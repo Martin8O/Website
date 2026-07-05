@@ -1,0 +1,34 @@
+import type { Sky } from '../data/chapters'
+
+/** Frame geometry + theme context a scene needs to paint, in CSS pixels
+ *  (the 2D context is already DPR-scaled by the engine). */
+export type SceneConfig = {
+  w: number
+  h: number
+  dpr: number
+  /** Signature accent of the scene's theme (hex), from `THEME_ACCENT`. */
+  accent: string
+  /** Sub-mood for `sky` scenes — the `chapter.sky` of the current run. */
+  sky?: Sky
+  /** True → `time` is frozen at 0; the scene must look complete when static. */
+  reducedMotion: boolean
+}
+
+/**
+ * A scene renderer: a pure draw function — no React, no DOM state, framework-
+ * free so L2 can reuse it as the fallback. Everything painted derives from:
+ *  - `alpha`  how present the scene is (cross-fade weight 0..1). Every fill
+ *             must be multiplied by it so scenes stack during transitions.
+ *  - `localT` scroll progress through the scene's chapter run (0..1) — the
+ *             *story* clock. Never advance story by wall time.
+ *  - `time`   seconds, for ambient motion only (twinkle, drift); 0 under
+ *             reduced motion.
+ *  - `cfg`    frame geometry + theme accents.
+ */
+export type Renderer = (
+  ctx: CanvasRenderingContext2D,
+  alpha: number,
+  localT: number,
+  time: number,
+  cfg: SceneConfig,
+) => void

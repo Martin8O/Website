@@ -1,0 +1,9 @@
+/* The world layer: fills the fixed story stage, sits under every DOM layer.
+   Pure decoration — pointer-events stay off (inherited from the stage). */
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}

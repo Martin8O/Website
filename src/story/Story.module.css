@@ -11,14 +11,3 @@
   /* Smooth the per-chapter accent shift instead of snapping between themes. */
   transition: none;
 }
-
-/* Plain dark backdrop for now — real per-chapter art arrives in Phase B.
-   A whisper of vertical shading so it reads as depth, not a flat wall. */
-.backdrop {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(120% 90% at 50% 8%, rgba(255, 255, 255, 0.04), transparent 60%),
-    linear-gradient(180deg, #090b10 0%, var(--bg) 55%, #04050700 100%),
-    var(--bg);
-}

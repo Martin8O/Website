@@ -4,6 +4,26 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-011 — Domain: svobodamartin.dev (2026-07-05)
+Martin bought **svobodamartin.dev** ("prozatím"); `svobodamartin.ai` is available but expensive — deferred.
+Production deploy + the contact email (site is email-only) ride on this domain, wired at D1. *Why:* unblocks
+the launch checklist early; `.dev` fits the builder positioning. Supersedes the "domain TBD" half of ADR-005.
+
+### ADR-010 — Canvas world: one stage, theme registry, scene runs with cross-fades (2026-07-05)
+The visual world is **one fixed 2D `<canvas>`** (`src/canvas/CanvasStage.tsx`): a single rAF loop reads
+`scrollProgress` imperatively from the store (zero React re-renders per frame), DPR-capped at 2, rebuilds on
+resize, pauses when the tab is hidden, and under `prefers-reduced-motion` freezes ambient time + repaints only
+when scroll moves. Scenes are **pure, framework-free renderers** `render(ctx, alpha, localT, time, cfg)`
+dispatched via the total **`Record<Theme, Renderer>`** registry (`src/canvas/registry.ts`) — a new visual kind
+is one entry, and a missing entry is a compile error. Chapters group into **scene runs** (contiguous same
+theme; `sky` splits per sub-mood) with a smoothstep **cross-fade at 0.3–0.7 of a boundary chapter** and a
+`localT` window reaching ±0.5 chapter beyond the run — pure, unit-tested math in `src/canvas/sceneTimeline.ts`.
+The shared toolkit (`src/canvas/toolkit.ts`) keeps particles **deterministic** (seeded hash, ambient time only
+for twinkle) so scrubbing is exact. *Why:* honors the L1→L2 seam (renderers reusable as the 3D fallback), keeps
+story motion scroll-derived per ADR-009, and makes B2/B3 pure content work. *Layer-order lesson (B1):* light
+effects must be occluded by geometry via **draw order** (e.g. crepuscular rays painted before the ridges while
+the sun is behind them), never by alpha thresholds.
+
 ### ADR-009 — Timeline contract: track = N×110vh, story derived from `scrollProgress` (2026-07-05)
 The story's shape is locked to the data + one number. Scroll-track height = **`N × 110vh`** (`N` = chapter
 count); the pure `resolveTimeline(progress, count)` maps `scrollProgress` → `{ index, localT }`, and cards fade
