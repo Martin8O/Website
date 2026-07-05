@@ -1,0 +1,24 @@
+.scale {
+  position: absolute;
+  right: 1.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+
+.tick {
+  display: block;
+  height: 2px;
+  background: var(--accent, var(--amber));
+  border-radius: 1px;
+  transition: opacity 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  .scale {
+    display: none;
+  }
+}

@@ -1,0 +1,13 @@
+.vignette {
+  position: absolute;
+  inset: 0;
+  /* Dark frame + a faint theme-accent glow at the edges. */
+  background:
+    radial-gradient(
+      130% 130% at 50% 50%,
+      transparent 55%,
+      color-mix(in srgb, var(--accent, var(--amber)) 6%, transparent) 78%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+  transition: background 0.6s ease;
+}

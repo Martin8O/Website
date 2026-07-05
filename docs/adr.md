@@ -4,6 +4,14 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-009 — Timeline contract: track = N×110vh, story derived from `scrollProgress` (2026-07-05)
+The story's shape is locked to the data + one number. Scroll-track height = **`N × 110vh`** (`N` = chapter
+count); the pure `resolveTimeline(progress, count)` maps `scrollProgress` → `{ index, localT }`, and cards fade
+by smoothstep distance from their center (`cardOpacity`). All of it lives in **`src/timeline.ts`** (framework-free,
+unit-tested), so adding/reordering a chapter is one object in `chapters.ts` with zero render-code edits (proven
+live at A2). *Why:* keeps `scrollProgress` the single source of truth and the math reusable by the L2 renderer;
+no wall-clock story animation, so scrub stays perfect. Per-chapter accent comes from a data `THEME_ACCENT` map.
+
 ### ADR-008 — Deploy pipeline: Vercel, moving to GitHub-linked auto-deploy (2026-07-05)
 A1 proved the pipeline with a one-off **Vercel CLI** deploy (project `martin-website`, live at
 `martin-website-beta.vercel.app`). Going forward the site deploys via **GitHub → Vercel** integration: push to

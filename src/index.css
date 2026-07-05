@@ -46,3 +46,28 @@ html.lenis body {
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
+
+/* Accent classes for authored chapter copy (used inside chapter bodies).
+   Global — chapter HTML is injected, so these can't be CSS-module-scoped. */
+.a-gold {
+  color: var(--gold);
+}
+.a-hud {
+  color: var(--amber);
+}
+.a-cyan {
+  color: var(--cyan);
+}
+.a-btc {
+  color: var(--bitcoin);
+}
+.a-mag {
+  color: var(--magenta);
+}
+.a-gold,
+.a-hud,
+.a-cyan,
+.a-btc,
+.a-mag {
+  font-weight: 600;
+}

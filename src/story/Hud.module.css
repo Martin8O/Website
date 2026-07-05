@@ -1,0 +1,41 @@
+.hud {
+  position: absolute;
+  bottom: 1.6rem;
+  left: 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--amber)) 45%, transparent);
+  border-radius: 4px;
+  background: rgba(6, 7, 10, 0.55);
+  backdrop-filter: blur(6px);
+  font-family: var(--font-mono);
+  transition: border-color 0.6s ease;
+}
+
+.era {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg);
+  min-width: 6.5em;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent, var(--amber));
+  box-shadow: 0 0 8px var(--accent, var(--amber));
+  transition: background-color 0.6s ease, box-shadow 0.6s ease;
+}
+
+.pct {
+  font-size: 0.82rem;
+  color: var(--accent, var(--amber));
+  font-variant-numeric: tabular-nums;
+  min-width: 3em;
+  text-align: right;
+  transition: color 0.6s ease;
+}
