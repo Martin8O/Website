@@ -40,13 +40,23 @@ export function hash1(n: number): number {
 type Rgb = { r: number; g: number; b: number }
 const rgbCache = new Map<string, Rgb>()
 
+/** Parse `#rgb` / `#rrggbb` — or an `rgb(r,g,b)` string, so colours composed
+ *  by `mixHex` can be mixed/alpha'd again. Scenes feed scroll-driven colour
+ *  strings through here every frame, so the memo cache is capped. */
 function hexToRgb(hex: string): Rgb {
   const cached = rgbCache.get(hex)
   if (cached) return cached
-  let s = hex.replace('#', '')
-  if (s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2]
-  const n = parseInt(s, 16)
-  const rgb = { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
+  let rgb: Rgb
+  if (hex[0] === '#') {
+    let s = hex.slice(1)
+    if (s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2]
+    const n = parseInt(s, 16)
+    rgb = { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
+  } else {
+    const m = /(\d+)\D+(\d+)\D+(\d+)/.exec(hex)
+    rgb = m ? { r: +m[1], g: +m[2], b: +m[3] } : { r: 0, g: 0, b: 0 }
+  }
+  if (rgbCache.size >= 4096) rgbCache.clear()
   rgbCache.set(hex, rgb)
   return rgb
 }
@@ -180,8 +190,14 @@ export type RidgeOptions = {
   color: string
   /** Fill from the curve down to this y. */
   bottom: number
-  /** Phase shift in 0..1 units — drive with localT for scroll parallax. */
+  /** Phase shift in 0..1 units — drive with localT for scroll parallax.
+   *  NOTE: this morphs the profile; for terrain that must fly past
+   *  unchanged, use `scrollX` instead. */
   shift?: number
+  /** Horizontal scroll in px (positive = terrain runs LEFT). The profile is
+   *  made w-periodic (integer harmonics) and translated — the same landscape
+   *  streaming by, never remodelling. */
+  scrollX?: number
   alpha?: number
 }
 
@@ -193,24 +209,31 @@ export function drawRidge(ctx: CanvasRenderingContext2D, o: RidgeOptions): void 
   const p2 = hash1(o.seed + 1) * TAU
   const p3 = hash1(o.seed + 2) * TAU
   const shift = (o.shift ?? 0) * TAU
+  const scrolled = o.scrollX !== undefined
+  // Integer harmonics tile seamlessly across w — required for scrolling.
+  const f2 = scrolled ? 2 : 2.3
+  const f3 = scrolled ? 5 : 4.7
+  const off = scrolled ? ((((o.scrollX ?? 0) % o.w) + o.w) % o.w) : 0
   ctx.save()
   ctx.globalAlpha = alpha
   ctx.fillStyle = o.color
   ctx.beginPath()
-  ctx.moveTo(0, o.bottom)
+  ctx.moveTo(-off, o.bottom)
   const steps = 72
-  for (let i = 0; i <= steps; i++) {
-    const x = (i / steps) * o.w
+  // With scroll, draw two periods and translate left — pure motion.
+  const periods = scrolled ? 2 : 1
+  for (let i = 0; i <= steps * periods; i++) {
+    const x = (i / steps) * o.w - off
     const u = (i / steps) * TAU
     const yv =
       o.y -
       o.amp *
         (0.55 * Math.sin(u * 1.0 + p1 + shift) +
-          0.3 * Math.sin(u * 2.3 + p2 + shift * 1.7) +
-          0.15 * Math.sin(u * 4.7 + p3))
+          0.3 * Math.sin(u * f2 + p2 + shift * 1.7) +
+          0.15 * Math.sin(u * f3 + p3))
     ctx.lineTo(x, yv)
   }
-  ctx.lineTo(o.w, o.bottom)
+  ctx.lineTo(o.w * periods - off, o.bottom)
   ctx.closePath()
   ctx.fill()
   ctx.restore()

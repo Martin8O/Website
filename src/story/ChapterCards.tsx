@@ -15,13 +15,18 @@ export function ChapterCards({ pos }: { pos: number }) {
         // Cards rise a touch as they fade in, settle at center when focused.
         const rise = (1 - o) * 12
         const Title = i === 0 ? 'h1' : 'h2'
+        // Horizontal placement comes from the class (data-driven per chapter,
+        // centered again on narrow viewports) — the inline transform only
+        // carries the vertical settle, via the class's --tx.
+        const alignClass =
+          ch.align === 'left' ? styles.alignLeft : ch.align === 'right' ? styles.alignRight : ''
         return (
           <article
             key={ch.id}
-            className={styles.card}
+            className={`${styles.card} ${alignClass}`}
             style={{
               opacity: o,
-              transform: `translate(-50%, calc(-50% + ${rise}px))`,
+              transform: `translate(var(--tx), calc(-50% + ${rise}px))`,
               // Hide fully-faded cards from AT/tab order without unmounting them.
               visibility: o < 0.02 ? 'hidden' : 'visible',
               ['--accent' as string]: THEME_ACCENT[ch.theme],

@@ -4,9 +4,11 @@
   margin: 0;
 }
 
-/* Each card is centered and cross-fades; JS drives opacity + the translateY
-   settle. Kept off the pointer layer except for text selection. */
+/* Each card cross-fades; JS drives opacity + the translateY settle (the
+   horizontal anchor lives here via --tx so alignment stays pure CSS).
+   Kept off the pointer layer except for text selection. */
 .card {
+  --tx: -50%;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -17,6 +19,53 @@
   will-change: opacity, transform;
 }
 
+/* Side-anchored cards (data-driven per chapter) — the scene's focal point
+   keeps the other side. Narrow viewports fall back to centered. */
+.alignLeft,
+.alignRight {
+  --tx: 0;
+  width: min(44vw, 32rem);
+}
+
+.alignLeft {
+  left: clamp(1.5rem, 6vw, 7rem);
+  text-align: left;
+}
+
+.alignRight {
+  left: auto;
+  right: clamp(1.5rem, 6vw, 7rem);
+  text-align: right;
+}
+
+.alignLeft .body {
+  margin-left: 0;
+}
+
+.alignRight .body {
+  margin-right: 0;
+}
+
+@media (max-width: 719px) {
+  .alignLeft,
+  .alignRight {
+    --tx: -50%;
+    left: 50%;
+    right: auto;
+    width: min(90vw, 40rem);
+    text-align: center;
+  }
+
+  .alignLeft .body,
+  .alignRight .body {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* The B2 sky scenes get BRIGHT (cumulus sea, the cloud-punch white-out,
+   desert noon) — a soft dark halo keeps the light text readable there and
+   disappears on dark scenes. */
 .num {
   font-family: var(--font-mono);
   letter-spacing: 0.22em;
@@ -24,6 +73,7 @@
   font-size: clamp(0.62rem, 1.4vw, 0.78rem);
   color: var(--accent, var(--amber));
   margin: 0 0 1rem;
+  text-shadow: 0 1px 14px rgba(6, 9, 16, 0.55);
 }
 
 .title {
@@ -34,6 +84,7 @@
   letter-spacing: -0.01em;
   margin: 0;
   color: var(--fg);
+  text-shadow: 0 2px 30px rgba(6, 9, 16, 0.45), 0 1px 4px rgba(6, 9, 16, 0.3);
 }
 
 .body {
@@ -43,4 +94,5 @@
   color: #c3cad6;
   max-width: 34ch;
   margin: 1.25rem auto 0;
+  text-shadow: 0 1px 18px rgba(6, 9, 16, 0.6), 0 1px 3px rgba(6, 9, 16, 0.4);
 }

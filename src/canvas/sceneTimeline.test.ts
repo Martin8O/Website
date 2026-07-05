@@ -6,6 +6,7 @@ import {
   buildRuns,
   resolveSceneFrame,
   runLocalT,
+  runLocalTRaw,
   type SceneRun,
 } from './sceneTimeline'
 
@@ -52,6 +53,20 @@ describe('runLocalT', () => {
     expect(runLocalT(0, first, count)).toBe(0)
     expect(runLocalT(1.5, first, count)).toBe(1)
     expect(runLocalT(0.75, first, count)).toBeCloseTo(0.5)
+  })
+
+  it('tRaw keeps flowing past the window edges (ambient motion never freezes)', () => {
+    // Beyond the window the clamped t saturates but the raw one continues…
+    expect(runLocalT(6, middle, count)).toBe(1)
+    expect(runLocalTRaw(6, middle, count)).toBeCloseTo(1.5)
+    expect(runLocalTRaw(4, middle, count)).toBeCloseTo(-0.5)
+    // …and two ADJACENT windows advance at the same rate: a shared world
+    // (the cloud sea) can stay phase-continuous across the hand-over.
+    const a: SceneRun = { theme: 'sky', start: 2, end: 2 }
+    const b: SceneRun = { theme: 'sky', start: 3, end: 3 }
+    for (const pos of [2.3, 2.5, 2.7]) {
+      expect(runLocalTRaw(pos, a, count) - runLocalTRaw(pos, b, count)).toBeCloseTo(1)
+    }
   })
 
   it('middle run: window spans ±0.5 chapters around the run', () => {

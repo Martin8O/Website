@@ -21,10 +21,14 @@ export type SceneRun = {
 }
 
 /** One scene to paint this frame: which run, how far through it (`t`, the
- *  renderer's `localT`), and its cross-fade weight. */
+ *  renderer's `localT`), and its cross-fade weight. `tRaw` is the SAME
+ *  progress left unclamped — while a scene is painted beyond its own window
+ *  (both halves of a cross-fade), ambient world motion (cloud drift) must
+ *  keep flowing from it, or one copy of the world freezes and doubles. */
 export type SceneSlot = {
   run: SceneRun
   t: number
+  tRaw: number
   alpha: number
 }
 
@@ -64,11 +68,17 @@ export function buildRuns(
  * owns — e.g. the origin sun arcs over both intro and school without a jump.
  */
 export function runLocalT(pos: number, run: SceneRun, count: number): number {
+  return clamp01(runLocalTRaw(pos, run, count))
+}
+
+/** `runLocalT` without the clamp — continuous across the window edges, for
+ *  ambient motion that must not freeze while a scene cross-fades. */
+export function runLocalTRaw(pos: number, run: SceneRun, count: number): number {
   const lastIndex = Math.max(count - 1, 0)
   const winStart = run.start === 0 ? 0 : run.start - 0.5
   const winEnd = run.end === lastIndex ? lastIndex : run.end + 0.5
   if (winEnd <= winStart) return 0
-  return clamp01((pos - winStart) / (winEnd - winStart))
+  return (pos - winStart) / (winEnd - winStart)
 }
 
 /** Resolve a frame: the base scene (alpha 1) and, inside a transition zone,
@@ -99,11 +109,28 @@ export function resolveSceneFrame(
       run = next
     } else if (blend > 0) {
       return {
-        base: { run, t: runLocalT(pos, run, count), alpha: 1 },
-        incoming: { run: next, t: runLocalT(pos, next, count), alpha: blend },
+        base: {
+          run,
+          t: runLocalT(pos, run, count),
+          tRaw: runLocalTRaw(pos, run, count),
+          alpha: 1,
+        },
+        incoming: {
+          run: next,
+          t: runLocalT(pos, next, count),
+          tRaw: runLocalTRaw(pos, next, count),
+          alpha: blend,
+        },
       }
     }
   }
 
-  return { base: { run, t: runLocalT(pos, run, count), alpha: 1 } }
+  return {
+    base: {
+      run,
+      t: runLocalT(pos, run, count),
+      tRaw: runLocalTRaw(pos, run, count),
+      alpha: 1,
+    },
+  }
 }

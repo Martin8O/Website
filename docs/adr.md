@@ -4,6 +4,26 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-012 — Sky family: one renderer, sub-mood dispatch, and cross-scene continuity via a shared arc + `tRaw` (2026-07-06)
+The whole pilot arc (chapters 01–05) is **one registry entry** (`renderSky`) that dispatches on `cfg.sky` to
+five scene modules under `src/canvas/scenes/sky/` (climb / cruise / desert / airshow / sunset), each pure. Story
+beats that must be physically right are **pure, unit-tested math** in `skyMath.ts` (graduation ladder, cloud-punch
+white-out, one-circle-fight helix, landing pose) — 17 tests. Two structural rules emerged from Martin's live
+review and are now load-bearing:
+1. **Ambient world motion must not freeze at a cross-fade.** The scene timeline exposes **`tRaw`** — `localT`
+   left *unclamped*, continuous across a run's window edges — alongside the clamped `localT`. Story beats use
+   `localT`; anything that streams (the cloud sea's drift) uses `tRaw`, so during a hand-over both scenes paint
+   the *same* moving world instead of one frozen copy doubling the other. Adjacent windows advance at equal rate,
+   so a shared field (climb↔cruise sea) stays phase-continuous. (`SceneSlot.tRaw`, `SceneConfig.tRaw`.)
+2. **One object spanning many scenes = one shared function of global position, not per-scene state.** The section
+   sun is `sunArc(pos)` (piecewise waypoints, unit-tested continuous + strictly monotone); all five scenes
+   evaluate it at `winStart + tRaw`, so the sun glides through every seam with no freeze and no ghost. Same
+   principle retired the earlier "hold the hand-over point" hack.
+*Also:* sprite/colour caches that receive scroll-mixed colours must **quantize keys** (and clamp green ≤ max(r,b)
+— nothing in the sky is green) or they grow unbounded and tint grey clouds sage. *Why:* keeps renderers pure and
+data-driven for L2 reuse while making multi-scene continuity provably correct rather than eyeballed. Extends
+ADR-010.
+
 ### ADR-011 — Domain: svobodamartin.dev (2026-07-05)
 Martin bought **svobodamartin.dev** ("prozatím"); `svobodamartin.ai` is available but expensive — deferred.
 Production deploy + the contact email (site is email-only) ride on this domain, wired at D1. *Why:* unblocks

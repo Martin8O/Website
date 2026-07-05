@@ -38,6 +38,9 @@ export type Chapter = {
   projects?: string[]
   /** Optional per-chapter palette override (Phase C4 cohesion pass). */
   palette?: string[]
+  /** Where the text card sits so it never fights the scene's focal point;
+   *  omitted = centered. Narrow viewports always center (CSS). */
+  align?: 'left' | 'right'
 }
 
 /** Signature accent colour per theme — drives the eyebrow + HUD tint so the
@@ -75,6 +78,7 @@ export const CHAPTERS: Chapter[] = [
     num: '01 — The Decision',
     title: 'Upward',
     body: 'From CTU FEE, after two years, to the University of Defence. The goal: a <span class="a-hud">military pilot</span>. The Z‑142, then the L‑39C — over a hundred hours in the air and a brand-new identity.',
+    align: 'right',
   },
   {
     id: 'sky-cruise',
@@ -84,6 +88,7 @@ export const CHAPTERS: Chapter[] = [
     num: '02 — Fighters',
     title: 'Above the<br>clouds',
     body: 'Pardubice, Náměšť, Čáslav. The L‑39C, the L‑39ZA, then the <span class="a-hud">L‑159</span>. The horizon curved, the clouds stayed below the wings, and time was measured in g-forces.',
+    align: 'right',
   },
   {
     id: 'sky-desert',
@@ -93,32 +98,37 @@ export const CHAPTERS: Chapter[] = [
     num: '03 — Afghanistan',
     title: 'A different<br>sky',
     body: 'Bagram Air Base, liaison officer. Dust instead of clouds, the same service. The kind of experience that resets you.',
-  },
-  {
-    id: 'calm-healing',
-    theme: 'calm',
-    era: '2013',
-    num: '04 — The Test',
-    title: 'Healing',
-    body: 'Ulcerative colitis. A year and a half — and <span class="a-cyan">I healed myself</span>. I wrote a whole website about that journey. The body as the first project I had to “debug.”',
+    align: 'left',
   },
   {
     id: 'sky-airshow',
     theme: 'sky',
     sky: 'airshow',
     era: '2016–2017',
-    num: '05 — Airshow',
+    num: '04 — Airshow',
     title: 'Display<br>pilot',
     body: 'A two-ship strike on a ground target — Czechia, Slovakia, Romania, the UK, Sweden. <span class="a-hud">Flying for thousands of eyes below.</span> Precision to the centimetre, adrenaline at the maximum.',
+    align: 'right',
   },
   {
     id: 'sky-sunset',
     theme: 'sky',
     sky: 'sunset',
     era: '2020–2022',
-    num: '06 — End of service',
+    num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
-    body: 'Instructor → flight-safety inspector → test pilot. Military retirement in 2022. Retrained as a network and systems administrator. Travels around the world, and helping out at Buddhist courses.',
+    body: '<span class="a-hud">Twenty years in the Air Force.</span> Instructor → flight-safety inspector → test pilot. Military retirement in 2022. Retrained as a network and systems administrator. Travels around the world, and helping out at Buddhist courses.',
+    align: 'left',
+  },
+  // The story is THEMATIC here, not strictly chronological: healing (2013)
+  // follows the closed Air-Force arc so the flying section stays whole.
+  {
+    id: 'calm-healing',
+    theme: 'calm',
+    era: '2013',
+    num: '06 — The Test',
+    title: 'Healing',
+    body: 'Ulcerative colitis. A year and a half — and <span class="a-cyan">I healed myself</span>. I wrote a whole website about that journey. The body as the first project I had to “debug.”',
   },
   {
     id: 'bitcoin-node',

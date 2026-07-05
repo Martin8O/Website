@@ -91,7 +91,11 @@ export const renderOrigin: Renderer = (ctx, alpha, t, time, cfg) => {
   const climb = smoothstep(0.22, 1, t)
   const elevation = Math.pow(climb, 1.5) * 0.8 // 0..0.8
   const daylight = smoothstep(0.04, 0.75, elevation)
-  const sunX = lerp(0.16, 0.84, t) * w
+  // Past the run's edge (continuous tRaw) the sun accelerates on along its
+  // arc and slides off the right edge — clearing the sky for the next
+  // scene's new day instead of ghosting through the cross-fade.
+  const tExit = cfg.tRaw ?? t
+  const sunX = lerp(0.16, 0.84, tExit + Math.max(0, tExit - 1) * 3) * w
   const sunY = lerp(horizonY + h * 0.05, h * 0.2, elevation / 0.8)
   const discUp = smoothstep(0.015, 0.09, elevation) // disc above the horizon
 
@@ -216,20 +220,24 @@ export const renderOrigin: Renderer = (ctx, alpha, t, time, cfg) => {
 
   // --- Sun -----------------------------------------------------------------
   // Wide atmosphere first (present even pre-dawn — the promise of sunrise),
-  // then bloom and a crisp disc once it clears the horizon.
+  // then bloom and a crisp disc once it clears the horizon. At the very end
+  // of the run the sun quietly dims away (continuous tRaw — past the window
+  // edge), so it never ghosts through the incoming sky scene, whose own sun
+  // starts a NEW day on the left.
+  const sunFade = 1 - smoothstep(1.02, 1.14, tExit)
   drawGlow(
     ctx,
     sunX,
     Math.min(sunY, horizonY + h * 0.02),
     unit * (0.38 + 0.3 * daylight),
     '#f2a54c',
-    alpha * (0.14 + 0.3 * daylight),
+    alpha * (0.14 + 0.3 * daylight) * sunFade,
   )
-  drawGlow(ctx, sunX, sunY, unit * 0.13, '#ffd98a', alpha * 0.55 * discUp)
-  drawGlow(ctx, sunX, sunY, unit * 0.05, '#fff3d2', alpha * 0.9 * discUp)
-  if (discUp > 0) {
+  drawGlow(ctx, sunX, sunY, unit * 0.13, '#ffd98a', alpha * 0.55 * discUp * sunFade)
+  drawGlow(ctx, sunX, sunY, unit * 0.05, '#fff3d2', alpha * 0.9 * discUp * sunFade)
+  if (discUp > 0 && sunFade > 0.004) {
     ctx.save()
-    ctx.fillStyle = rgba('#fff6dd', alpha * discUp)
+    ctx.fillStyle = rgba('#fff6dd', alpha * discUp * sunFade)
     ctx.beginPath()
     ctx.arc(sunX, sunY, unit * 0.021, 0, TAU)
     ctx.fill()
@@ -387,7 +395,7 @@ export const renderOrigin: Renderer = (ctx, alpha, t, time, cfg) => {
     ],
     alpha,
   )
-  drawGlow(ctx, sunX, sunY, unit * 0.2, '#ffcf7a', alpha * 0.18 * daylight)
+  drawGlow(ctx, sunX, sunY, unit * 0.2, '#ffcf7a', alpha * 0.18 * daylight * sunFade)
 
   // Land pass of the crepuscular rays — beams across the fields, only once
   // the sun has visually cleared the ridge tops (see the sky pass above).

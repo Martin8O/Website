@@ -10,6 +10,11 @@ export type SceneConfig = {
   accent: string
   /** Sub-mood for `sky` scenes — the `chapter.sky` of the current run. */
   sky?: Sky
+  /** `localT` left unclamped — continuous across the scene's window edges.
+   *  Use for ambient world motion (cloud drift) so it never freezes while
+   *  the scene is painted inside a neighbour's cross-fade. Story beats keep
+   *  using the clamped `localT`. */
+  tRaw?: number
   /** True → `time` is frozen at 0; the scene must look complete when static. */
   reducedMotion: boolean
 }

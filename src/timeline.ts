@@ -54,8 +54,10 @@ export function nearestChapter(progress: number, count: number): number {
 /**
  * A card's opacity given the continuous position and the card's own index.
  * Peaks at 1 when centered, smoothstep-eased to 0 by `falloff` chapters away.
+ * Falloff ≈ 0.5 keeps neighbouring cards from ever stacking visibly — two
+ * same-side cards overlapping mid-transition read as a glitch.
  */
-export function cardOpacity(pos: number, cardIndex: number, falloff = 0.62): number {
+export function cardOpacity(pos: number, cardIndex: number, falloff = 0.52): number {
   const d = Math.abs(pos - cardIndex)
   const o = clamp01(1 - d / falloff)
   return o * o * (3 - 2 * o)

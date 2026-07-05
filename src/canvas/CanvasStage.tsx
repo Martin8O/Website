@@ -62,6 +62,7 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
         dpr: Math.min(window.devicePixelRatio || 1, 2),
         accent: THEME_ACCENT[slot.run.theme],
         sky: slot.run.sky,
+        tRaw: slot.tRaw,
         reducedMotion,
       }
       RENDERERS[slot.run.theme](ctx, slot.alpha, slot.t, time, cfg)
