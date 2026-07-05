@@ -62,7 +62,7 @@ export const CHAPTERS: Chapter[] = [
   {
     id: 'origin-school',
     theme: 'origin',
-    era: '1980 · School',
+    era: '1991–1998 · School',
     num: '00 — Origin',
     title: 'School<br>& Pascal',
     body: 'A school-leaving exam in maths and programming. In Pascal I wrote <span class="a-gold">chess for two players</span> — it enforced the rules, no AI opponent yet. The first lines of code, with no idea where they would lead.',
