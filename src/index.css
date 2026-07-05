@@ -1,0 +1,48 @@
+/* Design tokens (palette + type DNA) — the through-line for the whole site.
+   Fuller token set arrives with the real chapters; this is the A1 seed. */
+:root {
+  /* Palette */
+  --bg: #06070a;
+  --fg: #e8ecf2;
+  --muted: #7b8494;
+  --amber: #ffb000; /* the amber HUD through-line */
+  --gold: #f5c451;
+  --cyan: #35d0e0;
+  --magenta: #e0459b;
+  --bitcoin: #f7931a;
+
+  /* Type */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Chakra Petch', ui-monospace, monospace;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* Lenis owns smoothing; keep native scroll-behavior out of the way. */
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Lenis recommended baseline */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
