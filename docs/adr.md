@@ -4,6 +4,38 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-014 — Bagram as a lived-in airbase; procedural rotors carry no static blade; offline Node tracer (2026-07-06)
+The desert scene (chapter 04) was rebuilt from Martin's Bagram photos into a **30k-person airbase seen from the
+ground**: two towering Hindu-Kush ranges with **snow caps**, a runway on the horizon with a **C-17 lifting off**
+right of the tower as the scene opens (gone right; a slower Apache pair drifts in from the left; the Mi-17
+transport pair enters as the Apaches near the tower), a **tent city** of barrel-vaulted rows, clamshell hangars,
+a control tower, a **taxiway + apron pads** full of parked aircraft (a dense nose-on F-16 flightline behind a
+side-profile row, C-17s towering among them), and the **perimeter up close** — concrete T-wall runs with guard
+towers + concertina alternating with chain-link. Three rules emerged from Martin's review rounds and are
+load-bearing:
+1. **A procedural rotor must never carry a permanent static blade.** An always-drawn blade laid under a spinning
+   one reads as a *stopped* rotor (Martin caught it on both the Apache main rotor and, via a stale bake, the
+   Mi-17). The fix: the main rotor is a blur lens + **two blade pairs 90° out of phase** (one strong, one faint);
+   the tail rotor (disc faces camera in side view) is a faint disc + **N blades spinning in the screen plane**
+   around the traced hub. At `time` 0 (reduced motion / parked craft) both rest crossed like a real stopped
+   rotor. The static blades were **erased from the traces** so nothing is doubled. Shared helpers `mainRotor` /
+   `tailRotor` dress both the Apache (4-blade tail) and Mi-17 (3-blade tail).
+2. **A stepped snow-line must be an opaque, pre-mixed fill clipped along a wavy edge — never a translucent pass.**
+   Painting snow translucent over rock double-paints where the two ridge seeds overlap and stripes visible alpha
+   bands across the taller face (Martin's "bílý pruh"). Each snow step is a colour **pre-mixed toward the rock**
+   (opaque), and its clip runs along a gentle sine wave at its own phase, so three steps read as one soft,
+   organic transition.
+3. **The silhouette tracer moved off the browser into an offline Node/jimp pipeline** (`local/tmp/trace4.mjs`,
+   jobs in `trace4-jobs.json`, baked via `node local/tmp/gen-sil4.mjs`). Same algorithm as ADR-013 (colour-key →
+   boundary walk → Douglas-Peucker → normalize) plus a `mirror` flag and rectangular `erase` bands to cut
+   spinning rotor blades out of a source before tracing. Reproducible without the dev server; f16park / f16front
+   / c17front / c17side added, apache + mi17 re-traced blade-free. *Also:* the preview screenshot channel wedged
+   mid-session, so verification ran through a **dev-only frame sink** — the page POSTs `canvas.toDataURL()` to a
+   tiny local `http` receiver (`local/tmp/framesink.mjs`) that writes PNGs to `local/tmp`, driven by the same
+   `window.__paintFrame` hook. *Why:* real geometry + a base that reads as *lived in* (Martin's standing
+   constraint), correct motion cues, and a trace pipeline that survives the browser channel breaking. Extends
+   ADR-013.
+
 ### ADR-013 — Real aircraft as baked vector silhouettes; layered cockpits composited, not alpha-thresholded (2026-07-06)
 Every aircraft is a **real silhouette traced from Martin's reference pack** (`local/ode mne/siluety/`) and baked
 to `src/canvas/scenes/sky/silhouettes.ts` (generated — regenerate with `node local/tmp/gen-sil3.mjs`): browser-

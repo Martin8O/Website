@@ -185,42 +185,62 @@ function paintZ142(ctx: CanvasRenderingContext2D, o: AircraftOptions, time: numb
   propBlur(ctx, 0.5, 0.01, 0.15, time)
 }
 
+/** A helicopter's main rotor seen from the side: a faint blur lens + two
+ *  full-span blade pairs 90° out of phase — the leading pair strong, the
+ *  crossing pair fainter. Spinning, the sweep is unmistakable; at `spin` 0
+ *  (parked, reduced motion) the pairs rest crossed like a stopped rotor.
+ *  Deliberately NO always-static blade: overlaid on the spin it reads as a
+ *  frozen rotor (Martin caught it twice). */
+function mainRotor(ctx: CanvasRenderingContext2D, hubX: number, hubY: number, R: number, spin: number): void {
+  ctx.save()
+  ctx.globalAlpha *= 0.22
+  fillEllipse(ctx, hubX, hubY, R, 0.012)
+  ctx.restore()
+  for (const [phase, a] of [[0, 0.85], [Math.PI / 2, 0.4]] as const) {
+    const bx = Math.cos(spin + phase) * (R * 0.96)
+    const by = Math.sin(spin + phase) * 0.013
+    ctx.save()
+    ctx.globalAlpha *= a
+    strokeLine(ctx, hubX - bx, hubY - by, hubX + bx, hubY + by, 0.01)
+    ctx.restore()
+  }
+}
+
+/** A tail rotor seen from the side — the disc faces the camera, so `blades`
+ *  procedural blades spin in the screen plane around the traced hub (both
+ *  helicopter traces keep only the hub on the fin). Frozen at `spin` 0. */
+function tailRotor(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, blades: number, spin: number): void {
+  ctx.save()
+  ctx.globalAlpha *= 0.18
+  fillEllipse(ctx, x, y, r, r)
+  ctx.restore()
+  ctx.save()
+  ctx.globalAlpha *= 0.8
+  for (let b = 0; b < blades; b++) {
+    const a = spin + b * (TAU / blades)
+    strokeLine(ctx, x, y, x + Math.cos(a) * r, y + Math.sin(a) * r, 0.009)
+  }
+  ctx.restore()
+}
+
 function paintMi17(ctx: CanvasRenderingContext2D, o: AircraftOptions, time: number): void {
   fillSilhouette(ctx, SILHOUETTES.mi17)
-  // The rotor is fully procedural (the trace keeps only mast + hub): one
-  // static full-span blade pair — real Mi-17 proportions, rear tip almost at
-  // the tail rotor, front overhanging the nose — plus blur lens + spin.
-  const hubX = 0.226
-  const hubY = -0.108
-  const R = 0.58
-  strokeLine(ctx, hubX - R, hubY + 0.008, hubX + R, hubY - 0.004, 0.011)
-  ctx.save()
-  ctx.globalAlpha *= 0.25
-  fillEllipse(ctx, hubX, hubY, R, 0.011)
-  ctx.restore()
-  const spin = time * 21
-  const bx = Math.cos(spin) * (R * 0.96)
-  const by = Math.sin(spin) * 0.012
-  ctx.save()
-  ctx.globalAlpha *= 0.45
-  strokeLine(ctx, hubX - bx, hubY - by, hubX + bx, hubY + by, 0.01)
-  ctx.restore()
+  // The main rotor is fully procedural (the trace keeps only mast + hub):
+  // blur lens + TWO rotating blade pairs, 90° out of phase — no permanent
+  // static blade (it visually froze the rotor under the spinning one,
+  // Martin's catch). At time 0 the pairs rest crossed = a parked rotor.
+  mainRotor(ctx, 0.2, -0.125, 0.62, time * 21)
+  tailRotor(ctx, -0.488, -0.122, 0.088, 3, time * 26)
   canopyGlint(ctx, o, 0.42, -0.05, 0.35, -0.085)
 }
 
 function paintApache(ctx: CanvasRenderingContext2D, o: AircraftOptions, time: number): void {
   fillSilhouette(ctx, SILHOUETTES.apache)
-  ctx.save()
-  ctx.globalAlpha *= 0.25
-  fillEllipse(ctx, 0.0, -0.14, 0.48, 0.011)
-  ctx.restore()
-  const spin = time * 23
-  const bx = Math.cos(spin) * 0.45
-  const by = Math.sin(spin) * 0.013
-  ctx.save()
-  ctx.globalAlpha *= 0.55
-  strokeLine(ctx, -bx, -0.14 - by, bx, -0.14 + by, 0.01)
-  ctx.restore()
+  // Both rotors fully procedural over the traced mast + sensor dome / fin
+  // hub — the B2.3a re-traces erased the static blades (under the spinning
+  // ones they read as a stopped rotor, Martin's catch). Same as the Mi-17.
+  mainRotor(ctx, 0.145, -0.129, 0.6, time * 23)
+  tailRotor(ctx, -0.338, -0.124, 0.075, 4, time * 30)
 }
 
 /** Rear-view L-159 gear + flaps for the landing beat (the reference photos fly
