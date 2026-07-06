@@ -40,7 +40,7 @@ export function drawCockpitHud(ctx: CanvasRenderingContext2D, o: CockpitHudOptio
   // the top FMS/MACH/ALT row clears the L-159 riding above it.
   const s = (Math.min(o.w, o.h) / 800) * 0.66
   const cx = o.w * 0.5
-  const cy = o.h * 0.54
+  const cy = o.h * 0.515
   const a = o.alpha
 
   ctx.save()
