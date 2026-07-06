@@ -64,7 +64,7 @@ export const CHAPTERS: Chapter[] = [
     id: 'intro',
     theme: 'origin',
     num: '↓ Scroll to travel through a life',
-    title: 'MARTIN',
+    title: 'Martin',
     body: 'One life, many worlds. Scroll speed is the speed of time. Move down and let the sun run across the sky.',
   },
   {

@@ -2,6 +2,9 @@
   position: absolute;
   inset: 0;
   margin: 0;
+  /* The B2.3d overhead pass rocks the text along with the canvas world —
+     the engine drives these variables, zero everywhere else. */
+  transform: translate3d(var(--cam-shake-x, 0px), var(--cam-shake-y, 0px), 0);
 }
 
 /* Each card cross-fades; JS drives opacity + the translateY settle (the

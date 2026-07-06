@@ -28,7 +28,7 @@ import {
 } from '../../toolkit'
 import { drawAircraft, drawTrail } from './aircraft'
 import { drawCloudDeck, drawCloudSea, drawPuff } from './clouds'
-import { drawCockpitHud } from './hud'
+import { bvrPicture, drawCockpitHud } from './hud'
 import { GRADUATION, cloudPunch, graduationAt, sunArc } from './skyMath'
 
 const GOLD = '#ffd27a'
@@ -264,16 +264,19 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
       ctx.restore()
     }
 
-    // The green cockpit HUD snaps ON — full intensity, no fade — the instant
-    // the L-159 arrives (Martin: instrument power-up, not a dissolve). Same
-    // readouts the cruise opens with, so the hand-over is seamless.
-    if (toL159 >= 1) {
+    // The green cockpit HUD snaps ON — COMPLETE, full intensity, no fade —
+    // the instant the L-159 shows (26 %, mid-ring; Martin: the whole picture
+    // at once, framed contacts included, exactly as it looks a beat later).
+    // The BVR picture is one shared function of the story position, so the
+    // contacts drift and their ranges count down seamlessly into the cruise.
+    if (toL159 > 0.2) {
+      const bvr = bvrPicture(1.5 + (cfg.tRaw ?? t), w, h)
       drawCockpitHud(ctx, {
         w, h, alpha: a,
         attack: 0,
-        target: { x: w * 0.86, y: h * 0.33 },
-        target2: { x: w * 0.9, y: h * 0.27 },
-        rangeNm: 26,
+        target: bvr.target,
+        target2: bvr.target2,
+        rangeNm: bvr.rangeNm,
         mach: 0.74,
         altFt: 21500,
         hdg: 139,

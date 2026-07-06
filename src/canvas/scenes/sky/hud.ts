@@ -13,9 +13,31 @@
  * the L-159 — it appears only in the L-159 moments, for authenticity.
  */
 
-import { TAU, clamp01, lerp, rgba } from '../../toolkit'
+import { TAU, clamp01, lerp, rgba, smoothstep } from '../../toolkit'
 
 export const HUD_GREEN = '#5dff6d'
+
+/** The two BVR contacts as ONE function of the story position, shared by
+ *  climb and cruise so the hand-over is seamless (both scenes evaluate it at
+ *  winStart + tRaw): the frames drift gently — one way, then another, no
+ *  wild moves (Martin) — and the ranges run down CONTINUOUSLY from the
+ *  moment the HUD lights up with the L-159 (26 %) to the merge before the
+ *  helix (38 %); the longer window makes the count visibly slower. */
+export function bvrPicture(
+  pos: number,
+  w: number,
+  h: number,
+): { target: { x: number; y: number }; target2: { x: number; y: number }; rangeNm: number } {
+  const wander = Math.sin(pos * 2.2)
+  const wander2 = Math.sin(pos * 3.1 + 1.3)
+  return {
+    target: { x: w * (0.86 + 0.014 * wander), y: h * (0.33 + 0.01 * wander2) },
+    target2: { x: w * (0.9 + 0.011 * wander2), y: h * (0.27 - 0.012 * wander) },
+    // Ends on the values the picture used to show at 38 % — the same finale,
+    // reached over a much longer run, so the count visibly slows down.
+    rangeNm: lerp(26, 7, smoothstep(2.38, 3.42, pos)),
+  }
+}
 
 export type CockpitHudOptions = {
   w: number

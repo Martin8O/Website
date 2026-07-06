@@ -86,11 +86,16 @@ export const renderOrigin: Renderer = (ctx, alpha, t, time, cfg) => {
   const unit = Math.min(w, h)
 
   // --- Sun state (drives the whole palette) --------------------------------
-  // Rises late so the school chapter still keeps its stars; ends the run in
-  // golden-hour light, handing a warm horizon to the sky scenes.
-  const climb = smoothstep(0.22, 1, t)
-  const elevation = Math.pow(climb, 1.5) * 0.8 // 0..0.8
-  const daylight = smoothstep(0.04, 0.75, elevation)
+  // Dawn breaks EARLY and fast (Martin: once the sun is over the horizon the
+  // night must go — brightening from ~7 %, the red dawn glow AT dawn ~8–9 %,
+  // golden morning in by 13 %); the run still ends in golden-hour light.
+  const climb = smoothstep(0.16, 0.9, t)
+  const elevation = Math.pow(climb, 1.3) * 0.8 // 0..0.8
+  const daylight = smoothstep(0.02, 0.55, elevation)
+  // Second phase of the sunrise: once the sun stands HIGH (from ~10 %) the
+  // red dawn gives way to a radiant golden-yellow morning (Martin: červená
+  // patří úsvitu, výš už záře).
+  const morning = smoothstep(0.35, 0.75, elevation)
   // Past the run's edge (continuous tRaw) the sun accelerates on along its
   // arc and slides off the right edge — clearing the sky for the next
   // scene's new day instead of ghosting through the cross-fade.
@@ -107,10 +112,10 @@ export const renderOrigin: Renderer = (ctx, alpha, t, time, cfg) => {
     w,
     h,
     [
-      [0, mixHex('#03040a', '#122240', daylight)],
-      [0.45, mixHex('#0a1024', '#2c4470', daylight)],
-      [0.78, mixHex('#141330', '#7c5148', daylight)],
-      [1, mixHex('#1c1730', '#d59a55', daylight)],
+      [0, mixHex('#03040a', mixHex('#122240', '#1e3a63', morning), daylight)],
+      [0.45, mixHex('#0a1024', mixHex('#2c4470', '#4a70a8', morning), daylight)],
+      [0.78, mixHex('#141330', mixHex('#7c5148', '#c99b5e', morning), daylight)],
+      [1, mixHex('#1c1730', mixHex('#d59a55', '#ffd98a', morning), daylight)],
     ],
     alpha,
   )

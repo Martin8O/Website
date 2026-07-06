@@ -3,6 +3,7 @@ import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { chapterPosition } from '../timeline'
 import { getScrollProgress, setScrollProgress } from '../scroll/scrollStore'
 import { RENDERERS } from './registry'
+import { landingShake } from './scenes/sky/skyMath'
 import { buildRuns, resolveSceneFrame, type SceneSlot } from './sceneTimeline'
 import { makeGrainTile } from './toolkit'
 import type { SceneConfig } from './types'
@@ -36,6 +37,8 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
     let rafId = 0
     let needsPaint = true
     let lastProgress = -1
+    let lastShakeX = 0
+    let lastShakeY = 0
 
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
     let reducedMotion = media.matches
@@ -84,6 +87,34 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
       if (frame) {
         drawSlot(frame.base, time)
         if (frame.incoming) drawSlot(frame.incoming, time)
+      }
+
+      // The B2.3d overhead pass rocks the DOM text along with the canvas —
+      // the cards live outside the canvas, so the same shake signal rides
+      // two CSS variables (zeroed the instant the window closes; always
+      // still under reduced motion).
+      let shakeX = 0
+      let shakeY = 0
+      if (!reducedMotion && frame) {
+        const sunsetSlot =
+          frame.incoming?.run.sky === 'sunset'
+            ? frame.incoming
+            : frame.base.run.sky === 'sunset'
+              ? frame.base
+              : null
+        if (sunsetSlot) {
+          const s = landingShake(sunsetSlot.t, time)
+          const amp = Math.min(w, h) * 0.011
+          shakeX = s.x * amp
+          shakeY = s.y * amp
+        }
+      }
+      if (shakeX !== lastShakeX || shakeY !== lastShakeY) {
+        lastShakeX = shakeX
+        lastShakeY = shakeY
+        const rs = document.documentElement.style
+        rs.setProperty('--cam-shake-x', `${shakeX.toFixed(2)}px`)
+        rs.setProperty('--cam-shake-y', `${shakeY.toFixed(2)}px`)
       }
 
       if (grain) {
@@ -141,6 +172,8 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
     return () => {
       stop()
       if (import.meta.env.DEV) delete hookHost.__paintFrame
+      document.documentElement.style.removeProperty('--cam-shake-x')
+      document.documentElement.style.removeProperty('--cam-shake-y')
       window.removeEventListener('resize', resize)
       document.removeEventListener('visibilitychange', onVisibility)
       media.removeEventListener('change', onMedia)

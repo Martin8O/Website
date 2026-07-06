@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest'
 import {
   DISPLAY_T,
   GRADUATION,
-  TOUCHDOWN,
+  LANDING,
+  LANDING_S,
   cloudPunch,
   graduationAt,
   helixPoint,
-  landingPose,
+  landingDepth,
+  landingPov,
   opposingDisplay,
   poseFold,
   rollFrame,
@@ -124,8 +126,10 @@ describe('sunArc', () => {
     expect(sunArc(2)).toEqual({ x: 0.32, y: 0.15 })
     expect(sunArc(2.5)).toEqual({ x: 0.44, y: 0.15 })
     expect(sunArc(5.5)).toEqual({ x: 0.76, y: 0.38 })
-    // Fully set: below the 0.70 horizon by the end of the landing roll.
-    expect(sunArc(6.4).y).toBeGreaterThan(0.7)
+    // Still a slab above the 0.71 horizon when the roll stops (t 0.875 =
+    // pos 6.375), fully below it just after — Martin's beat order.
+    expect(sunArc(5.5 + LANDING.stop).y).toBeLessThan(0.71 + 0.052)
+    expect(sunArc(6.44).y).toBeGreaterThan(0.71 + 0.052)
   })
 })
 
@@ -381,35 +385,79 @@ describe('l159 pose grid', () => {
   })
 })
 
-describe('landingPose', () => {
-  it('descends monotonically to the runway and stays down', () => {
+describe('landingPov', () => {
+  it('orders the beats: sweep → black → reveal → touchdown → stop', () => {
+    expect(LANDING.sweepIn).toBeLessThan(LANDING.blackFull)
+    expect(LANDING.blackFull).toBeLessThan(LANDING.blackLift)
+    expect(LANDING.blackLift).toBeLessThan(LANDING.reveal)
+    expect(LANDING.reveal).toBeLessThan(LANDING.touchdown)
+    expect(LANDING.touchdown).toBeLessThan(LANDING.stop)
+    expect(LANDING.stop).toBeLessThan(1)
+  })
+
+  it('hides the pass-over swap under FULL black, and only there', () => {
+    // The jet crosses the observer (s = 0) strictly inside the full-black
+    // window — the belly→tail-on swap can never be seen happening.
+    for (let t = LANDING.blackFull; t <= LANDING.blackLift + 1e-9; t += 0.002) {
+      expect(landingPov(t).black).toBe(1)
+    }
+    const before = landingPov(LANDING.blackFull - 1e-6).s
+    const after = landingPov(LANDING.blackLift + 1e-6).s
+    expect(before).toBeLessThan(0)
+    expect(after).toBeGreaterThan(0)
+    // Clear view outside the pass window.
+    expect(landingPov(LANDING.sweepIn - 0.01).black).toBe(0)
+    expect(landingPov(LANDING.reveal + 0.01).black).toBe(0)
+    expect(landingPov(1).black).toBe(0)
+  })
+
+  it('moves forward monotonically and touches down exactly on the threshold', () => {
+    let prev = -Infinity
+    for (let t = 0; t <= 1.0001; t += 0.005) {
+      const { s } = landingPov(t)
+      expect(s).toBeGreaterThanOrEqual(prev)
+      prev = s
+    }
+    expect(landingPov(LANDING.touchdown).s).toBeCloseTo(LANDING_S.threshold, 9)
+    expect(landingPov(LANDING.touchdown).alt).toBeCloseTo(0, 9)
+  })
+
+  it('keeps the wheels descending to the threshold and down after it', () => {
     let prev = Infinity
-    for (let t = 0; t < TOUCHDOWN; t += 0.01) {
-      const { alt } = landingPose(t)
+    for (let t = LANDING.blackFull; t < LANDING.touchdown; t += 0.005) {
+      const { alt } = landingPov(t)
       expect(alt).toBeLessThanOrEqual(prev)
       prev = alt
     }
-    expect(landingPose(0).alt).toBe(1)
-    for (let t = TOUCHDOWN; t <= 1.0001; t += 0.05) {
-      expect(landingPose(t).alt).toBe(0)
+    for (let t = LANDING.touchdown; t <= 1.0001; t += 0.05) {
+      expect(landingPov(t).alt).toBe(0)
     }
   })
 
-  it('moves forward continuously through touchdown', () => {
-    let prev = -Infinity
-    for (let t = 0; t <= 1.0001; t += 0.01) {
-      const { x } = landingPose(t)
-      expect(x).toBeGreaterThanOrEqual(prev)
-      prev = x
-    }
-    // No jump at the touchdown seam.
-    expect(landingPose(TOUCHDOWN - 1e-9).x).toBeCloseTo(0, 6)
-    expect(landingPose(TOUCHDOWN).x).toBeCloseTo(0, 6)
+  it('bites the brakes at the wheels and eases to the stop at the runway half', () => {
+    // Touchdown is an EVENT: the roll starts noticeably slower than the
+    // approach ends (the brakes bite) — but never near a dead stop.
+    const e = 1e-4
+    const vBefore = (landingPov(LANDING.touchdown - e).s - landingPov(LANDING.touchdown - 2 * e).s) / e
+    const vAfter = (landingPov(LANDING.touchdown + 2 * e).s - landingPov(LANDING.touchdown + e).s) / e
+    expect(vAfter).toBeLessThan(vBefore * 0.6)
+    expect(vAfter).toBeGreaterThan(vBefore * 0.25)
+    // Dead stop AT the half, and it stays parked.
+    expect(landingPov(LANDING.stop).s).toBeCloseTo(LANDING_S.stop, 9)
+    expect(landingPov(1).s).toBeCloseTo(LANDING_S.stop, 9)
+    const vEnd = (landingPov(LANDING.stop).s - landingPov(LANDING.stop - e).s) / e
+    expect(vEnd).toBeLessThan(0.05)
+    // …and the stop is the runway's physical HALF, well short of the end.
+    expect(LANDING_S.stop).toBe((LANDING_S.threshold + LANDING_S.end) / 2)
   })
 
-  it('rolls out to a stop, nose settling', () => {
-    expect(landingPose(1).speed).toBe(0)
-    expect(landingPose(1).pitch).toBe(0)
-    expect(landingPose(TOUCHDOWN).pitch).toBeGreaterThan(0)
+  it('projects depth monotonically with the threshold as the unit', () => {
+    expect(landingDepth(1)).toBeCloseTo(1, 9)
+    let prev = 0
+    for (let s = 0.05; s <= 8; s += 0.05) {
+      const d = landingDepth(s)
+      expect(d).toBeGreaterThan(prev)
+      prev = d
+    }
   })
 })

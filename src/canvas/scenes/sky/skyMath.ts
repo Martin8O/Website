@@ -80,7 +80,9 @@ const SUN_KNOTS: ReadonlyArray<readonly [number, number, number]> = [
   [4.5, 0.7, 0.28], // desert → airshow
   [5.5, 0.76, 0.38], // airshow → sunset
   [5.9, 0.83, 0.52], // sinking, sliding west…
-  [6.3, 0.888, 0.755], // …below the horizon (fully set)
+  [6.34, 0.885, 0.695], // half-sunk into the horizon while the jet brakes…
+  [6.46, 0.9, 0.795], // …and the last sliver goes right AFTER the roll
+  //                     stops (B2.3d beat order: set during, gone after)
 ]
 
 export type SunPoint = { x: number; y: number }
@@ -360,34 +362,110 @@ export function opposingDisplay(t: number, w: number, h: number): DisplayPose {
 }
 
 // ---------------------------------------------------------------------------
-// SUNSET — the landing
+// SUNSET — the landing seen from the APPROACH AXIS (B2.3d)
+// The observer stands ON the extended centreline just short of the Čáslav
+// threshold, looking down the runway. The jet comes from BEHIND: the screen
+// goes BLACK as it passes right over the observer's head (the wow beat), the
+// black lifts on its tail-on view already ahead, then the jet shrinks and
+// descends down the perspective to the threshold, touches down and brakes to
+// a stop at the runway's physical HALF. The sun sets through the roll and the
+// last sliver goes just after the stop.
 // ---------------------------------------------------------------------------
 
-/** Scroll t of the touchdown moment. */
-export const TOUCHDOWN = 0.55
+/** Story beats of the landing, in scene t. The black-out window brackets the
+ *  overhead pass: at full black the painter swaps the sweeping belly planform
+ *  for the tail-on view — the swap hides entirely inside it, exactly like the
+ *  climb's cloud-punch white-out hides the world swap. */
+export const LANDING = {
+  sweepIn: 0.53, // the belly shadow sweeps through — a fast swipe
+  blackFull: 0.548, // screen fully black — the pass-over swap hides here
+  blackLift: 0.554, // the BLINK ends: the jet already fills the whole screen
+  reveal: 0.57, // view clear: the jet shrinking down the line to the piano keys
+  touchdown: 0.685,
+  stop: 0.875,
+} as const
 
-export type LandingPose = {
-  /** Along-runway position: −1 far on approach → 0 at touchdown → grows
-   *  through the rollout (units of the glide length). */
-  x: number
-  /** Height above the runway, 1 at scene start → 0 on the wheels. */
-  alt: number
-  /** Nose-up attitude in radians (jets land slightly nose-high). */
-  pitch: number
-  /** Ground speed through the rollout, 1 → 0 at a stop. */
-  speed: number
+/** Along-runway stations, in units of the observer→threshold gap:
+ *  the jet crosses the observer at s = 0, the wheels touch at the threshold
+ *  (s = 1) and the roll ends at the runway's physical half. The camera sits
+ *  FAR back and high on the glidepath (Martin's review, 2× out again): the
+ *  gap doubled, so the same runway spans half as many gap-units — small and
+ *  slender behind a LONG approach-light axis. */
+export const LANDING_S = { threshold: 1, stop: 2.375, end: 3.75 } as const
+
+/** Perspective-depth warp for the whole POV scene: screen size and drop
+ *  below the horizon both scale with 1/depth. The exponent < 1 keeps the
+ *  far half of the runway (and the stopped jet) readable — a gentle wide-
+ *  angle cheat on true 1/s perspective. */
+export const LANDING_DEPTH_K = 0.72
+
+export function landingDepth(s: number): number {
+  // The floor only guards the pole at s = 0 — it must sit LOW enough that
+  // the just-past-the-camera jet still projects across the whole screen.
+  return Math.pow(Math.max(s, 0.004), LANDING_DEPTH_K)
 }
 
-export function landingPose(t: number): LandingPose {
-  if (t < TOUCHDOWN) {
-    const p = clamp01(t / TOUCHDOWN)
-    const alt = Math.pow(1 - p, 1.15)
-    const flare = smoothstep(0.8, 1, p)
-    return { x: -1 + p, alt, pitch: 0.05 + flare * 0.09, speed: 1 }
+/** Camera shake of the overhead pass, unit amplitude — one shared source
+ *  for the canvas world AND the DOM text (the whole view rocks together,
+ *  Martin's ask). Lives strictly inside the 67–68 % window: silent before
+ *  the sweep, dead again by 68 %. `time` rumbles it while it lasts; the
+ *  scroll-driven terms keep even a parked frame displaced. */
+export function landingShake(t: number, time: number): { x: number; y: number } {
+  // Dead before the HUD's readout can ROUND to 68 % (progress .675 = t .575).
+  const env =
+    smoothstep(LANDING.sweepIn + 0.002, LANDING.blackFull, t) * (1 - smoothstep(0.558, 0.573, t))
+  if (env <= 0.01) return { x: 0, y: 0 }
+  return {
+    x: (Math.sin(time * 87) * 0.6 + Math.sin(t * 913 + 1.7) * 0.4) * env,
+    y: (Math.cos(time * 71 + 0.9) * 0.6 + Math.sin(t * 787 + 4.1) * 0.4) * env,
   }
-  const r = clamp01((t - TOUCHDOWN) / (1 - TOUCHDOWN))
-  const speed = Math.pow(1 - r, 1.6)
-  // Rollout distance = the integral of that deceleration (closed form).
-  const x = (1 - Math.pow(1 - r, 2.6)) / 2.6
-  return { x, alt: 0, pitch: 0.14 * Math.pow(1 - r, 1.8), speed }
+}
+
+export type LandingPov = {
+  /** Along-runway distance ahead of the observer (LANDING_S units);
+   *  negative while the jet is still behind the observer's head. */
+  s: number
+  /** Wheel height above the runway, 1 at the overhead pass → 0 on the
+   *  wheels at the threshold and through the roll. */
+  alt: number
+  /** Screen black-out 0..1 — 1 across the whole pass-over swap window. */
+  black: number
+}
+
+/** Scene t when the jet is exactly overhead (s = 0) — mid black-out. */
+const OVERHEAD = (LANDING.blackFull + LANDING.blackLift) / 2
+
+/** Approach progress exponent: right after the pass the jet is still AT the
+ *  camera, so s grows slowly at first — the silhouette fills the whole
+ *  screen as the blink lifts, then most of the shrink happens over the next
+ *  few scroll ticks, the way a real flythrough compresses (Martin: black
+ *  blink → jet across the screen → nothing but smooth shrinking). */
+const APPROACH_P = 1.77
+
+/** How much of the approach speed survives the touchdown: the brakes BITE
+ *  the moment the wheels are down (Martin: the 69–70 % roll read too fast),
+ *  and the cubic then eases that reduced speed smoothly into the halfway
+ *  stop — one continuous deceleration from the wheels to standstill. */
+const BRAKE_BITE = 0.45
+
+export function landingPov(t: number): LandingPov {
+  const L = LANDING
+  // The veil snaps shut through the second half of the sweep — the swallow
+  // reads as a fast swipe, not a hovering shape.
+  const black =
+    smoothstep(L.sweepIn + 0.006, L.blackFull, t) * (1 - smoothstep(L.blackLift, L.reveal, t))
+  if (t < L.touchdown) {
+    const tau = (t - OVERHEAD) / (L.touchdown - OVERHEAD)
+    const s = Math.sign(tau) * Math.pow(Math.abs(tau), APPROACH_P)
+    return { s, alt: Math.pow(1 - clamp01(s), 1.12), black }
+  }
+  // Rollout: the brakes bite AT the wheels (the touchdown is an event — the
+  // roll starts at BRAKE_BITE of the approach speed), then a cubic eases
+  // that speed monotonically to zero exactly at the runway half.
+  const u = clamp01((t - L.touchdown) / (L.stop - L.touchdown))
+  const v0 = (APPROACH_P / (L.touchdown - OVERHEAD)) * (L.stop - L.touchdown) * BRAKE_BITE
+  const D = LANDING_S.stop - LANDING_S.threshold
+  const s =
+    LANDING_S.threshold + v0 * u + (3 * D - 2 * v0) * u * u + (v0 - 2 * D) * u * u * u
+  return { s, alt: 0, black: 0 }
 }

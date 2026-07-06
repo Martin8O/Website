@@ -4,6 +4,34 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-017 — The sunset landing is a glidepath POV: a warped-depth projection, a black-blink flythrough, and one shared shake source (2026-07-07)
+Chapter 05's sunset was rebuilt from a side-on landing into a **first-person approach**: the camera sits far back and
+high on the extended centreline, looking down the runway, and the L-159 flies *through* the camera and recedes onto
+the threshold. It's a scene of pure projection maths, and four decisions carry it (all in `skyMath.ts` + `sunset.ts`,
+unit-tested where they're pure):
+1. **One warped-depth projection owns the whole ground plane.** `landingDepth(s) = max(s, 0.004)^0.72` maps a single
+   along-runway station `s` (observer→threshold gap = 1 unit) to screen size and drop-below-horizon; every object,
+   marking, light and the rolling jet reads `yAt`/`xAt`/`spanAt`/`halfW` off it, so they stay mutually consistent at
+   any distance. The exponent < 1 is a deliberate wide-angle cheat so the far half of the runway (and the stopped jet)
+   stay readable. The low `max` floor matters: it must not clamp the just-past-the-camera jet, which has to project
+   across the whole screen.
+2. **The flythrough is a black BLINK, then only shrinking — no on-screen motion.** `landingPov(t)` runs the approach
+   on `tau^1.77` (the jet leaves the camera slowly, so the silhouette fills the screen as the blink lifts, then most
+   of the shrink happens over the next few ticks). Because the camera IS on the glide line and the line ends on the
+   piano keys, the airborne jet is pinned to screen-centre-over-threshold and *only scales down* — no lateral drift,
+   which reads as "flying straight at the aim point" (Martin: žádné skoky, jen zmenšování). The belly→tail-on view
+   swap hides entirely inside the full-black window, exactly like the climb's cloud-punch hides its world swap.
+3. **Touchdown is an EVENT, not a C1 seam.** The brakes bite at the wheels (`BRAKE_BITE = 0.45` of approach speed),
+   then a cubic eases that reduced speed monotonically to a dead stop at the runway's physical half — the tests now
+   assert the roll starts noticeably slower than the approach ends (a felt touchdown) rather than velocity-matching.
+4. **The camera shake is ONE source, shared by canvas and DOM.** `landingShake(t, time)` (envelope strictly inside
+   67–68 %, killed before the HUD readout can round up to "68 %") drives both the canvas transform in `sunset.ts` and
+   two CSS variables the engine writes each frame, so the chapter text rocks with the world. Reduced motion zeroes it.
+Also here: the far ridge runs full-width and only *dips* through the sun's lane (`laneDip`) so the disc sets **behind**
+the last hill layer; every horizon town's base is evaluated from a terrain surface function so nothing floats; the
+overhead-pass belly is `drawL159Belly`, the gear-down rear (with painted 44° flaps welded to the measured wing
+underside) is `drawL159Rear`. Extends ADR-016 (`L159_REAR_GEAR` was baked there for this) and ADR-012 (`tRaw`).
+
 ### ADR-016 — Aerobatics from a multi-view pose set (not one silhouette rotated); roll = a real elevation ladder; the display runs on unclamped progress; a scene may set its own enter-fade (2026-07-06)
 The airshow two-ship (chapter 05) flies a full **opposing display** — head-on entry with a roll each, a huge
 mirrored loop (foot on the runway line, top near the sky's ceiling), a wingover reversal, a second low pass,

@@ -20,14 +20,13 @@ import type { Renderer } from '../../types'
 import {
   drawGlow,
   fillVerticalGradient,
-  lerp,
   mixHex,
   rgba,
   smoothstep,
 } from '../../toolkit'
 import { drawAircraft, drawTrail } from './aircraft'
 import { drawCloudSea } from './clouds'
-import { drawCockpitHud } from './hud'
+import { bvrPicture, drawCockpitHud } from './hud'
 import { helixPoint, sunArc } from './skyMath'
 
 export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
@@ -231,21 +230,21 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   // while he flies the L-159. Only the chapter cross-fade touches it.
   const hudA = alpha
   if (hudA > 0.01) {
-    // Two BVR contacts far ahead — the designated bogey and his wingman a
-    // touch higher and further right, both in the same green target frame.
-    const bogey = { x: w * 0.86, y: h * 0.33 }
-    const bogey2 = { x: w * 0.9, y: h * 0.27 }
+    // Two BVR contacts far ahead — the shared story-position picture (see
+    // bvrPicture): gently drifting frames, ranges counting down all the way
+    // from the 26 % power-up, seamless across the climb hand-over.
+    const bvr = bvrPicture(2.5 + (cfg.tRaw ?? t), w, h)
     ctx.save()
     ctx.fillStyle = rgba('#1a2236', hudA * 0.7)
-    ctx.fillRect(bogey.x - 1.5, bogey.y - 1.5, 3, 3)
-    ctx.fillRect(bogey2.x - 1.5, bogey2.y - 1.5, 3, 3)
+    ctx.fillRect(bvr.target.x - 1.5, bvr.target.y - 1.5, 3, 3)
+    ctx.fillRect(bvr.target2.x - 1.5, bvr.target2.y - 1.5, 3, 3)
     ctx.restore()
     drawCockpitHud(ctx, {
       w, h, alpha: hudA,
       attack: 0,
-      target: bogey,
-      target2: bogey2,
-      rangeNm: lerp(26, 4, smoothstep(0.72, 0.96, t)),
+      target: bvr.target,
+      target2: bvr.target2,
+      rangeNm: bvr.rangeNm,
       mach: 0.74 + smoothstep(0.8, 0.95, t) * 0.08,
       altFt: 21500 - t * 4000,
       hdg: 139,

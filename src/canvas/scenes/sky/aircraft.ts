@@ -22,7 +22,7 @@
  */
 
 import { TAU, rgba } from '../../toolkit'
-import { L159_POSE_AZS, L159_POSE_GRID } from './l159poses'
+import { L159_POSE_AZS, L159_POSE_GRID, L159_REAR_GEAR } from './l159poses'
 import { L159P_GLASS, L159P_SEATS, L159_ROLL, SILHOUETTES, type SilhouetteKey, type SilhouetteRings } from './silhouettes'
 import { poseFold, rollFrame } from './skyMath'
 
@@ -477,6 +477,117 @@ export function drawL159Pose(ctx: CanvasRenderingContext2D, o: L159PoseOptions):
   }
   paintFrame(mem.cur, o.alpha)
   if (fade < 1) paintFrame(mem.prev, o.alpha * (1 - fade))
+  ctx.restore()
+}
+
+// ---------------------------------------------------------------------------
+// The landing POV views (B2.3d) — tail-on gear-down + the belly planform
+// ---------------------------------------------------------------------------
+
+/** Bounding metrics of a traced ring set, lazily measured once. */
+function ringBounds(rings: SilhouetteRings): { spanX: number; maxY: number; minY: number } {
+  let mnX = Infinity
+  let mxX = -Infinity
+  let mxY = -Infinity
+  let mnY = Infinity
+  for (const ring of rings) {
+    for (let i = 0; i < ring.length; i += 2) {
+      if (ring[i] < mnX) mnX = ring[i]
+      if (ring[i] > mxX) mxX = ring[i]
+      if (ring[i + 1] > mxY) mxY = ring[i + 1]
+      if (ring[i + 1] < mnY) mnY = ring[i + 1]
+    }
+  }
+  return { spanX: mxX - mnX, maxY: mxY, minY: mnY }
+}
+
+const REAR_GEAR_BOUNDS = ringBounds(L159_REAR_GEAR)
+
+/** Fin-tip height over the wheel line, in units of the SPAN — so a scene can
+ *  pin the tail light exactly ON the tip of the traced fin (Martin caught the
+ *  strobe blinking above the aircraft when this was a guess). */
+export const L159_REAR_FIN_TIP =
+  (REAR_GEAR_BOUNDS.maxY - REAR_GEAR_BOUNDS.minY) / REAR_GEAR_BOUNDS.spanX
+
+export type L159RearOptions = {
+  x: number
+  /** Screen y of the WHEEL bottoms — the landing anchors on the contact
+   *  point, airborne or rolling. */
+  y: number
+  /** WingSPAN in px — the landing scales the jet against the runway width,
+   *  so span is the natural size (the trace is length-normalized). */
+  size: number
+  /** Flap deflection 0..1 (1 = the full 44° landing setting) — the ANIMACE
+   *  render flies flaps-up, so the dropped panels are painted on. */
+  flaps?: number
+  color: string
+  alpha: number
+}
+
+/** The L-159 seen from dead astern with the REAL landing gear down — the
+ *  ANIMACE tail-on trace (`L159_REAR_GEAR`) plus the landing flaps hanging
+ *  44° down off the inner trailing edge (Martin's marked model view: they
+ *  run from the fuselage side out to where the ailerons start). The B2.3d
+ *  landing beat. */
+export function drawL159Rear(ctx: CanvasRenderingContext2D, o: L159RearOptions): void {
+  if (o.alpha <= 0.004 || o.size <= 1.5) return
+  const s = o.size / REAR_GEAR_BOUNDS.spanX
+  ctx.save()
+  ctx.translate(o.x, o.y)
+  ctx.scale(s, s)
+  ctx.translate(0, -REAR_GEAR_BOUNDS.maxY)
+  ctx.globalAlpha = o.alpha
+  ctx.fillStyle = o.color
+  fillSilhouette(ctx, L159_REAR_GEAR)
+  const flaps = o.flaps ?? 0
+  if (flaps > 0.02) {
+    // Each dropped flap hangs off the wing band, from the fuselage side out
+    // to the aileron break (Martin's green-marked model view). The panel is
+    // PIVOTED about its inner-top corner and rotated ~1.5° INTO the wing so
+    // it follows the dihedral — the outer top edge tucks into the band and
+    // no daylight can open outboard (Martin's Paint zoom); a 44° deflection
+    // of the ~0.05-span chord hangs ~0.045 span below.
+    const sp = REAR_GEAR_BOUNDS.spanX
+    const drop = 0.045 * flaps
+    ctx.beginPath()
+    for (const side of [-1, 1] as const) {
+      const xi = side * 0.09 * sp // fuselage side — the pivot corner
+      const xo = side * 0.28 * sp // aileron break
+      const yi = REAR_GEAR_BOUNDS.maxY - 0.128 * sp
+      const yo = REAR_GEAR_BOUNDS.maxY - 0.133 * sp // rotated up, into the band
+      ctx.moveTo(xi, yi)
+      ctx.lineTo(xo, yo)
+      ctx.lineTo(xo, yo + drop * 0.9 * sp)
+      ctx.lineTo(xi, yi + drop * sp)
+      ctx.closePath()
+    }
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+export type L159BellyOptions = {
+  x: number
+  y: number
+  /** Aircraft LENGTH in px (pose-set normalization). */
+  size: number
+  /** Screen rotation of the nose direction, radians (0 = nose at +x). */
+  rot: number
+  color: string
+  alpha: number
+}
+
+/** The belly planform (el −90 pose frame) — the overhead pass: it sweeps
+ *  huge across the view as the jet crosses right over the observer's head. */
+export function drawL159Belly(ctx: CanvasRenderingContext2D, o: L159BellyOptions): void {
+  if (o.alpha <= 0.004 || o.size <= 1.5) return
+  ctx.save()
+  ctx.translate(o.x, o.y)
+  ctx.rotate(o.rot)
+  ctx.scale(o.size, o.size)
+  ctx.globalAlpha = o.alpha
+  ctx.fillStyle = o.color
+  fillSilhouette(ctx, L159_POSE_GRID[0][0])
   ctx.restore()
 }
 
