@@ -180,17 +180,17 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
       color: mixHex('#3c3225', HAZE, 0.1), alpha: structA, time: 0,
     })
   }
-  drawAircraft(ctx, 'heli', {
+  drawAircraft(ctx, 'mi17', {
     x: wrapX(span * 0.82, rowOff), y: rowY - h * 0.008, size: unit * 0.09,
     color: mixHex('#3c3225', HAZE, 0.1), alpha: structA, time: 0,
   })
 
-  // --- The helicopter transport beat — the few times he flew here -----------
+  // --- The Mi-17 transport beat — the few times he flew here -----------------
   const heliIn = smoothstep(0.3, 0.75, t)
   if (heliIn > 0.001 && heliIn < 0.999) {
     const hx = lerp(w * 1.12, -w * 0.12, heliIn)
     const hy = h * 0.3 + Math.sin(time * 1.3) * h * 0.006
-    drawAircraft(ctx, 'heli', {
+    drawAircraft(ctx, 'mi17', {
       x: hx, y: hy, size: unit * 0.11, dir: -1, color: '#41372a', glint: '#e8dcc0', alpha: condense * 0.95, time,
     })
   }

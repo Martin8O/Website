@@ -180,6 +180,8 @@ export const renderAirshow: Renderer = (ctx, alpha, t, time, cfg) => {
     drawRibbon(ctx, pts, unit * 0.007, color, alpha * smokeOn * (who === 'lead' ? 0.18 : 0.14), 2.4)
   }
 
+  // The display pair flies CLEAN (no stores — Martin's call); the vykrut
+  // returns with the B2.3 choreography once the clean roll frames exist.
   const jetColor = '#26324d'
   drawAircraft(ctx, 'l159', {
     x: lead.x, y: lead.y, size: unit * 0.085, tilt: -lead.heading,

@@ -28,6 +28,7 @@ import {
 } from '../../toolkit'
 import { drawAircraft, drawTrail } from './aircraft'
 import { drawCloudDeck, drawCloudSea, drawPuff } from './clouds'
+import { drawCockpitHud } from './hud'
 import { GRADUATION, cloudPunch, graduationAt, sunArc } from './skyMath'
 
 const GOLD = '#ffd27a'
@@ -229,9 +230,55 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
       unit * 0.007, '#f2f7ff', a * 0.1 * smoothstep(0.6, 0.63, t),
     )
 
-    drawAircraft(ctx, 'l39', {
-      x: px, y: py, size: unit * 0.13, tilt, color: '#22314e', glint: '#dcecff', alpha: a, time,
-    })
+    // THE L-159 UNLOCK — the moment the jet levels off after the punch-out
+    // (the burst puffs have just dissolved), the graduation ladder ends: the
+    // L-39 dissolves into the stores L-159 (2012), ringed by the same golden
+    // pulse the earlier rungs got. From here on he flies the modern jet —
+    // level, all the way through the cruise hand-over (Martin: switch early,
+    // give the L-159 a long straight run before the one-circle fight).
+    const toL159 = smoothstep(0.8, 0.88, t)
+    if (toL159 < 1) {
+      drawAircraft(ctx, 'l39', {
+        x: px, y: py, size: unit * 0.13, tilt, color: '#22314e', glint: '#dcecff', alpha: a * (1 - toL159), time,
+      })
+    }
+    if (toL159 > 0) {
+      drawAircraft(ctx, 'l159p', {
+        x: px, y: py, size: unit * 0.14, tilt, color: '#22314e', glint: '#dcecff', alpha: a * toL159, time,
+      })
+    }
+    const pulse = smoothstep(0.8, 0.84, t) * (1 - smoothstep(0.92, 0.98, t))
+    if (pulse > 0.01) {
+      const spread = smoothstep(0.8, 0.98, t)
+      ctx.save()
+      ctx.strokeStyle = rgba(GOLD, a * pulse * 0.55)
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(px, py, unit * 0.14 * (0.55 + spread * 1.1), 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = rgba(GOLD, a * pulse * 0.9)
+      ctx.fillText('L-159', px + unit * 0.1, py + unit * 0.09)
+      ctx.restore()
+    }
+
+    // The green cockpit HUD snaps ON — full intensity, no fade — the instant
+    // the L-159 arrives (Martin: instrument power-up, not a dissolve). Same
+    // readouts the cruise opens with, so the hand-over is seamless.
+    if (toL159 >= 1) {
+      drawCockpitHud(ctx, {
+        w, h, alpha: a,
+        attack: 0,
+        target: { x: w * 0.86, y: h * 0.33 },
+        target2: { x: w * 0.9, y: h * 0.27 },
+        rangeNm: 26,
+        mach: 0.74,
+        altFt: 21500,
+        hdg: 139,
+      })
+    }
 
     // The burst: only the LATE phase — a ring of torn white already flying
     // apart (the tight in-transition puffs died with the dissolve).

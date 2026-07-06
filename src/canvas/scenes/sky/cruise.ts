@@ -4,17 +4,16 @@
  * frame centre while the cumulus sea streams past beneath them (near rows
  * fast, far rows slow — perspective).
  *
- *  1. SOLO — one L-39 alone above the sea, a hint of contrail.
+ *  1. SOLO — the L-159 alone above the sea, a hint of contrail (the golden
+ *     L-39→L-159 unlock fired at the top of the climb; the green cockpit HUD
+ *     has been lit at full strength since that moment).
  *  2. THE ONE-CIRCLE FIGHT — per Martin's diagram (`1 circle fight
  *     principle.png`): two jets corkscrew down a shared VERTICAL HELIX,
  *     opposite sides of the axis, paths weaving like a double helix — near
  *     side bigger and faster, far side small behind it. Graceful, never
  *     violent.
- *  3. COMAO — the L-159 era arrives with its own golden unlock (2012 — this
- *     is where it belongs, not in the CTU→Brno climb): twilight falls (the
- *     HUD photo's rose horizon), a mixed package rides beside you, the green
- *     cockpit HUD lights up, and the run closes with a ground strike through
- *     a gap in the sea — BVR to A-G.
+ *  3. COMAO — golden afternoon falls (the HUD photo's rose horizon) and a
+ *     mixed package rides beside you — Gripens high, Mi-17s low.
  */
 
 import type { Renderer } from '../../types'
@@ -30,9 +29,6 @@ import { drawAircraft, drawTrail } from './aircraft'
 import { drawCloudSea } from './clouds'
 import { drawCockpitHud } from './hud'
 import { helixPoint, sunArc } from './skyMath'
-
-const GOLD = '#ffd27a'
-const MONO = '"Chakra Petch", ui-monospace, Consolas, monospace'
 
 export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   const { w, h } = cfg
@@ -90,9 +86,12 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   // --- COMAO entry gate (seg-3) ----------------------------------------------
   const seg3 = smoothstep(0.6, 0.7, t)
 
-  // --- 1. SOLO — holding centre frame, the world doing the moving -----------
-  // Position/attitude/size are EXACTLY the climb's hand-over state, so the
-  // cross-fade stacks two identical jets — one aircraft, no ghost.
+  // --- 1. SOLO — the L-159 riding level --------------------------------------
+  // The L-39→L-159 unlock already happened at the top of the climb (Martin:
+  // switch early — the L-159 gets a long straight run in the horizon before
+  // the one-circle fight). Position/attitude/size are EXACTLY the climb's
+  // hand-over state, so the cross-fade stacks two identical jets — one
+  // aircraft, no ghost.
   const solo = (1 - smoothstep(0.24, 0.34, t)) * alpha
   if (solo > 0.004) {
     // Holds the exact hand-over spot until the cross-fade has fully resolved
@@ -107,8 +106,8 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
       sx - Math.cos(stilt) * unit * 0.55, sy + Math.sin(stilt) * unit * 0.55 + unit * 0.012,
       unit * 0.007, '#f2f7ff', solo * 0.1,
     )
-    drawAircraft(ctx, 'l39', {
-      x: sx, y: sy, size: unit * 0.13, tilt: stilt, color: '#22314e', glint: '#dcecff', alpha: solo, time,
+    drawAircraft(ctx, 'l159p', {
+      x: sx, y: sy, size: unit * 0.14, tilt: stilt, color: '#22314e', glint: '#dcecff', alpha: solo, time,
     })
   }
 
@@ -173,10 +172,13 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
       }
     }
     ctx.restore()
-    // Far jet small and dim behind the axis, near jet big in front.
+    // Far jet small and dim behind the axis, near jet big in front — two
+    // stores-laden L-159 side profiles riding the corkscrew (the roll-frame
+    // animation is parked until the whole site stands; the spiral itself
+    // carries the motion, as before).
     for (const j of [...jets].sort((a, b) => a.now.z - b.now.z)) {
       const near = (j.now.z + 1) / 2
-      drawAircraft(ctx, 'l39', {
+      drawAircraft(ctx, 'l159p', {
         x: j.now.x, y: j.now.y, size: unit * (0.06 + 0.1 * near),
         tilt: -j.heading, color: mixHex('#2c3c60', '#1b2540', 1 - near),
         glint: '#d7e8ff', alpha: ballet * (0.6 + 0.4 * near), time,
@@ -191,47 +193,31 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
     const bob = Math.sin(time * 0.8) * h * 0.003
     const body = mixHex('#2a3550', '#242e46', gold)
 
-    // Lead L-159 (you fly the other one) + wingman.
+    // Lead L-159 (you fly the other one) + wingman — both in the stores
+    // configuration (the real COMAO fit, traced from Martin's render).
     const leadX = w * 0.6 - slide
     const leadY = h * 0.36 + bob
     // Trail runs straight back along his own flight line, clear of the wingman.
     drawTrail(ctx, leadX - unit * 0.1, leadY + unit * 0.01, leadX - w * 0.4, leadY + unit * 0.026, unit * 0.008, '#dde8f8', a * 0.08)
-    drawAircraft(ctx, 'l159', {
+    drawAircraft(ctx, 'l159p', {
       x: leadX, y: leadY, size: unit * 0.19, tilt: 0.04, color: body, glint: '#d7ecff', alpha: a, time,
     })
-    drawAircraft(ctx, 'l159', {
+    drawAircraft(ctx, 'l159p', {
       x: w * 0.47 - slide * 1.2, y: h * 0.43 - bob, size: unit * 0.15, tilt: 0.04, color: body, glint: '#d7ecff', alpha: a * 0.95, time,
     })
 
-    // The L-159 unlock — 2012, the modern jet arrives (closes the ladder
-    // the climb started; same golden motif).
-    const pulse = smoothstep(0.66, 0.68, t) * (1 - smoothstep(0.72, 0.8, t))
-    if (pulse > 0.01) {
-      const spread = smoothstep(0.66, 0.8, t)
-      ctx.save()
-      ctx.strokeStyle = rgba(GOLD, a * pulse * 0.55)
-      ctx.lineWidth = 1.5
-      ctx.beginPath()
-      ctx.arc(leadX, leadY, unit * 0.19 * (0.55 + spread * 1.1), 0, Math.PI * 2)
-      ctx.stroke()
-      ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
-      ctx.textAlign = 'left'
-      ctx.textBaseline = 'middle'
-      ctx.fillStyle = rgba(GOLD, a * pulse * 0.9)
-      ctx.fillText('L-159', leadX + unit * 0.13, leadY + unit * 0.11)
-      ctx.restore()
-    }
-
-    // The exercise package: an echelon of distant jets + two helicopters low.
+    // The exercise package: an echelon of Gripen planforms + two Mi-17s low
+    // (real silhouettes from the reference pack — no more generic darts).
     for (let i = 0; i < 4; i++) {
       const dx = w * (0.14 + i * 0.055) - slide * 1.5
       const dy = h * (0.22 + i * 0.024) + bob * (i % 2 ? 1 : -1)
       drawTrail(ctx, dx - unit * 0.02, dy, dx - unit * 0.12, dy + h * 0.012, unit * 0.004, '#d8e4f4', a * 0.07)
-      drawAircraft(ctx, 'dart', { x: dx, y: dy, size: unit * 0.034, color: body, alpha: a * 0.85, time })
+      drawAircraft(ctx, 'gripen', { x: dx, y: dy, size: unit * 0.05, color: body, alpha: a * 0.85, time })
     }
     for (let i = 0; i < 2; i++) {
-      drawAircraft(ctx, 'heli', {
-        x: w * (0.3 + i * 0.085) - slide, y: h * (0.525 + i * 0.02) + bob, size: unit * 0.055,
+      // Low pair riding under the Gripen echelon's tail (Martin's placement).
+      drawAircraft(ctx, 'mi17', {
+        x: w * (0.2 + i * 0.06) - slide, y: h * (0.575 + i * 0.02) + bob, size: unit * 0.06,
         color: body, glint: '#cfe2f8', alpha: a * 0.9, time,
       })
     }
@@ -240,7 +226,10 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   }
 
   // --- The green cockpit HUD — you're inside the L-159 now -------------------
-  const hudA = smoothstep(0.72, 0.84, t) * alpha * 0.8
+  // Full intensity for the whole chapter: it snapped on with the unlock at
+  // the top of the climb (Martin: instrument power-up, no fade) and stays lit
+  // while he flies the L-159. Only the chapter cross-fade touches it.
+  const hudA = alpha
   if (hudA > 0.01) {
     // Two BVR contacts far ahead — the designated bogey and his wingman a
     // touch higher and further right, both in the same green target frame.

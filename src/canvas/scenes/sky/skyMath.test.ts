@@ -6,8 +6,10 @@ import {
   graduationAt,
   helixPoint,
   landingPose,
+  rollFrame,
   sunArc,
 } from './skyMath'
+import { L159_ROLL, ROLL_BANKS_DEG, SILHOUETTES } from './silhouettes'
 
 describe('graduationAt', () => {
   it('starts on the ultralight with no pulse', () => {
@@ -120,6 +122,69 @@ describe('sunArc', () => {
     expect(sunArc(5.5)).toEqual({ x: 0.76, y: 0.38 })
     // Fully set: below the 0.70 horizon by the end of the landing roll.
     expect(sunArc(6.4).y).toBeGreaterThan(0.7)
+  })
+})
+
+describe('rollFrame', () => {
+  it('hits the traced quarter points of a full roll', () => {
+    expect(rollFrame(0)).toEqual({ frame: 0, flipY: false })
+    expect(rollFrame(Math.PI / 2).frame).toBe(L159_ROLL.length - 1)
+    expect(rollFrame(Math.PI)).toEqual({ frame: 0, flipY: true })
+    expect(rollFrame((3 * Math.PI) / 2).frame).toBe(L159_ROLL.length - 1)
+    expect(rollFrame(2 * Math.PI - 1e-9)).toEqual({ frame: 0, flipY: false })
+  })
+
+  it('folds negative and >2π angles onto the same poses', () => {
+    expect(rollFrame(-0.3)).toEqual(rollFrame(2 * Math.PI - 0.3))
+    expect(rollFrame(0.4 + 4 * Math.PI)).toEqual(rollFrame(0.4))
+  })
+
+  it('walks the ladder monotonically from level to knife-edge', () => {
+    let prev = 0
+    for (let b = 0; b <= Math.PI / 2 + 1e-9; b += 0.01) {
+      const { frame } = rollFrame(b)
+      expect(frame).toBeGreaterThanOrEqual(prev)
+      prev = frame
+    }
+    expect(prev).toBe(L159_ROLL.length - 1)
+  })
+
+  it('mirrors instead of popping at the quarter points', () => {
+    // Just past knife-edge the frame stays the planform, only flipY turns on.
+    expect(rollFrame(Math.PI / 2 + 0.01).frame).toBe(L159_ROLL.length - 1)
+    expect(rollFrame(Math.PI / 2 + 0.01).flipY).toBe(true)
+  })
+})
+
+describe('silhouette data', () => {
+  const all: Array<[string, ReadonlyArray<ReadonlyArray<number>>]> = [
+    ...Object.entries(SILHOUETTES),
+    ...L159_ROLL.map((rings, i): [string, ReadonlyArray<ReadonlyArray<number>>] => [`roll[${i}]`, rings]),
+  ]
+
+  it('ships one traced frame per bank step', () => {
+    expect(L159_ROLL.length).toBe(ROLL_BANKS_DEG.length)
+  })
+
+  it('every silhouette is normalized: unit length, centred, detailed', () => {
+    for (const [name, rings] of all) {
+      const outer = rings[0]
+      // ≥ 22 points — traced shapes carry far more; the authored ultralight
+      // is compact by design and sets the floor.
+      expect(outer.length, name).toBeGreaterThanOrEqual(44)
+      let minx = Infinity
+      let maxx = -Infinity
+      for (let i = 0; i < outer.length; i += 2) {
+        minx = Math.min(minx, outer[i])
+        maxx = Math.max(maxx, outer[i])
+      }
+      expect(maxx - minx, name).toBeCloseTo(1, 2)
+      expect(minx + maxx, name).toBeCloseTo(0, 2)
+      for (const ring of rings) {
+        expect(ring.length % 2, name).toBe(0)
+        for (const c of ring) expect(Math.abs(c), name).toBeLessThan(1.5)
+      }
+    }
   })
 })
 

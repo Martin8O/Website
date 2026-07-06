@@ -4,6 +4,32 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-013 — Real aircraft as baked vector silhouettes; layered cockpits composited, not alpha-thresholded (2026-07-06)
+Every aircraft is a **real silhouette traced from Martin's reference pack** (`local/ode mne/siluety/`) and baked
+to `src/canvas/scenes/sky/silhouettes.ts` (generated — regenerate with `node local/tmp/gen-sil3.mjs`): browser-
+assisted contour extraction on the dev server (`/@fs/` image → per-photo colour keying → connected components →
+pixel-edge boundary walk → Douglas-Peucker with a closed-ring split), normalized (nose +x, y down, x-extent = 1,
+bbox-centred). **The runtime stays pure vector — no images load in the app.** Rings: 0 = outer, later = holes
+(canopy) or detached parts, filled `evenodd`. The L-159 stores render is split into **body + canopy glass +
+seats** so a real glass cockpit layers over the L-39 / clean L-159 too; the ultralight is hand-authored (its 3/4
+photos would not key); the Mi-17 rotor is fully procedural (overhangs the unit box).
+Two rules emerged from Martin's review and are load-bearing:
+1. **A fading craft that layers parts (glass, seats, rotor, separate wing) must be composited, not painted
+   layer-by-layer with an alpha threshold.** Translucent layers accumulate opacity where they overlap (the seats
+   read darker than the body mid-dissolve — Martin caught it). The earlier fix (skip the cockpit below 0.85
+   alpha) created a visible "silhouette first, cockpit pops on a beat later" step. Real fix: paint the craft
+   **opaque on a scratch canvas and stamp it down once** at the craft's alpha (`drawAircraft`, `LAYERED` set) —
+   cockpit present from the first translucent frame, whole aircraft dissolves as one image.
+2. **A donor cockpit sunk into a different fuselage needs a body-colour fairing at its aft cut**, not a raw
+   overlay: the L-159 glass ends in a vertical edge that the low L-39/clean-L-159 spine doesn't continue, leaving
+   a step against the sky ("schod"). A small `turtledeck` quadratic sweeps the glass onto the spine, and the
+   seats are clipped to the glass so no sliver pokes past the windscreen as a dark speck.
+*Also:* the green cockpit HUD **snaps on at full intensity** the instant the L-159 unlock fires at the top of the
+climb (no fade — an instrument power-up) and rides centred through the cruise; the L-39→L-159 swap moved earlier
+(climb top-out) so the modern jet gets a long level run before the one-circle fight. *Why:* real geometry over
+free-hand shapes (Martin's standing constraint), and correct compositing so cross-fades read clean. Roll-animation
+frames are traced + parked (`L159_ROLL`, `rollFrame`) for the airshow vykrut once the site stands. Extends ADR-012.
+
 ### ADR-012 — Sky family: one renderer, sub-mood dispatch, and cross-scene continuity via a shared arc + `tRaw` (2026-07-06)
 The whole pilot arc (chapters 01–05) is **one registry entry** (`renderSky`) that dispatches on `cfg.sky` to
 five scene modules under `src/canvas/scenes/sky/` (climb / cruise / desert / airshow / sunset), each pure. Story

@@ -7,6 +7,7 @@
  */
 
 import { TAU, clamp01, smoothstep } from '../../toolkit'
+import { ROLL_BANKS_DEG } from './silhouettes'
 
 // ---------------------------------------------------------------------------
 // CLIMB — the aircraft "graduation" ladder + the cloud-punch
@@ -119,6 +120,47 @@ export type HelixPoint = {
 export function helixPoint(turns: number, phase: number): HelixPoint {
   const a = turns * TAU + phase
   return { x: Math.sin(a), z: Math.cos(a) }
+}
+
+// ---------------------------------------------------------------------------
+// THE ROLL — mapping a continuous bank angle onto the traced frame ladder
+// (`L159_ROLL`, Martin's model photos: level → 30° → 45° → 70° → planform)
+// ---------------------------------------------------------------------------
+
+export type RollPose = {
+  /** Index into `L159_ROLL`. */
+  frame: number
+  /** Render mirrored about the flight axis — the inverted half of the roll. */
+  flipY: boolean
+}
+
+/** Fold a roll angle (radians, any sign) into the traced [0°, 90°] range and
+ *  pick the nearest frame; the far half of the roll renders as a y-flip, so
+ *  one full turn reads level → knife-edge → inverted → knife-edge → level
+ *  with no pop at the quarter points (the planform is its own mirror). */
+export function rollFrame(bank: number): RollPose {
+  const p = ((bank % TAU) + TAU) % TAU
+  let fold: number
+  let flipY: boolean
+  if (p <= Math.PI / 2) {
+    fold = p
+    flipY = false
+  } else if (p <= Math.PI) {
+    fold = Math.PI - p
+    flipY = true
+  } else if (p <= Math.PI * 1.5) {
+    fold = p - Math.PI
+    flipY = true
+  } else {
+    fold = TAU - p
+    flipY = false
+  }
+  const deg = (fold * 180) / Math.PI
+  let frame = 0
+  for (let i = 1; i < ROLL_BANKS_DEG.length; i++) {
+    if (Math.abs(ROLL_BANKS_DEG[i] - deg) < Math.abs(ROLL_BANKS_DEG[frame] - deg)) frame = i
+  }
+  return { frame, flipY }
 }
 
 // ---------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { chapterPosition } from '../timeline'
-import { getScrollProgress } from '../scroll/scrollStore'
+import { getScrollProgress, setScrollProgress } from '../scroll/scrollStore'
 import { RENDERERS } from './registry'
 import { buildRuns, resolveSceneFrame, type SceneSlot } from './sceneTimeline'
 import { makeGrainTile } from './toolkit'
@@ -126,8 +126,21 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
     media.addEventListener('change', onMedia)
     start()
 
+    // Dev-only headless-verification hook: hidden tabs never fire rAF (and
+    // the loop above stops on purpose), so tooling can set a scroll progress
+    // and paint exactly one frame by hand. Stripped from prod builds.
+    const hookHost = window as unknown as { __paintFrame?: (progress: number, ms: number) => void }
+    if (import.meta.env.DEV) {
+      hookHost.__paintFrame = (progress, ms) => {
+        setScrollProgress(progress)
+        needsPaint = true
+        paint(ms)
+      }
+    }
+
     return () => {
       stop()
+      if (import.meta.env.DEV) delete hookHost.__paintFrame
       window.removeEventListener('resize', resize)
       document.removeEventListener('visibilitychange', onVisibility)
       media.removeEventListener('change', onMedia)
