@@ -4,6 +4,33 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-015 — Airshow as a major airbase; crop-enabled sheet tracer; static-display fleet keeps its resting rotors; landmark towns grounded to the horizon (2026-07-06)
+The airshow scene (chapter 05) was rebuilt from an aeroclub strip into a **Čáslav-class major airbase** seen from
+the crowd line: a hazy two-ridge hill horizon, hardened-shelter humps, a five-hangar line, the **Čáslav control
+tower** (tapering shaft, flared two-deck cab, balcony rails, antenna masts) with its ops building, an apron
+**full of organic static display** across a marked runway + taxiway (yellow line + connectors + windsock), and a
+crowd at **tens-of-thousands scale** (six depth rows, marquee tents, flags, camera flashes). The two-ship display
+(entry → loop → exit, colored smoke) is unchanged. Four decisions are load-bearing:
+1. **The offline tracer gained a `crop` rect so one silhouette SHEET yields many craft** (`local/tmp/trace5.mjs`,
+   jobs in `trace5-jobs.json`, baked via `node local/tmp/gen-sil5.mjs`). Extends the ADR-014 pipeline; a `fill`
+   band (mirror of `erase`) repairs watermark holes before the boundary walk. From `heloes side.jpg` +
+   `mil jet mix.jpg` + front-view vectors: `f18front`, `rafalefront`, `f35front`, `f35park`, `chinook`, `uh1`.
+2. **A static-display craft is traced AS-IS and keeps its resting rotor blades — never spin a procedural rotor
+   over it.** The opposite of ADR-014's flying rotors: parked helicopters (chinook, uh1) only ever sit, so their
+   traced blades are correct and a procedural spin would be wrong. Bad traces are dropped from the bake, not
+   shipped damaged (su24park + blackhawk had watermark scars; v22 + c130 lacked wheels — kept in the JSON for a
+   future retrace, excluded from `SILHOUETTES`).
+3. **Parked aircraft sit by their silhouette's own ground reach, not a shared magic number.** `groundReach(kind)`
+   caches the max y of ring 0 (procedural-gear jets use a fixed `JET_GEAR_REACH`), so every kind's wheels land
+   exactly on the stand regardless of how its trace was centred — a mixed static line stays level.
+4. **A distant landmark silhouette must run its feet down PAST the horizon line, and reads best framed in a gap
+   between nearer buildings.** Čáslav (the Gothic tower of St. Peter & Paul) and Kutná Hora (St. Barbara's three
+   concave tent roofs + the Jesuit onion dome, per `kutna hora silueta.jpg`) sit tiny and hazy on the far hills;
+   Martin's review drove them *smaller, more distant, grounded* (base at h·0.7215, under the grass line, so no
+   town floats) and *framed between two hangars each* (the hangar line was re-spaced to open a gap around each
+   town). *Why:* a venue that reads as Martin's real home base, a trace pipeline that scales to whole reference
+   sheets, and honest omission over shipping a broken silhouette. Extends ADR-014.
+
 ### ADR-014 — Bagram as a lived-in airbase; procedural rotors carry no static blade; offline Node tracer (2026-07-06)
 The desert scene (chapter 04) was rebuilt from Martin's Bagram photos into a **30k-person airbase seen from the
 ground**: two towering Hindu-Kush ranges with **snow caps**, a runway on the horizon with a **C-17 lifting off**
