@@ -15,8 +15,13 @@
  *    ground kit, taxiway (yellow line + connectors), a wide marked runway,
  *    a windsock in the wind,
  *  - behind it all: a soft hazy hill line, so the horizon breathes,
- *  - the pair flies the display line: entry pass → a full loop → exit,
- *    lead trailing white smoke, wingman red (never a "many aircraft" show),
+ *  - the pair flies the OPPOSING display (B2.3c, Martin's own routine +
+ *    sketch): head-on entry from both runway ends with a full roll each →
+ *    the pass → mirrored loops meeting at the top and the feet → wingover
+ *    reversals → a second pass rolling through the cross → the farewell
+ *    climb, wings rocking ±45° under flares (`airshow flares.jpg`); the
+ *    jets are the multi-view ANIMACE model (`l159poses.ts`), lead trailing
+ *    subtle white smoke, wingman red,
  *  - below: the crowd at TENS-OF-THOUSANDS scale — six rows deep, from a far
  *    head-texture band at the crowd-line barrier to near silhouettes;
  *    marquee tents, raised arms, flags, camera flashes.
@@ -25,6 +30,7 @@
 import type { Renderer } from '../../types'
 import {
   TAU,
+  clamp01,
   drawGlow,
   drawRidge,
   fillVerticalGradient,
@@ -34,10 +40,10 @@ import {
   rgba,
   smoothstep,
 } from '../../toolkit'
-import { drawAircraft, drawRibbon, type CraftKind } from './aircraft'
+import { drawAircraft, drawL159Pose, drawRibbon, type CraftKind } from './aircraft'
 import { drawPuff } from './clouds'
 import { SILHOUETTES } from './silhouettes'
-import { sunArc } from './skyMath'
+import { opposingDisplay, sunArc } from './skyMath'
 
 /** Summer distance haze — everything far mixes toward this. */
 const HAZE = '#d9e9f5'
@@ -176,38 +182,10 @@ function drawKutnaHora(ctx: CanvasRenderingContext2D, w: number, h: number, cx: 
   ctx.restore()
 }
 
-/** The display line: entry pass → full loop → exit, as {x, y, heading}.
- *  Piecewise but C0-continuous; u may go slightly negative (smoke history). */
-function displayPath(u: number, w: number, h: number): { x: number; y: number; heading: number } {
-  const cx = w * 0.54
-  const cy = h * 0.4
-  const R = h * 0.235
-  // Loop entry/exit tangent point: the bottom of the circle.
-  const enterX = cx
-  const enterY = cy + R
-  if (u < 0.24) {
-    // Entry: a shallow descending pass from off-screen left to the loop foot.
-    const p = u / 0.24
-    const x = lerp(-w * 0.08, enterX, p)
-    const y = lerp(h * 0.62, enterY, p) - Math.sin(p * Math.PI) * h * 0.03
-    return { x, y, heading: Math.atan2(enterY - h * 0.62, enterX + w * 0.08) * 0.6 }
-  }
-  if (u < 0.76) {
-    // The loop: one full turn from the bottom, pulling UP into it.
-    const p = (u - 0.24) / 0.52
-    const a = Math.PI / 2 - p * TAU // start at the bottom, climb the right side
-    const x = cx + Math.cos(a) * R
-    const y = cy + Math.sin(a) * R
-    return { x, y, heading: Math.atan2(-Math.cos(a), Math.sin(a)) }
-  }
-  // Exit: level acceleration out to the right, a touch of climb.
-  const p = (u - 0.76) / 0.24
-  return {
-    x: lerp(enterX, w * 1.12, p),
-    y: enterY - p * h * 0.06,
-    heading: -0.06,
-  }
-}
+/** How hard a farewell flare falls, in h per (scroll t)² — the ballistic sag
+ *  that curves the trails down behind the climbing jets. Tuned so the lowest
+ *  flares burn out in mid-air, never into the runway. */
+const FLARE_GRAVITY = 6.5
 
 export const renderAirshow: Renderer = (ctx, alpha, t, time, cfg) => {
   const { w, h } = cfg
@@ -565,59 +543,105 @@ export const renderAirshow: Renderer = (ctx, alpha, t, time, cfg) => {
   }
   ctx.restore()
 
-  // --- The two-ship display + colored smoke ----------------------------------
-  const u = t
-  const lead = displayPath(u, w, h)
-  const wingU = u - 0.03
-  const wingRaw = displayPath(wingU, w, h)
-  // The wingman holds echelon: offset perpendicular to his flight path, so
-  // the pair — and their two smokes — never merge into one line.
-  const wingOff = unit * 0.02
-  const wing = {
-    x: wingRaw.x - Math.sin(wingRaw.heading) * wingOff,
-    y: wingRaw.y + Math.cos(wingRaw.heading) * wingOff,
-    heading: wingRaw.heading,
-  }
-  const inAir = smoothstep(0.005, 0.03, u)
+  // --- The opposing two-ship display (B2.3c) ---------------------------------
+  // ONE mirrored script (skyMath.opposingDisplay) flies both jets: head-on
+  // entry with a full roll each → the pass → mirrored loops meeting at the
+  // top AND the feet → wingover reversals → a second pass rolling THROUGH
+  // the cross → the farewell climb, wing-rocking ±45° under a rain of
+  // flares (Martin's sketch + `airshow flares.jpg`). Jet B is jet A's pixel
+  // mirror, riding a hair lower so every meet stays a near-miss.
+  // The display runs on the UNCLAMPED progress: the farewell run continues
+  // past the chapter's own end (61 %) and the pair flies off at full speed
+  // by 63 % while the scene still owns the frame.
+  const td = cfg.tRaw ?? t
+  const jet = opposingDisplay(td, w, h)
+  const jetColor = '#26324d'
+  const jetSize = unit * 0.082
+  const inAir = smoothstep(0.005, 0.03, td)
+  const off = h * 0.016
 
-  const smokeOn = smoothstep(0.06, 0.1, u) // smoke switches on after entry
-  for (const [who, du, color] of [
-    ['lead', 0, '#fbfbf8'],
-    ['wing', -0.03, '#e0483f'],
-  ] as const) {
-    const pts: Array<[number, number]> = []
+  // Display smoke — a hint, not a stripe; white lead, red wingman.
+  const smokeOn = smoothstep(0.05, 0.09, td)
+  if (smokeOn > 0.01) {
+    const ptsA: Array<[number, number]> = []
+    const ptsB: Array<[number, number]> = []
     for (let i = 44; i >= 0; i--) {
-      const su = u + du - i * 0.004
-      if (su < 0.06) continue // no smoke before the switch-on point
-      const p = displayPath(su, w, h)
-      if (who === 'wing') {
-        pts.push([p.x - Math.sin(p.heading) * wingOff, p.y + Math.cos(p.heading) * wingOff])
+      const su = td - i * 0.004
+      if (su < 0.05) continue
+      const p = opposingDisplay(su, w, h)
+      ptsA.push([p.x, p.y])
+      ptsB.push([w - p.x, p.y + off])
+    }
+    drawRibbon(ctx, ptsA, unit * 0.011, '#b9cede', alpha * smokeOn * 0.09, 2.6)
+    drawRibbon(ctx, ptsA, unit * 0.007, '#fbfbf8', alpha * smokeOn * 0.17, 2.4)
+    drawRibbon(ctx, ptsB, unit * 0.007, '#e0483f', alpha * smokeOn * 0.13, 2.4)
+  }
+
+  // FLARES — the farewell (airshow flares.jpg): white-hot points kicked out
+  // through the climb, each sailing on with the jet's velocity AT ITS OWN
+  // ejection instant (a fan of trajectories), drag bleeding that speed off
+  // while gravity bends it into a long curving fall. They keep falling
+  // after the jets are gone and TOUCH DOWN ON THE RUNWAY — never into the
+  // crowd — dying as small embers on the tarmac while the sunset rises.
+  const flareGround = h * 0.8455 // mid-runway
+  // Emission plan (Martin): steady bursts from 61 % to the 63 % exit —
+  // a lighter opening tranche through the roll (61–62 %), then a denser
+  // one on the fast straight run out (62–63 %).
+  const FLARE_T: ReadonlyArray<number> = [
+    0.995, 1.017, 1.039, 1.061, // 61–62 %
+    1.085, 1.099, 1.112, 1.126, 1.14, 1.153, // 62–63 %
+  ]
+  for (const mirror of [0, 1] as const) {
+    for (let i = 0; i < FLARE_T.length; i++) {
+      const u0 = FLARE_T[i] + hash1(910 + i * 7.3 + mirror * 31) * 0.004
+      const age = (td - u0) / 0.3
+      if (age <= 0 || age >= 1) continue
+      const e = opposingDisplay(u0, w, h)
+      const e2 = opposingDisplay(u0 - 0.004, w, h)
+      const mx = mirror ? -1 : 1
+      const ex = mirror ? w - e.x : e.x
+      const ey = e.y + mirror * off
+      const vx = (mx * (e.x - e2.x)) / 0.004
+      const vy = (e.y - e2.y) / 0.004
+      const grav = h * FLARE_GRAVITY * (0.85 + hash1(920 + i * 5.1 + mirror * 17) * 0.3)
+      const at = (a: number): [number, number] => {
+        const dt = a * 0.3
+        const carry = 0.4 / (1 + 5.5 * a) // drag bleeds the ejection speed off
+        return [ex + vx * dt * carry, Math.min(ey + vy * dt * carry + grav * dt * dt, flareGround)]
+      }
+      // The trail: this flare's own recent path, oldest → newest.
+      const trail: Array<[number, number]> = []
+      const a0 = Math.max(0, age - 0.35)
+      for (let k = 0; k <= 5; k++) trail.push(at(a0 + ((age - a0) * k) / 5))
+      const burn = Math.pow(1 - age, 1.35)
+      drawRibbon(ctx, trail, unit * 0.006, '#e6b48e', alpha * 0.5 * (0.35 + 0.65 * burn), 2.2)
+      const [fx, fy] = at(age)
+      if (fy >= flareGround - 0.5) {
+        // Touched down: a dying ember on the runway.
+        drawGlow(ctx, fx, fy, unit * 0.006, '#ffce87', alpha * burn * 0.5)
       } else {
-        pts.push([p.x, p.y])
+        // The white-hot head, dimming as the flare burns out.
+        drawGlow(ctx, fx, fy, unit * (0.007 + 0.008 * burn), '#ffdf9e', alpha * burn * 0.9)
+        ctx.save()
+        ctx.fillStyle = rgba('#fff8e6', alpha * burn)
+        ctx.beginPath()
+        ctx.arc(fx, fy, unit * 0.0034 * (0.35 + 0.65 * burn), 0, TAU)
+        ctx.fill()
+        ctx.restore()
       }
     }
-    // Smoke as a hint, not a stripe (Martin: ~15 % of the original weight).
-    if (who === 'lead') {
-      drawRibbon(ctx, pts, unit * 0.011, '#b9cede', alpha * smokeOn * 0.1, 2.6)
-    }
-    drawRibbon(ctx, pts, unit * 0.007, color, alpha * smokeOn * (who === 'lead' ? 0.18 : 0.14), 2.4)
   }
 
-  // The display pair flies CLEAN (no stores — Martin's call); the vykrut
-  // returns with the B2.3c choreography now that the clean roll frames exist.
-  const jetColor = '#26324d'
-  drawAircraft(ctx, 'l159', {
-    x: lead.x, y: lead.y, size: unit * 0.085, tilt: -lead.heading,
-    color: jetColor, glint: '#d7e8ff', alpha: alpha * inAir, time,
+  // The pair — the multi-view model rolls, loops and rocks for real now,
+  // resting on ONE clean pose whenever the scroll parks (see drawL159Pose).
+  drawL159Pose(ctx, {
+    x: jet.x, y: jet.y, size: jetSize, rot: jet.heading, bank: jet.bank,
+    color: jetColor, alpha: alpha * inAir, time,
   })
-  drawAircraft(ctx, 'l159', {
-    x: wing.x, y: wing.y, size: unit * 0.078, tilt: -wing.heading,
-    color: jetColor, glint: '#d7e8ff', alpha: alpha * inAir * smoothstep(0.02, 0.05, u),
-    time,
+  drawL159Pose(ctx, {
+    x: w - jet.x, y: jet.y + off, size: jetSize * 0.93, rot: jet.heading, bank: jet.bank,
+    mirror: true, color: jetColor, alpha: alpha * inAir, time,
   })
-
-  // (No pyro beat here for now — the choreographed two-ship strike display
-  // arrives with the B2.3c opposing-loops redesign.)
 
   // --- The crowd: TENS OF THOUSANDS, six rows deep ---------------------------
   // The crowd-line barrier at the far edge of the spectator area — the near
@@ -673,7 +697,12 @@ export const renderAirshow: Renderer = (ctx, alpha, t, time, cfg) => {
     { y: h * 0.965, color: '#182031', seed: 860, step: 18, arms: true },
     { y: h * 0.998, color: '#0e1420', seed: 840, step: 23, arms: true },
   ]
-  const excite = 0.5 + 0.5 * smoothstep(0.24, 0.5, t) * (1 - smoothstep(0.9, 1, t))
+  // The crowd surges at the display beats: head-on pass, loop top, loop-foot
+  // meet, the low second pass, the flare climb (beats live on the display's
+  // own unclamped clock).
+  const bump = (c: number, hw: number): number => clamp01(1 - Math.abs(td - c) / hw)
+  const excite =
+    0.4 + 0.6 * Math.max(bump(0.27, 0.09), bump(0.405, 0.08), bump(0.52, 0.07), bump(0.877, 0.09), bump(1.07, 0.12))
   for (const row of rows) {
     ctx.save()
     ctx.fillStyle = rgba(row.color, condense)

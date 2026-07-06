@@ -133,6 +133,24 @@ describe('resolveSceneFrame', () => {
     expect(frame?.incoming).toBeUndefined()
   })
 
+  it('the sunset waits for the flares: its enterFade overrides the window', () => {
+    // Chapter 5 = airshow, chapter 6 = sunset with enterFade [0.76, 0.97] —
+    // 64 % of the whole scroll before the landing starts to appear.
+    const early = resolveSceneFrame(5 + FADE_START + 0.05, runs, count)
+    expect(early?.base.run.sky).toBe('airshow')
+    expect(early?.incoming).toBeUndefined()
+    const still = resolveSceneFrame(5.75, runs, count)
+    expect(still?.incoming).toBeUndefined()
+    const rising = resolveSceneFrame(5.82, runs, count)
+    expect(rising?.base.run.sky).toBe('airshow')
+    expect(rising?.incoming?.run.sky).toBe('sunset')
+    expect(rising?.incoming?.alpha).toBeGreaterThan(0)
+    expect(rising?.incoming?.alpha).toBeLessThan(1)
+    const done = resolveSceneFrame(5.985, runs, count)
+    expect(done?.base.run.sky).toBe('sunset')
+    expect(done?.incoming).toBeUndefined()
+  })
+
   it('story ends: last scene stays, clamped', () => {
     const frame = resolveSceneFrame(count - 1, runs, count)
     expect(frame?.base.run.start).toBe(runs[runs.length - 1].start)

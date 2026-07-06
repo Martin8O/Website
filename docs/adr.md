@@ -4,6 +4,43 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-016 — Aerobatics from a multi-view pose set (not one silhouette rotated); roll = a real elevation ladder; the display runs on unclamped progress; a scene may set its own enter-fade (2026-07-06)
+The airshow two-ship (chapter 05) flies a full **opposing display** — head-on entry with a roll each, a huge
+mirrored loop (foot on the runway line, top near the sky's ceiling), a wingover reversal, a second low pass,
+then a rolling farewell climb streaming flares. It reads as a real aircraft rolling and looping because the jet
+is no longer one side silhouette spun in-plane. Five decisions are load-bearing:
+1. **A rolling aircraft is drawn from a MULTI-VIEW pose set, not one silhouette flipped/rotated.** Martin's
+   ANIMACE render pack (`local/ode mne/animace/`) is a 5×7 grid — camera elevation {0, ±45, ±90} × azimuth
+   {0…180} — traced offline (`local/tmp/trace6.mjs` + `gen-sil6.mjs`) to `src/canvas/scenes/sky/l159poses.ts`
+   (GENERATED; kept OUT of `silhouettes.ts`). The gear was un-retractable in the viewer, so it's erased per pose
+   with tight `erase` rects (repaired against the `skin` renders, iterated on Martin's marked-up montage); the
+   hand-orbited camera drifts a few %, so every frame is re-scaled to its Az column's el-0 width (horizontal
+   extent depends on azimuth only) in units of the side-view LENGTH — so `size` means aircraft length for every
+   pose and relative view sizes stay true. Az-90 frames anchor on the nose-tip (the roll axis) so the el ladder
+   rolls without bobbing. Gear-ON tail views (`L159_REAR_GEAR`) are kept for the B2.3d landing.
+2. **A continuous roll maps onto the elevation ladder — real belly views, no faked far half.** `poseFold(bank)`
+   returns a continuous camera elevation + a `flipY`: one full roll walks side → below → inverted → above → side,
+   every quarter on real traced geometry (supersedes the B2.2 `rollFrame`, which mirrored the top frames to fake
+   the bottom). The painter shows the NEAREST ladder frame and, on a step change, dissolves the OLD frame over the
+   new for ~130 ms of ambient time — so a parked scroll always rests on ONE clean pose, never a translucent
+   in-between (Martin's 52/59/61 % "two ghosted poses" catch), and the flat fill can't over-darken.
+3. **The whole choreography is one pure function, unit-tested — position/heading/roll/flare from scroll t.**
+   `opposingDisplay(t, w, h)` returns jet A's full state; jet B is its pixel mirror. Because the pair flies the
+   same script mirrored, "normal attitude while flying left" is the *flipped* pose (bank ≈ π), which is why the
+   half-rolls that bring them upright for the low passes fold to `flipY`. Tests assert mirror symmetry, the three
+   centreline meetings, completed vykruts, and the ±attitude at each pass.
+4. **The display runs on the airshow's UNCLAMPED progress (`tRaw`), not the chapter's clamped t.** Once the
+   chapter's own t saturates at 1 the jets would freeze and hang in a corner waiting for the hand-over (Martin's
+   catch); driving the figure on `cfg.tRaw` lets the farewell climb continue past 1 and the pair leaves the frame
+   at full speed while the scene still owns it. Flares carry each spark's own ballistic trajectory (velocity at
+   its ejection instant, drag bleed, gravity) and are clamped to touch down on the RUNWAY, never the crowd.
+5. **A scene can override where the NEXT scene fades in over it (`enterFade` on the chapter).** Default is the
+   `[0.3, 0.7]` window; the sunset landing sets `[0.76, 0.97]` so it holds back until the airshow pair has flown
+   clean off and the flares have dropped — i.e. it only starts appearing at ~64 % of the whole scroll. *Why:* a
+   data-driven per-scene handover point keeps the story beats (aerobatics finish → flares fall → landing) in
+   order without a special case in the timeline resolver, and the same `enterFade` will carry into the B2.3d
+   sunset rebuild untouched. Extends ADR-012 (`tRaw` continuity) and ADR-013 (scratch-canvas layer compositing).
+
 ### ADR-015 — Airshow as a major airbase; crop-enabled sheet tracer; static-display fleet keeps its resting rotors; landmark towns grounded to the horizon (2026-07-06)
 The airshow scene (chapter 05) was rebuilt from an aeroclub strip into a **Čáslav-class major airbase** seen from
 the crowd line: a hazy two-ridge hill horizon, hardened-shelter humps, a five-hangar line, the **Čáslav control

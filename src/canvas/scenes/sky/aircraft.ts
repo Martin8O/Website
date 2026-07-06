@@ -22,8 +22,9 @@
  */
 
 import { TAU, rgba } from '../../toolkit'
+import { L159_POSE_AZS, L159_POSE_GRID } from './l159poses'
 import { L159P_GLASS, L159P_SEATS, L159_ROLL, SILHOUETTES, type SilhouetteKey, type SilhouetteRings } from './silhouettes'
-import { rollFrame } from './skyMath'
+import { poseFold, rollFrame } from './skyMath'
 
 export type CraftKind = SilhouetteKey
 
@@ -400,6 +401,82 @@ export function drawAircraftRoll(ctx: CanvasRenderingContext2D, bank: number, o:
   } else {
     fillSilhouette(ctx, L159_ROLL[pose.frame])
   }
+  ctx.restore()
+}
+
+/** The az-90 column index of the pose grid — the airshow display flies in
+ *  the screen plane, so every roll state lives in that one column. */
+const AZ90 = L159_POSE_AZS.indexOf(90)
+
+export type L159PoseOptions = {
+  x: number
+  y: number
+  /** Aircraft LENGTH in px (the pose set is normalized to the length). */
+  size: number
+  /** Screen angle of the velocity vector (atan2(dy, dx)), radians — the
+   *  nose follows it through loops without folding. */
+  rot: number
+  /** Roll about the flight axis, radians; 0 = upright seen from its left. */
+  bank: number
+  /** x-mirror the whole render — the opposing jet flies the same state
+   *  reflected about the display centreline. */
+  mirror?: boolean
+  /** Ambient seconds — times the brief frame hand-over; 0 (reduced motion)
+   *  snaps instantly. */
+  time?: number
+  /** Pose-memory key; defaults to the mirror side (the display pair). */
+  id?: string
+  color: string
+  alpha: number
+}
+
+/** Per-jet pose memory for the step hand-over (module-scoped like the
+ *  scratch canvas — the renderer stays a pure function of its inputs plus
+ *  this short-lived visual smoothing). */
+const poseMemory = new Map<string, { cur: number; prev: number; since: number }>()
+
+/** The multi-view L-159 from the ANIMACE render set (`l159poses.ts`): folds
+ *  the roll onto the el ladder (real belly frames — no faked far half) and
+ *  shows the NEAREST ladder frame — parked scroll always rests on one clean
+ *  pose, never a translucent in-between (Martin's 52/59/61 % catch). When
+ *  the roll crosses onto the next frame, the OLD frame dissolves over the
+ *  new one for ~130 ms of ambient time: the new pose is solid from the
+ *  first instant (same flat colour, so the union can never over-darken)
+ *  and the change reads as a quick flick, not a ghost. */
+export function drawL159Pose(ctx: CanvasRenderingContext2D, o: L159PoseOptions): void {
+  if (o.alpha <= 0.004 || o.size <= 1.5) return
+  const fold = poseFold(o.bank)
+  const step = Math.round((fold.el + 90) / 45) // nearest el-ladder frame
+  const key = step * 2 + (fold.flipY ? 1 : 0)
+  const time = o.time ?? 0
+  const id = o.id ?? (o.mirror ? 'B' : 'A')
+  let mem = poseMemory.get(id)
+  if (!mem) {
+    mem = { cur: key, prev: key, since: -1 }
+    poseMemory.set(id, mem)
+  }
+  if (mem.cur !== key) {
+    mem.prev = mem.cur
+    mem.cur = key
+    mem.since = time
+  }
+  // Frozen ambient time (reduced motion / static capture) snaps instantly.
+  const fade = time > 0 && time >= mem.since ? Math.min(1, (time - mem.since) / 0.13) : 1
+
+  ctx.save()
+  ctx.translate(o.x, o.y)
+  if (o.mirror) ctx.scale(-1, 1)
+  ctx.rotate(o.rot)
+  ctx.fillStyle = o.color
+  const paintFrame = (frameKey: number, alpha: number): void => {
+    ctx.save()
+    ctx.scale(o.size, o.size * (frameKey % 2 ? -1 : 1))
+    ctx.globalAlpha = alpha
+    fillSilhouette(ctx, L159_POSE_GRID[frameKey >> 1][AZ90])
+    ctx.restore()
+  }
+  paintFrame(mem.cur, o.alpha)
+  if (fade < 1) paintFrame(mem.prev, o.alpha * (1 - fade))
   ctx.restore()
 }
 

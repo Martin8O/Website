@@ -41,6 +41,11 @@ export type Chapter = {
   /** Where the text card sits so it never fights the scene's focal point;
    *  omitted = centered. Narrow viewports always center (CSS). */
   align?: 'left' | 'right'
+  /** When this chapter STARTS a new scene: where that scene fades in over
+   *  its predecessor, in localT of the predecessor's last chapter (default
+   *  [0.3, 0.7] — see sceneTimeline). The sunset landing holds back until
+   *  the airshow's farewell flares have fallen (B2.3c). */
+  enterFade?: readonly [number, number]
 }
 
 /** Signature accent colour per theme — drives the eyebrow + HUD tint so the
@@ -114,6 +119,10 @@ export const CHAPTERS: Chapter[] = [
     id: 'sky-sunset',
     theme: 'sky',
     sky: 'sunset',
+    // Hold the landing back until the airshow pair has flown clean off and
+    // the farewell flares have dropped to the runway — 0.76 of chapter 5
+    // = 64 % of the whole scroll.
+    enterFade: [0.76, 0.97],
     era: '2020–2022',
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',

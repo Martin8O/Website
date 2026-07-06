@@ -18,6 +18,10 @@ export type SceneRun = {
   sky?: Sky
   start: number
   end: number
+  /** Where THIS scene fades in over its predecessor, in localT of the
+   *  predecessor's last chapter (defaults to [FADE_START, FADE_END]) — the
+   *  sunset landing waits for the airshow's falling flares (B2.3c). */
+  enterFade?: readonly [number, number]
 }
 
 /** One scene to paint this frame: which run, how far through it (`t`, the
@@ -47,7 +51,7 @@ export const FADE_END = 0.7
 /** Group chapters into scene runs. `sky` chapters split per sub-mood, so each
  *  aviation mood is its own scene (B2 cross-fades between them for free). */
 export function buildRuns(
-  chapters: ReadonlyArray<Pick<Chapter, 'theme' | 'sky'>>,
+  chapters: ReadonlyArray<Pick<Chapter, 'theme' | 'sky' | 'enterFade'>>,
 ): SceneRun[] {
   const runs: SceneRun[] = []
   chapters.forEach((ch, i) => {
@@ -55,7 +59,7 @@ export function buildRuns(
     if (last && last.theme === ch.theme && last.sky === ch.sky) {
       last.end = i
     } else {
-      runs.push({ theme: ch.theme, sky: ch.sky, start: i, end: i })
+      runs.push({ theme: ch.theme, sky: ch.sky, start: i, end: i, enterFade: ch.enterFade })
     }
   })
   return runs
@@ -103,7 +107,8 @@ export function resolveSceneFrame(
   // Only the last chapter of a run borders a different scene.
   if (chapter === run.end && runIndex < runs.length - 1) {
     const next = runs[runIndex + 1]
-    const blend = smoothstep(FADE_START, FADE_END, frac)
+    const [fadeStart, fadeEnd] = next.enterFade ?? [FADE_START, FADE_END]
+    const blend = smoothstep(fadeStart, fadeEnd, frac)
     if (blend >= 1) {
       // Fully handed over — the next scene IS the frame; skip the dead base.
       run = next
