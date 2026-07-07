@@ -4,6 +4,41 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-021 — Contact finale as a breathing spiral galaxy: story-coloured particles, a cursor that emits gravitational waves, and everything painted with dots not lines (2026-07-07)
+C3 replaced the last placeholder (`contact`, chapter 09 — "Now") with the site's closing world: after the dev city
+dissolves, the whole journey settles into one slow, full-screen **spiral galaxy** the visitor sits inside while they
+read the CTA. Built to Martin's reference (`local/ode mne/pulsing bottom or end style.jpg`) but taken far past it over
+seven live review rounds. The load-bearing decisions:
+1. **The colour IS the story, carried by structure not labels.** ~20k particle dots fan into a **two-arm spiral**
+   (per-dot twist pre-baked as cos/sin into a `Float32Array`, so the inner loop is pure arithmetic + `fillRect` — the
+   only way ~20k dots hold 60 fps), ringed by the palette of the worlds just lived (origin gold → sky amber → calm
+   cyan → bitcoin-orange → dev magenta, `storyMix` wheel). A quiet warm nucleus (the amber `#FFB000` through-line) sits
+   off-centre RIGHT so the left-aligned card never fights it. The background is a real cosmos: Milky-Way band, breathing
+   nebula clouds, drifting speckle + two parallax star layers, and a slow **fly-through dust cluster** (`dust()` — far
+   motes are pinpricks, near ones streak past the frame edge) so the whole screen has depth, not a centred object.
+2. **The cursor is a gravitational-wave source — the dev scene's "bend the world, don't paint it" carried forward.**
+   Two invisible fronts leave the hand half a cycle apart (`gravFront`): one stays **anchored** where it was born and
+   finishes its journey behind you, the other **travels** with the cursor — each bends nearby particles outward and
+   lights them as it passes. Plus BTC-style depth tilt. The anchor is ephemeral pointer memory (module state, re-sampled
+   on cycle wrap), NOT story state — scenes stay pure functions of `(alpha, localT, time, cfg)`.
+3. **Nothing in the scene is a drawn line (Martin's steer).** Earlier revs tried a constellation web, inward threads,
+   cursor→sun links and radial rays; once the bloom spanned the frame they all read as **wires hanging across the sky**.
+   Final rule: dots, glows and displacement only — connection is carried by shared colour and motion, the heartbeat is a
+   per-dot brightening front (no ring), the visitor is a soft glow (no links). Cheaper and calmer.
+4. **The card moved left, and "much bigger on Vercel" was a composition illusion, not a size bug.** The nucleus holding
+   the right of the frame let the card take the left (`align: 'left'` + a data-driven `ctaEyebrow` "+ Get in touch" and a
+   mailto-aware `target`). When Martin saw the *deployed* (old, centred, on-black) card as "much bigger," a computed-style
+   check proved title/body are byte-identical (57.6 px / 17 px) to the new build — the old **centred 640 px column on
+   near-black** just reads larger than the new **512 px column over a galaxy**. Deploying the new version is the fix;
+   no font change. Email stays a placeholder until the domain (two strings in `chapters.ts`).
+
+New pure `contactMath.ts` (28 tests: breath/wave/bloom/petal/spiral-glow/dust/gravFront/storyMix). Verified live via the
+headless-Chrome CDP harness (canvas + full-page + frame-cost + a computed-style probe against the live Vercel URL). Gate
+green (175 tests), ~8 ms/frame headless-CPU (dev-scene class → comfortably inside budget on GPU). Model-fit: 🔥 Fable 5 ·
+high (7 revs) + Opus 4.8 (copy/wrap-up). `placeholder.ts` retired — every theme has a real renderer now.
+
+---
+
 ### ADR-020 — Dev scene as a diegetic proof-of-work: a Tron/Matrix city on black glass, real project assets baked offline, and a staircase explosion whose motion the story can't skip (2026-07-07)
 B3c built chapter 08 (`dev` — "Solo developer") as the site's climax: the Claude-Code month, where the five real apps
 are the point. Eleven review rounds with Martin (reference-driven: `local/ode mne/solodev/tron*.{jpg,png}`,

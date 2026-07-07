@@ -116,6 +116,25 @@
     0 2px 16px rgba(0, 0, 0, 0.8);
 }
 
+/* Mono eyebrow right above the CTA — the contact finale's `+ Get in touch`
+   caption over the breathing field (data-driven; most chapters omit it). */
+.ctaEyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(0.72rem, 1.6vw, 0.85rem);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #dfe5ee;
+  margin: 1.6rem auto 0;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 1px 3px rgba(0, 0, 0, 0.9),
+    0 2px 14px rgba(0, 0, 0, 0.8);
+}
+
+.ctaEyebrow + .cta {
+  margin-top: 0.55rem;
+}
+
 /* Optional outbound CTA under the body (data-driven per chapter) — a quiet
    mono link in the chapter's accent, real anchor for SEO/a11y. */
 .cta {
@@ -162,4 +181,28 @@
   margin: 0.7rem auto 0;
   max-width: 34ch;
   text-align: center;
+}
+
+/* Side-anchored cards keep their whole CTA block on their own edge. */
+.alignLeft .ctaEyebrow,
+.alignLeft .ctaHint {
+  margin-left: 0;
+  text-align: left;
+}
+
+.alignRight .ctaEyebrow,
+.alignRight .ctaHint {
+  margin-right: 0;
+  text-align: right;
+}
+
+@media (max-width: 719px) {
+  .alignLeft .ctaEyebrow,
+  .alignLeft .ctaHint,
+  .alignRight .ctaEyebrow,
+  .alignRight .ctaHint {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
 }

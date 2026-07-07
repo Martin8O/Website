@@ -57,12 +57,15 @@ export function ChapterCards({ pos }: { pos: number }) {
                 dangerouslySetInnerHTML={{ __html: ch.body }}
               />
             )}
+            {ch.ctaEyebrow && <p className={styles.ctaEyebrow}>{ch.ctaEyebrow}</p>}
             {ch.cta && (
               <a
                 className={styles.cta}
                 href={ch.cta.href}
-                target="_blank"
-                rel="noopener noreferrer"
+                // mailto: must open the mail client in place — a blank tab
+                // is the classic dead-page annoyance. New tabs are for http.
+                target={ch.cta.href.startsWith('http') ? '_blank' : undefined}
+                rel={ch.cta.href.startsWith('http') ? 'noopener noreferrer' : undefined}
               >
                 {ch.cta.label}
               </a>

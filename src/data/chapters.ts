@@ -57,6 +57,9 @@ export type Chapter = {
   cardEase?: number
   /** Optional outbound link rendered under the body (real links only). */
   cta?: { label: string; href: string }
+  /** Optional mono eyebrow line right above the CTA — the contact finale's
+   *  `+ Get in touch` (the reference's caption over the breathing field). */
+  ctaEyebrow?: string
   /** Optional muted one-liner under the CTA (the contact chapter's
    *  "three lines is enough" nudge). */
   ctaHint?: string
@@ -259,10 +262,14 @@ export const CHAPTERS: Chapter[] = [
     num: '09 — Now',
     title: 'The next world<br>could be yours.',
     compact: true,
+    // The galaxy's nucleus holds the right of the frame (C3 rev5) — the
+    // card keeps the left so neither blocks the other.
+    align: 'left',
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision and sense of responsibility, the calm of twenty-one years of meditation, and a build pace measured in days. It’s all above&nbsp;—&nbsp;and it’s all public. <span class="a-btc">Don’t trust; verify.</span><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision and sense of responsibility, the calm of twenty-one years of meditation, and a build pace measured in days. It’s all above&nbsp;—&nbsp;and it’s all public.<br><span class="a-btc">Don’t trust; verify.</span><br><br>If you have something worth building, I’d enjoy hearing about it.',
+    ctaEyebrow: '+ Get in touch',
     cta: {
       label: '[ email — arriving with the domain ]',
       href: 'mailto:hello@example.com',
