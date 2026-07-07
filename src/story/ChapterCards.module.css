@@ -165,10 +165,12 @@
 
 /* `.compact` no longer changes the font size — every chapter shares the one
    size set on `.title`/`.body` above (Martin: unify text size everywhere).
-   Kept only for the slightly tighter body leading on the long-copy chapters
-   (08 dev, 09 contact) so they still clear the dashboard with room to spare. */
+   It keeps a slightly tighter leading AND a WIDER measure on the long-copy
+   chapters (08 dev, 09 contact): a wider paragraph fits the same words in
+   fewer lines, so the 08 card clears the GitHub dashboard below it. */
 .compact .body {
   line-height: 1.5;
+  max-width: 48ch;
 }
 
 /* Muted nudge under the CTA (the contact chapter's "three lines is enough"). */

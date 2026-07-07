@@ -37,20 +37,24 @@ export type Edge = { a: number; b: number; len: number }
 /** Where the ₿ stands — the flattened clearing the network radiates from. */
 export const PAD = { x: 0, z: 0.55 } as const
 
-/** Story beats (scene localT) + ambient rhythm (seconds). Choreography
- *  (rev12): the bare MOUNTAINS trace in alone over 84→87 % global; at 87 %
- *  (t = impactT) the genesis IMPULSE strikes the centre — the world map
- *  pops on instantly and the impact wave rolls outward over the terrain,
- *  igniting peers and their links as it passes; the chip materializes out
- *  of the impact right behind the front. */
+/** Story beats (scene localT) + ambient rhythm (seconds). The bitcoin scene
+ *  spans global HUD 75→85 % (localT 0→1). Choreography (rev15 — beats spread
+ *  later so the climax fills 80→83 % instead of finishing at 80 % and leaving
+ *  a dead 80→85 % plateau): the bare MOUNTAINS trace in alone over ~75.5→79 %;
+ *  at ~80 % (t = impactT) the genesis IMPULSE strikes the centre — the world
+ *  map pops on and the impact wave rolls outward over the terrain, igniting
+ *  peers and their links as it passes, finishing its unhurried sweep by ~83 %
+ *  just as the dev world begins to enter; the chip materializes out of the
+ *  impact right behind the front. */
 export const BTC = {
   traceT0: 0.05,
-  traceT1: 0.3,
-  /** The genesis impulse lands (t): 87 % global. */
-  impactT: 0.33,
-  /** The impact wave has crossed the whole valley by here (89 % global) —
-   *  an even, unhurried sweep across the 87→89 % stretch (rev13). */
-  waveEndT: 0.51,
+  traceT1: 0.42,
+  /** The genesis impulse lands (t): ~80 % global. */
+  impactT: 0.48,
+  /** The impact wave has crossed the whole valley by here (~83 % global) —
+   *  an even, unhurried sweep that fills the old dead stretch and hands off
+   *  to the dev world as it enters (rev15). */
+  waveEndT: 0.82,
   /** World radius the impact wave reaches at waveEndT. */
   storyWaveMax: 1.9,
   /** Coin heartbeat period, seconds. */

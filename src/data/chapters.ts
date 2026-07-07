@@ -212,9 +212,10 @@ export const CHAPTERS: Chapter[] = [
     // word "Bitcoin" in the title arrives only at 88 % — after the genesis
     // impulse has landed.
     title: '<span class="t-late">Bitcoin</span><br>rabbit hole',
-    // The word lands the moment the HUD flips to 88 % — the HUD ROUNDS
-    // (Math.round), so "88" appears at progress 0.875 = pos 7.875, not 7.92.
-    lateWord: [-0.125, -0.105],
+    // The word lands just after the genesis impulse strikes (~80 % global,
+    // rev15): the impulse is at scene localT 0.48 = pos 7.98, so the word
+    // fades in over pos 8.0–8.03 (HUD 80–80.3 %), right behind the strike.
+    lateWord: [0.0, 0.03],
     // The card must not outrun its world: the bitcoin scene enters over
     // pos 7.56–7.88 and the genesis impulse lands ~7.83 — the card rises
     // right behind the impulse (7.77→7.9) instead of over the lake.
