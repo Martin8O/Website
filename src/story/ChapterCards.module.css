@@ -86,11 +86,15 @@
     0 2px 14px rgba(0, 0, 0, 0.8);
 }
 
+/* One title size for the WHOLE site (Martin, post-C3): the pilot-arc titles
+   were 5.5rem — too big, and inconsistent with the trimmed 08/09 cards. This
+   cap (2.8rem) fits even the longest copy (08 dev) above the dashboard, so
+   every chapter now shares it — no compact/regular split. */
 .title {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(2.4rem, 8vw, 5.5rem);
-  line-height: 1.02;
+  font-size: clamp(1.6rem, 3.8vw, 2.8rem);
+  line-height: 1.06;
   letter-spacing: -0.01em;
   margin: 0;
   color: #ffffff;
@@ -102,7 +106,7 @@
 
 .body {
   font-family: var(--font-body);
-  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  font-size: clamp(0.86rem, 1.6vw, 0.98rem);
   line-height: 1.55;
   color: #eef3fa;
   max-width: 34ch;
@@ -159,18 +163,11 @@
   border-bottom-color: var(--accent, var(--amber));
 }
 
-/* Long-copy chapters (the explosion, the contact finale): smaller display
-   sizes so the whole card — title, body, CTA, hint — fits a single
-   viewport and leaves the bottom band free (the GitHub dashboard).
-   Sizes trimmed after C3 (Martin: the 08 card was overrunning into the
-   dashboard) — title down ~22 %, body ~8 %. */
-.compact .title {
-  font-size: clamp(1.6rem, 3.8vw, 2.8rem);
-  line-height: 1.08;
-}
-
+/* `.compact` no longer changes the font size — every chapter shares the one
+   size set on `.title`/`.body` above (Martin: unify text size everywhere).
+   Kept only for the slightly tighter body leading on the long-copy chapters
+   (08 dev, 09 contact) so they still clear the dashboard with room to spare. */
 .compact .body {
-  font-size: clamp(0.86rem, 1.6vw, 0.98rem);
   line-height: 1.5;
 }
 
