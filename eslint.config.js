@@ -5,7 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  // `local/` is gitignored scratch (brain notes, capture harnesses, throwaway
+  // headless-Chrome profiles) — never source; keep it out of the lint pass.
+  { ignores: ['dist', 'local'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

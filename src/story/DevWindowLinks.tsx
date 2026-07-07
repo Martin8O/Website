@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CHAPTERS } from '../data/chapters'
+import { DEV_PROJECTS } from '../data/projects'
 import { DEV, windowLayout } from '../canvas/scenes/devMath'
 import styles from './DevWindowLinks.module.css'
 
@@ -9,16 +10,19 @@ import styles from './DevWindowLinks.module.css'
  * canvas keeps painting the windows; these give them a real cursor, focus
  * ring, hover glow and an outbound link). Geometry mirrors the canvas:
  * positions from `windowLayout` (fractions of the viewport), widths as
- * fractions of `min(vw, vh)` via CSS `min()`, so no per-frame JS. The C1
- * Work section will formalize this data in `src/data/projects.ts`.
+ * fractions of `min(vw, vh)` via CSS `min()`, so no per-frame JS. Content
+ * (href · tint · panel ratio) is the single source of truth in
+ * `src/data/projects.ts` — the same `DEV_PROJECTS` the canvas paints.
  */
-const LINKS = [
-  { href: 'https://github.com/Martin8O/ClearFeed', label: 'ClearFeed — GitHub', tint: '#25e3ff', aspect: 0.66 },
-  { href: 'https://www.one-tenovice.cz', label: 'Těnovice fundraiser — one-tenovice.cz', tint: '#a24dff', aspect: 0.66 },
-  { href: 'https://registrace.online', label: 'Registrace — registrace.online', tint: '#e0459b', aspect: 0.66 },
-  { href: 'https://github.com/Martin8O/RL-Lab', label: 'RL Lab + Data Lab — GitHub', tint: '#ff6f8f', aspect: 0.58 },
-  { href: 'https://github.com/Martin8O/BrainQuest', label: 'BrainQuest + dev-brain — GitHub', tint: '#3dffb4', aspect: 0.66 },
-] as const
+const LINKS = DEV_PROJECTS.map((p) => ({
+  href: p.link.href,
+  name: p.name,
+  label: `${p.name} — ${p.link.display}`,
+  tagline: p.tagline,
+  stack: p.stack,
+  tint: p.window.tint,
+  aspect: p.window.aspect ?? 0.66,
+}))
 
 const DEV_INDEX = CHAPTERS.findIndex((c) => c.theme === 'dev')
 
@@ -42,12 +46,11 @@ export function DevWindowLinks({ pos }: { pos: number }) {
       {LINKS.slice(0, DEV.windows).map((link, i) => (
         <a
           key={link.href}
-          className={styles.hit}
+          className={`${styles.hit} ${slots[i].y < 0.5 ? styles.below : styles.above}`}
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={link.label}
-          title={link.label}
           style={{
             left: `${slots[i].x * 100}%`,
             top: `${slots[i].y * 100}%`,
@@ -55,7 +58,19 @@ export function DevWindowLinks({ pos }: { pos: number }) {
             aspectRatio: `1 / ${link.aspect}`,
             ['--tint' as string]: link.tint,
           }}
-        />
+        >
+          {/* Hover / focus detail: what the app IS + its stack (the same copy
+              the Work panel shows). */}
+          <span className={styles.tip} role="tooltip">
+            <span className={styles.tipName}>{link.name}</span>
+            <span className={styles.tipTag}>{link.tagline}</span>
+            <span className={styles.tipStack}>
+              {link.stack.map((s) => (
+                <span key={s}>{s}</span>
+              ))}
+            </span>
+          </span>
+        </a>
       ))}
     </nav>
   )

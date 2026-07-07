@@ -62,6 +62,7 @@ import {
 } from './devMath'
 import { DEV_ANIMS } from './devAnims'
 import { DEV_SHOTS } from './devShots'
+import { DEV_PROJECTS } from '../../data/projects'
 
 // --- Palette: vibecoding neon over Tron steel --------------------------------
 const NIGHT_TOP = '#04030c'
@@ -80,35 +81,25 @@ const PALE = '#eaf0ff'
 const STEEL_LO = '#0a1428'
 const STEEL_HI = '#1c3a66'
 
-/** A UI motif that previews what each app IS — the pre-decode fallback
- *  behind the real hero shot ('graph' = the living BrainQuest network,
- *  'anim' = the RL Lab agent filmstrips playing side by side). */
-type WinKind = 'blocklist' | 'fund' | 'form' | 'chart' | 'graph' | 'anim'
-
-/** The five real apps, in the card's order — index i uses layout slot i.
- *  `shot` keys into DEV_SHOTS (the repo README hero), `cropX` biases its
- *  cover-crop (0 = keep the left edge); `sub` is the app's real home, drawn
- *  as a prominent link strip; `badge` marks collaborations; `aspect`
- *  overrides the panel ratio (RL Lab runs wide for its two agents). */
-const DEV_WINDOWS: ReadonlyArray<{
-  name: string
-  sub: string
-  tint: string
-  kind: WinKind
-  shot?: string
-  cropX?: number
-  cropY?: number
-  badge?: string
-  aspect?: number
-}> = [
-  { name: 'ClearFeed', sub: 'github.com/Martin8O/ClearFeed', tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
-  { name: 'Těnovice', sub: 'one-tenovice.cz', tint: VIOLET, kind: 'fund', shot: 'tenovice', cropY: 0.13, badge: 'COLLAB' },
-  { name: 'Registrace', sub: 'registrace.online', tint: MAGENTA, kind: 'form', shot: 'registrace' },
-  { name: 'RL Lab + Data Lab', sub: 'github.com/Martin8O/RL-Lab', tint: CORAL, kind: 'anim', shot: 'rllab', aspect: 0.58 },
-  // Two repos, one system: BrainQuest is the game over the dev-brain vault
-  // — both named in the window's green title row.
-  { name: 'BrainQuest + dev-brain', sub: 'github.com/Martin8O/BrainQuest', tint: MINT, kind: 'graph' },
-]
+/** The five real apps, in slot order — index i uses layout slot i. The
+ *  content (name · real link · badge) is the single source of truth in
+ *  `src/data/projects.ts`; here it is flattened to the scene's draw-time
+ *  shape: `sub` = the app's real home (drawn as a prominent link strip),
+ *  `shot` keys into DEV_SHOTS (the repo README hero), `cropX/Y` bias its
+ *  cover-crop, `aspect` overrides the panel ratio (RL Lab runs wide for its
+ *  two agents). The clickable anchors over these panels read the same
+ *  `DEV_PROJECTS` (see `src/story/DevWindowLinks.tsx`). */
+const DEV_WINDOWS = DEV_PROJECTS.map((p) => ({
+  name: p.name,
+  sub: p.link.display,
+  tint: p.window.tint,
+  kind: p.window.kind,
+  shot: p.window.shot,
+  cropX: p.window.cropX,
+  cropY: p.window.cropY,
+  badge: p.badge,
+  aspect: p.window.aspect,
+}))
 
 /** Left→right neon hue across the city / floor — the logo's gradient. */
 function bandHue(u01: number): string {

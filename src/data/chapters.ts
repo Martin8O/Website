@@ -34,8 +34,6 @@ export type Chapter = {
   body?: string
   /** Only meaningful for theme 'sky'. */
   sky?: Sky
-  /** Only for theme 'dev'; the real Work items land here in Phase C1. */
-  projects?: string[]
   /** Optional per-chapter palette override (Phase C4 cohesion pass). */
   palette?: string[]
   /** Where the text card sits so it never fights the scene's focal point;
@@ -247,7 +245,8 @@ export const CHAPTERS: Chapter[] = [
     cardEase: 0.05,
     compact: true,
     body: 'It began carefully&nbsp;—&nbsp;small apps first, testing what AI and I could build together. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">eight builds in five weeks</span>&nbsp;—&nbsp;they’re floating all around you. Each one writes what it taught me into a knowledge vault, <strong>dev-brain</strong>, and one of the builds, <strong>BrainQuest</strong>, turns that vault into a learning game. So I’m learning the craft, not just watching it happen.<br>All of it public.<br>The contribution graph below looks like a steep takeoff. Everything above turned out to be training for this. <em>(Turns out I love the screen after all.)</em>',
-    projects: ['ClearFeed', 'Těnovice', 'Registrace', 'RL Lab', 'BrainQuest'],
+    // The Work items (the five floating windows) are data-driven from
+    // `src/data/projects.ts` → the dev scene + DevWindowLinks read them.
   },
   // 09 — NOW: the contact finale (FINAL v2.5). The world behind it is the
   // C3 placeholder until the contact scene lands; the email is a

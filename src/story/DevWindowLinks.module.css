@@ -22,3 +22,74 @@
   box-shadow: 0 0 36px 8px color-mix(in srgb, var(--tint, #ffb000) 45%, transparent);
   outline: none;
 }
+
+/* Hover / focus detail: what the app is + its stack. Hidden until the plate
+   is hovered or keyboard-focused; placed below upper windows, above lower
+   ones so it never runs off the frame. */
+.tip {
+  position: absolute;
+  left: 50%;
+  width: min(260px, 42vw);
+  transform: translateX(-50%) translateY(4px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.6rem 0.7rem;
+  background: color-mix(in srgb, #06080e 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tint, #ffb000) 45%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 16px 40px -18px #000;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+  z-index: 2;
+}
+.below .tip {
+  top: 100%;
+}
+.above .tip {
+  bottom: 100%;
+  transform: translateX(-50%) translateY(-4px);
+}
+.hit:hover .tip,
+.hit:focus-visible .tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.tipName {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.86rem;
+  color: var(--fg);
+}
+.tipTag {
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--fg) 76%, transparent);
+}
+.tipStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.26rem;
+  margin-top: 0.1rem;
+}
+.tipStack span {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.02em;
+  padding: 0.12rem 0.36rem;
+  border-radius: 4px;
+  color: color-mix(in srgb, var(--tint, #ffb000) 80%, #fff);
+  background: color-mix(in srgb, var(--tint, #ffb000) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tint, #ffb000) 26%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tip {
+    transition: none;
+  }
+}

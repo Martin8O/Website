@@ -4,6 +4,36 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-022 — Work section: `projects.ts` as the one Work source of truth, surfaced two ways from the same data (2026-07-08)
+C1 formalized the Work items. Before, the same five projects were hard-coded in **three** places (the dev-scene window
+metadata, the clickable link overlay, and a dead A2 `chapter.projects` string list). The decisions:
+1. **One typed catalog drives everything.** `src/data/projects.ts` (`Project[]`, both eras: 6 pre-Claude + the 5
+   Claude-month apps) is the single source. The five apps carry a `window` block (canvas tint/kind/shot/crop hints);
+   `DEV_PROJECTS` (filtered + ordered) is consumed by BOTH the canvas (`dev.ts` `DEV_WINDOWS` is now a `.map` of it) and
+   the DOM anchors (`DevWindowLinks`). A project's content — name, one-liner, stack, real link — lives once; the render
+   is byte-identical to before (verified live). The dead `chapter.projects` field was removed.
+2. **Portfolio surfaces in two places, both from the data (Martin's call — the story alone wasn't enough).** The
+   original design was "the story IS the portfolio" (only the 5 windows in chapter 08). Martin wanted a real overview of
+   *all* work, so: (a) a **Work overview panel** — a modal opened from a quiet nav "Work" trigger (`SiteNav`), listing
+   every project with screenshot + tagline + stack chips + live link, grouped by era; (b) **hover/focus detail** on the
+   five chapter-08 windows (tagline + stack), same copy. Both read `projects.ts`.
+3. **Real screenshots, bundled; the heavy module is code-split.** A new `projectShots.ts` bakes 10 real shots to
+   downscaled data-URL JPEGs (`gen-projectshots.mjs`: 7 from disk assets, the 3 Lovable apps captured **live** headless
+   over CDP) — the `devShots.ts`/`calmSprites.ts` pattern. The panel + its ~230 KB of shots load only on open
+   (`React.lazy`), so the main bundle grew ~2.5 KB. The Bitcoin article (Medium blocks bot capture) renders as a clean
+   text card rather than a fake shot.
+4. **Two small, load-bearing fixes.** The panel wouldn't wheel-scroll because Lenis owns the global wheel — fixed with
+   `data-lenis-prevent` on the overlay (confirmed the installed Lenis honours it). And a fresh headless-Chrome profile
+   under `local/tmp/` dropped a vendored extension bundle that broke `eslint .`; `local/` is now in the eslint ignores
+   (it is gitignored scratch, never source).
+
+Links were verified live (HTTP status); private repos (ClearFeed, RL Lab, BrainQuest) 404 to the public and carry
+`live: false` + a status note — they still render per Martin's "link every repo, publish over time" policy (he'll make
+them public later; the shots are also his to refine). Gate green (172 tests). Model-fit: Opus 4.8 · medium (data +
+integration + the live-capture pipeline) = fit.
+
+---
+
 ### ADR-021 — Contact finale as a breathing spiral galaxy: story-coloured particles and everything painted with dots not lines (2026-07-07)
 > **Update (2026-07-08):** the cursor gravitational-wave interaction (point 2 below) was **removed** at Martin's call —
 > "the breathing spiral is the experience on its own; the gravity ruins it." The scene now ignores `cfg.pointer`

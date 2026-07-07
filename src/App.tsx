@@ -1,5 +1,6 @@
 import { ScrollProvider } from './scroll/ScrollProvider'
 import { Story } from './story/Story'
+import { SiteNav } from './story/SiteNav'
 import { CHAPTERS } from './data/chapters'
 import { trackHeightVh } from './timeline'
 import styles from './App.module.css'
@@ -15,6 +16,7 @@ function App() {
   return (
     <ScrollProvider>
       <Story />
+      <SiteNav />
       <div
         className={styles.scrollTrack}
         style={{ height: `${trackHeightVh(CHAPTERS.length)}vh` }}
