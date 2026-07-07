@@ -161,14 +161,16 @@
 
 /* Long-copy chapters (the explosion, the contact finale): smaller display
    sizes so the whole card — title, body, CTA, hint — fits a single
-   viewport and leaves the bottom band free (the GitHub dashboard). */
+   viewport and leaves the bottom band free (the GitHub dashboard).
+   Sizes trimmed after C3 (Martin: the 08 card was overrunning into the
+   dashboard) — title down ~22 %, body ~8 %. */
 .compact .title {
-  font-size: clamp(1.9rem, 5.2vw, 3.6rem);
+  font-size: clamp(1.6rem, 3.8vw, 2.8rem);
   line-height: 1.08;
 }
 
 .compact .body {
-  font-size: clamp(0.92rem, 1.9vw, 1.06rem);
+  font-size: clamp(0.86rem, 1.6vw, 0.98rem);
   line-height: 1.5;
 }
 
