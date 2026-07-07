@@ -4,6 +4,42 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-018 — The healing lake: scroll choreographed in global %, photo figures as bundled bitmaps, and physics-first water (2026-07-07)
+B3a built chapter 06 (`calm` — "Selfhealing") as a still pre-dawn lake, from Martin's own mojecestakezdravi.cz
+motifs: a stepping-stone path ("krok za krokem") from a near bank to a small tree island, the tree flowering as the
+path arrives, an aurora, drifting dandelion seeds, fireflies, and a seated meditator from his photo. Ten review
+rounds shaped it; five decisions are load-bearing (renderer `calm.ts` + pure `calmMath.ts`, unit-tested where pure):
+1. **The story is choreographed in GLOBAL scroll % (the HUD readout), not chapter-local `t`.** Martin directs by the
+   on-screen %; a scene's `t` is `pos − chapterIndex`, and `pos = frac·(count−1)`, so global % ≈ `pos/(count−1)`. The
+   mismatch cost a full round (his "72 %" was my `t≈0.75`). Marks now derive from % and are converted once:
+   `enterFade` on the *incoming* chapter is expressed in the predecessor's local-`t`, and the sunset→calm hand-over is
+   tuned so the lit airfield **dims to black by ~73 % global** (a `handoff = 1 − smoothstep(0.98,1.05, tRaw)` applied
+   to every light channel *and* a night veil, because tRaw only passes ~1 inside that cross-fade). The aurora lives
+   76→79→83 % (rise/fall envelopes), the opposite arc to the tree's growth+bloom; the card holds full until 83 %; the
+   next scene may enter only at 84 % (`bitcoin.enterFade`).
+2. **Martin's photo figures are bundled as PIXEL-EXACT bitmaps — a deliberate exception to the B2.2 "runtime is pure
+   vector" rule (ADR-013).** Repeated attempts to *trace* the meditator into a polygon always broke the lower body
+   (the photo's rock ledge merged into the crossed legs → spiky base, uneven knees). So `make-meditator-sprites.mjs`
+   flood-fills the figure out of the photo (keeping its own soft AA edge + original RGB) and inlines it as a data-URL
+   PNG in `calmSprites.ts` — no network fetch, bundle self-contained. The renderer decodes it lazily (browser-only, so
+   `calm.ts` stays importable by the Node math tests) and `drawImage`s it. Cost: ~+22 KB gzipped, accepted for
+   fidelity to a real person in a scene *about* that person.
+3. **The card can hold at full strength across a window, not peak at the chapter centre.** New data-driven
+   `chapter.cardFull` + `cardOpacityWindowed(pos, i, [a,b])` (pure, tested) keeps the Selfhealing text fully lit from
+   the lake settling (~76.5 %) until the tree stands in full bloom (83 %), easing out by 84 % — the words stay with the
+   scene's whole arc instead of fading as the reader is still reading.
+4. **Water disturbances are one dispersive physics model, shared by stone-drops and ambient rain.** `rippleTrainAt(dt)`
+   emits a *train* of rings: the leading ring launches first and fastest, decelerates as it spreads, and its amplitude
+   falls off ~`1/r`; trailing rings follow on a delay, stay tighter, thin out, and die sooner. Both a stone landing
+   (`rippleTrain(i, t)`) and the idle raindrops read the same function, so every ripple obeys the same physics. The
+   surface also carries a slow multi-band "tremble" and the reflections/light-column breathe — the lake is never a
+   frozen mirror (all `time`-gated → still under reduced motion).
+5. **Layered translucent water tints fade in on vertical gradients, never on hard seams.** Three colour bands
+   (warm teal / deep blue / aqua) drift over one another with wavy edges at different speeds; each is filled with a
+   top→down gradient anchored on its seam so the colour *arrives* gradually — a churning, multi-hued surface with no
+   readable colour line. The tree is a depth-7 recursive build whose fine outer branches extend (and then blossom) only
+   once the path arrives; its base structure is mirrored, softened, into the lake.
+
 ### ADR-017 — The sunset landing is a glidepath POV: a warped-depth projection, a black-blink flythrough, and one shared shake source (2026-07-07)
 Chapter 05's sunset was rebuilt from a side-on landing into a **first-person approach**: the camera sits far back and
 high on the extended centreline, looking down the runway, and the L-159 flies *through* the camera and recedes onto

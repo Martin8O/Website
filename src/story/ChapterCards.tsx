@@ -1,5 +1,5 @@
 import { CHAPTERS, THEME_ACCENT } from '../data/chapters'
-import { cardOpacity } from '../timeline'
+import { cardOpacity, cardOpacityWindowed } from '../timeline'
 import styles from './ChapterCards.module.css'
 
 /**
@@ -11,7 +11,7 @@ export function ChapterCards({ pos }: { pos: number }) {
   return (
     <main className={styles.cards}>
       {CHAPTERS.map((ch, i) => {
-        const o = cardOpacity(pos, i)
+        const o = ch.cardFull ? cardOpacityWindowed(pos, i, ch.cardFull) : cardOpacity(pos, i)
         // Cards rise a touch as they fade in, settle at center when focused.
         const rise = (1 - o) * 12
         const Title = i === 0 ? 'h1' : 'h2'

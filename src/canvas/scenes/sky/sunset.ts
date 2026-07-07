@@ -116,8 +116,12 @@ export const renderSunset: Renderer = (ctx, alpha, t, time, cfg) => {
   // Dusk deepens only once the roll has STOPPED — sun order per Martin:
   // sets during the landing, fully set after the stop, then the night.
   const cool = smoothstep(LANDING.stop - 0.03, 1, t)
-  // Ground lights warm up as the sun sinks toward the horizon.
-  const lightA = alpha * (0.45 + 0.55 * smoothstep(0.5, 0.9, t))
+  // Ground lights warm up as the sun sinks toward the horizon — and die
+  // FAST once the healing lake starts settling over the airfield (B3a:
+  // 72–74 % global; tRaw only passes 0.98 inside that hand-over), so the
+  // runway never glares through the cross-fade.
+  const handoff = 1 - smoothstep(0.98, 1.05, cfg.tRaw ?? t)
+  const lightA = alpha * (0.45 + 0.55 * smoothstep(0.5, 0.9, t)) * handoff
   // Dark silhouettes CONDENSE while the airshow dissolves under us — never
   // a translucent black ghost floating over the cross-fade.
   const condense = alpha * alpha * alpha
@@ -501,7 +505,7 @@ export const renderSunset: Renderer = (ctx, alpha, t, time, cfg) => {
     const cyc = time > 0 ? (time % 2.4) / 2.4 : 0.03
     const wFlash = cyc < 0.05 ? 1 - cyc / 0.05 : 0
     const gFlash = cyc > 0.5 && cyc < 0.55 ? 1 - (cyc - 0.5) / 0.05 : 0
-    const bA = alpha * (0.25 + 0.75 * smoothstep(0.5, 0.9, t))
+    const bA = alpha * (0.25 + 0.75 * smoothstep(0.5, 0.9, t)) * handoff
     if (wFlash > 0.02) drawGlow(ctx, tx, baseY - th - h * 0.013, unit * 0.014, '#ffffff', bA * wFlash * 0.8)
     if (gFlash > 0.02) drawGlow(ctx, tx, baseY - th - h * 0.013, unit * 0.014, '#59ff8a', bA * gFlash * 0.7)
   }
@@ -717,7 +721,7 @@ export const renderSunset: Renderer = (ctx, alpha, t, time, cfg) => {
     // on the traced fin tip (measured, not guessed — it blinked above the
     // jet), a red beacon on the spine — these carry the small stopped jet
     // through the dusk (steady if frozen).
-    const na = alpha * (0.5 + 0.5 * smoothstep(0.5, 0.9, t))
+    const na = alpha * (0.5 + 0.5 * smoothstep(0.5, 0.9, t)) * handoff
     const lr = Math.max(1.4, span * 0.012)
     const finY = jetY - span * (L159_REAR_FIN_TIP - 0.015)
     dot(jetX - span * 0.5, jetY - span * 0.16, lr, Math.max(unit * 0.006, span * 0.05), '#ff4536', na * 0.9)
@@ -745,6 +749,16 @@ export const renderSunset: Renderer = (ctx, alpha, t, time, cfg) => {
   }
   if (pov.black > 0.004) {
     ctx.fillStyle = rgba('#07040b', alpha * pov.black)
+    ctx.fillRect(0, 0, w, h)
+  }
+
+  // B3a hand-off: beyond the light-channel dimmers, the night itself
+  // swallows the airfield ahead of the healing lake — a deepening veil that
+  // also kills the bright PAINT (piano keys, markings) and the horizon
+  // afterglow, so nothing bright survives past ~73 % global.
+  const swallow = smoothstep(0.98, 1.06, cfg.tRaw ?? t)
+  if (swallow > 0.01) {
+    ctx.fillStyle = rgba('#04060a', alpha * swallow * 0.72)
     ctx.fillRect(0, 0, w, h)
   }
   if (shaking) ctx.restore()

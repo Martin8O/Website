@@ -6,6 +6,7 @@ import {
   resolveTimeline,
   nearestChapter,
   cardOpacity,
+  cardOpacityWindowed,
 } from './timeline'
 import { CHAPTERS } from './data/chapters'
 
@@ -70,6 +71,29 @@ describe('cardOpacity', () => {
   })
   it('is symmetric around the center', () => {
     expect(cardOpacity(2.7, 3)).toBeCloseTo(cardOpacity(3.3, 3), 10)
+  })
+})
+
+describe('cardOpacityWindowed', () => {
+  // The Selfhealing shape: full from index-0.12 to index+0.47.
+  const FULL = [-0.12, 0.47] as const
+
+  it('holds at FULL strength across the whole window', () => {
+    expect(cardOpacityWindowed(6.88, 7, FULL)).toBe(1)
+    expect(cardOpacityWindowed(7, 7, FULL)).toBe(1)
+    expect(cardOpacityWindowed(7.47, 7, FULL)).toBe(1)
+  })
+
+  it('is gone just outside the eased edges', () => {
+    expect(cardOpacityWindowed(6.7, 7, FULL)).toBe(0)
+    expect(cardOpacityWindowed(7.61, 7, FULL)).toBe(0)
+  })
+
+  it('eases through the edges monotonically', () => {
+    const mid = cardOpacityWindowed(7.535, 7, FULL)
+    expect(mid).toBeGreaterThan(0)
+    expect(mid).toBeLessThan(1)
+    expect(cardOpacityWindowed(7.5, 7, FULL)).toBeGreaterThan(mid)
   })
 })
 

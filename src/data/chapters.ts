@@ -46,6 +46,11 @@ export type Chapter = {
    *  [0.3, 0.7] — see sceneTimeline). The sunset landing holds back until
    *  the airshow's farewell flares have fallen (B2.3c). */
   enterFade?: readonly [number, number]
+  /** Optional card-visibility window in pos-offsets from this chapter's
+   *  index: the card holds at FULL opacity across it (easing just outside)
+   *  instead of peaking at the chapter centre — the Selfhealing card stays
+   *  up until the tree stands in full bloom (timeline.cardOpacityWindowed). */
+  cardFull?: readonly [number, number]
 }
 
 /** Signature accent colour per theme — drives the eyebrow + HUD tint so the
@@ -134,14 +139,28 @@ export const CHAPTERS: Chapter[] = [
   {
     id: 'calm-healing',
     theme: 'calm',
-    era: '2013',
+    // Martin directs in global HUD % (pos = frac·9): the lit airfield starts
+    // dimming at 72 % and the lake owns the frame by ~76 %, so the dusk
+    // visibly gives way — no invisible pre-run of the healing story.
+    enterFade: [0.48, 0.78],
+    // The card holds at full strength from the lake settling (~76.5 %)
+    // until the tree stands in full bloom (83 %), gone before the next
+    // scene may enter at 84 %.
+    cardFull: [-0.12, 0.47],
+    // Diagnosed January 2014; remission confirmed by colonoscopy — dates
+    // per Martin's own site (mojecestakezdravi.cz/uvod-2).
+    era: '2014–2015',
     num: '06 — The Test',
-    title: 'Healing',
-    body: 'Ulcerative colitis. A year and a half — and <span class="a-cyan">I healed myself</span>. I wrote a whole website about that journey. The body as the first project I had to “debug.”',
+    title: 'Selfhealing',
+    // Martin's wording (rev10): gift + verdict + the work + the quiet result.
+    body: 'Ulcerative colitis — a “lifelong” disease, “no known cause, no cure.” It became a gift: eighteen months of rebuilding everything — food, gut, mind, lifestyle — ended in <span class="a-cyan">full remission without medication</span>. The whole journey became a detailed website.',
   },
   {
     id: 'bitcoin-node',
     theme: 'bitcoin',
+    // The healing lake holds until 84 % global (frac 0.56 of its chapter);
+    // only then does the next world begin to bleed in.
+    enterFade: [0.56, 0.88],
     era: 'since 2017',
     num: '07 — Bitcoin',
     title: 'My own<br>node',

@@ -62,3 +62,25 @@ export function cardOpacity(pos: number, cardIndex: number, falloff = 0.52): num
   const o = clamp01(1 - d / falloff)
   return o * o * (3 - 2 * o)
 }
+
+/**
+ * Windowed variant for chapters whose card must HOLD at full strength over a
+ * stretch of the scroll instead of peaking at the chapter centre (data-driven
+ * via `chapter.cardFull`): full between `cardIndex + full[0]` and
+ * `cardIndex + full[1]`, easing in/out over `ease` chapters on either side —
+ * the Selfhealing card stays up until the tree stands in full bloom (83 %).
+ */
+export function cardOpacityWindowed(
+  pos: number,
+  cardIndex: number,
+  full: readonly [number, number],
+  ease = 0.13,
+): number {
+  const a = cardIndex + full[0]
+  const b = cardIndex + full[1]
+  const up = clamp01((pos - (a - ease)) / ease)
+  const down = clamp01(((b + ease) - pos) / ease)
+  const rise = up * up * (3 - 2 * up)
+  const fall = down * down * (3 - 2 * down)
+  return Math.min(rise, fall)
+}
