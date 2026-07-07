@@ -84,7 +84,7 @@ export const CHAPTERS: Chapter[] = [
   {
     id: 'intro',
     theme: 'origin',
-    num: '↓ Scroll to travel through a life',
+    num: '↓ Scroll to travel through time with me',
     title: 'Martin',
     body: 'One life, many worlds. Scroll speed is the speed of time. Move down and let the sun run across the sky.',
   },
@@ -93,9 +93,12 @@ export const CHAPTERS: Chapter[] = [
     theme: 'origin',
     era: '1991–1998 · School',
     num: '00 — Origin',
-    title: 'School<br>& Pascal',
+    // "and", not "&" — the display face draws an ugly ampersand (Martin).
+    title: 'School<br>and Pascal',
     // Copy FINAL v2.5 (local/ode mne/texty/texty-v2.md) from here on.
-    body: 'A school-leaving exam in maths and programming. In Pascal I wrote <span class="a-gold">chess for two players</span> — it knew every rule of the game, but it couldn\'t come up with a single move. The first lines of code, with no idea where they would lead.',
+    // Em-dashes ride non-breaking spaces on BOTH sides everywhere, so a
+    // dash never strands at a line start or end in the justified bodies.
+    body: 'A school-leaving exam in maths and programming. In Pascal I wrote <span class="a-gold">chess for two players</span>&nbsp;—&nbsp;it knew every rule of the game, but it couldn\'t come up with a single move. The first lines of code, with no idea where they would lead.',
   },
   {
     id: 'sky-climb',
@@ -104,7 +107,13 @@ export const CHAPTERS: Chapter[] = [
     era: 'CTU → Brno',
     num: '01 — The Decision',
     title: 'Upward',
-    body: 'Two years into electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen — <em>remember that</em> — and there was a boyhood dream waiting: <span class="a-hud">flying fighter jets</span>. The Z‑142, then the L‑39C — a hundred hours in the air and a totally different life.',
+    // Clear the frame BEFORE the cloud-punch white-out: hold to 21 %, then
+    // a quick fade — chapter 02 needs the stage from 23 % (L-159 at 24 %).
+    cardFull: [-0.3, 0.1],
+    cardEase: 0.15,
+    // The faculty was electrical engineering; the FIELD was informatics —
+    // that is what makes "a life in front of a computer screen" land.
+    body: 'Two years into computer science at the faculty of electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen&nbsp;—&nbsp;<em>remember that</em>&nbsp;—&nbsp;and there was a boyhood dream waiting: <span class="a-hud">flying fighter jets</span>. The Z‑142, then the L‑39C&nbsp;—&nbsp;a hundred hours in the air and a totally different life.',
     align: 'right',
   },
   {
@@ -114,7 +123,11 @@ export const CHAPTERS: Chapter[] = [
     era: '2003–2012',
     num: '02 — Fighters',
     title: 'Above the<br>clouds',
-    body: 'The L‑39C, the L‑39ZA, then the <span class="a-hud">L‑159</span>. Every type an upgrade: more thrust, more avionics, more to learn — and less room for error. The horizon curved, the clouds stayed below the wings, and time was measured in g-forces.',
+    // Rises out of the white-out from 23 %, full at 24.5 % — right as the
+    // L-159 takes the lead (24 %).
+    cardFull: [-0.55, 0.3],
+    cardEase: 0.15,
+    body: 'The L‑39C, the L‑39ZA, then the <span class="a-hud">L‑159</span>. Every type an upgrade: more thrust, more avionics, more to learn&nbsp;—&nbsp;and less room for error. The horizon curved, the clouds stayed below the wings, and time was measured in g-forces.',
     align: 'right',
   },
   {
@@ -124,7 +137,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2010 · Bagram',
     num: '03 — Afghanistan',
     title: 'A different<br>sky',
-    body: 'Bagram Air Base, liaison officer. Dust instead of clouds, a war instead of training — the same service, a different sky. The kind of experience that changes your perspective on everything, permanently.',
+    body: 'Four months at Bagram Air Base as liaison officer. Dust instead of clouds, a war instead of training&nbsp;—&nbsp;the same service, a different sky. The kind of experience that changes your perspective on everything, permanently.',
     align: 'left',
   },
   {
@@ -134,7 +147,12 @@ export const CHAPTERS: Chapter[] = [
     era: '2016–2017',
     num: '04 — Airshow',
     title: 'Display<br>pilot',
-    body: 'Two seasons as a display pilot, airshows across Europe. <span class="a-hud">Ten minutes of maximum everything</span> — speed, g-load, focus — two jets metres apart, tens of thousands watching. A dream fulfilled.',
+    // Arrive with the show (rise 46→48 %), hold while the two-ship display
+    // actually flies (the farewell flares fall ~ pos 5.67), gone as the
+    // sunset enters.
+    cardFull: [-0.2, 0.6],
+    cardEase: 0.16,
+    body: 'Two seasons as a display pilot, airshows across Europe. <span class="a-hud">Ten minutes of maximum everything</span>&nbsp;—&nbsp;speed, g-load, focus&nbsp;—&nbsp;two jets metres apart, tens of thousands watching. A dream fulfilled.',
     align: 'right',
   },
   {
@@ -148,7 +166,11 @@ export const CHAPTERS: Chapter[] = [
     era: '2020–2022',
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
-    body: '<span class="a-hud">Twenty years in the Air Force, 1,700 hours in the air</span> — the final years as instructor, flight-safety inspector and test pilot. I retired in 2022 with no plan for what comes next. Retrained in networks and systems, then went looking: travelling the world, half of every year abroad, volunteering at Buddhist centres. Meditation had been part of my life since 2005 — now it had more room to breathe.',
+    // Wait for the airshow to fly clean off (sunset scene enters pos
+    // 5.76–5.97), hold through the touchdown + braking (~pos 6.1–6.3),
+    // and clear the frame before the healing lake bleeds in (~6.5).
+    cardFull: [-0.05, 0.4],
+    body: '<span class="a-hud">Twenty years in the Air Force, 1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and test pilot. I retired in 2022 with no plan for what comes next. Retrained in networks and systems, then went looking: travelling the world, half of every year abroad, volunteering at Buddhist centres and courses. Meditation had been part of my life since 2005&nbsp;—&nbsp;now it had more room to breathe.',
     align: 'left',
   },
   // The story is THEMATIC here, not strictly chronological: healing (2013)
@@ -169,7 +191,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2014–2015',
     num: '06 — The Test',
     title: 'Selfhealing',
-    body: 'Ulcerative colitis — “lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle at once</span>: eighteen months of rebuilding everything — food, gut, mind, lifestyle. In remission ever since — <span class="a-cyan">no medication since 2014</span>. I came out healthier, knowing myself from the inside.',
+    body: 'Ulcerative colitis&nbsp;—&nbsp;“lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle</span>: eighteen months of rebuilding everything&nbsp;—&nbsp;food, gut, mind, lifestyle. In remission ever since&nbsp;—&nbsp;<span class="a-cyan">no medication since 2014</span>. I came out healthier, knowing myself from the inside.',
     cta: {
       label: 'Read the whole journey →',
       href: 'https://mojecestakezdravi.cz/',
@@ -190,9 +212,13 @@ export const CHAPTERS: Chapter[] = [
     // The word lands the moment the HUD flips to 88 % — the HUD ROUNDS
     // (Math.round), so "88" appears at progress 0.875 = pos 7.875, not 7.92.
     lateWord: [-0.125, -0.105],
+    // The card must not outrun its world: the bitcoin scene enters over
+    // pos 7.56–7.88 and the genesis impulse lands ~7.83 — the card rises
+    // right behind the impulse (7.77→7.9) instead of over the lake.
+    cardFull: [-0.1, 0.4],
     // "Don't trust — verify" stands on its own line (v2.5): it is the
     // method, not just the slogan.
-    body: 'The freedom underneath the technology. Keys, blocks, nodes, trustless consensus. <span class="a-btc">The hardest money nobody can print, seize or censor.</span> So I stopped reading and started running it: a full &amp; Lightning node, solo mining to my own pool.<br><span class="a-btc">Don’t trust — verify.</span>',
+    body: 'The freedom underneath the technology. Keys, blocks, nodes, trustless consensus. <span class="a-btc">The hardest money nobody can print, seize or censor.</span> So I stopped reading and started running it: a full &amp; Lightning node, solo mining to my own pool.<br><span class="a-btc">Don’t trust&nbsp;—&nbsp;verify.</span>',
     cta: {
       label: 'Read my Bitcoin intro →',
       href: 'https://medium.com/@shadovv_50954/discover-bitcoin-the-r-evolution-in-the-world-of-money-9de1272b9b13',
@@ -216,7 +242,7 @@ export const CHAPTERS: Chapter[] = [
     cardFull: [0.55, 0.7],
     cardEase: 0.05,
     compact: true,
-    body: 'It began carefully — small apps first, testing what AI and I could build together. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">eight builds in five weeks</span> — they’re floating all around you. Each one writes what it taught me into a knowledge vault, <strong>dev-brain</strong>, and one of the builds, <strong>BrainQuest</strong>, turns that vault into a learning game. So I’m learning the craft, not just watching it happen. All of it public.<br>The contribution graph looks like a steep takeoff. Everything above turned out to be training for this. <em>(Turns out I love the screen after all.)</em>',
+    body: 'It began carefully&nbsp;—&nbsp;small apps first, testing what AI and I could build together. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">eight builds in five weeks</span>&nbsp;—&nbsp;they’re floating all around you. Each one writes what it taught me into a knowledge vault, <strong>dev-brain</strong>, and one of the builds, <strong>BrainQuest</strong>, turns that vault into a learning game. So I’m learning the craft, not just watching it happen.<br>All of it public.<br>The contribution graph below looks like a steep takeoff. Everything above turned out to be training for this. <em>(Turns out I love the screen after all.)</em>',
     projects: ['ClearFeed', 'Těnovice', 'Registrace', 'RL Lab', 'BrainQuest'],
   },
   // 09 — NOW: the contact finale (FINAL v2.5). The world behind it is the
@@ -236,7 +262,7 @@ export const CHAPTERS: Chapter[] = [
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Worlds come in all sizes — an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision and sense of responsibility, the calm of twenty-one years of meditation, and a build pace measured in days. It’s all above — and it’s all public. <span class="a-btc">Don’t trust; verify.</span><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision and sense of responsibility, the calm of twenty-one years of meditation, and a build pace measured in days. It’s all above&nbsp;—&nbsp;and it’s all public. <span class="a-btc">Don’t trust; verify.</span><br>If you have something worth building, I’d enjoy hearing about it.',
     cta: {
       label: '[ email — arriving with the domain ]',
       href: 'mailto:hello@example.com',
