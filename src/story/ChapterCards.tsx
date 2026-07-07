@@ -11,7 +11,9 @@ export function ChapterCards({ pos }: { pos: number }) {
   return (
     <main className={styles.cards}>
       {CHAPTERS.map((ch, i) => {
-        const o = ch.cardFull ? cardOpacityWindowed(pos, i, ch.cardFull) : cardOpacity(pos, i)
+        const o = ch.cardFull
+          ? cardOpacityWindowed(pos, i, ch.cardFull, ch.cardEase)
+          : cardOpacity(pos, i)
         // Cards rise a touch as they fade in, settle at center when focused.
         const rise = (1 - o) * 12
         const Title = i === 0 ? 'h1' : 'h2'
@@ -30,10 +32,11 @@ export function ChapterCards({ pos }: { pos: number }) {
         // carries the vertical settle, via the class's --tx.
         const alignClass =
           ch.align === 'left' ? styles.alignLeft : ch.align === 'right' ? styles.alignRight : ''
+        const compactClass = ch.compact ? styles.compact : ''
         return (
           <article
             key={ch.id}
-            className={`${styles.card} ${alignClass}`}
+            className={`${styles.card} ${alignClass} ${compactClass}`}
             style={{
               opacity: o,
               transform: `translate(var(--tx), calc(-50% + ${rise}px))`,
@@ -64,6 +67,7 @@ export function ChapterCards({ pos }: { pos: number }) {
                 {ch.cta.label}
               </a>
             )}
+            {ch.ctaHint && <p className={styles.ctaHint}>{ch.ctaHint}</p>}
           </article>
         )
       })}

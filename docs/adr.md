@@ -4,6 +4,38 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-020 — Dev scene as a diegetic proof-of-work: a Tron/Matrix city on black glass, real project assets baked offline, and a staircase explosion whose motion the story can't skip (2026-07-07)
+B3c built chapter 08 (`dev` — "Solo developer") as the site's climax: the Claude-Code month, where the five real apps
+are the point. Eleven review rounds with Martin (reference-driven: `local/ode mne/solodev/tron*.{jpg,png}`,
+`brainquest.png`, `github-stats.json`, each repo's README hero). The load-bearing decisions:
+1. **The proof is real, not evoked.** Each project window shows the app's actual README hero shot; RL Lab plays two
+   trained-agent GIFs (Lunar Lander + Breakout); BrainQuest runs a living knowledge-graph traced from Martin's own
+   screenshot. All are **baked offline into data-URL sprites / JPEG filmstrips** (`devShots.ts`, `devAnims.ts` via
+   `gen-devshots.mjs` / `gen-devanims.mjs`) and decoded lazily in the browser — the `calmSprites`/`worldMap` pattern,
+   so the runtime stays image-free and Node-importable for tests. The GitHub numbers ride the scene **diegetically**
+   (a dashboard built from the static `github-stats.json` snapshot, amber `#FFB000` through-line), not as another card.
+2. **The glass mirror is a self-blit, and the gravity wave is an invisible pixel-warp — never re-drawn, never coloured.**
+   The reflection re-blits the finished upper half of the frame, flipped + faded (pixel-exact, ~2 drawImages); windows
+   carry their own scratch-canvas reflections that inherit the flight's mirror state and only appear once low enough to
+   land on the glass. Touchdown fires a **spacetime ripple that re-samples the already-painted background through an
+   expanding annulus scaled outward** (the old screensaver warp) — Martin's explicit steer: bend the world, don't paint
+   rings.
+3. **The explosion is a STAIRCASE so the story owns the motion.** Five cards launch on five scroll steps and all touch
+   down together at 100 %, each position a clean fraction at every step (`windowSpawn` linear-per-leg, unit-tested to
+   Martin's 1/5 · 2/5+1/4 · … table). This fixed two problems at once: a one-step spawn was too fast to read the
+   per-card 180°-per-step mirror cartwheel, and a mid-flight landing window was thin enough to scrub past — landing at
+   the scroll's end means the waves fire reliably, forward and back. Beats are tuned to the **rounded HUD %** (the
+   readout is the source of truth, ADR-019 lesson): landings + waves live inside "95", copy snaps full at "96".
+4. **Clickable windows are a DOM layer over the canvas, mirroring its geometry.** `DevWindowLinks` lays real `<a>`
+   anchors over the five painted windows (positions from `devMath.windowLayout`, widths as CSS `min(vw,vh)` fractions —
+   no per-frame JS), giving cursor/focus/hover-glow + outbound links. It is the C1 Work-section's data made tangible
+   early; C1 will formalize it into `src/data/projects.ts` and both layers will read from there.
+5. **Chapter 09 (contact) added now as a data + DOM placeholder.** The approved copy v2.5 rewrote every chapter's body
+   and added `09 — NOW` ("The next world could be yours.", email CTA + hint). It renders over the shared placeholder
+   world; the real particle-field contact scene is C3. Adding it re-scaled the global HUD % (10→11 chapters) but scenes
+   are timed in local `t`, so nothing visual shifted — only the % labels moved. **The globe (B4) is parked** (Martin:
+   likely unneeded), so the visual build is effectively complete bar the contact finale.
+
 ### ADR-019 — Bitcoin as a living 3D valley: a scroll-driven genesis impulse, a bundled world map, and an engine-wide pointer channel (2026-07-07)
 B3b built chapter 07 (`bitcoin` — "Bitcoin rabbit hole") not as a coin but as a **living network world**: a dense
 wireframe data-valley (one perspective projection in `bitcoinMath.ts`) under a dot-matrix **world map** that seethes

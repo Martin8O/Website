@@ -51,8 +51,18 @@ export type Chapter = {
    *  instead of peaking at the chapter centre — the Selfhealing card stays
    *  up until the tree stands in full bloom (timeline.cardOpacityWindowed). */
   cardFull?: readonly [number, number]
+  /** Ease width (pos units) on either side of `cardFull` — override the
+   *  default for snappy arrivals (the 08 card snaps full within half a
+   *  HUD percent of the landings). */
+  cardEase?: number
   /** Optional outbound link rendered under the body (real links only). */
   cta?: { label: string; href: string }
+  /** Optional muted one-liner under the CTA (the contact chapter's
+   *  "three lines is enough" nudge). */
+  ctaHint?: string
+  /** Sentence-length headlines (the contact chapter) render at a smaller
+   *  display size so the whole card fits one viewport. */
+  compact?: boolean
   /** When the title holds a `<span class="t-late">…</span>`, that word fades
    *  in across this pos-offset window from the chapter's index — the word
    *  "Bitcoin" arrives at 88 %, after the genesis impulse. */
@@ -84,7 +94,8 @@ export const CHAPTERS: Chapter[] = [
     era: '1991–1998 · School',
     num: '00 — Origin',
     title: 'School<br>& Pascal',
-    body: 'A school-leaving exam in maths and programming. In Pascal I wrote <span class="a-gold">chess for two players</span> — it enforced the rules, no AI opponent yet. The first lines of code, with no idea where they would lead.',
+    // Copy FINAL v2.5 (local/ode mne/texty/texty-v2.md) from here on.
+    body: 'A school-leaving exam in maths and programming. In Pascal I wrote <span class="a-gold">chess for two players</span> — it knew every rule of the game, but it couldn\'t come up with a single move. The first lines of code, with no idea where they would lead.',
   },
   {
     id: 'sky-climb',
@@ -93,7 +104,7 @@ export const CHAPTERS: Chapter[] = [
     era: 'CTU → Brno',
     num: '01 — The Decision',
     title: 'Upward',
-    body: 'From CTU FEE, after two years, to the University of Defence. The goal: a <span class="a-hud">military pilot</span>. The Z‑142, then the L‑39C — over a hundred hours in the air and a brand-new identity.',
+    body: 'Two years into electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen — <em>remember that</em> — and there was a boyhood dream waiting: <span class="a-hud">flying fighter jets</span>. The Z‑142, then the L‑39C — a hundred hours in the air and a totally different life.',
     align: 'right',
   },
   {
@@ -103,7 +114,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2003–2012',
     num: '02 — Fighters',
     title: 'Above the<br>clouds',
-    body: 'Pardubice, Náměšť, Čáslav. The L‑39C, the L‑39ZA, then the <span class="a-hud">L‑159</span>. The horizon curved, the clouds stayed below the wings, and time was measured in g-forces.',
+    body: 'The L‑39C, the L‑39ZA, then the <span class="a-hud">L‑159</span>. Every type an upgrade: more thrust, more avionics, more to learn — and less room for error. The horizon curved, the clouds stayed below the wings, and time was measured in g-forces.',
     align: 'right',
   },
   {
@@ -113,7 +124,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2010 · Bagram',
     num: '03 — Afghanistan',
     title: 'A different<br>sky',
-    body: 'Bagram Air Base, liaison officer. Dust instead of clouds, the same service. The kind of experience that resets you.',
+    body: 'Bagram Air Base, liaison officer. Dust instead of clouds, a war instead of training — the same service, a different sky. The kind of experience that changes your perspective on everything, permanently.',
     align: 'left',
   },
   {
@@ -123,7 +134,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2016–2017',
     num: '04 — Airshow',
     title: 'Display<br>pilot',
-    body: 'A two-ship strike on a ground target — Czechia, Slovakia, Romania, the UK, Sweden. <span class="a-hud">Flying for thousands of eyes below.</span> Precision to the centimetre, adrenaline at the maximum.',
+    body: 'Two seasons as a display pilot, airshows across Europe. <span class="a-hud">Ten minutes of maximum everything</span> — speed, g-load, focus — two jets metres apart, tens of thousands watching. A dream fulfilled.',
     align: 'right',
   },
   {
@@ -137,7 +148,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2020–2022',
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
-    body: '<span class="a-hud">Twenty years in the Air Force.</span> Instructor → flight-safety inspector → test pilot. Military retirement in 2022. Retrained as a network and systems administrator. Travels around the world, and helping out at Buddhist courses.',
+    body: '<span class="a-hud">Twenty years in the Air Force, 1,700 hours in the air</span> — the final years as instructor, flight-safety inspector and test pilot. I retired in 2022 with no plan for what comes next. Retrained in networks and systems, then went looking: travelling the world, half of every year abroad, volunteering at Buddhist centres. Meditation had been part of my life since 2005 — now it had more room to breathe.',
     align: 'left',
   },
   // The story is THEMATIC here, not strictly chronological: healing (2013)
@@ -158,9 +169,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2014–2015',
     num: '06 — The Test',
     title: 'Selfhealing',
-    // Martin's wording (rev16): verdict → the work → the quiet result →
-    // knowing himself from the inside; his site as the CTA.
-    body: 'Ulcerative colitis — a “lifelong” disease. “No known cause, no cure.” Eighteen months of rebuilding everything — food, gut, mind, lifestyle. It ended in <span class="a-cyan">full remission, without medication</span>. I came out healthier, knowing myself from the inside.',
+    body: 'Ulcerative colitis — “lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle at once</span>: eighteen months of rebuilding everything — food, gut, mind, lifestyle. In remission ever since — <span class="a-cyan">no medication since 2014</span>. I came out healthier, knowing myself from the inside.',
     cta: {
       label: 'Read the whole journey →',
       href: 'https://mojecestakezdravi.cz/',
@@ -181,7 +190,9 @@ export const CHAPTERS: Chapter[] = [
     // The word lands the moment the HUD flips to 88 % — the HUD ROUNDS
     // (Math.round), so "88" appears at progress 0.875 = pos 7.875, not 7.92.
     lateWord: [-0.125, -0.105],
-    body: 'The freedom underneath the technology. Keys, blocks, nodes, trustless consensus. <span class="a-btc">The hardest money nobody can print, seize or censor.</span> So I stopped reading and started running it: a full &amp; Lightning node, solo mining to my own pool. Don’t trust — verify.',
+    // "Don't trust — verify" stands on its own line (v2.5): it is the
+    // method, not just the slogan.
+    body: 'The freedom underneath the technology. Keys, blocks, nodes, trustless consensus. <span class="a-btc">The hardest money nobody can print, seize or censor.</span> So I stopped reading and started running it: a full &amp; Lightning node, solo mining to my own pool.<br><span class="a-btc">Don’t trust — verify.</span>',
     cta: {
       label: 'Read my Bitcoin intro →',
       href: 'https://medium.com/@shadovv_50954/discover-bitcoin-the-r-evolution-in-the-world-of-money-9de1272b9b13',
@@ -194,7 +205,42 @@ export const CHAPTERS: Chapter[] = [
     era: '2026',
     num: '08 — The explosion',
     title: 'Solo<br>developer',
-    body: 'I discovered Claude Code and the activity exploded. In one month: <span class="a-cyan">worlds of my own</span>, one after another.',
+    // FINAL v2.5: the headline number is "eight builds in five weeks"
+    // (accented); the projects are not listed — they float around as the
+    // canvas windows.
+    // The card arrives AFTER the landings settle: it rises across the back
+    // half of the "95 %" HUD readout (touchdown at 95.0) and is FULL the
+    // instant the HUD flips to 96 (progress 0.955 — the HUD rounds), so no
+    // half-faded step; it holds through "97", then dissolves with the scene.
+    // Compact: the long v2.5 body must share the frame with the dashboard.
+    cardFull: [0.55, 0.7],
+    cardEase: 0.05,
+    compact: true,
+    body: 'It began carefully — small apps first, testing what AI and I could build together. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">eight builds in five weeks</span> — they’re floating all around you. Each one writes what it taught me into a knowledge vault, <strong>dev-brain</strong>, and one of the builds, <strong>BrainQuest</strong>, turns that vault into a learning game. So I’m learning the craft, not just watching it happen. All of it public.<br>The contribution graph looks like a steep takeoff. Everything above turned out to be training for this. <em>(Turns out I love the screen after all.)</em>',
     projects: ['ClearFeed', 'Těnovice', 'Registrace', 'RL Lab', 'BrainQuest'],
+  },
+  // 09 — NOW: the contact finale (FINAL v2.5). The world behind it is the
+  // C3 placeholder until the contact scene lands; the email is a
+  // placeholder until the domain exists (forwarding at launch, CLAUDE.md).
+  {
+    id: 'contact-now',
+    theme: 'contact',
+    // Let the dev finale own the frame until 97 % — the landings (95 %),
+    // the full card + dashboard hold (95→97 %), THEN the scene dissolves
+    // into the night and NOW arrives at the very end.
+    enterFade: [0.7, 0.97],
+    era: 'now',
+    num: '09 — Now',
+    title: 'The next world<br>could be yours.',
+    compact: true,
+    // Arrive only after the dev finale has said its piece (no ghost text
+    // over the 08 card): rise from ~98 %, full at the very end.
+    cardFull: [-0.05, 0],
+    body: 'Worlds come in all sizes — an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision and sense of responsibility, the calm of twenty-one years of meditation, and a build pace measured in days. It’s all above — and it’s all public. <span class="a-btc">Don’t trust; verify.</span><br>If you have something worth building, I’d enjoy hearing about it.',
+    cta: {
+      label: '[ email — arriving with the domain ]',
+      href: 'mailto:hello@example.com',
+    },
+    ctaHint: 'Three lines is enough: what it is, who it’s for, when you need it.',
   },
 ]

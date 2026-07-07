@@ -3,6 +3,7 @@ import { CHAPTERS, THEME_ACCENT } from '../data/chapters'
 import { chapterPosition, nearestChapter } from '../timeline'
 import { CanvasStage } from '../canvas/CanvasStage'
 import { ChapterCards } from './ChapterCards'
+import { DevWindowLinks } from './DevWindowLinks'
 import { Hud } from './Hud'
 import { TickScale } from './TickScale'
 import { ScrollHint } from './ScrollHint'
@@ -26,6 +27,7 @@ export function Story() {
     <div className={styles.stage} style={{ ['--accent' as string]: accent }}>
       <CanvasStage chapters={CHAPTERS} />
       <ChapterCards pos={pos} />
+      <DevWindowLinks pos={pos} />
       <Vignette />
       <Hud era={active.era ?? ''} progress={progress} />
       <TickScale progress={progress} count={count} />

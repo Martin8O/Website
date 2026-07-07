@@ -1,0 +1,24 @@
+.links {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* An invisible plate exactly over a canvas window: real anchor semantics
+   (cursor: pointer, keyboard focus), and a soft glow in the app's own neon
+   on hover so it clearly reads as a link. */
+.hit {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: box-shadow 160ms ease;
+}
+
+.hit:hover,
+.hit:focus-visible {
+  /* No frame — just ambient light in the window's own neon. */
+  box-shadow: 0 0 36px 8px color-mix(in srgb, var(--tint, #ffb000) 45%, transparent);
+  outline: none;
+}

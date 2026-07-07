@@ -123,3 +123,27 @@
 .cta:focus-visible {
   border-bottom-color: var(--accent, var(--amber));
 }
+
+/* Long-copy chapters (the explosion, the contact finale): smaller display
+   sizes so the whole card — title, body, CTA, hint — fits a single
+   viewport and leaves the bottom band free (the GitHub dashboard). */
+.compact .title {
+  font-size: clamp(1.9rem, 5.2vw, 3.6rem);
+  line-height: 1.08;
+}
+
+.compact .body {
+  font-size: clamp(0.92rem, 1.9vw, 1.06rem);
+  line-height: 1.5;
+}
+
+/* Muted nudge under the CTA (the contact chapter's "three lines is enough"). */
+.ctaHint {
+  font-family: var(--font-body);
+  font-size: clamp(0.72rem, 1.5vw, 0.82rem);
+  font-style: italic;
+  color: var(--muted);
+  margin: 0.7rem auto 0;
+  max-width: 34ch;
+  text-align: center;
+}
