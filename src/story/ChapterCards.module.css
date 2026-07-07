@@ -97,5 +97,29 @@
   color: #c3cad6;
   max-width: 34ch;
   margin: 1.25rem auto 0;
+  /* Bodies set as a justified block (Martin's call, rev15/16) — titles and
+     eyebrows keep their card alignment. */
+  text-align: justify;
   text-shadow: 0 1px 18px rgba(6, 9, 16, 0.6), 0 1px 3px rgba(6, 9, 16, 0.4);
+}
+
+/* Optional outbound CTA under the body (data-driven per chapter) — a quiet
+   mono link in the chapter's accent, real anchor for SEO/a11y. */
+.cta {
+  display: inline-block;
+  margin-top: 1.15rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.72rem, 1.6vw, 0.85rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent, var(--amber));
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent, #f7931a) 45%, transparent);
+  padding-bottom: 2px;
+  text-shadow: 0 1px 14px rgba(6, 9, 16, 0.55);
+}
+
+.cta:hover,
+.cta:focus-visible {
+  border-bottom-color: var(--accent, var(--amber));
 }

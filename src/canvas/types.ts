@@ -17,6 +17,11 @@ export type SceneConfig = {
   tRaw?: number
   /** True → `time` is frozen at 0; the scene must look complete when static. */
   reducedMotion: boolean
+  /** The engine-smoothed pointer, CSS px, with presence `a` easing 0→1 as
+   *  the pointer arrives and back after it leaves (0 on touch rest, under
+   *  reduced motion, and until the first move). Purely an ENHANCEMENT
+   *  channel: scenes must look complete at a = 0. */
+  pointer?: { x: number; y: number; a: number }
 }
 
 /**

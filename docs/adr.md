@@ -4,6 +4,45 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-019 — Bitcoin as a living 3D valley: a scroll-driven genesis impulse, a bundled world map, and an engine-wide pointer channel (2026-07-07)
+B3b built chapter 07 (`bitcoin` — "Bitcoin rabbit hole") not as a coin but as a **living network world**: a dense
+wireframe data-valley (one perspective projection in `bitcoinMath.ts`) under a dot-matrix **world map** that seethes
+with transactions, a peer **network** whose node icons are tiered by real connection count, and — Martin's central
+ask — something **pulsing and reactive to the mouse**. Sixteen review rounds; the load-bearing decisions:
+1. **The scene has NO central object.** Early cuts placed a glowing ₿ coin, then a ₿ chip (traced from the official
+   logo). Martin rejected both — a coin "is a lure toward money, away from the technology," and any logo is a lure.
+   The epicentre is now **pure energy**: at 87 % a **genesis impulse** strikes the valley centre (a translucent,
+   round-ended bolt), and everything radiates from that. The lesson: for a philosophy-first subject, resist the
+   obvious brand mark; let the *behaviour* carry the meaning.
+2. **The story is a scroll-driven WAVE, not a per-node timeline.** `storyWaveR(t)` is the impact front's world radius,
+   linear in scroll across 87→89 %; `nodeLit(dist, t)` lights a peer the instant the front reaches it, and the same
+   front lifts a crest + trailing trough into the terrain (`waveBand` with tunable half-width). Terrain deformation,
+   node ignition and edge reveal are ONE function of the wave — scrub-safe, reversible, and self-synchronising (no
+   drift between "the ground bulges" and "the node wakes").
+3. **A pointer channel added to the engine, presence-smoothed, opt-in per scene.** `SceneConfig.pointer = {x,y,a}` is
+   eased in `CanvasStage` (position lerp + presence `a` that fades in on first move, out on leave/blur/touch-lift, 0
+   under reduced motion). Scenes stay pure; the smoothing + lifecycle live once in the engine. Bitcoin uses it for a
+   true-3D camera parallax, a terrain swell under the cursor, and orange "you are a node" links — but only *after* the
+   impulse lands (`pointer.a` gated by the story), so the arrival is bare mountains with no interactivity.
+4. **Generated data, baked offline, kept out of the runtime hot path.** `worldMap.ts` is a 256×112 land mask sampled
+   from a NASA-derived equirectangular image (`gen-worldmap.mjs`); the ~8 900 static land dots are further baked into a
+   per-viewport canvas layer at render time (cache keyed to the pointer-free horizon so a hover never rebuilds it),
+   with only a sparse live subset shimmering on top. The map "breathes" on its own clock (a time-based brightness
+   swell), never on scroll.
+5. **Physics belongs to matter, not to light.** First-cut transaction lights used ballistic/eased travel; Martin
+   correctly flagged that electromagnetic signalling has no such physics. Every travelling light — map arcs, city
+   feeders, mesh edges — now moves at **constant pixel/world speed regardless of segment length and runs both
+   directions**, so a short hop flies exactly as fast as an ocean crossing. Node **tiers follow designated hubs**
+   (every 12th core peer gets 7 links, others 2, periphery 1) so the big circular icons sit on genuinely
+   high-degree nodes, not on chance.
+
+Cards gained two data-driven fields used here and reusable later: `cta` (a real outbound link under the body — the
+Medium intro / his healing site) and `lateWord` (a title word that fades in on its own scroll cue — "Bitcoin"
+appears exactly when the HUD's *rounded* % flips to 88). Bodies are set justified. Gate green throughout (122 tests,
++23 in `bitcoinMath.test.ts`). Verified live frame-by-frame via the frame sink at every % of the choreography.
+
+---
+
 ### ADR-018 — The healing lake: scroll choreographed in global %, photo figures as bundled bitmaps, and physics-first water (2026-07-07)
 B3a built chapter 06 (`calm` — "Selfhealing") as a still pre-dawn lake, from Martin's own mojecestakezdravi.cz
 motifs: a stepping-stone path ("krok za krokem") from a near bank to a small tree island, the tree flowering as the

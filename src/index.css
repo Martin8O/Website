@@ -81,3 +81,9 @@ html.lenis body {
 .a-mag {
   font-weight: 600;
 }
+
+/* A title word that arrives on its own scroll cue (ChapterCards drives
+   --late per card; the "Bitcoin" reveal at 88 %). */
+.t-late {
+  opacity: var(--late, 1);
+}

@@ -651,16 +651,25 @@ export const renderCalm: Renderer = (ctx, alpha, t, time, cfg) => {
 
     // Mirror smear beneath, contact shadow, the pebble's mass, a wet top
     // face catching the sky, then a quiet lit rim — the stone must read as
-    // WEIGHT on the water, not a floating highlight.
+    // WEIGHT on the water, not a floating highlight. Both shadow layers are
+    // radial FADES (centre → nothing), so they dissolve into the water with
+    // no visible edge (rev11).
+    const softEllipse = (ex: number, ey: number, erx: number, ery: number, color: string, a: number) => {
+      if (a <= 0.004) return
+      ctx.save()
+      ctx.translate(ex, ey)
+      ctx.scale(1, ery / erx)
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, erx)
+      g.addColorStop(0, rgba(color, a))
+      g.addColorStop(0.55, rgba(color, a * 0.45))
+      g.addColorStop(1, rgba(color, 0))
+      ctx.fillStyle = g
+      ctx.fillRect(-erx, -erx, erx * 2, erx * 2)
+      ctx.restore()
+    }
     ctx.save()
-    ctx.fillStyle = mixRgba(INK, '#16414d', light * 0.4, 0.18 * aStone)
-    ctx.beginPath()
-    ctx.ellipse(sx, yStone + ry * 2.4, rx * 0.85, ry * 0.9, 0, 0, TAU)
-    ctx.fill()
-    ctx.fillStyle = rgba('#010507', 0.4 * aStone)
-    ctx.beginPath()
-    ctx.ellipse(sx, yStone + ry * 0.5, rx * 1.06, ry * 0.62, 0, 0, TAU)
-    ctx.fill()
+    softEllipse(sx, yStone + ry * 2.4, rx * 1.1, ry * 1.3, mixHex(INK, '#16414d', light * 0.4), 0.15 * aStone)
+    softEllipse(sx, yStone + ry * 0.5, rx * 1.35, ry * 0.85, '#010507', 0.32 * aStone)
     ctx.fillStyle = mixRgba(INK, '#28565f', 0.12 + light * 0.5, aStone)
     ctx.beginPath()
     ctx.ellipse(sx, yStone, rx, ry, 0, 0, TAU)
@@ -824,26 +833,19 @@ export const renderCalm: Renderer = (ctx, alpha, t, time, cfg) => {
   )
   drawGlow(ctx, w * LIGHT_X, horizonY - h * 0.008, unit * 0.26, BLUSH, alpha * 0.3 * blush * (0.92 + 0.08 * br))
 
-  // The faintest vertical rays through the mist once the light stands —
-  // two quiet beams, far subtler than origin's crepuscular fan.
-  const rayA = smoothstep(0.5, 0.85, light) * alpha * 0.05
-  if (rayA > 0.004) {
+  // (rev11: the two crepuscular beams that used to stand here read as
+  // "colored columns" over the veiled sky near the tree — removed.)
+
+  // --- Hand-over to the bitcoin world (B3b) ---------------------------------
+  // As the network fades in over 84→88 % (tExit 1.06→1.38), the dawn sinks
+  // back into night so the bright lake never burns through the rising world
+  // (the B3a hand-over lesson: the outgoing scene must dim itself).
+  const nightVeil = smoothstep(1.04, 1.36, tExit)
+  if (nightVeil > 0.003) {
     ctx.save()
-    ctx.globalCompositeOperation = 'screen'
-    for (let k = 0; k < 2; k++) {
-      const rx0 = w * (LIGHT_X - 0.04 + k * 0.07) + Math.sin(time * 0.02 + k * 2.6) * w * 0.008
-      const g = ctx.createLinearGradient(0, horizonY, 0, horizonY - h * 0.34)
-      g.addColorStop(0, rgba(PALE, rayA * (0.8 + 0.2 * br)))
-      g.addColorStop(1, rgba(PALE, 0))
-      ctx.fillStyle = g
-      ctx.beginPath()
-      ctx.moveTo(rx0 - w * 0.004, horizonY)
-      ctx.lineTo(rx0 - w * 0.017, horizonY - h * 0.34)
-      ctx.lineTo(rx0 + w * 0.017, horizonY - h * 0.34)
-      ctx.lineTo(rx0 + w * 0.004, horizonY)
-      ctx.closePath()
-      ctx.fill()
-    }
+    ctx.globalAlpha = alpha * nightVeil * 0.88
+    ctx.fillStyle = '#030509'
+    ctx.fillRect(0, 0, w, h)
     ctx.restore()
   }
 }

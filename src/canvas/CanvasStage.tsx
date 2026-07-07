@@ -40,6 +40,34 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
     let lastShakeX = 0
     let lastShakeY = 0
 
+    // Pointer channel (B3b): scenes are pure, so the smoothing lives here —
+    // the target updates on pointermove, and every painted frame eases the
+    // published position/presence toward it. Presence `a` fades in on the
+    // first move and back out on leave/blur (and on touch lift), so scenes
+    // can scale their pointer response by one scalar.
+    let ptrTX = 0
+    let ptrTY = 0
+    let ptrTA = 0
+    let ptrX = 0
+    let ptrY = 0
+    let ptrA = 0
+    const onPointerMove = (e: PointerEvent) => {
+      ptrTX = e.clientX
+      ptrTY = e.clientY
+      if (ptrTA === 0 && ptrA < 0.01) {
+        // Arriving from nothing: snap the position, ease only the presence.
+        ptrX = ptrTX
+        ptrY = ptrTY
+      }
+      ptrTA = 1
+    }
+    const onPointerGone = () => {
+      ptrTA = 0
+    }
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') ptrTA = 0
+    }
+
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
     let reducedMotion = media.matches
     const onMedia = () => {
@@ -67,6 +95,7 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
         sky: slot.run.sky,
         tRaw: slot.tRaw,
         reducedMotion,
+        pointer: { x: ptrX, y: ptrY, a: reducedMotion ? 0 : ptrA },
       }
       RENDERERS[slot.run.theme](ctx, slot.alpha, slot.t, time, cfg)
     }
@@ -79,6 +108,11 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
       lastProgress = progress
 
       const time = reducedMotion ? 0 : now / 1000
+      if (!reducedMotion) {
+        ptrX += (ptrTX - ptrX) * 0.1
+        ptrY += (ptrTY - ptrY) * 0.1
+        ptrA += (ptrTA - ptrA) * 0.06
+      }
       const frame = resolveSceneFrame(chapterPosition(progress, count), runs, count)
 
       // Safety floor — scenes contract to paint opaque, but never flash white.
@@ -153,17 +187,30 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
 
     resize()
     window.addEventListener('resize', resize)
+    window.addEventListener('pointermove', onPointerMove, { passive: true })
+    window.addEventListener('pointerup', onPointerUp, { passive: true })
+    window.addEventListener('pointercancel', onPointerGone, { passive: true })
+    window.addEventListener('blur', onPointerGone)
+    document.documentElement.addEventListener('pointerleave', onPointerGone)
     document.addEventListener('visibilitychange', onVisibility)
     media.addEventListener('change', onMedia)
     start()
 
     // Dev-only headless-verification hook: hidden tabs never fire rAF (and
     // the loop above stops on purpose), so tooling can set a scroll progress
-    // and paint exactly one frame by hand. Stripped from prod builds.
-    const hookHost = window as unknown as { __paintFrame?: (progress: number, ms: number) => void }
+    // and paint exactly one frame by hand — optionally with a settled
+    // pointer at (px, py). Stripped from prod builds.
+    const hookHost = window as unknown as {
+      __paintFrame?: (progress: number, ms: number, px?: number, py?: number) => void
+    }
     if (import.meta.env.DEV) {
-      hookHost.__paintFrame = (progress, ms) => {
+      hookHost.__paintFrame = (progress, ms, px, py) => {
         setScrollProgress(progress)
+        if (px !== undefined && py !== undefined) {
+          ptrX = ptrTX = px
+          ptrY = ptrTY = py
+          ptrA = ptrTA = 1
+        }
         needsPaint = true
         paint(ms)
       }
@@ -175,6 +222,11 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
       document.documentElement.style.removeProperty('--cam-shake-x')
       document.documentElement.style.removeProperty('--cam-shake-y')
       window.removeEventListener('resize', resize)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onPointerUp)
+      window.removeEventListener('pointercancel', onPointerGone)
+      window.removeEventListener('blur', onPointerGone)
+      document.documentElement.removeEventListener('pointerleave', onPointerGone)
       document.removeEventListener('visibilitychange', onVisibility)
       media.removeEventListener('change', onMedia)
     }

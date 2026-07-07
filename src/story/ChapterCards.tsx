@@ -15,6 +15,16 @@ export function ChapterCards({ pos }: { pos: number }) {
         // Cards rise a touch as they fade in, settle at center when focused.
         const rise = (1 - o) * 12
         const Title = i === 0 ? 'h1' : 'h2'
+        // A `.t-late` word in the title fades in over its own scroll window
+        // (the "Bitcoin" reveal at 88 %); 1 everywhere else.
+        let late = 1
+        if (ch.lateWord) {
+          const u = Math.min(
+            1,
+            Math.max(0, (pos - (i + ch.lateWord[0])) / (ch.lateWord[1] - ch.lateWord[0])),
+          )
+          late = u * u * (3 - 2 * u)
+        }
         // Horizontal placement comes from the class (data-driven per chapter,
         // centered again on narrow viewports) — the inline transform only
         // carries the vertical settle, via the class's --tx.
@@ -30,6 +40,7 @@ export function ChapterCards({ pos }: { pos: number }) {
               // Hide fully-faded cards from AT/tab order without unmounting them.
               visibility: o < 0.02 ? 'hidden' : 'visible',
               ['--accent' as string]: THEME_ACCENT[ch.theme],
+              ['--late' as string]: late,
             }}
           >
             {ch.num && <p className={styles.num}>{ch.num}</p>}
@@ -42,6 +53,16 @@ export function ChapterCards({ pos }: { pos: number }) {
                 className={styles.body}
                 dangerouslySetInnerHTML={{ __html: ch.body }}
               />
+            )}
+            {ch.cta && (
+              <a
+                className={styles.cta}
+                href={ch.cta.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {ch.cta.label}
+              </a>
             )}
           </article>
         )

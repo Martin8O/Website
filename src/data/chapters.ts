@@ -51,6 +51,12 @@ export type Chapter = {
    *  instead of peaking at the chapter centre — the Selfhealing card stays
    *  up until the tree stands in full bloom (timeline.cardOpacityWindowed). */
   cardFull?: readonly [number, number]
+  /** Optional outbound link rendered under the body (real links only). */
+  cta?: { label: string; href: string }
+  /** When the title holds a `<span class="t-late">…</span>`, that word fades
+   *  in across this pos-offset window from the chapter's index — the word
+   *  "Bitcoin" arrives at 88 %, after the genesis impulse. */
+  lateWord?: readonly [number, number]
 }
 
 /** Signature accent colour per theme — drives the eyebrow + HUD tint so the
@@ -152,8 +158,13 @@ export const CHAPTERS: Chapter[] = [
     era: '2014–2015',
     num: '06 — The Test',
     title: 'Selfhealing',
-    // Martin's wording (rev10): gift + verdict + the work + the quiet result.
-    body: 'Ulcerative colitis — a “lifelong” disease, “no known cause, no cure.” It became a gift: eighteen months of rebuilding everything — food, gut, mind, lifestyle — ended in <span class="a-cyan">full remission without medication</span>. The whole journey became a detailed website.',
+    // Martin's wording (rev16): verdict → the work → the quiet result →
+    // knowing himself from the inside; his site as the CTA.
+    body: 'Ulcerative colitis — a “lifelong” disease. “No known cause, no cure.” Eighteen months of rebuilding everything — food, gut, mind, lifestyle. It ended in <span class="a-cyan">full remission, without medication</span>. I came out healthier, knowing myself from the inside.',
+    cta: {
+      label: 'Read the whole journey →',
+      href: 'https://mojecestakezdravi.cz/',
+    },
   },
   {
     id: 'bitcoin-node',
@@ -163,8 +174,19 @@ export const CHAPTERS: Chapter[] = [
     enterFade: [0.56, 0.88],
     era: 'since 2017',
     num: '07 — Bitcoin',
-    title: 'My own<br>node',
-    body: 'A fascination with Bitcoin. A <span class="a-btc">full node</span> at home, for a while a Lightning node on Umbrel, a Bitaxe solo miner wired to my own pool. Many friends brought into the world of hard money.',
+    // Martin's own wording (rev14): freedom underneath the technology; the
+    // word "Bitcoin" in the title arrives only at 88 % — after the genesis
+    // impulse has landed.
+    title: '<span class="t-late">Bitcoin</span><br>rabbit hole',
+    // The word lands the moment the HUD flips to 88 % — the HUD ROUNDS
+    // (Math.round), so "88" appears at progress 0.875 = pos 7.875, not 7.92.
+    lateWord: [-0.125, -0.105],
+    body: 'The freedom underneath the technology. Keys, blocks, nodes, trustless consensus. <span class="a-btc">The hardest money nobody can print, seize or censor.</span> So I stopped reading and started running it: a full &amp; Lightning node, solo mining to my own pool. Don’t trust — verify.',
+    cta: {
+      label: 'Read my Bitcoin intro →',
+      href: 'https://medium.com/@shadovv_50954/discover-bitcoin-the-r-evolution-in-the-world-of-money-9de1272b9b13',
+    },
+    align: 'left',
   },
   {
     id: 'dev-explosion',
