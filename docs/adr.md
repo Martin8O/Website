@@ -4,7 +4,13 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
-### ADR-021 — Contact finale as a breathing spiral galaxy: story-coloured particles, a cursor that emits gravitational waves, and everything painted with dots not lines (2026-07-07)
+### ADR-021 — Contact finale as a breathing spiral galaxy: story-coloured particles and everything painted with dots not lines (2026-07-07)
+> **Update (2026-07-08):** the cursor gravitational-wave interaction (point 2 below) was **removed** at Martin's call —
+> "the breathing spiral is the experience on its own; the gravity ruins it." The scene now ignores `cfg.pointer`
+> entirely (`gravFront`/`WAVE` deleted). Same round unified the card font size site-wide (the pilot-arc titles were
+> 5.5rem — too big and inconsistent with the trimmed 08/09 cards; all chapters now share one 2.8rem cap, no
+> compact/regular split). Point 2 is kept below as the historical record.
+
 C3 replaced the last placeholder (`contact`, chapter 09 — "Now") with the site's closing world: after the dev city
 dissolves, the whole journey settles into one slow, full-screen **spiral galaxy** the visitor sits inside while they
 read the CTA. Built to Martin's reference (`local/ode mne/pulsing bottom or end style.jpg`) but taken far past it over

@@ -12,12 +12,10 @@ import {
   filamentAngle,
   filamentGlow,
   fract,
-  gravFront,
   petalReach,
   pulse,
   spore,
   storyMix,
-  WAVE,
 } from './contactMath'
 
 describe('fract', () => {
@@ -224,25 +222,6 @@ describe('dust', () => {
     // The plane position never changes — the camera moves, not the mote.
     expect(cycled.ux).toBe(before.ux)
     expect(cycled.uy).toBe(before.uy)
-  })
-})
-
-describe('gravFront', () => {
-  it('is silent outside the source range', () => {
-    expect(gravFront(-0.1, 0.5)).toBe(0)
-    expect(gravFront(1, 0.5)).toBe(0)
-    expect(gravFront(1.5, 0.5)).toBe(0)
-  })
-
-  it('is strongest exactly on the front and falls off around it', () => {
-    const on = gravFront(0.3, 0.3)
-    expect(on).toBeGreaterThan(gravFront(0.3 + WAVE.width * 2, 0.3) * 5)
-    expect(on).toBeGreaterThan(gravFront(0.3 - WAVE.width * 2, 0.3) * 5)
-  })
-
-  it('fades as the front travels outward', () => {
-    expect(gravFront(0.15, 0.15)).toBeGreaterThan(gravFront(0.85, 0.85) * 2)
-    expect(gravFront(0.99, 0.99)).toBeLessThan(0.05)
   })
 })
 

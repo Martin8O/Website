@@ -22,20 +22,19 @@
  * the frame cost stays pure arithmetic + fillRect); coloured spores; the
  * warm nucleus; the visitor's light + node links under the cursor.
  *
- * Rev6/7: the bloom is a SPIRAL GALAXY — every strand is a streamline
- * curved by a shared pre-baked twist (real trig at bake time, lookups per
- * frame) and a two-arm density pattern winds into arms around a QUIET
- * nucleus (the arms carry the mass, not the centre). The cursor is a
- * GRAVITATIONAL-WAVE source (the dev scene's signature carried forward):
- * two invisible fronts, half a cycle apart — one stays ANCHORED where it
- * was born and finishes its journey behind you, the other TRAVELS with
- * the hand — bend nearby particles outward and light them as they pass.
- * NOTHING in the scene is a drawn line (rev7): no webs, rays or rings —
- * dots, glows and displacement only. It still BREATHES at meditation
- * pace, a heartbeat front rolls through every ~13 s, and the field TILTS
- * toward the cursor in depth. Blooms in from a seed across the last
- * scroll stretch (bloomReach/bloomAlpha on `localT`); complete frozen at
- * time 0.
+ * The bloom is a SPIRAL GALAXY — every strand is a streamline curved by a
+ * shared pre-baked twist (real trig at bake time, lookups per frame) and a
+ * two-arm density pattern winds into arms around a QUIET nucleus (the arms
+ * carry the mass, not the centre). NOTHING in the scene is a drawn line: no
+ * webs, rays or rings — dots and glows only. It BREATHES at meditation pace
+ * with a wave travelling round the arms, a heartbeat front rolls through
+ * every ~13 s, and it cruises through a fly-through dust cluster. Blooms in
+ * from a seed across the last scroll stretch (bloomReach/bloomAlpha on
+ * `localT`); complete frozen at time 0.
+ *
+ * Rev8 (Martin): the cursor is INERT — the breathing spiral is the whole
+ * experience; the earlier gravitational-wave interaction was removed. The
+ * scene ignores `cfg.pointer` entirely.
  */
 
 import type { Renderer } from '../types'
@@ -60,12 +59,10 @@ import {
   dust,
   filamentAngle,
   filamentGlow,
-  gravFront,
   petalReach,
   pulse,
   spore,
   storyMix,
-  WAVE,
 } from './contactMath'
 
 /** The story wheel's colours, clockwise from the top: origin gold → sky
@@ -148,11 +145,6 @@ const DOT_STRIDE = 5
 let filRnd: Float32Array | null = null
 let dotRnd: Float32Array | null = null
 
-// Ephemeral interaction state (pointer memory, engine-style — not story
-// state): where the ANCHORED gravitational wave was born, plus the last
-// seen front phase so a new cycle re-samples the birth spot from the hand.
-const waveAnchor = { x: 0, y: 0, ph: 1 }
-
 function ensureRnd(): void {
   if (filRnd && dotRnd) return
   const n = CONTACT.filaments
@@ -181,7 +173,7 @@ function ensureRnd(): void {
 
 export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   if (alpha <= 0.002) return
-  const { w, h, pointer } = cfg
+  const { w, h } = cfg
 
   // --- Space: indigo-violet depth + the galactic plane + nebula clouds ----
   fillVerticalGradient(
@@ -252,22 +244,13 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   const bloomR = bloomReach(t)
   const B = breath(time)
 
-  // Geometry: the nucleus sits RIGHT of centre (the card owns the left —
-  // rev5) and the reach spans the whole frame, tips past the edges; the
-  // pointer leans the whole field a touch.
-  const pa = pointer?.a ?? 0
-  const px = pointer?.x ?? w / 2
-  const py = pointer?.y ?? h / 2
-  const cx = w * 0.6 + (px - w * 0.6) * 0.02 * pa
-  const cy = h * 0.48 + (py - h * 0.48) * 0.02 * pa
+  // Geometry: the nucleus sits RIGHT of centre (the card owns the left) and
+  // the reach spans the whole frame, tips past the edges. NO pointer
+  // interaction (rev8 — Martin: the breathing spiral is the experience on
+  // its own; the cursor gravity was removed).
+  const cx = w * 0.6
+  const cy = h * 0.48
   const R = Math.min(w, h) * 0.85
-  const pointerAng = Math.atan2(py - cy, px - cx)
-  // BTC-style camera tilt: deeper dots shift more toward the cursor.
-  const tiltX = Math.max(-1, Math.min(1, (px - w / 2) / (w / 2))) * pa * R * 0.1
-  const tiltY = Math.max(-1, Math.min(1, (py - h / 2) / (h / 2))) * pa * R * 0.07
-  // The cursor's gravitational-wave range (displacement + front glow).
-  const curR = Math.min(w, h) * 0.42
-  const curR2 = curR * curR
 
   // --- The star cluster the finale cruises through -------------------------
   // Full-screen depth dust on a slow approach: far motes are pinpricks, near
@@ -281,8 +264,8 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
       const mote = dust(i, time)
       if (mote.z < 0.35 !== near) continue
       const persp = 0.22 + mote.z * 1.1
-      const sx = cx + (mote.ux * w * 0.62) / persp + tiltX * (1 - mote.z) * 0.6
-      const sy = cy + (mote.uy * h * 0.62) / persp + tiltY * (1 - mote.z) * 0.6
+      const sx = cx + (mote.ux * w * 0.62) / persp
+      const sy = cy + (mote.uy * h * 0.62) / persp
       if (sx < -20 || sx > w + 20 || sy < -20 || sy > h + 20) continue
       // Born dim at the far plane, gone right before the camera.
       const fade = smoothstep(1, 0.92, mote.z) * Math.min(1, mote.z / 0.07)
@@ -346,23 +329,6 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   const pulseFront = CONTACT.core + pl.r01 * (1.3 - CONTACT.core)
   const beatOn = pl.a > 0.004
 
-  // --- The cursor's two gravitational waves (rev7) --------------------------
-  // Front A is ANCHORED: it keeps expanding from wherever it was born — the
-  // birth spot is re-sampled from the hand each time a new cycle starts, so
-  // a wave you set off stays behind and finishes its journey while you move
-  // on. Front B TRAVELS with the cursor. (Interaction state, engine-style:
-  // the anchor is ephemeral pointer memory, not story state.)
-  const phA = ((time / WAVE.period) % 1 + 1) % 1
-  const phB = ((time / WAVE.period + 0.5) % 1 + 1) % 1
-  const pointerOn = pa > 0.02
-  if (pointerOn && phA < waveAnchor.ph) {
-    waveAnchor.x = px
-    waveAnchor.y = py
-  }
-  waveAnchor.ph = phA
-  const ax = waveAnchor.x
-  const ay = waveAnchor.y
-
   // --- The bloom: ~16k dots of coloured fur, alive to the centre -----------
   ensureRnd()
   const fr = filRnd
@@ -381,8 +347,6 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
     const jitter = 0.86 + fr[fi + 1] * 0.28
     // Breath: mostly the shared tide, part traveling wave around the ring.
     const br = 0.62 * B + 0.38 * breathWave(time, baseAng)
-    // The fur leans toward an arriving pointer (subtle, presence-gated).
-    const lean = 1 + 0.07 * pa * Math.cos(ang - pointerAng)
     // Two-arm density pattern: strands near an arm's base angle are strong
     // and long; after the shared twist the pattern winds into spiral arms.
     const armW = Math.pow(0.5 + 0.5 * Math.cos(ARMS * (baseAng + ARM_PHASE)), 1.5)
@@ -391,7 +355,7 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
     // large-scale structure now.
     const petal = 0.7 + 0.3 * petalReach(baseAng, PETAL_SEED)
     const reach =
-      R * petal * jitter * (0.74 + 0.32 * br) * bloomR * lean * (0.85 + 0.25 * armW)
+      R * petal * jitter * (0.74 + 0.32 * br) * bloomR * (0.85 + 0.25 * armW)
     const cosA = Math.cos(ang)
     const sinA = Math.sin(ang)
     // The story wheel: colour from the strand's base angle, blended toward
@@ -430,48 +394,12 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
       const ca = cosA * cd - sinA * sd
       const sa = sinA * cd + cosA * sd
       const rr = u * reach * (1 + (dr[k + 3] - 0.5) * 0.05)
-      let x = cx + ca * rr * KX + tiltX * u
-      let y = cy + sa * rr * KY + tiltY * u
+      const x = cx + ca * rr * KX
+      const y = cy + sa * rr * KY
       // The heartbeat rolls through the fur as a brightening front.
       const beat = beatOn ? 1 + 1.7 * pl.a * Math.exp(-(((u - pulseFront) / 0.07) ** 2)) : 1
-      let a = alpha * bloomA * bright * g * breathGlow * beat * (0.65 + 0.35 * dr[k + 4])
-      let size = 0.8 + g * 1.3
-      // The cursor's gravitational waves (dev-scene lineage): front B rides
-      // the hand — bending particles outward and lighting the front as it
-      // passes — while front A keeps expanding from the spot where it was
-      // born, so moving on leaves a wave finishing its journey behind you.
-      if (pointerOn) {
-        const dxB = x - px
-        const dyB = y - py
-        const dB2 = dxB * dxB + dyB * dyB
-        if (dB2 < curR2 && dB2 > 1) {
-          const dist = Math.sqrt(dB2)
-          const wv = gravFront(dist / curR, phB) * pa
-          if (wv > 0.01) {
-            const push = wv * 16
-            x += (dxB / dist) * push
-            y += (dyB / dist) * push
-            a *= 1 + 0.9 * wv
-            size += 0.4 * wv
-          }
-          // A quiet ambient brighten close to the hand.
-          a *= 1 + 0.35 * (1 - dist / curR) * pa
-        }
-        const dxA = x - ax
-        const dyA = y - ay
-        const dA2 = dxA * dxA + dyA * dyA
-        if (dA2 < curR2 && dA2 > 1) {
-          const dist = Math.sqrt(dA2)
-          const wv = gravFront(dist / curR, phA) * pa
-          if (wv > 0.01) {
-            const push = wv * 16
-            x += (dxA / dist) * push
-            y += (dyA / dist) * push
-            a *= 1 + 0.9 * wv
-            size += 0.4 * wv
-          }
-        }
-      }
+      const a = alpha * bloomA * bright * g * breathGlow * beat * (0.65 + 0.35 * dr[k + 4])
+      const size = 0.8 + g * 1.3
       if (a <= 0.006) continue
       ctx.globalAlpha = Math.min(1, a)
       ctx.fillRect(x, y, size, size)
@@ -525,10 +453,4 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   // A small warm weld at dead centre — the strands converge around it and
   // the last few pixels must glow, not read as a pinhole.
   drawGlow(ctx, cx, cy, R * 0.035 * bloomR, '#fff2d8', alpha * bloomA * (0.16 + 0.08 * B))
-
-  // --- The visitor: a quiet light under the hand (you are here) ------------
-  // No lines to anywhere (rev7) — presence is a glow, the waves do the rest.
-  if (pointerOn) {
-    drawGlow(ctx, px, py, Math.min(w, h) * 0.09, '#cfeaff', alpha * bloomA * 0.09 * pa)
-  }
 }

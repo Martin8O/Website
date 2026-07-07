@@ -198,28 +198,6 @@ export function dust(i: number, time: number): Dust {
   }
 }
 
-/** Cursor gravitational waves (dev-scene lineage — the wave is invisible;
- *  only what it does to particles shows). Two independent fronts share the
- *  same period, half a cycle apart: one stays ANCHORED where it was born,
- *  the other travels with the hand (rev7). */
-export const WAVE = {
-  period: 2.8,
-  /** Gaussian half-width of a front, in range units. */
-  width: 0.055,
-} as const
-
-/**
- * Strength of ONE gravitational-wave front at normalized distance `d01`
- * from its source (0 = at the source, 1 = edge of range), with the front
- * currently at radius `front01` (0..1 of the range). Fades as it travels;
- * silent outside the range. Drives both particle displacement and the
- * brightening of the passing front.
- */
-export function gravFront(d01: number, front01: number): number {
-  if (d01 < 0 || d01 >= 1) return 0
-  return Math.exp(-(((d01 - front01) / WAVE.width) ** 2)) * (1 - front01)
-}
-
 export type Pulse = {
   /** Ring radius 0..1 (fraction of full travel). */
   r01: number
