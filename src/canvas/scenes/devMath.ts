@@ -67,6 +67,16 @@ const SLOTS: readonly WindowSlot[] = [
 /** Resolve the window constellation for this viewport. On wider screens the
  *  flanking windows push outward so the centre stays clear of the card. */
 export function windowLayout(aspect: number): WindowSlot[] {
+  // Portrait (phones): the centred card fills the middle of a tall screen, so
+  // the two lower windows — RL Lab (slot 3) and BrainQuest (slot 4) — drop into
+  // the bottom corners, below the copy and just above the GitHub dashboard,
+  // instead of sitting over the text (Martin's mobile call). The upper three
+  // stay in the sky above the card.
+  if (aspect < 1) {
+    return SLOTS.map((s, i) =>
+      i >= 3 ? { ...s, x: i === 3 ? 0.19 : 0.81, y: 0.73 } : s,
+    )
+  }
   // aspect = w/h; 1.78 (16:9) → no extra spread, wider → gently more.
   const spread = 1 + clamp01((aspect - 1.5) / 1.6) * 0.14
   return SLOTS.map((s) => ({ ...s, x: 0.5 + (s.x - 0.5) * spread }))

@@ -4,6 +4,33 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-026 — D1: ship L1 — code-split the world, show+copy+mailto contact, mobile-only repositioning, Cloudflare domain+email (2026-07-08)
+The launch pass. The decisions:
+1. **The canvas world is code-split behind `React.lazy`; React is its own vendor chunk.** The 2D world (six scene
+   renderers + all baked sprite/shot/pose/worldMap data) is the heaviest thing on the page and is purely decorative
+   (`aria-hidden`), so it's the natural split point. Result: the initial JS drops **720 kB → 62 kB** app shell + 142 kB
+   cacheable React vendor; the ~514 kB world fetches during the preloader hold, and the dark stage background covers the
+   gap until the first frame. This is the real LCP/TBT lever (the DOM `<h1>`/cards paint without waiting for the world to
+   parse). The Work panel was already lazy (C1).
+2. **Contact = show the address + a Copy button + `mailto:` — no form, no backend, no GDPR.** Martin's question: is a bare
+   `mailto:` a blocker (it opens the visitor's mail client, and does nothing if none is set up)? The answer that keeps the
+   no-backend/no-data-collection stance: render the full address as selectable text, keep `mailto:` as the click, and add
+   a clipboard Copy button (bilingual, graceful `catch` when the clipboard is blocked). A form service would put a third
+   party in the data path — rejected. The address is **`martin@svobodamartin.dev`** (Martin's pick), email light-blue.
+3. **Mobile-only repositioning, desktop byte-identical — via a CSS `--ty` var + per-chapter id overrides and `w<720` /
+   `aspect<1` branches in the scenes.** The text cards gained an overridable vertical anchor (`--ty`, default `-50%`) so a
+   `@media (max-width:719px)` block can drop 01/02/07/09 to the bottom, lift 03/05/06 into the sky — desktop keeps the
+   centred default. The canvas scenes each got one mobile branch: `bitcoin` map pushed below the nav, `dev`'s
+   `windowLayout(aspect)` drops RL Lab + BrainQuest to the bottom corners in portrait and the GitHub dashboard lifts above
+   the HUD, `contact`'s spiral centres + lifts its nucleus into the free space above the bottom-anchored copy. Gotcha
+   banked: a CSS var feeding a `calc()` with a px term **must carry a unit** (`--ty:0px`, not `0`) or the whole transform
+   is dropped.
+4. **Domain + email both on Cloudflare (DNS stays there), not moved to Vercel.** Web: `CNAME → cname.vercel-dns.com` for
+   apex + `www`, **proxy OFF (grey cloud)** so Vercel issues its own cert (orange-cloud proxy + Vercel SSL conflict).
+   Email: Cloudflare **Email Routing** (free) forwards `martin@svobodamartin.dev` → Martin's Gmail — no mail server, no
+   data stored. *Why:* Martin already runs the domain on Cloudflare; both are free records there and web (CNAME) + mail
+   (MX) are independent.
+
 ### ADR-025 — B5: SEO/social meta + a branded OG image rendered from the site's own DNA; safe-area via `env()`; a11y already carried by C2/C4 (2026-07-08)
 The reduced-motion / a11y / SEO / perf pass. The decisions:
 1. **The social card is generated, branded, and legible — not a scene screenshot, not a placeholder.** `public/og.png`

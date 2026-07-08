@@ -19,6 +19,7 @@ export type UiStrings = {
   workEyebrow: string
   workTitle: string
   workClaudeHead: string
+  workClaudeMonth: string
   workClaudeSub: string
   workBeforeHead: string
   workBeforeSub: string
@@ -28,6 +29,8 @@ export type UiStrings = {
   aboutTitle: string
   aboutCta: string
   profiles: string
+  copyEmail: string
+  emailCopied: string
 }
 
 /**
@@ -60,7 +63,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     loading: 'Loading',
     workEyebrow: 'Work',
     workTitle: 'Everything I’ve built',
-    workClaudeHead: 'The Claude-Code month',
+    workClaudeHead: 'The Claude-Code {m}',
+    workClaudeMonth: '~month',
     workClaudeSub: '· five real apps in ~a month — then this site in 3½ days',
     workBeforeHead: 'Before',
     workBeforeSub: '· first builds & experiments',
@@ -70,6 +74,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     aboutTitle: 'About me',
     aboutCta: 'Get in touch →',
     profiles: 'Profiles',
+    copyEmail: 'Copy',
+    emailCopied: 'Copied ✓',
   },
   cs: {
     docTitle: 'Martin — proskrolujte si jeden život',
@@ -84,7 +90,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     loading: 'Načítání',
     workEyebrow: 'Práce',
     workTitle: 'Všechno, co jsem postavil',
-    workClaudeHead: 'Měsíc s Claude Code',
+    workClaudeHead: '{m} s Claude Code',
+    workClaudeMonth: '~Měsíc',
     workClaudeSub: '· pět skutečných aplikací za ~měsíc — a pak tento web za 3½ dne',
     workBeforeHead: 'Předtím',
     workBeforeSub: '· první weby a experimenty',
@@ -94,5 +101,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     aboutTitle: 'Kdo jsem',
     aboutCta: 'Ozvěte se →',
     profiles: 'Profily',
+    copyEmail: 'Kopírovat',
+    emailCopied: 'Zkopírováno ✓',
   },
 }

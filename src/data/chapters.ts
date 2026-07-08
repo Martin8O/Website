@@ -274,8 +274,8 @@ export const CHAPTERS: Chapter[] = [
     body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision and sense of responsibility, the calm of twenty-one years of meditation, and a build pace measured in days. It’s all above&nbsp;—&nbsp;and it’s all public.<br><span class="a-btc">Don’t trust; verify.</span><br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
     cta: {
-      label: '[ email — arriving with the domain ]',
-      href: 'mailto:hello@example.com',
+      label: '[ martin@svobodamartin.dev ]',
+      href: 'mailto:martin@svobodamartin.dev',
     },
     ctaHint: 'Three lines is enough: what it is, who it’s for, when you need it.',
   },

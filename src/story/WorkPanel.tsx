@@ -122,7 +122,19 @@ export function WorkPanel({ onClose }: { onClose: () => void }) {
         <div className={styles.scroll}>
           <section className={styles.group}>
             <h3 className={styles.groupHead}>
-              {t.workClaudeHead} <span>{t.workClaudeSub}</span>
+              {/* "~month" (it was really ~5 weeks) highlighted light-orange —
+                  the `{m}` token places it correctly in either language. */}
+              {(() => {
+                const [pre, post] = t.workClaudeHead.split('{m}')
+                return (
+                  <>
+                    {pre}
+                    <span className={styles.month}>{t.workClaudeMonth}</span>
+                    {post}
+                  </>
+                )
+              })()}{' '}
+              <span>{t.workClaudeSub}</span>
             </h3>
             <ul className={styles.grid}>
               {claude.map((p) => (

@@ -90,8 +90,8 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     body: 'Světy jsou všech velikostí&nbsp;—&nbsp;automatizace, nástroj, aplikace, web. Pokud to dokážete popsat, dá se to postavit. Co přináším: soustředění stíhacího pilota, přesnost a odpovědnost pilota zkušebního, klid jednadvaceti let meditace a tempo stavby měřené ve dnech. Všechno je to výše&nbsp;—&nbsp;a všechno veřejně.<br><span class="a-btc">Nevěř; ověřuj.</span><br><br>Pokud máte něco, co stojí za postavení, rád si o tom poslechnu.',
     ctaEyebrow: '+ Ozvěte se',
     cta: {
-      label: '[ e-mail — dorazí s doménou ]',
-      href: 'mailto:hello@example.com',
+      label: '[ martin@svobodamartin.dev ]',
+      href: 'mailto:martin@svobodamartin.dev',
     },
     ctaHint: 'Stačí tři řádky: co to je, pro koho a kdy to potřebujete.',
   },

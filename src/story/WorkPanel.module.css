@@ -96,6 +96,13 @@
   letter-spacing: 0.04em;
   text-transform: none;
 }
+/* The "~month" token, lightly orange (higher specificity than .groupHead span
+   so it wins over the muted sub styling above). */
+.groupHead .month {
+  color: #ffb066;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
 
 .grid {
   list-style: none;

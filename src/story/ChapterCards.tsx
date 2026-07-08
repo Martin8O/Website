@@ -1,6 +1,62 @@
+import { useState } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { cardOpacity, cardOpacityWindowed } from '../timeline'
+import { useLang } from '../i18n/useLang'
+import { STRINGS } from '../i18n/strings'
 import styles from './ChapterCards.module.css'
+
+/**
+ * A chapter's optional CTA. For an outbound article (http) it's a plain quiet
+ * link. For the contact finale (mailto:) the address is shown in full and
+ * selectable, `mailto:` opens the visitor's mail client, AND a Copy button
+ * puts it on the clipboard — so it works even where no mail client is set up.
+ * No form, no backend, no data leaves the page (Martin's email-only, no-GDPR
+ * contact — D1).
+ */
+function Cta({ cta }: { cta: NonNullable<Chapter['cta']> }) {
+  const lang = useLang()
+  const ui = STRINGS[lang]
+  const isHttp = cta.href.startsWith('http')
+  const isMail = cta.href.startsWith('mailto:')
+  const email = isMail ? cta.href.slice('mailto:'.length).split('?')[0] : ''
+  const [copied, setCopied] = useState(false)
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(email)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      // Clipboard blocked (older browser / insecure context): the visible
+      // address and the mailto link still carry the contact.
+    }
+  }
+
+  return (
+    <span className={styles.ctaRow}>
+      <a
+        className={styles.cta}
+        href={cta.href}
+        // mailto: must open the mail client in place — a blank tab is the
+        // classic dead-page annoyance. New tabs are for http.
+        target={isHttp ? '_blank' : undefined}
+        rel={isHttp ? 'noopener noreferrer' : undefined}
+      >
+        {cta.label}
+      </a>
+      {isMail && (
+        <button
+          type="button"
+          className={`${styles.copyBtn} ${copied ? styles.copied : ''}`}
+          onClick={copy}
+          aria-label={copied ? ui.emailCopied : `${ui.copyEmail}: ${email}`}
+        >
+          {copied ? ui.emailCopied : ui.copyEmail}
+        </button>
+      )}
+    </span>
+  )
+}
 
 /**
  * All chapter text cards, stacked centered. Each fades in as its chapter nears
@@ -43,7 +99,10 @@ export function ChapterCards({ pos, chapters }: { pos: number; chapters: Chapter
             className={`${styles.card} ${alignClass} ${compactClass}`}
             style={{
               opacity: o,
-              transform: `translate(var(--tx), calc(-50% + ${rise}px))`,
+              // `--ty` (default -50%, the vertical centre anchor) is overridable
+              // per chapter in CSS — used only on mobile to nudge cards off the
+              // centre of action (desktop keeps the centred default).
+              transform: `translate(var(--tx), calc(var(--ty, -50%) + ${rise}px))`,
               // Hide fully-faded cards from AT/tab order without unmounting them.
               visibility: o < 0.02 ? 'hidden' : 'visible',
               ['--accent' as string]: THEME_ACCENT[ch.theme],
@@ -62,18 +121,7 @@ export function ChapterCards({ pos, chapters }: { pos: number; chapters: Chapter
               />
             )}
             {ch.ctaEyebrow && <p className={styles.ctaEyebrow}>{ch.ctaEyebrow}</p>}
-            {ch.cta && (
-              <a
-                className={styles.cta}
-                href={ch.cta.href}
-                // mailto: must open the mail client in place — a blank tab
-                // is the classic dead-page annoyance. New tabs are for http.
-                target={ch.cta.href.startsWith('http') ? '_blank' : undefined}
-                rel={ch.cta.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-              >
-                {ch.cta.label}
-              </a>
-            )}
+            {ch.cta && <Cta cta={ch.cta} />}
             {ch.ctaHint && <p className={styles.ctaHint}>{ch.ctaHint}</p>}
           </article>
         )

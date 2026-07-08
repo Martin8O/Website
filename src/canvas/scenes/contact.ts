@@ -248,8 +248,12 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   // the reach spans the whole frame, tips past the edges. NO pointer
   // interaction (rev8 — Martin: the breathing spiral is the experience on
   // its own; the cursor gravity was removed).
-  const cx = w * 0.6
-  const cy = h * 0.48
+  // On phones the card drops to the bottom, so the spiral centres horizontally
+  // and lifts into the free space between the top nav and the copy (Martin's
+  // mobile call); desktop keeps the nucleus right-of-centre for the left card.
+  const mobile = w < 720
+  const cx = mobile ? w * 0.5 : w * 0.6
+  const cy = mobile ? h * 0.23 : h * 0.48
   const R = Math.min(w, h) * 0.85
 
   // --- The star cluster the finale cruises through -------------------------

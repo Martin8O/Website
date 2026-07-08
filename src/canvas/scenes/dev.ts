@@ -1856,17 +1856,20 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
     let ph = unit * 0.231
     const bx = w * 0.5 + sh.x
     // Hug the base of the frame; on short viewports scale down so the
-    // panel never climbs into the card text.
-    let py = h - ph - h * 0.008 + sh.y * 0.5
+    // panel never climbs into the card text. On phones lift the whole panel
+    // above the bottom HUD / footer (the time-axis readout) so the receipts
+    // sit clear of the "NOW · %" chip (Martin's mobile call).
+    const bottomGap = h * 0.008 + (w < 720 ? h * 0.085 : 0)
+    let py = h - ph - bottomGap + sh.y * 0.5
     // Stay below the (compact) card copy on every viewport — the name tag
     // above the border counts too; on short screens it is dropped.
     const capH = 26
     const minTop = h * 0.46 + 265
     if (py - capH < minTop) {
-      const k9 = Math.max(0.5, (h - minTop - capH - h * 0.008) / ph)
+      const k9 = Math.max(0.5, (h - minTop - capH - bottomGap) / ph)
       pw *= k9
       ph *= k9
-      py = h - ph - h * 0.008 + sh.y * 0.5
+      py = h - ph - bottomGap + sh.y * 0.5
     }
     const x0b = bx - pw / 2
     const aB = alpha

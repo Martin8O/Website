@@ -70,6 +70,48 @@
     margin-left: auto;
     margin-right: auto;
   }
+
+  /* Mobile-only: nudge each card off the centre of action so the text never
+     blocks the scene (desktop keeps every card centred). Selectors are the
+     chapter ids on each <article>; `--ty:0` switches a card from centre- to
+     bottom-anchored. */
+  :global(#sky-climb),
+  :global(#sky-cruise),
+  :global(#bitcoin-node),
+  :global(#contact-now) {
+    /* 01 · 02 · 07 · 09 — drop to the bottom, clear of the HUD / scroll hint.
+       `--ty` MUST carry a length unit (0px, not 0) — it feeds a calc() with a
+       px term, and `calc(0 + 12px)` is invalid → the whole transform (incl.
+       the −50% centre) would be dropped and the card would overflow. */
+    top: auto;
+    bottom: calc(6.5rem + env(safe-area-inset-bottom));
+    --ty: 0px;
+  }
+
+  :global(#sky-desert) {
+    /* 03 — up ~15 % from centre. */
+    top: 35%;
+  }
+
+  :global(#sky-sunset),
+  :global(#calm-healing) {
+    /* 05 · 06 — up into the middle of the sky. */
+    top: 32%;
+  }
+
+  :global(#dev-explosion) {
+    /* 08 — top-anchor the copy high so ClearFeed lands just above the first
+       paragraph and the title clears the two upper windows; this frees the
+       lower band for the RL Lab / BrainQuest cards above the GitHub dashboard. */
+    top: 23%;
+    --ty: 0px;
+  }
+
+  /* Nudge the "08 — THE EXPLOSION" eyebrow ~3 letters left so it pulls clear of
+     the Registrace window on its right (Martin's call, mobile only). */
+  :global(#dev-explosion) .num {
+    transform: translateX(-3ch);
+  }
 }
 
 /* The B2 sky scenes get BRIGHT (cumulus sea, the cloud-punch white-out,
@@ -141,7 +183,15 @@
     0 2px 14px rgba(0, 0, 0, 0.8);
 }
 
-.ctaEyebrow + .cta {
+/* CTA row = the link (+ an optional Copy button for the mailto finale). */
+.ctaRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.15rem;
+}
+
+.ctaEyebrow + .ctaRow {
   margin-top: 0.55rem;
 }
 
@@ -149,7 +199,6 @@
    mono link in the chapter's accent, real anchor for SEO/a11y. */
 .cta {
   display: inline-block;
-  margin-top: 1.15rem;
   font-family: var(--font-mono);
   font-size: clamp(0.72rem, 1.6vw, 0.85rem);
   letter-spacing: 0.14em;
@@ -169,6 +218,46 @@
 .cta:focus-visible {
   color: color-mix(in srgb, var(--accent, var(--amber)) 72%, #fff);
   border-bottom-color: var(--accent, var(--amber));
+}
+
+/* The Copy-to-clipboard affordance beside the mailto address — quiet outline
+   button in the chapter accent; flips to a confirmed state for ~1.8 s. */
+.copyBtn {
+  font-family: var(--font-mono);
+  font-size: clamp(0.66rem, 1.4vw, 0.76rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #dfe5ee;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid color-mix(in srgb, var(--accent, #f7931a) 34%, transparent);
+  border-radius: 4px;
+  padding: 4px 9px;
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.copyBtn:hover,
+.copyBtn:focus-visible {
+  color: #fff;
+  border-color: var(--accent, var(--amber));
+  background: color-mix(in srgb, var(--accent, #f7931a) 16%, rgba(0, 0, 0, 0.28));
+}
+
+.copyBtn.copied {
+  color: var(--accent, var(--amber));
+  border-color: var(--accent, var(--amber));
+}
+
+/* The contact finale's email address in light blue (Martin's call) — overrides
+   the chapter-accent colour just for the mailto link in #contact-now. */
+:global(#contact-now) .cta {
+  color: #8ec6ff;
+  border-bottom-color: color-mix(in srgb, #8ec6ff 45%, transparent);
+}
+:global(#contact-now) .cta:hover,
+:global(#contact-now) .cta:focus-visible {
+  color: #b8dbff;
+  border-bottom-color: #8ec6ff;
 }
 
 /* `.compact` no longer changes the font size — every chapter shares the one

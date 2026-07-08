@@ -1,10 +1,10 @@
+import { lazy, Suspense } from 'react'
 import { useScrollProgress } from '../scroll/useScrollProgress'
 import { CHAPTERS, chaptersFor } from '../data/chapters'
 import { useLang } from '../i18n/useLang'
 import { chapterPosition, nearestChapter } from '../timeline'
 import { buildRuns } from '../canvas/sceneTimeline'
 import { accentAt } from './accent'
-import { CanvasStage } from '../canvas/CanvasStage'
 import { ChapterCards } from './ChapterCards'
 import { DevWindowLinks } from './DevWindowLinks'
 import { Hud } from './Hud'
@@ -13,6 +13,16 @@ import { ScrollHint } from './ScrollHint'
 import { SiteFooter } from './SiteFooter'
 import { Vignette } from './Vignette'
 import styles from './Story.module.css'
+
+// The whole 2D world — every scene renderer plus its baked sprite/shot/pose
+// data — is the heaviest thing on the page and is purely decorative
+// (aria-hidden). Code-split it so the initial bundle is just the React shell,
+// scroll engine and DOM story (fast FCP/LCP + low TBT); the chunk fetches
+// during the preloader hold, and the dark stage background covers the gap
+// until the first frame paints. See D1 / ADR-026.
+const CanvasStage = lazy(() =>
+  import('../canvas/CanvasStage').then((m) => ({ default: m.CanvasStage })),
+)
 
 // Scene runs for the static EN chapters (theme/timing only — identical for
 // both languages), built once at module load for the accent blend.
@@ -40,7 +50,9 @@ export function Story() {
 
   return (
     <div className={styles.stage} style={{ ['--accent' as string]: accent }}>
-      <CanvasStage chapters={CHAPTERS} />
+      <Suspense fallback={null}>
+        <CanvasStage chapters={CHAPTERS} />
+      </Suspense>
       <ChapterCards pos={pos} chapters={chapters} />
       <DevWindowLinks pos={pos} />
       <Vignette />

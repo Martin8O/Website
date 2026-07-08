@@ -85,7 +85,16 @@ export function AboutPanel({ onClose }: { onClose: () => void }) {
         onMouseDown={(e) => e.stopPropagation()}
       >
         <header className={styles.head}>
-          <div>
+          <img
+            className={styles.avatar}
+            src="/martin.jpg"
+            alt="Martin Svoboda"
+            width={64}
+            height={64}
+            loading="lazy"
+            decoding="async"
+          />
+          <div className={styles.titleWrap}>
             <p className={styles.eyebrow}>{t.aboutEyebrow}</p>
             <h2 id="about-title" className={styles.title}>
               {t.aboutTitle}

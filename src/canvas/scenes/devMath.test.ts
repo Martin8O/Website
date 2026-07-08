@@ -223,4 +223,17 @@ describe('windowLayout', () => {
       expect(s.y).toBeLessThan(1)
     }
   })
+
+  it('drops RL Lab + BrainQuest to the bottom corners in portrait', () => {
+    const p = windowLayout(0.46) // a phone (tall)
+    // slots 3 (RL Lab) and 4 (BrainQuest) sit low, in opposite corners…
+    expect(p[3].y).toBeGreaterThan(0.6)
+    expect(p[4].y).toBeGreaterThan(0.6)
+    expect(p[3].x).toBeLessThan(0.3)
+    expect(p[4].x).toBeGreaterThan(0.7)
+    // …and the three upper windows keep their sky positions.
+    expect(p[0].y).toBeLessThan(0.4)
+    expect(p[1].y).toBeLessThan(0.4)
+    expect(p[2].y).toBeLessThan(0.4)
+  })
 })

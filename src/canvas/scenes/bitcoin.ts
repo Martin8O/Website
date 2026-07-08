@@ -418,7 +418,9 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
   if (mapA > 0.01) {
     const mx0 = w * 0.01
     const mapW = w * 0.98
-    const my0 = h * 0.02
+    // On phones the map is pushed down so it clears the top nav pill (the
+    // continents used to sit under it); desktop keeps it hugging the top.
+    const my0 = (w < 720 ? 0.11 : 0.02) * h
     const cellW = mapW / WORLD_COLS
     const cellH = Math.min(cellW, (horizonY - h * 0.06 - my0) / WORLD_ROWS)
     const dot = Math.max(1, cellW * 0.42)
