@@ -18,6 +18,9 @@
  * "link every repo, publish over time" policy.
  */
 
+import type { Lang } from '../i18n/langStore'
+import { PROJECT_COPY_CS } from './projects.cs'
+
 // The dev-scene neon accents (mirror the scene palette in
 // `canvas/scenes/dev.ts`; kept here so the per-project tint lives in one place
 // and both the canvas and the DOM anchors read it).
@@ -56,6 +59,15 @@ export type Project = {
   /** Collaboration disclaimer chip in the window title bar (honest solo-dev
    *  framing: Těnovice was built WITH a friends' org). */
   badge?: string
+  /** Real build stats from the GitHub snapshot (`local/ode mne/solodev/
+   *  github-stats.json` → buildTimes: activeDays = distinct commit days).
+   *  Rendered at the bottom of the Work card; absent for the pre-GitHub
+   *  work (first websites, the article). */
+  build?: { days: number; commits: number }
+  /** Work-panel display order within the era (ascending; array order is the
+   *  fallback). The PROJECTS array itself must NOT be reordered — for the
+   *  Claude era it is the dev-scene window slot contract. */
+  workOrder?: number
   /** Present only for the five Claude-month apps that float as windows in the
    *  `dev` scene — the canvas rendering hints. `DEV_PROJECTS` (filtered +
    *  ordered from this array) is the window slot order. */
@@ -83,6 +95,7 @@ export const PROJECTS: Project[] = [
     era: 'pre-claude',
     link: { href: 'https://mojecestakezdravi.cz/', display: 'mojecestakezdravi.cz' },
     live: true,
+    workOrder: 1,
   },
   {
     id: 'rrcentrum',
@@ -92,6 +105,7 @@ export const PROJECTS: Project[] = [
     era: 'pre-claude',
     link: { href: 'https://rrcentrumpolabi.cz', display: 'rrcentrumpolabi.cz' },
     live: true,
+    workOrder: 2,
   },
   {
     id: 'bitcoin-article',
@@ -104,6 +118,8 @@ export const PROJECTS: Project[] = [
       display: 'medium.com',
     },
     live: true,
+    // Swapped with Wealth-Deck (Martin) — the article sits 5th, deck 3rd.
+    workOrder: 5,
   },
   {
     id: 'due-deck',
@@ -114,6 +130,8 @@ export const PROJECTS: Project[] = [
     era: 'pre-claude',
     link: { href: 'https://duedeck.lovable.app', display: 'duedeck.lovable.app' },
     live: true,
+    build: { days: 6, commits: 48 },
+    workOrder: 4,
   },
   {
     id: 'wealth-deck',
@@ -124,6 +142,8 @@ export const PROJECTS: Project[] = [
     era: 'pre-claude',
     link: { href: 'https://wealthdeck.lovable.app', display: 'wealthdeck.lovable.app' },
     live: true,
+    build: { days: 6, commits: 110 },
+    workOrder: 3,
   },
   {
     id: 'rand-pulse',
@@ -133,6 +153,8 @@ export const PROJECTS: Project[] = [
     era: 'pre-claude',
     link: { href: 'https://randpulse.lovable.app', display: 'randpulse.lovable.app' },
     live: true,
+    build: { days: 4, commits: 17 },
+    workOrder: 6,
   },
 
   // --- Era B — the Claude-Code month: "five real apps in ~a month" -----------
@@ -147,17 +169,23 @@ export const PROJECTS: Project[] = [
     link: { href: 'https://github.com/Martin8O/ClearFeed', display: 'github.com/Martin8O/ClearFeed' },
     live: false,
     status: 'Repo private · not yet in the store',
+    build: { days: 2, commits: 17 },
+    workOrder: 6,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
     id: 'tenovice',
     name: 'Těnovice',
     tagline: 'A fundraising page for Těnovice, a Buddhist retreat centre.',
-    stack: ['AWS CDK', 'DynamoDB', 'Serverless'],
+    // Cognito verified in the public repo (cdk/src/constructs/cognito.py —
+    // user pool + JWT authorizer on the API).
+    stack: ['AWS CDK', 'Cognito', 'DynamoDB', 'Serverless'],
     era: 'claude',
     link: { href: 'https://www.one-tenovice.cz', display: 'one-tenovice.cz' },
     live: true,
     badge: 'COLLAB',
+    build: { days: 11, commits: 53 },
+    workOrder: 3,
     window: { tint: VIOLET, kind: 'fund', shot: 'tenovice', cropY: 0.13 },
   },
   {
@@ -169,18 +197,23 @@ export const PROJECTS: Project[] = [
     era: 'claude',
     link: { href: 'https://registrace.online', display: 'registrace.online' },
     live: true,
+    build: { days: 16, commits: 61 },
+    workOrder: 2,
     window: { tint: MAGENTA, kind: 'form', shot: 'registrace' },
   },
   {
     id: 'rl-lab',
     name: 'RL Lab + Data Lab',
+    // Counts from the repo's own hero (9 algorithms, 100+ environments).
     tagline:
-      'Build, train, watch and play against reinforcement-learning agents across 100+ environments from one browser dashboard.',
+      'Train, watch & play against reinforcement-learning agents — from CartPole to Atari, physics, Doom and board games. 9 algorithms across 100+ environments; Data Lab adds research-grade metrics, seed sweeps and one-click exports.',
     stack: ['Python', 'FastAPI', 'PyTorch', 'React 19', 'TypeScript', 'Vite'],
     era: 'claude',
     link: { href: 'https://github.com/Martin8O/RL-Lab', display: 'github.com/Martin8O/RL-Lab' },
     live: false,
     status: 'Repo private · runs locally',
+    build: { days: 22, commits: 111 },
+    workOrder: 1,
     window: { tint: CORAL, kind: 'anim', shot: 'rllab', aspect: 0.58 },
   },
   {
@@ -193,7 +226,23 @@ export const PROJECTS: Project[] = [
     link: { href: 'https://github.com/Martin8O/BrainQuest', display: 'github.com/Martin8O/BrainQuest' },
     live: false,
     status: 'Repo private · porting to Android',
+    build: { days: 9, commits: 46 },
+    workOrder: 5,
     window: { tint: MINT, kind: 'graph' },
+  },
+  // No `window` block — the dev scene keeps its five windows; this one IS the
+  // site around them. (The Work panel is where it becomes legible.)
+  {
+    id: 'this-site',
+    name: 'This Site',
+    tagline:
+      'The scrollytelling site you are travelling through right now — from an empty folder to production deployment in 3½ intensive days.',
+    stack: ['React', 'TypeScript', 'Vite', 'Canvas 2D', 'Lenis'],
+    era: 'claude',
+    link: { href: 'https://martin-website-beta.vercel.app', display: 'martin-website-beta.vercel.app' },
+    live: true,
+    build: { days: 3.5, commits: 13 },
+    workOrder: 4,
   },
 ]
 
@@ -204,3 +253,14 @@ export type DevProject = Project & { window: NonNullable<Project['window']> }
 export const DEV_PROJECTS: DevProject[] = PROJECTS.filter(
   (p): p is DevProject => p.window !== undefined,
 )
+
+/**
+ * The projects in the requested language — EN canonical, CS as a copy overlay
+ * merged per id (chapters.ts pattern). Built once per language and cached so
+ * consumers get stable identities.
+ */
+const LOCALIZED: Partial<Record<Lang, Project[]>> = { en: PROJECTS }
+
+export function projectsFor(lang: Lang): Project[] {
+  return (LOCALIZED[lang] ??= PROJECTS.map((p) => ({ ...p, ...PROJECT_COPY_CS[p.id] })))
+}

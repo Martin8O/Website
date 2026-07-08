@@ -1,13 +1,18 @@
 import { useEffect, useRef } from 'react'
-import { PROJECTS, type Project } from '../data/projects'
+import { createPortal } from 'react-dom'
+import { projectsFor, type Project } from '../data/projects'
 import { PROJECT_SHOTS } from '../data/projectShots'
+import { useLang } from '../i18n/useLang'
+import { STRINGS, buildLine, type UiStrings } from '../i18n/strings'
+import type { Lang } from '../i18n/langStore'
 import styles from './WorkPanel.module.css'
 
 /**
  * The Work overview — the full portfolio in one place, opened from the nav
  * "Work" button (SiteNav). A modal overlay listing EVERY project (both eras)
- * data-driven from `src/data/projects.ts`: real screenshot (PROJECT_SHOTS,
- * lazy data-URLs), name, one-liner, stack and the live link. The five
+ * data-driven from `src/data/projects.ts` in the active language: real
+ * screenshot shown FULL (uncropped — Martin's call; `id.cs` variant when the
+ * site runs in Czech), name, one-liner, stack and the live link. The five
  * Claude-month apps also float as windows in chapter 08 — this is where the
  * whole body of work, old and new, is legible at a glance.
  *
@@ -16,17 +21,28 @@ import styles from './WorkPanel.module.css'
  * is a plain scrollable column that reads fine with animations off.
  */
 
-const CLAUDE = PROJECTS.filter((p) => p.era === 'claude')
-const BEFORE = PROJECTS.filter((p) => p.era === 'pre-claude')
+/** The baked screenshots for a project in the given language (EN fallback) —
+ *  an array; the card stacks them vertically (hero, then detail/animation). */
+function shotsFor(id: string, lang: Lang) {
+  return (lang === 'cs' && PROJECT_SHOTS[`${id}.cs`]) || PROJECT_SHOTS[id]
+}
 
-function Card({ p }: { p: Project }) {
-  const shot = PROJECT_SHOTS[p.id]
+function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
+  const shots = shotsFor(p.id, lang)
   const tint = p.window?.tint ?? 'var(--amber)'
   return (
     <li className={styles.card} style={{ ['--tint' as string]: tint }}>
       <div className={styles.shot}>
-        {shot ? (
-          <img src={shot.url} alt={`${p.name} screenshot`} loading="lazy" decoding="async" />
+        {shots ? (
+          shots.map((s, i) => (
+            <img
+              key={s.url}
+              src={s.url}
+              alt={`${p.name} screenshot${i > 0 ? ` ${i + 1}` : ''}`}
+              loading="lazy"
+              decoding="async"
+            />
+          ))
         ) : (
           <div className={styles.noshot} aria-hidden="true">
             {p.name.charAt(0)}
@@ -37,7 +53,10 @@ function Card({ p }: { p: Project }) {
       <div className={styles.body}>
         <h3 className={styles.name}>{p.name}</h3>
         <p className={styles.tagline}>{p.tagline}</p>
-        <ul className={styles.stack} aria-label="Stack">
+        {/* Bottom block, pinned down so it lines up across cards: stack tags,
+            the link, and the real build stats (GitHub snapshot) centered
+            underneath. */}
+        <ul className={styles.stack} aria-label={t.workStack}>
           {p.stack.map((s) => (
             <li key={s}>{s}</li>
           ))}
@@ -46,15 +65,26 @@ function Card({ p }: { p: Project }) {
           <a className={styles.link} href={p.link.href} target="_blank" rel="noopener noreferrer">
             {p.link.display} <span aria-hidden="true">↗</span>
           </a>
-          {!p.live && <span className={styles.status}>{p.status ?? 'private'}</span>}
+          {!p.live && <span className={styles.status}>{p.status}</span>}
         </div>
+        {p.build && (
+          <p className={styles.buildStats}>{buildLine(lang, p.build.days, p.build.commits)}</p>
+        )}
       </div>
     </li>
   )
 }
 
 export function WorkPanel({ onClose }: { onClose: () => void }) {
-  const panelRef = useRef<HTMLDivElement>(null)
+  const lang = useLang()
+  const t = STRINGS[lang]
+  // Display order within an era = `workOrder` (array order as fallback —
+  // the array itself is the dev-scene window contract and must not move).
+  const projects = projectsFor(lang)
+  const byOrder = (a: Project, b: Project) =>
+    (a.workOrder ?? Number.MAX_SAFE_INTEGER) - (b.workOrder ?? Number.MAX_SAFE_INTEGER)
+  const claude = projects.filter((p) => p.era === 'claude').sort(byOrder)
+  const before = projects.filter((p) => p.era === 'pre-claude').sort(byOrder)
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -66,24 +96,25 @@ export function WorkPanel({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  return (
+  // Portal to <body>: the nav pill's backdrop-filter makes it a containing
+  // block for fixed descendants, which would trap (and collapse) the overlay.
+  return createPortal(
     <div className={styles.overlay} onMouseDown={onClose} data-lenis-prevent>
       <div
         className={styles.panel}
         role="dialog"
         aria-modal="true"
         aria-labelledby="work-title"
-        ref={panelRef}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <header className={styles.head}>
           <div>
-            <p className={styles.eyebrow}>Work</p>
+            <p className={styles.eyebrow}>{t.workEyebrow}</p>
             <h2 id="work-title" className={styles.title}>
-              Everything I&#39;ve built
+              {t.workTitle}
             </h2>
           </div>
-          <button ref={closeRef} className={styles.close} onClick={onClose} aria-label="Close">
+          <button ref={closeRef} className={styles.close} onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </header>
@@ -91,27 +122,28 @@ export function WorkPanel({ onClose }: { onClose: () => void }) {
         <div className={styles.scroll}>
           <section className={styles.group}>
             <h3 className={styles.groupHead}>
-              The Claude-Code month <span>· five real apps in ~a month</span>
+              {t.workClaudeHead} <span>{t.workClaudeSub}</span>
             </h3>
             <ul className={styles.grid}>
-              {CLAUDE.map((p) => (
-                <Card key={p.id} p={p} />
+              {claude.map((p) => (
+                <Card key={p.id} p={p} lang={lang} t={t} />
               ))}
             </ul>
           </section>
 
           <section className={styles.group}>
             <h3 className={styles.groupHead}>
-              Before <span>· first builds &amp; experiments</span>
+              {t.workBeforeHead} <span>{t.workBeforeSub}</span>
             </h3>
             <ul className={styles.grid}>
-              {BEFORE.map((p) => (
-                <Card key={p.id} p={p} />
+              {before.map((p) => (
+                <Card key={p.id} p={p} lang={lang} t={t} />
               ))}
             </ul>
           </section>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

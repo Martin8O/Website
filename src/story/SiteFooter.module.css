@@ -1,0 +1,27 @@
+/* Bottom-right, mirroring the HUD's bottom-left corner; mono + muted so it
+   reads as instrument chrome, not content. */
+.footer {
+  position: absolute;
+  bottom: 1.6rem;
+  right: 1.6rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  pointer-events: auto;
+}
+
+.footer a {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.footer a:hover,
+.footer a:focus-visible {
+  color: var(--amber);
+  border-color: var(--amber);
+  outline: none;
+}

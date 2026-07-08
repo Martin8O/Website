@@ -13,6 +13,9 @@
  * accent spans: a-gold · a-hud (amber) · a-cyan · a-btc · a-mag.
  */
 
+import type { Lang } from '../i18n/langStore'
+import { CHAPTER_COPY_CS } from './chapters.cs'
+
 /** Visual worlds. Extensible union — a new *kind* later (e.g. 'sport') slots
  *  in here and gets one renderer in the Phase-B theme registry. */
 export type Theme = 'origin' | 'sky' | 'calm' | 'bitcoin' | 'dev' | 'contact'
@@ -277,3 +280,18 @@ export const CHAPTERS: Chapter[] = [
     ctaHint: 'Three lines is enough: what it is, who it’s for, when you need it.',
   },
 ]
+
+/**
+ * The story in the requested language. EN = the canonical array above; CS =
+ * the copy overlay from `chapters.cs.ts` merged per chapter id, so timing /
+ * choreography fields exist exactly once. Arrays are built once and cached —
+ * stable identities keep React effects quiet across re-renders.
+ */
+const LOCALIZED: Partial<Record<Lang, Chapter[]>> = { en: CHAPTERS }
+
+export function chaptersFor(lang: Lang): Chapter[] {
+  return (LOCALIZED[lang] ??= CHAPTERS.map((ch) => ({
+    ...ch,
+    ...CHAPTER_COPY_CS[ch.id],
+  })))
+}

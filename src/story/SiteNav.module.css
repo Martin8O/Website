@@ -1,32 +1,63 @@
-/* Fixed, quiet top-right nav — sits above the story stage, out of the way of
-   the scroll world until wanted. */
+/* Fixed, quiet top-right nav — one glass pill holding the three items, above
+   the story stage and out of the way of the scroll world until wanted. */
 .nav {
   position: fixed;
   top: clamp(0.75rem, 2vw, 1.4rem);
   right: clamp(0.75rem, 2vw, 1.6rem);
   z-index: 40;
-  pointer-events: auto;
-}
-
-.work {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--amber);
-  padding: 0.42rem 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.16rem;
   border-radius: 999px;
   background: color-mix(in srgb, #06070a 55%, transparent);
   border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  pointer-events: auto;
 }
-.work:hover,
-.work:focus-visible {
+
+.item {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+  padding: 0.34rem 0.8rem;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 150ms ease, box-shadow 150ms ease;
+}
+.item:hover,
+.item:focus-visible {
   background: color-mix(in srgb, var(--amber) 14%, transparent);
-  border-color: var(--amber);
   box-shadow: 0 0 22px -6px color-mix(in srgb, var(--amber) 60%, transparent);
   outline: none;
+}
+
+/* The house icon button — square-ish, glyph centered on the text baseline. */
+.home {
+  display: grid;
+  place-items: center;
+  padding: 0.34rem 0.55rem;
+}
+.home svg {
+  display: block;
+}
+
+/* Quiet separator before the language switch. */
+.divider {
+  width: 1px;
+  height: 1.05rem;
+  margin: 0 0.15rem;
+  background: color-mix(in srgb, var(--amber) 30%, transparent);
+}
+
+/* The language switch reads as a mode toggle, not another page. */
+.lang {
+  letter-spacing: 0.1em;
+  padding: 0.34rem 0.62rem;
+  color: color-mix(in srgb, var(--amber) 72%, #fff);
 }

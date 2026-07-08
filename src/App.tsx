@@ -1,6 +1,7 @@
 import { ScrollProvider } from './scroll/ScrollProvider'
 import { Story } from './story/Story'
 import { SiteNav } from './story/SiteNav'
+import { SkipLinks } from './story/SkipLinks'
 import { CHAPTERS } from './data/chapters'
 import { trackHeightVh } from './timeline'
 import styles from './App.module.css'
@@ -15,8 +16,11 @@ import styles from './App.module.css'
 function App() {
   return (
     <ScrollProvider>
-      <Story />
+      {/* DOM order = tab order: skip-link first, then the nav, then the story
+          (all are position:fixed, so the visual layout is unaffected). */}
+      <SkipLinks />
       <SiteNav />
+      <Story />
       <div
         className={styles.scrollTrack}
         style={{ height: `${trackHeightVh(CHAPTERS.length)}vh` }}

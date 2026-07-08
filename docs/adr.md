@@ -4,6 +4,36 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-023 — C2: bilingual CZ/EN via copy overlays (supersedes ADR-003), a real nav with teleport jumps, finale-gated footer (2026-07-08)
+C2 grew the site chrome: nav (🏠 Home · Work · Contact · About · CZ/EN), skip-link, an "About me" dialog, a
+GitHub/LinkedIn footer — and, on Martin's call at review, the site went **bilingual**. The decisions:
+1. **CZ/EN with a toggle — SUPERSEDES ADR-003 (English only).** Martin's audience is both Czech clients and
+   international; the story loses nothing dubbed. Architecture: **EN stays canonical** — every timing/choreography
+   field (`enterFade`, `cardFull`, `lateWord`, `workOrder`, window hints) exists exactly once on the EN data; Czech
+   rides as **copy overlays keyed by id** (`chapters.cs.ts`, `projects.cs.ts`, one `strings.ts` for UI), merged at
+   read time into per-language cached arrays (stable identities — the toggle never re-initializes the canvas, which
+   keeps reading the static EN array since it needs no copy). Language persists in `localStorage`, seeds from
+   `navigator.language`, drives `<html lang>` + `document.title`. Where content genuinely differs per language it
+   lives in the overlay (the Bitcoin article is two DIFFERENT articles: medium.seznam.cz vs medium.com). Register:
+   vykání, except the canonical motto "Nevěř — ověřuj."
+2. **Nav jumps TELEPORT (`lenis.scrollTo(..., immediate)`)** — the first build glided through all nine scenes and
+   Martin killed it: a nav jump is navigation, not storytelling. One `scrollToProgress()` relay in `scrollStore`
+   (ScrollProvider registers the Lenis driver) keeps components Lenis-free; the skip-link and About-CTA reuse it.
+3. **Dialogs portal to `<body>`** — the nav pill's `backdrop-filter` makes it a **containing block for
+   fixed-position descendants** (CSS spec, easy to forget): both panels rendered inside the nav collapsed into the
+   pill. `createPortal` is the durable fix, not removing the blur.
+4. **Per-language, multi-image project shots; heavy animation stays out of the bundle.** `PROJECT_SHOTS` became
+   `Record<id, ProjectShot[]>` — an array per card (images stack vertically), with `id.cs` keys for Czech variants
+   (fallback = EN). Stills bake to 460 px data-URL JPEGs; the RL-Lab taxi GIF (2.6 MB, animated) ships as a
+   `public/` asset loaded on demand — inlining would have tripled the lazy chunk and data-URLs can't be justified
+   for megabyte animations.
+5. **The "footer" of a scrollytelling site is the finale.** GitHub + LinkedIn (from `profile.ts`) render
+   bottom-right only as the contact chapter settles (fade 97.5→99.5 %, hidden from pointer/tab until visible) — the
+   corner stays clean for the whole journey, and LinkedIn stays deliberately quiet until Martin refreshes the
+   profile. Work cards additionally carry **real build stats** (`build: {days, commits}` from the GitHub snapshot's
+   `buildTimes` — honest distinct-commit-day counts), and Work-panel display order is an explicit `workOrder` field
+   because the PROJECTS array order is the dev-scene window-slot contract and must not move.
+
 ### ADR-022 — Work section: `projects.ts` as the one Work source of truth, surfaced two ways from the same data (2026-07-08)
 C1 formalized the Work items. Before, the same five projects were hard-coded in **three** places (the dev-scene window
 metadata, the clickable link overlay, and a dead A2 `chapter.projects` string list). The decisions:

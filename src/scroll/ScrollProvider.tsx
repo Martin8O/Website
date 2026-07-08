@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import Lenis from 'lenis'
-import { setScrollProgress } from './scrollStore'
+import { registerScrollDriver, setScrollProgress } from './scrollStore'
 
 /**
  * Owns the one and only smooth-scroll rhythm for the site.
@@ -33,6 +33,18 @@ export function ScrollProvider({ children }: { children: ReactNode }) {
       setScrollProgress(progress)
     })
 
+    // Nav / skip-link jumps ride the same Lenis rhythm (scrollStore relays).
+    // Reduced motion always teleports — a multi-chapter glide IS the motion.
+    registerScrollDriver((target, immediate) => {
+      const limit = lenis.limit || document.documentElement.scrollHeight - window.innerHeight
+      lenis.scrollTo(target * limit, {
+        immediate: immediate || prefersReducedMotion,
+        // A long jump (Contact from the top) gets a fixed flight time instead
+        // of Lenis's distance-based default, which would take ~forever.
+        duration: 2.2,
+      })
+    })
+
     let rafId = 0
     const raf = (time: number) => {
       lenis.raf(time)
@@ -42,6 +54,7 @@ export function ScrollProvider({ children }: { children: ReactNode }) {
 
     return () => {
       cancelAnimationFrame(rafId)
+      registerScrollDriver(null)
       lenis.destroy()
     }
   }, [])

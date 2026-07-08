@@ -1,16 +1,17 @@
-import { CHAPTERS, THEME_ACCENT } from '../data/chapters'
+import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { cardOpacity, cardOpacityWindowed } from '../timeline'
 import styles from './ChapterCards.module.css'
 
 /**
  * All chapter text cards, stacked centered. Each fades in as its chapter nears
  * center and out as it passes — driven purely by the continuous `pos`. Text is
- * real DOM (good for SEO/a11y); titles/bodies are our own authored HTML.
+ * real DOM (good for SEO/a11y); titles/bodies are our own authored HTML —
+ * already in the active language (Story passes `chaptersFor(lang)`).
  */
-export function ChapterCards({ pos }: { pos: number }) {
+export function ChapterCards({ pos, chapters }: { pos: number; chapters: Chapter[] }) {
   return (
     <main className={styles.cards}>
-      {CHAPTERS.map((ch, i) => {
+      {chapters.map((ch, i) => {
         const o = ch.cardFull
           ? cardOpacityWindowed(pos, i, ch.cardFull, ch.cardEase)
           : cardOpacity(pos, i)
@@ -36,6 +37,9 @@ export function ChapterCards({ pos }: { pos: number }) {
         return (
           <article
             key={ch.id}
+            // Chapter ids double as anchors (the skip-link lands on
+            // #contact-now and focuses its email CTA).
+            id={ch.id}
             className={`${styles.card} ${alignClass} ${compactClass}`}
             style={{
               opacity: o,

@@ -31,3 +31,21 @@ export function subscribe(listener: Listener): () => void {
   listeners.add(listener)
   return () => listeners.delete(listener)
 }
+
+/**
+ * Programmatic scroll (the nav "Contact" jump, skip-links). Lenis owns the
+ * scroll, so the ScrollProvider registers a driver here; components call
+ * `scrollToProgress` without ever touching the Lenis instance. `immediate`
+ * teleports (skip-links — a keyboard user shouldn't sit through the flight).
+ */
+type ScrollDriver = (progress: number, immediate: boolean) => void
+
+let driver: ScrollDriver | null = null
+
+export function registerScrollDriver(next: ScrollDriver | null): void {
+  driver = next
+}
+
+export function scrollToProgress(target: number, opts?: { immediate?: boolean }): void {
+  driver?.(target < 0 ? 0 : target > 1 ? 1 : target, opts?.immediate ?? false)
+}

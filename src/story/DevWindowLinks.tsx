@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CHAPTERS } from '../data/chapters'
-import { DEV_PROJECTS } from '../data/projects'
+import { projectsFor, type DevProject } from '../data/projects'
+import { useLang } from '../i18n/useLang'
 import { DEV, windowLayout } from '../canvas/scenes/devMath'
 import styles from './DevWindowLinks.module.css'
 
@@ -14,19 +15,27 @@ import styles from './DevWindowLinks.module.css'
  * (href · tint · panel ratio) is the single source of truth in
  * `src/data/projects.ts` — the same `DEV_PROJECTS` the canvas paints.
  */
-const LINKS = DEV_PROJECTS.map((p) => ({
-  href: p.link.href,
-  name: p.name,
-  label: `${p.name} — ${p.link.display}`,
-  tagline: p.tagline,
-  stack: p.stack,
-  tint: p.window.tint,
-  aspect: p.window.aspect ?? 0.66,
-}))
-
 const DEV_INDEX = CHAPTERS.findIndex((c) => c.theme === 'dev')
 
 export function DevWindowLinks({ pos }: { pos: number }) {
+  const lang = useLang()
+  // Same five windows the canvas paints, with the active language's copy for
+  // the hover/focus detail (projectsFor caches per language → cheap memo).
+  const links = useMemo(
+    () =>
+      projectsFor(lang)
+        .filter((p): p is DevProject => p.window !== undefined)
+        .map((p) => ({
+          href: p.link.href,
+          name: p.name,
+          label: `${p.name} — ${p.link.display}`,
+          tagline: p.tagline,
+          stack: p.stack,
+          tint: p.window.tint,
+          aspect: p.window.aspect ?? 0.66,
+        })),
+    [lang],
+  )
   const [aspect, setAspect] = useState(16 / 9)
   useEffect(() => {
     const measure = () => setAspect(window.innerWidth / Math.max(1, window.innerHeight))
@@ -43,7 +52,7 @@ export function DevWindowLinks({ pos }: { pos: number }) {
   const slots = windowLayout(aspect)
   return (
     <nav className={styles.links} aria-label="Projects">
-      {LINKS.slice(0, DEV.windows).map((link, i) => (
+      {links.slice(0, DEV.windows).map((link, i) => (
         <a
           key={link.href}
           className={`${styles.hit} ${slots[i].y < 0.5 ? styles.below : styles.above}`}

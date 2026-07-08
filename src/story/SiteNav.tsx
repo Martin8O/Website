@@ -1,40 +1,91 @@
 import { Suspense, lazy, useCallback, useRef, useState } from 'react'
+import { scrollToProgress } from '../scroll/scrollStore'
+import { useLang } from '../i18n/useLang'
+import { setLang } from '../i18n/langStore'
+import { STRINGS } from '../i18n/strings'
+import { AboutPanel } from './AboutPanel'
 import styles from './SiteNav.module.css'
 
 /**
- * Minimal, unobtrusive nav — for now a single "Work" trigger (top-right) that
- * opens the full portfolio overview (WorkPanel). The heavy panel + its baked
- * screenshots are code-split behind React.lazy, so they load only when the
- * visitor actually opens Work. Focus returns to the trigger on close.
- *
- * C2 will grow this into the fuller nav (Contact jump, about essence, GitHub +
- * LinkedIn footer links).
+ * Minimal, unobtrusive nav (C2) — one quiet glass pill, top-right:
+ * Home (house icon, back to the story start) · Work · Contact · About · CZ/EN.
+ * Work + Contact are one click away without scrolling the whole life
+ * (ROADMAP §8b). Home/Contact jumps TELEPORT (Martin: no auto-scroll racing
+ * through every scene). The language button shows the language it switches TO.
+ * The heavy Work panel stays code-split behind React.lazy; About is a page of
+ * text and ships inline. Focus returns to the trigger when a dialog closes.
  */
 const WorkPanel = lazy(() => import('./WorkPanel').then((m) => ({ default: m.WorkPanel })))
 
 export function SiteNav() {
-  const [open, setOpen] = useState(false)
-  const triggerRef = useRef<HTMLButtonElement>(null)
+  const lang = useLang()
+  const t = STRINGS[lang]
+  const [open, setOpen] = useState<'work' | 'about' | null>(null)
+  const workRef = useRef<HTMLButtonElement>(null)
+  const aboutRef = useRef<HTMLButtonElement>(null)
 
-  const close = useCallback(() => {
-    setOpen(false)
-    triggerRef.current?.focus()
+  const closeWork = useCallback(() => {
+    setOpen(null)
+    workRef.current?.focus()
+  }, [])
+  const closeAbout = useCallback(() => {
+    setOpen(null)
+    aboutRef.current?.focus()
   }, [])
 
   return (
     <nav className={styles.nav} aria-label="Site">
       <button
-        ref={triggerRef}
-        className={styles.work}
-        onClick={() => setOpen(true)}
-        aria-haspopup="dialog"
-        aria-expanded={open}
+        className={`${styles.item} ${styles.home}`}
+        onClick={() => scrollToProgress(0, { immediate: true })}
+        aria-label={t.navHome}
+        title={t.navHome}
       >
-        Work
+        {/* Simple house glyph, drawn inline so it inherits the amber color. */}
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path
+            d="M8 1.6 1.6 7.2h1.8v6.4h3.4V9.8h2.4v3.8h3.4V7.2h1.8Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.3"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
-      {open && (
+      <button
+        ref={workRef}
+        className={styles.item}
+        onClick={() => setOpen('work')}
+        aria-haspopup="dialog"
+        aria-expanded={open === 'work'}
+      >
+        {t.navWork}
+      </button>
+      <button className={styles.item} onClick={() => scrollToProgress(1, { immediate: true })}>
+        {t.navContact}
+      </button>
+      <button
+        ref={aboutRef}
+        className={styles.item}
+        onClick={() => setOpen('about')}
+        aria-haspopup="dialog"
+        aria-expanded={open === 'about'}
+      >
+        {t.navAbout}
+      </button>
+      <span className={styles.divider} aria-hidden="true" />
+      <button
+        className={`${styles.item} ${styles.lang}`}
+        onClick={() => setLang(lang === 'en' ? 'cs' : 'en')}
+        aria-label={t.langSwitchLabel}
+        title={t.langSwitchLabel}
+      >
+        {t.langSwitch}
+      </button>
+      {open === 'about' && <AboutPanel onClose={closeAbout} />}
+      {open === 'work' && (
         <Suspense fallback={null}>
-          <WorkPanel onClose={close} />
+          <WorkPanel onClose={closeWork} />
         </Suspense>
       )}
     </nav>
