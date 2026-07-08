@@ -4,6 +4,34 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-031 — Biography fact-check: accurate dates/terminology, a non-chapter era schedule, humbler claims (2026-07-09)
+A full fact-check of every claim on the site (Martin's review), reconciled against the sources of truth — his own
+health site and his corrections — not memory. Durable decisions:
+1. **Terminology: "military jet pilot" (EN) / "pilot proudových letounů" (CZ), never "fighter pilot" / "stíhací
+   pilot".** Martin flew jet trainers + the L-159 (advanced *light-combat*), not an air-superiority fighter
+   (Gripen/F-16); "fighter" over-claims to ex-colleagues. Applied everywhere incl. `index.html` OG/meta; chapter 02
+   eyebrow "Fighters" → "Military jets" / "Proudové stroje".
+2. **Dates corrected from the sources.** Illness: diagnosed Jan 2014, remission confirmed by colonoscopy Feb 2016
+   (mojecestakezdravi.cz) → era `2014–2016`, dropped the unverifiable "no medication since 2014". Fighters split:
+   L-39 `2005–2012`, L-159 `2012–2022` (flown to end of career); service split `2020–2022` / `2022–2026`. About:
+   "20 years in the Air Force, 17 flying" (was "20 years a fighter pilot").
+3. **Non-chapter era stops (`EXTRA_ERAS`).** The pilot arc needs more year-labels than chapters (L-39 then L-159
+   inside one "cruise" chapter; service-end then free-years inside "sunset"). `timeline.activeEra` now merges chapter
+   eras with a small `EXTRA_ERAS` list; the L-159 label is synced to the golden unlock ring (climb localT 0.8 =
+   pos 2.3 = 23 %), and the "L-159" tag rides with the jet in the climb scene.
+4. **Humbler, truthful claims.** "eight builds in five weeks" → "five real apps in about a month" (matches the five
+   canvas windows). Dropped "everything public and verifiable on GitHub" (dev-brain + RL-Lab are private) — the
+   per-card GitHub links already carry verifiability. Bagram kept to "liaison officer" (self-defining non-flying).
+5. **Dev-window interactive layer.** The clickable/hover overlay now ends at 98 % (was 99.5 %, still hover-lit under
+   the contact nebula); hover is glow-only (no lift/frame/black shadow); the info popup sits below every window, text
+   justified, with an OUTWARD neon glow (a negative box-shadow spread had hidden the glow inside the box).
+6. **Crash guard:** `getNebulaLayers` clamps a ring radius to ≥ 0 — a ≈1px (unlaid-out) canvas collapses `unit` and
+   `arc()` throws (`IndexSizeError`).
+**Deferred:** the dev scene's dark atmospheric edges (the outer cards sit against them) — a scene-composition tweak
+for another session. Gate green (187 tests). Model-fit: Opus 4.8 · medium.
+
+---
+
 ### ADR-031 — Security-header + DNS hardening pass: green everything that has no downside, leave two grey on purpose (2026-07-08)
 Prompted by a Hardenize/Red Sift scan of `svobodamartin.dev`. Verified live state first (DNS = Cloudflare, mail =
 Cloudflare Email Routing, web = Vercel DNS-only → Let's Encrypt certs). The durable decisions:

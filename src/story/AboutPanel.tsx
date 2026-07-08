@@ -22,11 +22,12 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
   en: {
     p1: (
       <>
-        Twenty years a fighter pilot&nbsp;—&nbsp;instructor, display pilot, test pilot. Then a
+        Twenty years in the Air Force, seventeen of them flying&nbsp;—&nbsp;military jet pilot,
+        instructor, display pilot, test pilot. Then a
         self-healing that rebuilt how I live, a Bitcoin rabbit hole that rebuilt what I
         trust&nbsp;—&nbsp;trust grounded in deep technical understanding, not in
         promises&nbsp;—&nbsp;and Claude&nbsp;Code, which turned the computer screen I once walked
-        away from into a hyper-efficient workshop: eight builds in five weeks, and{' '}
+        away from into a hyper-efficient workshop: five real apps in about a month, and{' '}
         <span className={styles.highlight}>this site</span>&nbsp;—&nbsp;from an empty folder to a
         live production deploy <span className={styles.highlight}>in 4&nbsp;days</span>.
       </>
@@ -43,11 +44,12 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
   cs: {
     p1: (
       <>
-        Dvacet let stíhací pilot&nbsp;–&nbsp;instruktor, display pilot, zkušební pilot. Pak
+        Dvacet let u letectva, sedmnáct z nich ve vzduchu&nbsp;–&nbsp;pilot proudových letounů, instruktor,
+        display pilot, zkušební pilot. Pak
         sebeuzdravení, které přestavělo, jak žiju, bitcoinová králičí nora, která přestavěla,
         čemu věřím&nbsp;–&nbsp;důvěře postavené na hlubokém technickém porozumění, ne na
         slibech&nbsp;–&nbsp;a Claude&nbsp;Code, který proměnil obrazovku počítače, od níž jsem
-        kdysi odešel, v super efektivní dílnu: osm projektů za pět týdnů a{' '}
+        kdysi odešel, v super efektivní dílnu: pět skutečných aplikací za zhruba měsíc a{' '}
         <span className={styles.highlight}>tento web</span>&nbsp;–&nbsp;kompletně z prázdné složky
         až po produkční nasazení <span className={styles.highlight}>za 4&nbsp;dny</span>.
       </>

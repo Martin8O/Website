@@ -65,19 +65,22 @@ export function nearestChapter(progress: number, count: number): number {
 export function activeEra(
   progress: number,
   chapters: readonly { era?: string; eraFrom?: number }[],
+  extra: readonly { from: number; era: string }[] = [],
 ): string {
   const p = clamp01(progress)
   const span = Math.max(chapters.length - 1, 1)
+  const stops = chapters
+    .map((ch, i) => (ch.era ? { from: ch.eraFrom ?? (i - 0.5) / span, era: ch.era } : null))
+    .filter((s): s is { from: number; era: string } => s !== null)
+    .concat(extra)
   let era = ''
   let best = -Infinity
-  chapters.forEach((ch, i) => {
-    if (!ch.era) return
-    const from = ch.eraFrom ?? (i - 0.5) / span
-    if (from <= p && from >= best) {
-      best = from
-      era = ch.era
+  for (const s of stops) {
+    if (s.from <= p && s.from >= best) {
+      best = s.from
+      era = s.era
     }
-  })
+  }
   return era
 }
 

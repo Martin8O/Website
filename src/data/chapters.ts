@@ -84,6 +84,16 @@ export type Chapter = {
 
 /** Signature accent colour per theme — drives the eyebrow + HUD tint so the
  *  palette is data-driven from day one (hex, matches the design tokens). */
+/** Extra HUD era stops NOT tied to a chapter — the pilot arc needs two year
+ *  labels (L-39, then L-159) inside the single "cruise" chapter's scroll span.
+ *  Language-agnostic (aircraft designations). Merged in `timeline.activeEra`. */
+export const EXTRA_ERAS: readonly { from: number; era: string }[] = [
+  { from: 0.2, era: '2005–2012 · L-39' },
+  // The free years after the Air Force — appears mid-way through the sunset
+  // chapter's card, as the body turns from "end of service" to "the open road".
+  { from: 0.62, era: '2022–2026' },
+]
+
 export const THEME_ACCENT: Record<Theme, string> = {
   origin: '#f5c451',
   sky: '#ffb000',
@@ -118,7 +128,7 @@ export const CHAPTERS: Chapter[] = [
     id: 'sky-climb',
     theme: 'sky',
     sky: 'climb',
-    era: '2001–2005 · CTU → Brno',
+    era: '1999–2005 · CTU → Brno',
     num: '01 — The Decision',
     title: 'Upward',
     // Clear the frame BEFORE the cloud-punch white-out: hold to 21 %, then
@@ -127,18 +137,20 @@ export const CHAPTERS: Chapter[] = [
     cardEase: 0.15,
     // The faculty was electrical engineering; the FIELD was informatics —
     // that is what makes "a life in front of a computer screen" land.
-    body: 'Two years into computer science at the faculty of electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen&nbsp;—&nbsp;<em>remember that</em>&nbsp;—&nbsp;and there was a boyhood dream waiting: <span class="a-hud">flying fighter jets</span>. The Z‑142, then the L‑39C&nbsp;—&nbsp;a hundred hours in the air and a totally different life.',
+    body: 'Two years into computer science at the faculty of electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen&nbsp;—&nbsp;<em>remember that</em>&nbsp;—&nbsp;and there was a boyhood dream waiting: <span class="a-hud">flying military jets</span>. The Z‑142, then the L‑39C&nbsp;—&nbsp;a hundred hours in the air and a totally different life.',
     align: 'right',
   },
   {
     id: 'sky-cruise',
     theme: 'sky',
     sky: 'cruise',
-    era: '2005–2010',
-    // Flip the year label the moment the L-159 takes the lead (24 %), not at
-    // the mechanical 25 % midpoint.
-    eraFrom: 0.24,
-    num: '02 — Fighters',
+    era: '2012–2022 · L-159',
+    // Two era stops span this chapter: the L-39 years (2005–2012, EXTRA_ERAS)
+    // arrive at 20 %, then the L-159 takes the lead at 23 % — synced to the
+    // golden unlock ring in the climb scene (climb localT 0.8 = pos 2.3 = 23 %,
+    // per sceneTimeline: the climb run's window is pos [1.5, 2.5]).
+    eraFrom: 0.23,
+    num: '02 — Military jets',
     title: 'Above the<br>clouds',
     // Rises out of the white-out from 23 %, full at 24.5 % — right as the
     // L-159 takes the lead (24 %).
@@ -180,9 +192,11 @@ export const CHAPTERS: Chapter[] = [
     // the farewell flares have dropped to the runway — 0.76 of chapter 5
     // = 64 % of the whole scroll.
     enterFade: [0.76, 0.97],
-    era: '2020–2026',
-    // Hold the airshow's "2016–2017" through 58 %; the sunset era arrives at
-    // 59 % — as the landing actually enters, not at the 55 % midpoint.
+    // Split across the chapter (title stays the military roles): "2020–2022"
+    // = the last service years (landing = leaving the Air Force), then a
+    // "2022–2026" stop (EXTRA_ERAS) at mid-card, where the body turns to the
+    // free years that followed. Arrives at 59 %, as the landing enters.
+    era: '2020–2022',
     eraFrom: 0.585,
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
@@ -193,7 +207,7 @@ export const CHAPTERS: Chapter[] = [
     body: '<span class="a-hud">Twenty years in the Air Force, ~1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and test pilot. In 2021 I chose to leave the military; since 2022 I’ve been my own boss. Before that I retrained in computer networks and systems. But I had no masterplan&nbsp;—&nbsp;just trust in the open road ahead and the urge to leap into the world. What followed was intense travel: half of every year abroad, volunteering at Buddhist centres and courses. Meditation had been part of my life since 2005&nbsp;—&nbsp;now it had more room to breathe.',
     align: 'left',
   },
-  // The story is THEMATIC here, not strictly chronological: healing (2013)
+  // The story is THEMATIC here, not strictly chronological: healing (2014–16)
   // follows the closed Air-Force arc so the flying section stays whole.
   {
     id: 'calm-healing',
@@ -206,12 +220,13 @@ export const CHAPTERS: Chapter[] = [
     // until the tree stands in full bloom (83 %), gone before the next
     // scene may enter at 84 %.
     cardFull: [-0.12, 0.47],
-    // Diagnosed January 2014; remission confirmed by colonoscopy — dates
-    // per Martin's own site (mojecestakezdravi.cz/uvod-2).
-    era: '2014–2015',
+    // Dates per Martin's own site (mojecestakezdravi.cz/uvod-2): diagnosed
+    // January 2014; ~18 months of rebuilding; remission confirmed by
+    // colonoscopy February 2016 ("over a year without any medication").
+    era: '2014–2016',
     num: '06 — The Test',
     title: 'Selfhealing',
-    body: 'Ulcerative colitis&nbsp;—&nbsp;“lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle</span>: eighteen months of rebuilding everything&nbsp;—&nbsp;food, gut, mind, lifestyle. In remission ever since&nbsp;—&nbsp;<span class="a-cyan">no medication since 2014</span>. I came out healthier, knowing myself from the inside.',
+    body: 'Ulcerative colitis&nbsp;—&nbsp;“lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle</span>: eighteen months of rebuilding everything&nbsp;—&nbsp;food, gut, mind, lifestyle. In remission ever since&nbsp;—&nbsp;<span class="a-cyan">off all medication</span>, confirmed clear by colonoscopy in 2016. I came out healthier, knowing myself from the inside.',
     cta: {
       label: 'Read the whole journey →',
       href: 'https://mojecestakezdravi.cz/',
@@ -252,9 +267,8 @@ export const CHAPTERS: Chapter[] = [
     era: 'from 2026',
     num: '08 — The explosion',
     title: 'Solo<br>developer',
-    // FINAL v2.5: the headline number is "eight builds in five weeks"
-    // (accented); the projects are not listed — they float around as the
-    // canvas windows.
+    // Headline number is "five real apps in about a month" (accented, matches
+    // the five floating canvas windows); the projects aren't listed in prose.
     // The card arrives AFTER the landings settle: it rises across the back
     // half of the "95 %" HUD readout (touchdown at 95.0) and is FULL the
     // instant the HUD flips to 96 (progress 0.955 — the HUD rounds), so no
@@ -263,7 +277,7 @@ export const CHAPTERS: Chapter[] = [
     cardFull: [0.55, 0.7],
     cardEase: 0.05,
     compact: true,
-    body: 'It began carefully&nbsp;—&nbsp;small apps first, testing what AI and I could build together. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">eight builds in five weeks</span>&nbsp;—&nbsp;they’re floating all around you. They write what they taught me into a knowledge vault, <strong>dev-brain</strong>, and one of the builds, <strong>BrainQuest</strong>, turns that vault into a Duolingo-style learning game. So I’m still learning the craft, not just watching it happen.<br>All of it public and verifiable on GitHub.<br>The contribution graph below looks like a steep takeoff. Everything above turned out to be training for this. <em>(Turns out I love the screen after all.)</em>',
+    body: 'It began carefully&nbsp;—&nbsp;small apps first. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">five real apps in about a month</span>&nbsp;—&nbsp;floating all around you. During the builds they even wrote the lessons they taught me into the <strong>dev-brain</strong> vault, which <strong>BrainQuest</strong> turns into Duolingo-style learning&nbsp;—&nbsp;so I’m still learning the craft, not just watching. The contribution graph below looks like a steep takeoff; maybe everything above was training for it. <em>(Turns out I love the screen after all.)</em>',
     // The Work items (the five floating windows) are data-driven from
     // `src/data/projects.ts` → the dev scene + DevWindowLinks read them.
   },
@@ -287,7 +301,7 @@ export const CHAPTERS: Chapter[] = [
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
     cta: {
       label: '[ martin@svobodamartin.dev ]',

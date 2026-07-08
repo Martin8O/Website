@@ -13,19 +13,18 @@
   pointer-events: auto;
   cursor: pointer;
   border-radius: 6px;
-  transition: box-shadow 160ms ease;
+  transition: box-shadow 200ms ease;
 }
 
 .hit:hover,
 .hit:focus-visible {
-  /* No frame — just ambient light in the window's own neon. */
-  box-shadow: 0 0 36px 8px color-mix(in srgb, var(--tint, #ffb000) 45%, transparent);
+  /* Just a soft glow in the window's own neon — no frame, no lift (Martin). */
+  box-shadow: 0 0 46px -4px color-mix(in srgb, var(--tint, #ffb000) 60%, transparent);
   outline: none;
 }
 
 /* Hover / focus detail: what the app is + its stack. Hidden until the plate
-   is hovered or keyboard-focused; placed below upper windows, above lower
-   ones so it never runs off the frame. */
+   is hovered or keyboard-focused; always placed BELOW the window (Martin). */
 .tip {
   position: absolute;
   left: 50%;
@@ -35,10 +34,13 @@
   flex-direction: column;
   gap: 0.3rem;
   padding: 0.6rem 0.7rem;
-  background: color-mix(in srgb, #06080e 88%, transparent);
-  border: 1px solid color-mix(in srgb, var(--tint, #ffb000) 45%, transparent);
+  background: color-mix(in srgb, #06080e 82%, transparent);
   border-radius: 8px;
-  box-shadow: 0 16px 40px -18px #000;
+  /* Just an OUTWARD glow in the app's neon — no black shadow, no frame; the
+     positive spread lets the light escape the box so it reads as a glow, not a
+     hard-edged dark plate (Martin). */
+  box-shadow: 0 0 34px 3px color-mix(in srgb, var(--tint, #ffb000) 55%, transparent),
+    0 0 10px 0 color-mix(in srgb, var(--tint, #ffb000) 42%, transparent);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   opacity: 0;
@@ -48,10 +50,6 @@
 }
 .below .tip {
   top: 100%;
-}
-.above .tip {
-  bottom: 100%;
-  transform: translateX(-50%) translateY(-4px);
 }
 .hit:hover .tip,
 .hit:focus-visible .tip {
@@ -69,6 +67,8 @@
   font-family: var(--font-body);
   font-size: 0.74rem;
   line-height: 1.4;
+  text-align: justify;
+  hyphens: auto;
   color: color-mix(in srgb, var(--fg) 76%, transparent);
 }
 .tipStack {

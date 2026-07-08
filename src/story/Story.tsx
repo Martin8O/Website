@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useScrollProgress } from '../scroll/useScrollProgress'
-import { CHAPTERS, chaptersFor } from '../data/chapters'
+import { CHAPTERS, chaptersFor, EXTRA_ERAS } from '../data/chapters'
 import { useLang } from '../i18n/useLang'
 import { activeEra, chapterPosition } from '../timeline'
 import { buildRuns } from '../canvas/sceneTimeline'
@@ -46,7 +46,7 @@ export function Story() {
   const pos = chapterPosition(progress, count)
   // The HUD year label switches on a data-driven schedule (chapter.eraFrom),
   // so it flips when the scene arrives, not at the mechanical midpoint.
-  const era = activeEra(progress, chapters)
+  const era = activeEra(progress, chapters, EXTRA_ERAS)
   // C4: the accent GLIDES between themes in sync with the canvas cross-fade
   // instead of stepping at chapter boundaries.
   const accent = accentAt(pos, RUNS, count)

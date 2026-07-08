@@ -46,8 +46,10 @@ export function DevWindowLinks({ pos }: { pos: number }) {
   }, [])
 
   // Live only while the landed constellation owns the frame: from the
-  // touchdown (chapter + 0.5) until the hand-over veil takes it.
-  const landed = pos >= DEV_INDEX + 0.5 && pos <= DEV_INDEX + 0.95
+  // touchdown (chapter + 0.5) until 98 % (chapter + 0.8), where the contact
+  // galaxy takes over — past that the windows are only a fading backdrop and
+  // must NOT stay clickable / hover-lit under the nebula (Martin).
+  const landed = pos >= DEV_INDEX + 0.5 && pos <= DEV_INDEX + 0.8
   if (!landed) return null
 
   const slots = windowLayout(aspect)
@@ -56,7 +58,7 @@ export function DevWindowLinks({ pos }: { pos: number }) {
       {links.slice(0, DEV.windows).map((link, i) => (
         <a
           key={link.href}
-          className={`${styles.hit} ${slots[i].y < 0.5 ? styles.below : styles.above}`}
+          className={`${styles.hit} ${styles.below}`}
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"

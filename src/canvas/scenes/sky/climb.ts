@@ -246,6 +246,16 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
       drawAircraft(ctx, 'l159p', {
         x: px, y: py, size: unit * 0.14, tilt, color: '#22314e', glint: '#dcecff', alpha: a * toL159, time,
       })
+      // The "L-159" tag rides WITH the jet (not just the unlock flash) so the
+      // aircraft stays named as it flies out — matches the HUD era flipping to
+      // "2012–2021 · L-159" at this exact beat (Martin).
+      ctx.save()
+      ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = rgba(GOLD, a * toL159 * 0.9)
+      ctx.fillText('L-159', px + unit * 0.1, py + unit * 0.09)
+      ctx.restore()
     }
     const pulse = smoothstep(0.8, 0.84, t) * (1 - smoothstep(0.92, 0.98, t))
     if (pulse > 0.01) {
@@ -256,11 +266,6 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
       ctx.beginPath()
       ctx.arc(px, py, unit * 0.14 * (0.55 + spread * 1.1), 0, Math.PI * 2)
       ctx.stroke()
-      ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
-      ctx.textAlign = 'left'
-      ctx.textBaseline = 'middle'
-      ctx.fillStyle = rgba(GOLD, a * pulse * 0.9)
-      ctx.fillText('L-159', px + unit * 0.1, py + unit * 0.09)
       ctx.restore()
     }
 

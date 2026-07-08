@@ -368,7 +368,9 @@ function getNebulaLayers(w: number, h: number, horizonY: number, unit: number) {
   ga.strokeStyle = rgba(ICE, 0.4)
   ga.lineWidth = 1.4
   ga.beginPath()
-  ga.arc(px2, py2, pr - 0.7, TAU * 0.52, TAU * 0.9)
+  // Guard the inset ring: on a not-yet-laid-out (≈1px) canvas `unit` collapses
+  // to ~1, so `pr - 0.7` would go negative and `arc()` throws (IndexSizeError).
+  ga.arc(px2, py2, Math.max(0, pr - 0.7), TAU * 0.52, TAU * 0.9)
   ga.stroke()
   ga.strokeStyle = rgba(ICE, 0.24)
   ga.lineWidth = 1.1
@@ -1007,11 +1009,18 @@ function drawProjectWindow(
   ctx.globalAlpha = a * 0.95
   ctx.strokeStyle = rgba(meta.tint, 0.95)
   ctx.lineWidth = 1.4
+  // Bloom the neon rim (canvas shadow) so the window GLOWS at its edges like
+  // the DOM tooltip does — no dark edge where the panel meets the scene, just
+  // the app's own colour glowing outward (Martin).
+  ctx.shadowColor = rgba(meta.tint, 0.9)
+  ctx.shadowBlur = unit * 0.03
   roundRect(ctx, x0, y0, Wpx, Hpx, Wpx * 0.045)
   ctx.stroke()
-  ctx.globalAlpha = a * 0.3
+  ctx.globalAlpha = a * 0.45
   ctx.lineWidth = 4
+  ctx.shadowBlur = unit * 0.02
   ctx.stroke()
+  ctx.shadowBlur = 0
   // Title bar.
   ctx.globalAlpha = a
   ctx.fillStyle = rgba(meta.tint, 0.13)

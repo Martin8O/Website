@@ -25,7 +25,7 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
     { url: '/shots/clearfeed-0.jpg', aspect: 2.500 },
   ],
   'tenovice': [
-    { url: '/shots/tenovice-0.jpg', aspect: 1.074 },
+    { url: '/shots/tenovice-0.jpg', aspect: 0.983 },
   ],
   'tenovice.cs': [
     { url: '/shots/tenovice_cs-0.jpg', aspect: 0.986 },
