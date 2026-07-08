@@ -4,6 +4,30 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-025 — B5: SEO/social meta + a branded OG image rendered from the site's own DNA; safe-area via `env()`; a11y already carried by C2/C4 (2026-07-08)
+The reduced-motion / a11y / SEO / perf pass. The decisions:
+1. **The social card is generated, branded, and legible — not a scene screenshot, not a placeholder.** `public/og.png`
+   (1200×630) is rendered headless (same CDP pattern as the verification harness) from a self-contained card built in the
+   site's own DNA — dark `#06070a`, the amber HUD corner frame, "Martin" in Space Grotesk, and the climbing flight-path
+   with one coloured waypoint per era ending in the reticle mark. A raw scene grab has no title text and reads as noise at
+   thumbnail size; a designed card is deterministic and on-brand. The same mark ships as `favicon.svg` (scalable) +
+   `apple-touch-icon.png` (180). Full OG + Twitter `summary_large_image` tags, `theme-color`, `canonical`, `robots.txt`,
+   `sitemap.xml`.
+2. **Canonical / OG url / sitemap point to the decided production domain `svobodamartin.dev` before it resolves.** D1
+   wires the domain + email; the intended prod URL is a *decision already made* (domain bought), not an invented
+   placeholder, so baking it now means D1 flips DNS and the metadata is already correct. The contact email stays the
+   `hello@example.com` placeholder until launch (that string rides the domain).
+3. **Mobile safe-area is folded into the existing edge offsets via `env(safe-area-inset-*)`.** Each fixed/absolute chrome
+   element (nav, skip-link, footer, HUD, scroll-hint) gets `calc(<existing gap> + env(...))`; on desktop the insets are 0
+   so nothing moved, on notched phones the chrome clears the cutout. `viewport-fit=cover` lets the world reach under the
+   notch. No `100vh` traps exist (the world is one `position:fixed; inset:0` stage), so no `dvh/svh` swap was needed.
+4. **A11y + reduced-motion were already Done-criteria met by C2/C4 — B5 audited and confirmed, it didn't rebuild them.**
+   Skip-link is the first tab stop, single `<main>`, real `<h1>`/`<h2>` text, labelled `<nav>`, decorative canvas
+   `aria-hidden`; reduced motion freezes ambient canvas time to a static per-scroll frame with native scroll and zero
+   micro-motion. *Deferred to D1 (not a B5 miss):* the 720 kB main JS chunk (all scene renderers + baked data-URL assets)
+   — the real Lighthouse/LCP lever is code-splitting the scenes, which belongs with the production perf pass. Perf
+   confirmed healthy here (≤ 7.96 ms/frame every scene, headless CPU).
+
 ### ADR-024 — C4: preloader gates the journey, the accent GLIDES with the scene cross-fade, pointer micro-parallax (2026-07-08)
 The cohesion/polish pass. The decisions:
 1. **A preloader gates scroll on real critical-asset signals.** A dark amber boot gate (wordmark · hairline bar · mono

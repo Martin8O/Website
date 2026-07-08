@@ -1,7 +1,7 @@
 .hud {
   position: absolute;
-  bottom: 1.6rem;
-  left: 1.6rem;
+  bottom: calc(1.6rem + env(safe-area-inset-bottom));
+  left: calc(1.6rem + env(safe-area-inset-left));
   display: flex;
   align-items: center;
   gap: 0.7rem;

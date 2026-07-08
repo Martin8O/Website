@@ -2,7 +2,7 @@
    above everything (the nav is z 40, dialogs 50). */
 .skip {
   position: fixed;
-  top: clamp(0.75rem, 2vw, 1.4rem);
+  top: calc(clamp(0.75rem, 2vw, 1.4rem) + env(safe-area-inset-top));
   left: 50%;
   transform: translate(-50%, calc(-100% - 2rem));
   z-index: 60;

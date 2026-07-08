@@ -2,15 +2,54 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover so the fixed world reaches under notches; the nav /
+         footer / skip-link pad themselves with the safe-area insets. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#06070a" />
+    <meta name="author" content="Martin Svoboda" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Branded mark (the amber HUD through-line); SVG scales for every tab. -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="https://svobodamartin.dev/" />
+
+    <!-- Fonts: preconnect + display=swap so text paints immediately (no CLS;
+         the preloader holds the reveal until the faces have actually loaded). -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Chakra+Petch:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+
     <title>Martin — Scroll Through a Life</title>
-    <meta name="description" content="A personal scrollytelling journey: fighter pilot, airshow, self-healing, Bitcoin, and building with Claude Code." />
+    <meta
+      name="description"
+      content="A personal scrollytelling journey: fighter pilot, airshow, self-healing, Bitcoin, and building with Claude Code. Scroll, and a life flies past."
+    />
+
+    <!-- Open Graph / Twitter — the social share card (og.png is a branded
+         1200×630 rendered from the site's own DNA). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Martin — Scroll Through a Life" />
+    <meta property="og:title" content="Martin — Scroll Through a Life" />
+    <meta
+      property="og:description"
+      content="Fighter pilot → airshow → self-healing → Bitcoin → building with Claude Code. Scroll, and a life flies past."
+    />
+    <meta property="og:url" content="https://svobodamartin.dev/" />
+    <meta property="og:image" content="https://svobodamartin.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Martin — a scrollytelling journey through a life, in the amber HUD of a cockpit." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Martin — Scroll Through a Life" />
+    <meta
+      name="twitter:description"
+      content="Fighter pilot → airshow → self-healing → Bitcoin → building with Claude Code. Scroll, and a life flies past."
+    />
+    <meta name="twitter:image" content="https://svobodamartin.dev/og.png" />
   </head>
   <body>
     <div id="root"></div>

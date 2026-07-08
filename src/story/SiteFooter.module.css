@@ -2,8 +2,8 @@
    reads as instrument chrome, not content. */
 .footer {
   position: absolute;
-  bottom: 1.6rem;
-  right: 1.6rem;
+  bottom: calc(1.6rem + env(safe-area-inset-bottom));
+  right: calc(1.6rem + env(safe-area-inset-right));
   display: flex;
   align-items: baseline;
   gap: 1.2rem;

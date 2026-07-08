@@ -2,8 +2,10 @@
    the story stage and out of the way of the scroll world until wanted. */
 .nav {
   position: fixed;
-  top: clamp(0.75rem, 2vw, 1.4rem);
-  right: clamp(0.75rem, 2vw, 1.6rem);
+  /* Safe-area insets (0 on desktop) keep the pill clear of notches / rounded
+     corners on phones; the clamp is the baseline gap everywhere else. */
+  top: calc(clamp(0.75rem, 2vw, 1.4rem) + env(safe-area-inset-top));
+  right: calc(clamp(0.75rem, 2vw, 1.6rem) + env(safe-area-inset-right));
   z-index: 40;
   display: flex;
   align-items: center;
