@@ -94,7 +94,7 @@ export const CHAPTERS: Chapter[] = [
     num: '↓ Scroll to travel through time with me',
     title: 'Martin',
     centerBody: true,
-    body: 'One life, many worlds.<br>Scroll and set the sun running across the sky.',
+    body: 'One life, many worlds.<br>Scroll and send the sun racing across the sky.',
   },
   {
     id: 'origin-school',
