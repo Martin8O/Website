@@ -28,6 +28,39 @@ function shotsFor(id: string, lang: Lang) {
   return (lang === 'cs' && PROJECT_SHOTS[`${id}.cs`]) || PROJECT_SHOTS[id]
 }
 
+/** A looping, muted clip (the breathing contact-scene nebula) — used both as
+ *  the This-Site card's second shot and, decoratively (no `label` → aria-
+ *  hidden), as the panel's ambient backdrop. The `autoPlay` attribute covers
+ *  most browsers; the mount `play()` is the fallback for contexts that ignore
+ *  gesture-less autoplay (some mobile / embedded webviews). Under
+ *  `prefers-reduced-motion` it stays a still first frame — no autoplay, no
+ *  play() call (motion is a Done-criterion here). */
+function LoopingClip({ src, label, className }: { src: string; label?: string; className?: string }) {
+  const ref = useRef<HTMLVideoElement>(null)
+  const reduced =
+    typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+  useEffect(() => {
+    if (!reduced) ref.current?.play().catch(() => {})
+  }, [reduced])
+  return (
+    <video
+      ref={ref}
+      src={src}
+      className={className}
+      autoPlay={!reduced}
+      loop
+      muted
+      playsInline
+      preload="metadata"
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
+    />
+  )
+}
+
+/** The looping nebula, shared by every card as the panel backdrop asset. */
+const NEBULA_CLIP = '/contact-nebula.mp4'
+
 function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
   const shots = shotsFor(p.id, lang)
   const tint = p.window?.tint ?? 'var(--amber)'
@@ -35,15 +68,23 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
     <li className={styles.card} style={{ ['--tint' as string]: tint }}>
       <div className={styles.shot}>
         {shots ? (
-          shots.map((s, i) => (
-            <img
-              key={s.url}
-              src={s.url}
-              alt={`${p.name} — ${t.screenshotAlt}${i > 0 ? ` ${i + 1}` : ''}`}
-              loading="lazy"
-              decoding="async"
-            />
-          ))
+          shots.map((s, i) =>
+            /\.(mp4|webm)$/.test(s.url) ? (
+              <LoopingClip
+                key={s.url}
+                src={s.url}
+                label={`${p.name} — ${t.screenshotAlt}${i > 0 ? ` ${i + 1}` : ''}`}
+              />
+            ) : (
+              <img
+                key={s.url}
+                src={s.url}
+                alt={`${p.name} — ${t.screenshotAlt}${i > 0 ? ` ${i + 1}` : ''}`}
+                loading="lazy"
+                decoding="async"
+              />
+            ),
+          )
         ) : (
           <div className={styles.noshot} aria-hidden="true">
             {p.name.charAt(0)}
@@ -67,6 +108,17 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
           <a className={styles.link} href={p.link.href} target="_blank" rel="noopener noreferrer">
             {p.link.display} <span aria-hidden="true">↗</span>
           </a>
+          {p.repo && (
+            <a
+              className={styles.repoLink}
+              href={p.repo}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${p.name} — ${t.sourceOnGitHub}`}
+            >
+              GitHub <span aria-hidden="true">↗</span>
+            </a>
+          )}
           {!p.live && <span className={styles.status}>{p.status}</span>}
         </div>
         {p.build && (
@@ -108,6 +160,9 @@ export function WorkPanel({ onClose }: { onClose: () => void }) {
         aria-labelledby="work-title"
         onMouseDown={(e) => e.stopPropagation()}
       >
+        {/* Ambient life behind the cards — the same breathing nebula, dimmed
+            and blurred so the negative space isn't a flat black. */}
+        <LoopingClip src={NEBULA_CLIP} className={styles.backdrop} />
         <header className={styles.head}>
           <div>
             <p className={styles.eyebrow}>{t.workEyebrow}</p>

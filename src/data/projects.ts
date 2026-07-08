@@ -13,9 +13,10 @@
  * the catalog a later Work list / nav can draw from.
  *
  * Real links + real shots only (Martin's rule): every URL here was verified
- * live (C1). Private repos (ClearFeed, RL Lab, BrainQuest) currently 404 to
- * the public — they carry `live: false`; the link still renders per Martin's
- * "link every repo, publish over time" policy.
+ * live (C1). The repos are now published (Phase P) — ClearFeed, BrainQuest,
+ * Registrace, Website and strc-check are all public. RL Lab stays private
+ * (runs locally) → it alone carries `live: false`; the link still renders per
+ * Martin's "link every repo, publish over time" policy.
  */
 
 import type { Lang } from '../i18n/langStore'
@@ -50,6 +51,12 @@ export type Project = {
   /** The app's real home: `href` is the outbound URL, `display` the
    *  protocol-less label shown on the window's link strip. */
   link: { href: string; display: string }
+  /** Public source repo, when it lives somewhere OTHER than `link` (a hosted
+   *  app whose code is also on GitHub). Rendered as a compact "GitHub ↗"
+   *  next to the live link. Omitted when `link` already points at the repo
+   *  (ClearFeed / RL Lab / BrainQuest) or when there is no public repo (the
+   *  first websites + the article). Language-agnostic → EN-only. */
+  repo?: string
   /** Whether `link.href` is publicly reachable right now. Private repos read
    *  false — the link still renders (Martin's "link every repo" policy), this
    *  just flags the ones that 404 to the public until he publishes them. */
@@ -129,6 +136,7 @@ export const PROJECTS: Project[] = [
     stack: ['Lovable', 'Web', 'localStorage'],
     era: 'pre-claude',
     link: { href: 'https://duedeck.lovable.app', display: 'duedeck.lovable.app' },
+    repo: 'https://github.com/Martin8O/Due-Deck',
     live: true,
     build: { days: 6, commits: 48 },
     workOrder: 4,
@@ -141,6 +149,7 @@ export const PROJECTS: Project[] = [
     stack: ['Lovable', 'Web'],
     era: 'pre-claude',
     link: { href: 'https://wealthdeck.lovable.app', display: 'wealthdeck.lovable.app' },
+    repo: 'https://github.com/Martin8O/Wealth-Deck',
     live: true,
     build: { days: 6, commits: 110 },
     workOrder: 3,
@@ -152,9 +161,23 @@ export const PROJECTS: Project[] = [
     stack: ['Lovable', 'Web'],
     era: 'pre-claude',
     link: { href: 'https://randpulse.lovable.app', display: 'randpulse.lovable.app' },
+    repo: 'https://github.com/Martin8O/Rand-Pulse',
     live: true,
     build: { days: 4, commits: 17 },
     workOrder: 6,
+  },
+  {
+    id: 'strc-check',
+    name: 'STRC Risk Monitor',
+    tagline:
+      "An experimental risk dashboard for Strategy's STRC “Stretch” variable-rate preferred — tracks price vs. par, dividend yield and amplification.",
+    stack: ['Lovable', 'Web', 'Finnhub'],
+    era: 'pre-claude',
+    link: { href: 'https://strc-check.lovable.app', display: 'strc-check.lovable.app' },
+    repo: 'https://github.com/Martin8O/strc-check',
+    live: true,
+    build: { days: 1, commits: 31 },
+    workOrder: 7,
   },
 
   // --- Era B — the Claude-Code month: "five real apps in ~a month" -----------
@@ -167,9 +190,9 @@ export const PROJECTS: Project[] = [
     stack: ['JavaScript', 'Chrome MV3'],
     era: 'claude',
     link: { href: 'https://github.com/Martin8O/ClearFeed', display: 'github.com/Martin8O/ClearFeed' },
-    live: false,
-    status: 'Repo private · not yet in the store',
-    build: { days: 2, commits: 17 },
+    live: true,
+    status: 'Not yet in the store',
+    build: { days: 3, commits: 19 },
     workOrder: 6,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
@@ -182,6 +205,7 @@ export const PROJECTS: Project[] = [
     stack: ['AWS CDK', 'Cognito', 'DynamoDB', 'Serverless'],
     era: 'claude',
     link: { href: 'https://www.one-tenovice.cz', display: 'one-tenovice.cz' },
+    repo: 'https://github.com/AnnaRozumova/Tenovice_fund_page',
     live: true,
     badge: 'COLLAB',
     build: { days: 11, commits: 53 },
@@ -196,8 +220,9 @@ export const PROJECTS: Project[] = [
     stack: ['Next.js 16', 'React 19', 'TypeScript', 'Prisma 7', 'Supabase', 'Tailwind v4'],
     era: 'claude',
     link: { href: 'https://registrace.online', display: 'registrace.online' },
+    repo: 'https://github.com/Martin8O/Registrace',
     live: true,
-    build: { days: 16, commits: 61 },
+    build: { days: 17, commits: 63 },
     workOrder: 2,
     window: { tint: MAGENTA, kind: 'form', shot: 'registrace' },
   },
@@ -211,8 +236,8 @@ export const PROJECTS: Project[] = [
     era: 'claude',
     link: { href: 'https://github.com/Martin8O/RL-Lab', display: 'github.com/Martin8O/RL-Lab' },
     live: false,
-    status: 'Repo private · runs locally',
-    build: { days: 22, commits: 111 },
+    status: 'Private while licensing is sorted out · runs locally',
+    build: { days: 23, commits: 112 },
     workOrder: 1,
     window: { tint: CORAL, kind: 'anim', shot: 'rllab', aspect: 0.58 },
   },
@@ -224,9 +249,9 @@ export const PROJECTS: Project[] = [
     stack: ['Next.js', 'Capacitor', 'FSRS', 'LLM'],
     era: 'claude',
     link: { href: 'https://github.com/Martin8O/BrainQuest', display: 'github.com/Martin8O/BrainQuest' },
-    live: false,
-    status: 'Repo private · porting to Android',
-    build: { days: 9, commits: 46 },
+    live: true,
+    status: 'Porting to Android',
+    build: { days: 10, commits: 42 },
     workOrder: 5,
     window: { tint: MINT, kind: 'graph' },
   },
@@ -236,12 +261,13 @@ export const PROJECTS: Project[] = [
     id: 'this-site',
     name: 'This Site',
     tagline:
-      'The scrollytelling site you are travelling through right now — from an empty folder to production deployment in 3½ intensive days.',
+      'The scrollytelling site you are travelling through right now — from an empty folder to a live production deployment.',
     stack: ['React', 'TypeScript', 'Vite', 'Canvas 2D', 'Lenis'],
     era: 'claude',
     link: { href: 'https://svobodamartin.dev', display: 'svobodamartin.dev' },
+    repo: 'https://github.com/Martin8O/Website',
     live: true,
-    build: { days: 3.5, commits: 13 },
+    build: { days: 4, commits: 32 },
     workOrder: 4,
   },
 ]

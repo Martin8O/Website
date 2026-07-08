@@ -52,6 +52,36 @@ export function nearestChapter(progress: number, count: number): number {
 }
 
 /**
+ * The era label the HUD should read at `progress`. Each chapter with an `era`
+ * owns a breakpoint = `eraFrom` (explicit, 0..1) or the default uniform
+ * midpoint `(i − 0.5)/(count − 1)` — the point at which its era becomes active.
+ * The active era is the last breakpoint at or before `progress`. With no
+ * overrides this exactly reproduces `nearestChapter`'s switch points; an
+ * `eraFrom` lets a label flip when the scene actually arrives (L-159 at 24 %,
+ * sunset at ~59 %) instead of at the mechanical boundary. Breakpoints must
+ * stay monotonic in chapter order (they are — defaults are, and overrides keep
+ * within their neighbours' windows).
+ */
+export function activeEra(
+  progress: number,
+  chapters: readonly { era?: string; eraFrom?: number }[],
+): string {
+  const p = clamp01(progress)
+  const span = Math.max(chapters.length - 1, 1)
+  let era = ''
+  let best = -Infinity
+  chapters.forEach((ch, i) => {
+    if (!ch.era) return
+    const from = ch.eraFrom ?? (i - 0.5) / span
+    if (from <= p && from >= best) {
+      best = from
+      era = ch.era
+    }
+  })
+  return era
+}
+
+/**
  * A card's opacity given the continuous position and the card's own index.
  * Peaks at 1 when centered, smoothstep-eased to 0 by `falloff` chapters away.
  * Falloff ≈ 0.5 keeps neighbouring cards from ever stacking visibly — two

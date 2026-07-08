@@ -109,6 +109,12 @@
 .body strong {
   color: var(--fg);
 }
+/* The "this site … in 4 days" clause, lightly orange — the same accent the
+   Work panel uses for the "~month" token. */
+.body .highlight {
+  color: #ffb066;
+  font-weight: 500;
+}
 
 .cta {
   align-self: center;

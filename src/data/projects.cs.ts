@@ -35,10 +35,14 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   'rand-pulse': {
     tagline: 'Elegantní generátor náhody pro rychlá rozhodnutí a inspiraci.',
   },
+  'strc-check': {
+    tagline:
+      'Experimentální rizikový dashboard pro variabilní prioritní akcii STRC „Stretch“ od Strategy – sleduje cenu vůči paritě, dividendový výnos a amplifikaci.',
+  },
   clearfeed: {
     tagline:
       'Rozšíření pro Chrome (MV3), které tiše skryje témata, jež nechcete vídat – politiku, drby, spoilery, sport, krypto – napříč zpravodajstvím i feedy. 16 jazyků, 100% lokálně, žádné sledování.',
-    status: 'Privátní repo · zatím není ve store',
+    status: 'Zatím není ve store',
   },
   tenovice: {
     name: 'Těnovice',
@@ -51,16 +55,16 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   'rl-lab': {
     tagline:
       'Trénujte, sledujte a hrajte proti agentům posilovaného učení – od CartPole po Atari, fyziku, Doom i deskové hry. 9 algoritmů ve více než 100 prostředích; Data Lab přidává výzkumné metriky, seed sweepy a exporty na jedno kliknutí.',
-    status: 'Privátní repo · běží lokálně',
+    status: 'Zatím privátní, řeším licencování · běží lokálně',
   },
   brainquest: {
     tagline:
       'Mění znalostní trezor v Obsidianu v učební hru – spaced repetition (FSRS), strom dovedností a AI tutor.',
-    status: 'Privátní repo · portuji na Android',
+    status: 'Portuji na Android',
   },
   'this-site': {
     name: 'Tento web',
     tagline:
-      'Scrollytelling web, kterým právě procházíte – od prázdné složky k nasazení do produkce za 3½ intenzivního dne.',
+      'Scrollytelling web, kterým právě procházíte – od prázdné složky k živému nasazení do produkce.',
   },
 }

@@ -4,6 +4,26 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-030 — Projects panel: file-served hi-res shots, an ambient nebula, a hover lift-zoom; HUD era on a data-driven schedule (2026-07-08)
+Batched with the P-side status-sync of `projects.ts` (the repos are public now → real links + a secondary `GitHub ↗`
+per card + build stats refreshed against the live repos + a `strc-check` card). The durable decisions:
+1. **Work-panel screenshots are files under `public/shots/`, not inlined data-URLs** — this *reverses* C1's data-URL
+   choice. At the resolution a hover-zoom needs to reveal real detail (760 px, was 460), inlining bloated the
+   code-split Work chunk to ~1.3 MB (830 KB gzip). Files keep the chunk ~5 KB and load lazily per card, browser-cached.
+   `gen-projectshots.mjs` keeps the same CDP+Jimp pipeline, now `getBuffer`→`writeFileSync` into `public/shots/`.
+2. **The HUD year label switches on a data-driven schedule** (`chapter.eraFrom` + pure `timeline.activeEra`), not the
+   uniform chapter midpoint. With no overrides it exactly reproduces `nearestChapter`'s switch points; an `eraFrom`
+   lets a label flip when the scene actually *arrives* (the L-159 leads at 24 %, the sunset lands at 59 %) instead of
+   at the mechanical boundary. Pure + unit-tested (3 tests).
+3. **The contact-scene nebula is reused as a looping `<video>` (`public/contact-nebula.mp4`)** — both the This-Site
+   card's second shot and the panel's ambient backdrop (full-detail, colour-boosted, dimmed) so the negative space
+   isn't flat black. Muted autoplay + a mount `play()` fallback; `prefers-reduced-motion` → a still first frame.
+4. **Cards lift + zoom 1.18× on hover**, gated to fine-pointer + ≥760 px (a phone tap never triggers it, and a single
+   full-width card never overflows); horizontal gutter ≥2rem + `overflow-x: clip` guarantee no clipping, no scrollbar.
+Gate green (187 tests). Model-fit: Opus 4.8 · medium.
+
+---
+
 ### ADR-029 — Czech typography conventions + a centered-lede opt-out for the justified body (2026-07-08)
 A copy pass surfaced two durable rules, both about the fact that the site's chapter bodies are set `text-align: justify`.
 1. **Czech uses the en-dash "–" (with NBSP), English the em-dash "—".** The em-dash is an Anglo convention; the Czech

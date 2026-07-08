@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { useScrollProgress } from '../scroll/useScrollProgress'
 import { CHAPTERS, chaptersFor } from '../data/chapters'
 import { useLang } from '../i18n/useLang'
-import { chapterPosition, nearestChapter } from '../timeline'
+import { activeEra, chapterPosition } from '../timeline'
 import { buildRuns } from '../canvas/sceneTimeline'
 import { accentAt } from './accent'
 import { ChapterCards } from './ChapterCards'
@@ -44,7 +44,9 @@ export function Story() {
   const chapters = chaptersFor(lang)
   const count = chapters.length
   const pos = chapterPosition(progress, count)
-  const active = chapters[nearestChapter(progress, count)]
+  // The HUD year label switches on a data-driven schedule (chapter.eraFrom),
+  // so it flips when the scene arrives, not at the mechanical midpoint.
+  const era = activeEra(progress, chapters)
   // C4: the accent GLIDES between themes in sync with the canvas cross-fade
   // instead of stepping at chapter boundaries.
   const accent = accentAt(pos, RUNS, count)
@@ -61,7 +63,7 @@ export function Story() {
       <ChapterCards pos={pos} chapters={chapters} />
       <DevWindowLinks pos={pos} />
       <Vignette />
-      <Hud era={active.era ?? ''} progress={progress} />
+      <Hud era={era} progress={progress} />
       <TickScale progress={progress} count={count} />
       <ScrollHint progress={progress} />
       <SiteFooter progress={progress} />

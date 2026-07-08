@@ -5,6 +5,7 @@ import {
   chapterPosition,
   resolveTimeline,
   nearestChapter,
+  activeEra,
   cardOpacity,
   cardOpacityWindowed,
 } from './timeline'
@@ -94,6 +95,37 @@ describe('cardOpacityWindowed', () => {
     expect(mid).toBeGreaterThan(0)
     expect(mid).toBeLessThan(1)
     expect(cardOpacityWindowed(7.5, 7, FULL)).toBeGreaterThan(mid)
+  })
+})
+
+describe('activeEra', () => {
+  // Six evenly-spaced chapters (span = 5); default midpoints at 0.1, 0.3, 0.5…
+  const plain = [
+    { era: '' }, // intro, no era
+    { era: 'A' },
+    { era: 'B' },
+    { era: 'C' },
+    { era: 'D' },
+    { era: 'E' },
+  ]
+  it('reproduces nearest-chapter switch points with no overrides', () => {
+    expect(activeEra(0.0, plain)).toBe('') // before A's 0.1 midpoint
+    expect(activeEra(0.2, plain)).toBe('A') // A active 0.1–0.3
+    expect(activeEra(0.35, plain)).toBe('B') // B active 0.3–0.5
+    expect(activeEra(1.0, plain)).toBe('E')
+  })
+  it('honours an eraFrom override, holding the prior era until it', () => {
+    const over = [{ era: 'A' }, { era: 'B', eraFrom: 0.585 }, { era: 'C' }]
+    expect(activeEra(0.58, over)).toBe('A') // B held back past its 0.25 midpoint
+    expect(activeEra(0.585, over)).toBe('B') // flips exactly at the override
+  })
+  it('drives the real story eras — L-159 label at 24 %, sunset at 59 %', () => {
+    const en = CHAPTERS
+    const eraOf = (id: string) => en.find((c) => c.id === id)?.era
+    expect(activeEra(0.235, en)).toBe(eraOf('sky-climb')) // still the Decision label
+    expect(activeEra(0.24, en)).toBe(eraOf('sky-cruise')) // "2005–2010" as the L-159 leads
+    expect(activeEra(0.58, en)).toBe(eraOf('sky-airshow')) // "2016–2017" holds through 58 %
+    expect(activeEra(0.59, en)).toBe(eraOf('sky-sunset')) // "2020–2026" from 59 %
   })
 })
 

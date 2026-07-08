@@ -28,6 +28,7 @@ export type UiStrings = {
   workStack: string
   workLoadError: string
   screenshotAlt: string
+  sourceOnGitHub: string
   close: string
   aboutEyebrow: string
   aboutTitle: string
@@ -71,12 +72,13 @@ export const STRINGS: Record<Lang, UiStrings> = {
     workTitle: 'Everything I’ve built',
     workClaudeHead: 'The Claude-Code {m}',
     workClaudeMonth: '~month',
-    workClaudeSub: '· five real apps in ~a month — then this site in 3½ days',
+    workClaudeSub: '· five real apps in ~a month — then this site in 4 days',
     workBeforeHead: 'Before',
     workBeforeSub: '· first builds & experiments',
     workStack: 'Stack',
     workLoadError: 'The Work panel failed to load — please reload the page.',
     screenshotAlt: 'screenshot',
+    sourceOnGitHub: 'source code on GitHub',
     close: 'Close',
     aboutEyebrow: 'About',
     aboutTitle: 'About me',
@@ -102,12 +104,13 @@ export const STRINGS: Record<Lang, UiStrings> = {
     workTitle: 'Všechno, co jsem postavil',
     workClaudeHead: '{m} s Claude Code',
     workClaudeMonth: '~Měsíc',
-    workClaudeSub: '· pět skutečných aplikací za ~měsíc – a pak tento web za 3½ dne',
+    workClaudeSub: '· pět skutečných aplikací za ~měsíc – a pak tento web za 4 dny',
     workBeforeHead: 'Předtím',
     workBeforeSub: '· první weby a experimenty',
     workStack: 'Technologie',
     workLoadError: 'Panel s projekty se nepodařilo načíst – obnovte prosím stránku.',
     screenshotAlt: 'snímek obrazovky',
+    sourceOnGitHub: 'zdrojový kód na GitHubu',
     close: 'Zavřít',
     aboutEyebrow: 'O mně',
     aboutTitle: 'Kdo jsem',

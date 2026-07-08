@@ -29,6 +29,12 @@ export type Chapter = {
   theme: Theme
   /** Shown in the amber HUD instrument, e.g. '2003–2012'. */
   era?: string
+  /** Progress fraction (0..1) at which this chapter's `era` becomes the active
+   *  HUD readout, OVERRIDING the default uniform-midpoint switch — so the year
+   *  label flips when the SCENE actually arrives (the L-159 takes the lead at
+   *  24 %, the sunset lands ~59 %) rather than at the mechanical chapter
+   *  boundary. Timing field → lives on the EN array only (see timeline.activeEra). */
+  eraFrom?: number
   /** Eyebrow above the title, e.g. '05 — Airshow'. */
   num?: string
   /** Chapter heading; may contain `<br>`. */
@@ -112,7 +118,7 @@ export const CHAPTERS: Chapter[] = [
     id: 'sky-climb',
     theme: 'sky',
     sky: 'climb',
-    era: 'CTU → Brno',
+    era: '2001–2005 · CTU → Brno',
     num: '01 — The Decision',
     title: 'Upward',
     // Clear the frame BEFORE the cloud-punch white-out: hold to 21 %, then
@@ -128,7 +134,10 @@ export const CHAPTERS: Chapter[] = [
     id: 'sky-cruise',
     theme: 'sky',
     sky: 'cruise',
-    era: '2003–2012',
+    era: '2005–2010',
+    // Flip the year label the moment the L-159 takes the lead (24 %), not at
+    // the mechanical 25 % midpoint.
+    eraFrom: 0.24,
     num: '02 — Fighters',
     title: 'Above the<br>clouds',
     // Rises out of the white-out from 23 %, full at 24.5 % — right as the
@@ -171,7 +180,10 @@ export const CHAPTERS: Chapter[] = [
     // the farewell flares have dropped to the runway — 0.76 of chapter 5
     // = 64 % of the whole scroll.
     enterFade: [0.76, 0.97],
-    era: '2020–2022',
+    era: '2020–2026',
+    // Hold the airshow's "2016–2017" through 58 %; the sunset era arrives at
+    // 59 % — as the landing actually enters, not at the 55 % midpoint.
+    eraFrom: 0.585,
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
     // Wait for the airshow to fly clean off (sunset scene enters pos
@@ -237,7 +249,7 @@ export const CHAPTERS: Chapter[] = [
   {
     id: 'dev-explosion',
     theme: 'dev',
-    era: '2026',
+    era: 'from 2026',
     num: '08 — The explosion',
     title: 'Solo<br>developer',
     // FINAL v2.5: the headline number is "eight builds in five weeks"
