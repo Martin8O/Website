@@ -1,6 +1,8 @@
 # Claude's private brain + Martin's input materials — NEVER go to GitHub
 local/
 Local/
+dev_history.md
+.claude/
 
 # Dependencies
 node_modules/
