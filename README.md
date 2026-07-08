@@ -61,3 +61,7 @@ npm run preview  # serve the production build locally
 
 Working notes, the prompt backlog, ADRs and dev history live outside this README:
 `docs/adr.md`, `dev_history.md`, and the gitignored `local/` (private).
+
+## License
+
+[MIT](LICENSE) © Martin Svoboda
