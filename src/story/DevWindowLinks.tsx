@@ -61,6 +61,7 @@ export function DevWindowLinks({ pos }: { pos: number }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={link.label}
+          aria-describedby={`devwin-tag-${i}`}
           style={{
             left: `${slots[i].x * 100}%`,
             top: `${slots[i].y * 100}%`,
@@ -70,10 +71,14 @@ export function DevWindowLinks({ pos }: { pos: number }) {
           }}
         >
           {/* Hover / focus detail: what the app IS + its stack (the same copy
-              the Work panel shows). */}
+              the Work panel shows). The tagline is wired to the anchor via
+              aria-describedby so a screen reader announces it after the label
+              (the stack is left out — it would be read verbatim every time). */}
           <span className={styles.tip} role="tooltip">
             <span className={styles.tipName}>{link.name}</span>
-            <span className={styles.tipTag}>{link.tagline}</span>
+            <span id={`devwin-tag-${i}`} className={styles.tipTag}>
+              {link.tagline}
+            </span>
             <span className={styles.tipStack}>
               {link.stack.map((s) => (
                 <span key={s}>{s}</span>

@@ -4,6 +4,31 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-028 — D2.1: self-host the fonts, tighten the CSP, immutable asset cache, CORS + tooltip a11y (2026-07-08)
+The post-review hardening batch — the four items D2 flagged as worth doing, done together. The decisions:
+1. **The three brand fonts are self-hosted (`@fontsource`), not loaded from the Google Fonts CDN.** This removes the
+   *last* third-party runtime dependency: no visitor IP handed to Google (the GDPR angle behind the 2022 German
+   "Google Fonts" ruling), no CDN-outage/blocked-origin risk, and it closes the SRI gap a remote stylesheet can't
+   (Google serves the CSS dynamically, so a hash never matches). The weight set mirrors the old Google `<link>`
+   exactly (Space Grotesk 400/500/600/700, Inter 400/500/600, Chakra Petch 400/500/600) so rendering is unchanged.
+   The one real risk is Czech diacritics: each `@fontsource` per-weight file carries `latin-ext` via `unicode-range`,
+   so ě/š/č/ř/ž render in the real face — verified by force-loading the glyphs over CDP (`before:false → after:true`
+   proves coverage, not just fallback). Imported from `src/fonts.ts` before `index.css` so the faces register first.
+2. **With the CDN gone, the CSP tightens to `'self'` for style and font** (both Google origins dropped) — a stricter
+   policy that still holds because the fonts now ship from our own origin. Verified: a full scroll under the new CSP
+   produced zero violations and zero external font requests.
+3. **Hashed build assets get `immutable, max-age=31536000`; the CDN default was `max-age=0, must-revalidate`.**
+   Content-hashed files (JS/CSS/woff2 under `/assets/`) never change, so revalidating them every visit was pure
+   waste — a real (if modest) repeat-visit win. Vercel does *not* add `immutable` automatically to a Vite build's
+   `/assets/*` (confirmed on production), so it's an explicit `vercel.json` rule.
+4. **`Access-Control-Allow-Origin` pinned to the site's own origin, replacing Vercel's default `*`.** Cosmetic for
+   this threat model — a no-auth, no-cookie public site leaks nothing via a lax CORS policy, and `*` can't even be
+   combined with credentials — but it clears the securityheaders.com flag and is semantically correct (no cross-origin
+   JS needs to read these assets). **Also:** the dev-window tooltip tagline is now wired to its anchor via
+   `aria-describedby` (the stack is left out — a screen reader would read it verbatim every time).
+   Deferred as before: re-reading `prefers-reduced-motion` on a mid-session OS toggle (theoretical; cost > benefit).
+   Gate green (184 tests). Model-fit: Opus 4.8 · medium = fit (font-subset care + live verification, not creative).
+
 ### ADR-027 — D2: pre-launch code + security review — chunk error boundary, modal focus trap, security headers (2026-07-08)
 The launch-readiness review (full code, not just a diff), run as a 31-agent ultracode workflow: seven parallel
 reviewers across security + correctness dimensions, every finding adversarially verified by two independent lenses
