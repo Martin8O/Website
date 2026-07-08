@@ -18,6 +18,9 @@ per card + build stats refreshed against the live repos + a `strc-check` card). 
 3. **The contact-scene nebula is reused as a looping `<video>` (`public/contact-nebula.mp4`)** — both the This-Site
    card's second shot and the panel's ambient backdrop (full-detail, colour-boosted, dimmed) so the negative space
    isn't flat black. Muted autoplay + a mount `play()` fallback; `prefers-reduced-motion` → a still first frame.
+   Baked at native **1262 px** (a 640 px source looked blurry upscaled across the ~1120 px backdrop). Required a CSP
+   fix: the strict `default-src 'none'` in `vercel.json` needed **`media-src 'self'`** or the browser blocks the video
+   in production (flagged by a parallel hardening pass; the dev server has no CSP so it only bites once deployed).
 4. **Cards lift + zoom 1.18× on hover**, gated to fine-pointer + ≥760 px (a phone tap never triggers it, and a single
    full-width card never overflows); horizontal gutter ≥2rem + `overflow-x: clip` guarantee no clipping, no scrollbar.
 Gate green (187 tests). Model-fit: Opus 4.8 · medium.
