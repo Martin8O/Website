@@ -4,7 +4,7 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
-### ADR-031 — Biography fact-check: accurate dates/terminology, a non-chapter era schedule, humbler claims (2026-07-09)
+### ADR-032 — Biography fact-check: accurate dates/terminology, a non-chapter era schedule, humbler claims (2026-07-09)
 A full fact-check of every claim on the site (Martin's review), reconciled against the sources of truth — his own
 health site and his corrections — not memory. Durable decisions:
 1. **Terminology: "military jet pilot" (EN) / "pilot proudových letounů" (CZ), never "fighter pilot" / "stíhací
