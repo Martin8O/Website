@@ -168,6 +168,11 @@
     0 2px 16px rgba(0, 0, 0, 0.8);
 }
 
+/* Intro lede: a short, centered two-line tagline — not a justified paragraph. */
+.centerBody .body {
+  text-align: center;
+}
+
 /* Mono eyebrow right above the CTA — the contact finale's `+ Get in touch`
    caption over the breathing field (data-driven; most chapters omit it). */
 .ctaEyebrow {

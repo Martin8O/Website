@@ -4,6 +4,25 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-029 — Czech typography conventions + a centered-lede opt-out for the justified body (2026-07-08)
+A copy pass surfaced two durable rules, both about the fact that the site's chapter bodies are set `text-align: justify`.
+1. **Czech uses the en-dash "–" (with NBSP), English the em-dash "—".** The em-dash is an Anglo convention; the Czech
+   norm is the shorter pomlčka. All CZ copy was converted; EN keeps "—". (An over-abundance of em-dashes also reads as
+   machine-written to a Czech eye — a second reason to switch.)
+2. **Single-letter prepositions/conjunctions (k s v z o u a i) are bound to the following word with a NBSP** so they
+   never strand at a line end (standard Czech typography).
+3. **A spaced en-dash still stranded at line ends despite the NBSP** — because U+2013 carries Unicode line-break class
+   *break-after*, which Blink honours under `justify` even across a following NBSP (the GL glue loses to the BA break).
+   NBSP alone therefore can't hold a dash off a line edge. The fix is a global `.nw { white-space: nowrap }` that binds
+   a flagged dash into an unbreakable run with its neighbours (`hráče – znaly`). Applied only where a dash actually
+   stranded at the reviewed width; the mechanism generalises if more surface at other widths.
+4. **`Chapter.centerBody` opts a body out of the justified default into `text-align: center`.** Used only by the intro's
+   two-line lede (a short tagline, not a paragraph); every other body stays justified. Data-driven so it's one boolean,
+   no per-chapter CSS. Verified live by measuring each card's rendered line-end geometry over CDP in both languages.
+   Gate green (184 tests). Model-fit: Opus 4.8 · medium.
+
+---
+
 ### ADR-028 — D2.1: self-host the fonts, tighten the CSP, immutable asset cache, CORS + tooltip a11y (2026-07-08)
 The post-review hardening batch — the four items D2 flagged as worth doing, done together. The decisions:
 1. **The three brand fonts are self-hosted (`@fontsource`), not loaded from the Google Fonts CDN.** This removes the

@@ -67,6 +67,9 @@ export type Chapter = {
   /** Sentence-length headlines (the contact chapter) render at a smaller
    *  display size so the whole card fits one viewport. */
   compact?: boolean
+  /** Center the body text instead of the justified-block default — the intro
+   *  lede is a short two-line tagline, not a paragraph. */
+  centerBody?: boolean
   /** When the title holds a `<span class="t-late">…</span>`, that word fades
    *  in across this pos-offset window from the chapter's index — the word
    *  "Bitcoin" arrives at 88 %, after the genesis impulse. */
@@ -90,7 +93,8 @@ export const CHAPTERS: Chapter[] = [
     theme: 'origin',
     num: '↓ Scroll to travel through time with me',
     title: 'Martin',
-    body: 'One life, many worlds. Scroll speed is the speed of time. Move down and let the sun run across the sky.',
+    centerBody: true,
+    body: 'One life, many worlds.<br>Scroll and set the sun running across the sky.',
   },
   {
     id: 'origin-school',
@@ -174,7 +178,7 @@ export const CHAPTERS: Chapter[] = [
     // 5.76–5.97), hold through the touchdown + braking (~pos 6.1–6.3),
     // and clear the frame before the healing lake bleeds in (~6.5).
     cardFull: [-0.05, 0.4],
-    body: '<span class="a-hud">Twenty years in the Air Force, 1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and test pilot. I retired in 2022 with no plan for what comes next. Retrained in networks and systems, then went looking: travelling the world, half of every year abroad, volunteering at Buddhist centres and courses. Meditation had been part of my life since 2005&nbsp;—&nbsp;now it had more room to breathe.',
+    body: '<span class="a-hud">Twenty years in the Air Force, ~1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and test pilot. In 2021 I chose to leave the military; since 2022 I’ve been my own boss. Before that I retrained in computer networks and systems. But I had no masterplan&nbsp;—&nbsp;just trust in the open road ahead and the urge to leap into the world. What followed was intense travel: half of every year abroad, volunteering at Buddhist centres and courses. Meditation had been part of my life since 2005&nbsp;—&nbsp;now it had more room to breathe.',
     align: 'left',
   },
   // The story is THEMATIC here, not strictly chronological: healing (2013)
@@ -223,7 +227,7 @@ export const CHAPTERS: Chapter[] = [
     cardFull: [-0.1, 0.4],
     // "Don't trust — verify" stands on its own line (v2.5): it is the
     // method, not just the slogan.
-    body: 'The freedom underneath the technology. Keys, blocks, nodes, trustless consensus. <span class="a-btc">The hardest money nobody can print, seize or censor.</span> So I stopped reading and started running it: a full &amp; Lightning node, solo mining to my own pool.<br><span class="a-btc">Don’t trust&nbsp;—&nbsp;verify.</span>',
+    body: 'Bitcoin is a multidisciplinary IQ test&nbsp;—&nbsp;and the freedom underneath the technology. Keys, blocks, nodes, trustless consensus. <span class="a-btc">The hardest money nobody can print, seize or censor.</span> So I stopped reading and started running it: a full &amp; Lightning node, solo mining to my own pool.<br><span class="a-btc">Don’t trust&nbsp;—&nbsp;verify.</span>',
     cta: {
       label: 'Read my Bitcoin intro →',
       href: 'https://medium.com/@shadovv_50954/discover-bitcoin-the-r-evolution-in-the-world-of-money-9de1272b9b13',
@@ -247,7 +251,7 @@ export const CHAPTERS: Chapter[] = [
     cardFull: [0.55, 0.7],
     cardEase: 0.05,
     compact: true,
-    body: 'It began carefully&nbsp;—&nbsp;small apps first, testing what AI and I could build together. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">eight builds in five weeks</span>&nbsp;—&nbsp;they’re floating all around you. Each one writes what it taught me into a knowledge vault, <strong>dev-brain</strong>, and one of the builds, <strong>BrainQuest</strong>, turns that vault into a learning game. So I’m learning the craft, not just watching it happen.<br>All of it public.<br>The contribution graph below looks like a steep takeoff. Everything above turned out to be training for this. <em>(Turns out I love the screen after all.)</em>',
+    body: 'It began carefully&nbsp;—&nbsp;small apps first, testing what AI and I could build together. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">eight builds in five weeks</span>&nbsp;—&nbsp;they’re floating all around you. They write what they taught me into a knowledge vault, <strong>dev-brain</strong>, and one of the builds, <strong>BrainQuest</strong>, turns that vault into a Duolingo-style learning game. So I’m still learning the craft, not just watching it happen.<br>All of it public and verifiable on GitHub.<br>The contribution graph below looks like a steep takeoff. Everything above turned out to be training for this. <em>(Turns out I love the screen after all.)</em>',
     // The Work items (the five floating windows) are data-driven from
     // `src/data/projects.ts` → the dev scene + DevWindowLinks read them.
   },
@@ -271,7 +275,7 @@ export const CHAPTERS: Chapter[] = [
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision and sense of responsibility, the calm of twenty-one years of meditation, and a build pace measured in days. It’s all above&nbsp;—&nbsp;and it’s all public.<br><span class="a-btc">Don’t trust; verify.</span><br><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a fighter pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
     cta: {
       label: '[ martin@svobodamartin.dev ]',

@@ -26,13 +26,13 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         self-healing that rebuilt how I live, a Bitcoin rabbit hole that rebuilt what I
         trust&nbsp;—&nbsp;trust grounded in deep technical understanding, not in
         promises&nbsp;—&nbsp;and Claude&nbsp;Code, which turned the computer screen I once walked
-        away from into a workshop: eight builds in five weeks, this site in 3½&nbsp;days.
+        away from into a hyper-efficient workshop: eight builds in five weeks, this site in 3½&nbsp;days.
       </>
     ),
     p2: (
       <>
         What that means for you is simple:{' '}
-        <strong>I can help you build almost anything, fast.</strong> An automation, a tool, an
+        <strong>I can build you almost anything, fast.</strong> An automation, a tool, an
         app, a full platform&nbsp;—&nbsp;if you can describe it, it can be built. I bring a
         pilot&rsquo;s precision, a meditator&rsquo;s calm, and a build pace measured in days.
       </>
@@ -41,18 +41,18 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
   cs: {
     p1: (
       <>
-        Dvacet let stíhací pilot&nbsp;—&nbsp;instruktor, display pilot, zkušební pilot. Pak
+        Dvacet let stíhací pilot&nbsp;–&nbsp;instruktor, display pilot, zkušební pilot. Pak
         sebeuzdravení, které přestavělo, jak žiju, bitcoinová králičí nora, která přestavěla,
-        čemu věřím&nbsp;—&nbsp;důvěře postavené na hlubokém technickém porozumění, ne na
-        slibech&nbsp;—&nbsp;a Claude&nbsp;Code, který proměnil obrazovku počítače, od níž jsem
-        kdysi odešel, v dílnu: osm projektů za pět týdnů, tento web za 3½&nbsp;dne.
+        čemu věřím&nbsp;–&nbsp;důvěře postavené na hlubokém technickém porozumění, ne na
+        slibech&nbsp;–&nbsp;a Claude&nbsp;Code, který proměnil obrazovku počítače, od níž jsem
+        kdysi odešel, v super efektivní dílnu: osm projektů za pět týdnů, tento web za 3½&nbsp;dne.
       </>
     ),
     p2: (
       <>
         Co to znamená pro vás, je jednoduché:{' '}
-        <strong>pomůžu vám postavit téměř cokoli, rychle.</strong> Automatizaci, nástroj,
-        aplikaci, celou platformu&nbsp;—&nbsp;pokud to dokážete popsat, dá se to postavit.
+        <strong>Mohu vám postavit téměř cokoli, rychle.</strong> Automatizaci, nástroj,
+        aplikaci, celou platformu&nbsp;–&nbsp;pokud to dokážete popsat, dá se to postavit.
         Přináším přesnost pilota, klid meditujícího a tempo stavby měřené ve dnech.
       </>
     ),

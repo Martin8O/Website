@@ -88,6 +88,14 @@ html.lenis body {
   font-weight: 600;
 }
 
+/* Keep a run on one line (used to bind an en-dash to its neighbours in the
+   Czech bodies: U+2013 has Unicode break-after, which Blink honours under
+   `text-align: justify` even across a following NBSP, so a dash can otherwise
+   strand at a line end). Global — chapter HTML is injected. */
+.nw {
+  white-space: nowrap;
+}
+
 /* A title word that arrives on its own scroll cue (ChapterCards drives
    --late per card; the "Bitcoin" reveal at 88 %). */
 .t-late {

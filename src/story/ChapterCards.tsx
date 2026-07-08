@@ -90,13 +90,14 @@ export function ChapterCards({ pos, chapters }: { pos: number; chapters: Chapter
         const alignClass =
           ch.align === 'left' ? styles.alignLeft : ch.align === 'right' ? styles.alignRight : ''
         const compactClass = ch.compact ? styles.compact : ''
+        const centerClass = ch.centerBody ? styles.centerBody : ''
         return (
           <article
             key={ch.id}
             // Chapter ids double as anchors (the skip-link lands on
             // #contact-now and focuses its email CTA).
             id={ch.id}
-            className={`${styles.card} ${alignClass} ${compactClass}`}
+            className={`${styles.card} ${alignClass} ${compactClass} ${centerClass}`}
             style={{
               opacity: o,
               // `--ty` (default -50%, the vertical centre anchor) is overridable
