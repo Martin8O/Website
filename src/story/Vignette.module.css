@@ -9,5 +9,6 @@
       color-mix(in srgb, var(--accent, var(--amber)) 6%, transparent) 78%,
       rgba(0, 0, 0, 0.55) 100%
     );
-  transition: background 0.6s ease;
+  /* The accent inside the gradient glides per frame since C4 — transitioning
+     a whole background gradient against that is wasted repaint work. */
 }

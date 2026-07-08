@@ -4,6 +4,31 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-024 — C4: preloader gates the journey, the accent GLIDES with the scene cross-fade, pointer micro-parallax (2026-07-08)
+The cohesion/polish pass. The decisions:
+1. **A preloader gates scroll on real critical-asset signals.** A dark amber boot gate (wordmark · hairline bar · mono
+   `LOADING %`, the HUD's own voice) holds the journey until the three brand fonts have actually loaded (`document.
+   fonts.load(...)` per family — `fonts.ready` alone resolves before an unused face even starts fetching), the window
+   `load`, and a short minimum hold have all fired. The scroll lock is a **new `scrollStore` channel** (`setScrollLocked`/
+   `registerScrollLock`): Lenis owns wheel/touch so `lenis.stop()/start()` IS the lock, and the Preloader additionally
+   `preventDefault`s the keyboard scroll keys. A **4 s failsafe** unlocks no matter what, so a wedged font CDN can never
+   brick the site. Reduced motion → no sweep, the overlay just stands briefly and leaves. Verified live: real wheel +
+   PageDown while it stands leaves `scrollY` at 0; after it leaves the same input scrolls.
+2. **The DOM accent is a continuous function of the scene timeline, not a per-chapter step.** The stage `--accent`
+   (HUD, tick scale, vignette) used to jump at each chapter boundary while the canvas cross-faded smoothly underneath;
+   the 0.6 s CSS colour transitions only *smeared* that step. New pure `accent.ts` (`mixHex` + `accentAt`) samples the
+   **same `resolveSceneFrame`** the canvas uses and blends the two theme hexes by the exact cross-fade alpha — so the
+   chrome glides in lock-step with the painted hand-over, `enterFade` overrides included. The now-redundant CSS
+   transitions were removed (they'd lag the per-frame value). 7 tests.
+3. **Micro-interactions ride the existing eased pointer channel — one signal, DOM + canvas.** `CanvasStage` already
+   smooths a pointer with a presence scalar; C4 publishes two CSS vars from it (`--par-x/--par-y`, quantised to 0.1 px)
+   and the chapter-cards container drifts a few px *against* the pointer, so the text floats a plane above the world the
+   scenes already answer. Folded into the same `translate3d` as the B2.3d landing shake. Zero under reduced motion, on
+   touch (presence fades out on pointer-up), and at rest. The tick scale gained a matching continuous read: the current
+   tick brightens and glows in the (blended) accent as the scroll works through it — "gaining altitude". A shared
+   `--ls-eyebrow` token unifies every mono eyebrow's letter-spacing, and a global `a:focus-visible` ring (accent-tinted)
+   makes keyboard focus consistent. Frame cost unchanged (contact still ~7.9 ms with the pointer live).
+
 ### ADR-023 — C2: bilingual CZ/EN via copy overlays (supersedes ADR-003), a real nav with teleport jumps, finale-gated footer (2026-07-08)
 C2 grew the site chrome: nav (🏠 Home · Work · Contact · About · CZ/EN), skip-link, an "About me" dialog, a
 GitHub/LinkedIn footer — and, on Martin's call at review, the site went **bilingual**. The decisions:

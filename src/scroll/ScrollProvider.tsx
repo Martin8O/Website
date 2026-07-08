@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import Lenis from 'lenis'
-import { registerScrollDriver, setScrollProgress } from './scrollStore'
+import { registerScrollDriver, registerScrollLock, setScrollProgress } from './scrollStore'
 
 /**
  * Owns the one and only smooth-scroll rhythm for the site.
@@ -45,6 +45,17 @@ export function ScrollProvider({ children }: { children: ReactNode }) {
       })
     })
 
+    // The C4 preloader gates the journey until critical assets are in;
+    // Lenis owns wheel/touch, so stop/start IS the scroll lock (the
+    // Preloader guards keyboard scrolling itself).
+    registerScrollLock((locked) => {
+      if (locked) {
+        lenis.stop()
+      } else {
+        lenis.start()
+      }
+    })
+
     let rafId = 0
     const raf = (time: number) => {
       lenis.raf(time)
@@ -55,6 +66,7 @@ export function ScrollProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelAnimationFrame(rafId)
       registerScrollDriver(null)
+      registerScrollLock(null)
       lenis.destroy()
     }
   }, [])

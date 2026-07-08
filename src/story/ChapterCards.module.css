@@ -2,9 +2,15 @@
   position: absolute;
   inset: 0;
   margin: 0;
-  /* The B2.3d overhead pass rocks the text along with the canvas world —
-     the engine drives these variables, zero everywhere else. */
-  transform: translate3d(var(--cam-shake-x, 0px), var(--cam-shake-y, 0px), 0);
+  /* Two engine-driven signals ride this one transform: the B2.3d landing
+     shake, and the C4 micro-parallax (a few px against the pointer, so the
+     text floats a plane above the painted world). Both are zero at rest,
+     under reduced motion and on touch. */
+  transform: translate3d(
+    calc(var(--cam-shake-x, 0px) + var(--par-x, 0px)),
+    calc(var(--cam-shake-y, 0px) + var(--par-y, 0px)),
+    0
+  );
 }
 
 /* Each card cross-fades; JS drives opacity + the translateY settle (the
@@ -75,7 +81,7 @@
    halo. Positions stay; legibility comes from contrast, not placement. */
 .num {
   font-family: var(--font-mono);
-  letter-spacing: 0.22em;
+  letter-spacing: var(--ls-eyebrow);
   text-transform: uppercase;
   font-size: clamp(0.78rem, 1.8vw, 1rem);
   color: var(--accent, var(--amber));
@@ -125,7 +131,7 @@
 .ctaEyebrow {
   font-family: var(--font-mono);
   font-size: clamp(0.72rem, 1.6vw, 0.85rem);
-  letter-spacing: 0.3em;
+  letter-spacing: var(--ls-eyebrow);
   text-transform: uppercase;
   color: #dfe5ee;
   margin: 1.6rem auto 0;
@@ -152,6 +158,7 @@
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--accent, #f7931a) 45%, transparent);
   padding-bottom: 2px;
+  transition: color 140ms ease, border-color 140ms ease;
   text-shadow:
     0 0 2px rgba(0, 0, 0, 0.95),
     0 1px 3px rgba(0, 0, 0, 0.9),
@@ -160,6 +167,7 @@
 
 .cta:hover,
 .cta:focus-visible {
+  color: color-mix(in srgb, var(--accent, var(--amber)) 72%, #fff);
   border-bottom-color: var(--accent, var(--amber));
 }
 

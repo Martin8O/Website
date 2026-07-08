@@ -10,8 +10,9 @@
   border-radius: 4px;
   background: rgba(6, 7, 10, 0.55);
   backdrop-filter: blur(6px);
+  /* No colour transitions here: since C4 the stage --accent GLIDES per frame
+     (scene-timeline blend), so a CSS transition would only add lag. */
   font-family: var(--font-mono);
-  transition: border-color 0.6s ease;
 }
 
 .era {
@@ -28,7 +29,6 @@
   border-radius: 50%;
   background: var(--accent, var(--amber));
   box-shadow: 0 0 8px var(--accent, var(--amber));
-  transition: background-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 .pct {
@@ -37,5 +37,4 @@
   font-variant-numeric: tabular-nums;
   min-width: 3em;
   text-align: right;
-  transition: color 0.6s ease;
 }

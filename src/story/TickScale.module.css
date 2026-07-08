@@ -14,7 +14,8 @@
   height: 2px;
   background: var(--accent, var(--amber));
   border-radius: 1px;
-  transition: opacity 0.3s ease;
+  /* No transition since C4 — opacity/glow are continuous functions of the
+     (Lenis-smoothed) scroll, so easing here would only lag the readout. */
 }
 
 @media (max-width: 640px) {

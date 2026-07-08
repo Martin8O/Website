@@ -1,7 +1,9 @@
 import { useScrollProgress } from '../scroll/useScrollProgress'
-import { CHAPTERS, THEME_ACCENT, chaptersFor } from '../data/chapters'
+import { CHAPTERS, chaptersFor } from '../data/chapters'
 import { useLang } from '../i18n/useLang'
 import { chapterPosition, nearestChapter } from '../timeline'
+import { buildRuns } from '../canvas/sceneTimeline'
+import { accentAt } from './accent'
 import { CanvasStage } from '../canvas/CanvasStage'
 import { ChapterCards } from './ChapterCards'
 import { DevWindowLinks } from './DevWindowLinks'
@@ -11,6 +13,10 @@ import { ScrollHint } from './ScrollHint'
 import { SiteFooter } from './SiteFooter'
 import { Vignette } from './Vignette'
 import styles from './Story.module.css'
+
+// Scene runs for the static EN chapters (theme/timing only — identical for
+// both languages), built once at module load for the accent blend.
+const RUNS = buildRuns(CHAPTERS)
 
 /**
  * The fixed story overlay. Reads the one global `scrollProgress`, derives the
@@ -28,7 +34,9 @@ export function Story() {
   const count = chapters.length
   const pos = chapterPosition(progress, count)
   const active = chapters[nearestChapter(progress, count)]
-  const accent = THEME_ACCENT[active.theme]
+  // C4: the accent GLIDES between themes in sync with the canvas cross-fade
+  // instead of stepping at chapter boundaries.
+  const accent = accentAt(pos, RUNS, count)
 
   return (
     <div className={styles.stage} style={{ ['--accent' as string]: accent }}>

@@ -2,6 +2,7 @@ import { ScrollProvider } from './scroll/ScrollProvider'
 import { Story } from './story/Story'
 import { SiteNav } from './story/SiteNav'
 import { SkipLinks } from './story/SkipLinks'
+import { Preloader } from './story/Preloader'
 import { CHAPTERS } from './data/chapters'
 import { trackHeightVh } from './timeline'
 import styles from './App.module.css'
@@ -26,6 +27,8 @@ function App() {
         style={{ height: `${trackHeightVh(CHAPTERS.length)}vh` }}
         aria-hidden="true"
       />
+      {/* Last in DOM, highest z — the C4 boot gate over everything. */}
+      <Preloader />
     </ScrollProvider>
   )
 }

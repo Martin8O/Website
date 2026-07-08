@@ -13,7 +13,7 @@
 
 .word {
   font-size: 0.7rem;
-  letter-spacing: 0.3em;
+  letter-spacing: var(--ls-eyebrow);
   text-transform: uppercase;
 }
 

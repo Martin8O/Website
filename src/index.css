@@ -16,6 +16,12 @@
   --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'Chakra Petch', ui-monospace, monospace;
 
+  /* Rhythm (C4): the one letter-spacing every mono EYEBROW shares — chapter
+     num, CTA eyebrow, scroll hint, preloader line — so the mono voice reads
+     as a single instrument across the site. UI chrome (nav, HUD) stays
+     tighter on purpose. */
+  --ls-eyebrow: 0.26em;
+
   color-scheme: dark;
 }
 
@@ -86,4 +92,13 @@ html.lenis body {
    --late per card; the "Bitcoin" reveal at 88 %). */
 .t-late {
   opacity: var(--late, 1);
+}
+
+/* Keyboard baseline (C4): every plain anchor gets a real focus ring in the
+   active accent. Components with their own focus treatment (footer, skip
+   pill, panel links) override it with outline: none at higher specificity. */
+a:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent, var(--amber)) 80%, transparent);
+  outline-offset: 3px;
+  border-radius: 2px;
 }

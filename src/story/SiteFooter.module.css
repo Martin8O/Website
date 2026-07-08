@@ -25,3 +25,23 @@
   border-color: var(--amber);
   outline: none;
 }
+
+/* The ↗ leans into its own direction on hover — a whisper of motion. */
+.footer a span {
+  display: inline-block;
+  transition: transform 140ms ease;
+}
+.footer a:hover span,
+.footer a:focus-visible span {
+  transform: translate(2px, -2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer a span {
+    transition: none;
+  }
+  .footer a:hover span,
+  .footer a:focus-visible span {
+    transform: none;
+  }
+}

@@ -52,7 +52,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         Co to znamená pro vás, je jednoduché:{' '}
         <strong>pomůžu vám postavit téměř cokoli, rychle.</strong> Automatizaci, nástroj,
         aplikaci, celou platformu&nbsp;—&nbsp;pokud to dokážete popsat, dá se to postavit.
-        Přináším pilotovu přesnost, klid meditujícího a tempo stavby měřené ve dnech.
+        Přináším přesnost pilota, klid meditujícího a tempo stavby měřené ve dnech.
       </>
     ),
   },

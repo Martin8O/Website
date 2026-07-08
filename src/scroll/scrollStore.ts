@@ -49,3 +49,26 @@ export function registerScrollDriver(next: ScrollDriver | null): void {
 export function scrollToProgress(target: number, opts?: { immediate?: boolean }): void {
   driver?.(target < 0 ? 0 : target > 1 ? 1 : target, opts?.immediate ?? false)
 }
+
+/**
+ * Scroll gate (C4 preloader). The Preloader locks scrolling until the
+ * critical assets (fonts + first frame) are in; Lenis owns wheel/touch, so
+ * the ScrollProvider registers the actual stop/start here. The lock state is
+ * replayed on registration — the Preloader mounts (and locks) before the
+ * provider's effect runs, React effects being bottom-up.
+ */
+type ScrollLockDriver = (locked: boolean) => void
+
+let lockDriver: ScrollLockDriver | null = null
+let locked = false
+
+export function registerScrollLock(next: ScrollLockDriver | null): void {
+  lockDriver = next
+  next?.(locked)
+}
+
+export function setScrollLocked(next: boolean): void {
+  if (next === locked) return
+  locked = next
+  lockDriver?.(next)
+}

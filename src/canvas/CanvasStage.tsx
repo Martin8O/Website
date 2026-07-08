@@ -39,6 +39,8 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
     let lastProgress = -1
     let lastShakeX = 0
     let lastShakeY = 0
+    let lastParX = ''
+    let lastParY = ''
 
     // Pointer channel (B3b): scenes are pure, so the smoothing lives here —
     // the target updates on pointermove, and every painted frame eases the
@@ -151,6 +153,25 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
         rs.setProperty('--cam-shake-y', `${shakeY.toFixed(2)}px`)
       }
 
+      // C4 micro-parallax: the text cards drift a few px AGAINST the pointer
+      // (the world underneath answers it in the scenes, so the layers read
+      // as depth). Rides the same eased pointer channel; presence `ptrA`
+      // fades it out on leave/touch, reduced motion never enters. Quantised
+      // to 0.1 px so the style write only happens when the eye could tell.
+      let parX = '0.0'
+      let parY = '0.0'
+      if (!reducedMotion && w > 0 && h > 0) {
+        parX = ((ptrX / w - 0.5) * ptrA * -9).toFixed(1)
+        parY = ((ptrY / h - 0.5) * ptrA * -7).toFixed(1)
+      }
+      if (parX !== lastParX || parY !== lastParY) {
+        lastParX = parX
+        lastParY = parY
+        const rs = document.documentElement.style
+        rs.setProperty('--par-x', `${parX}px`)
+        rs.setProperty('--par-y', `${parY}px`)
+      }
+
       if (grain) {
         const jitter = reducedMotion ? 0 : Math.floor(now / 120)
         const ox = (jitter * 53) % 160
@@ -221,6 +242,8 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
       if (import.meta.env.DEV) delete hookHost.__paintFrame
       document.documentElement.style.removeProperty('--cam-shake-x')
       document.documentElement.style.removeProperty('--cam-shake-y')
+      document.documentElement.style.removeProperty('--par-x')
+      document.documentElement.style.removeProperty('--par-y')
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)

@@ -15,6 +15,7 @@ export type UiStrings = {
   langSwitchLabel: string
   skipToContact: string
   scrollHint: string
+  loading: string
   workEyebrow: string
   workTitle: string
   workClaudeHead: string
@@ -56,6 +57,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     langSwitchLabel: 'Přepnout do češtiny',
     skipToContact: 'Skip to contact',
     scrollHint: 'Scroll',
+    loading: 'Loading',
     workEyebrow: 'Work',
     workTitle: 'Everything I’ve built',
     workClaudeHead: 'The Claude-Code month',
@@ -79,6 +81,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     langSwitchLabel: 'Switch to English',
     skipToContact: 'Přeskočit na kontakt',
     scrollHint: 'Skrolujte',
+    loading: 'Načítání',
     workEyebrow: 'Práce',
     workTitle: 'Všechno, co jsem postavil',
     workClaudeHead: 'Měsíc s Claude Code',
