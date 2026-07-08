@@ -4,6 +4,29 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-031 — Security-header + DNS hardening pass: green everything that has no downside, leave two grey on purpose (2026-07-08)
+Prompted by a Hardenize/Red Sift scan of `svobodamartin.dev`. Verified live state first (DNS = Cloudflare, mail =
+Cloudflare Email Routing, web = Vercel DNS-only → Let's Encrypt certs). The durable decisions:
+1. **DNS-layer hardening lives in Cloudflare, not the repo.** Added **CAA** (`0 issue "letsencrypt.org"` for Vercel's
+   CA + an `iodef` mailto); Cloudflare auto-injects its own CA set (digicert/ssl.com/pki.goog/comodoca) once any CAA
+   exists — benign and prevents future breakage. Added **TLS-RPT** (`_smtp._tls` TXT). **DNSSEC** was already on (parent
+   `.dev` has a valid DS, algo 13; `dns.google` returns `AD:true`). None of this touches the codebase.
+2. **`X-XSS-Protection: 0`, not `1; mode=block`.** The header is deprecated and the legacy auditor could itself
+   introduce XS-Leaks in old engines; `0` is the OWASP-recommended value. Real XSS defense is the strict
+   `default-src 'none'` CSP. One line in `vercel.json`.
+3. **SRI left grey on purpose.** Adding `integrity=` via a Vite plugin is fragile under code-splitting / modulepreload /
+   any post-build transform (a drifted hash hard-fails the whole page), for a marginal gain on same-origin assets
+   already locked by `script-src 'self'`. Downside > benefit → not worth one green square.
+4. **MTA-STS deferred on purpose.** **DANE is already green**, which covers SMTP transport; MTA-STS in `enforce` can
+   delay/reject *inbound* mail if the policy drifts from the MX, and needs a hosted `mta-sts.` subdomain — moving parts
+   for redundant protection.
+5. **HSTS untouched.** The whole **`.dev` TLD is in the browsers' HSTS preload list**, so per-domain `preload`/
+   `includeSubDomains` is redundant; Vercel's `max-age=63072000` is already maxed for this domain.
+Net: the only grey squares left (SRI, MTA-STS) are deliberate, defensible calls, not unfinished work. Gate green.
+Model-fit: Opus 4.8 · low.
+
+---
+
 ### ADR-030 — Projects panel: file-served hi-res shots, an ambient nebula, a hover lift-zoom; HUD era on a data-driven schedule (2026-07-08)
 Batched with the P-side status-sync of `projects.ts` (the repos are public now → real links + a secondary `GitHub ↗`
 per card + build stats refreshed against the live repos + a `strc-check` card). The durable decisions:
