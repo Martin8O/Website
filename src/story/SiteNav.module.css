@@ -63,3 +63,19 @@
   padding: 0.34rem 0.62rem;
   color: color-mix(in srgb, var(--amber) 72%, #fff);
 }
+
+/* Shown if the lazy Work-panel chunk fails to load (ChunkBoundary fallback). */
+.loadError {
+  position: fixed;
+  inset: auto 1rem calc(1rem + env(safe-area-inset-bottom)) 1rem;
+  z-index: 40;
+  margin: 0 auto;
+  width: fit-content;
+  max-width: min(92vw, 34rem);
+  padding: 0.7rem 1.1rem;
+  font-size: 0.9rem;
+  color: var(--fg);
+  background: #14161f;
+  border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+  border-radius: 10px;
+}

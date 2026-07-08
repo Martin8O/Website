@@ -75,6 +75,8 @@
 
 .scroll {
   overflow-y: auto;
+  /* Reaching the list's end must not chain into scrolling the story behind. */
+  overscroll-behavior: contain;
   padding: clamp(1rem, 2.5vw, 1.75rem) clamp(1rem, 3vw, 2rem) clamp(1.5rem, 3vw, 2.25rem);
   scrollbar-width: thin;
 }

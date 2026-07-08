@@ -37,7 +37,16 @@ export function Preloader() {
     let shown = 0
     let rafId = 0
 
+    // The lock counts (scrollStore) — release exactly once, whether the gate
+    // finishes normally or the effect is torn down (StrictMode, HMR).
+    let holdsLock = true
     setScrollLocked(true)
+    const releaseLock = () => {
+      if (holdsLock) {
+        holdsLock = false
+        setScrollLocked(false)
+      }
+    }
 
     // Lenis stops wheel/touch; keyboard scrolling is native — gate it too.
     const SCROLL_KEYS = new Set([
@@ -50,6 +59,8 @@ export function Preloader() {
       'End',
     ])
     const keyGuard = (e: KeyboardEvent) => {
+      // Space on a focused button/link is activation, not scrolling.
+      if ((e.target as Element | null)?.closest?.('button, a, [role="button"]')) return
       if (SCROLL_KEYS.has(e.key)) e.preventDefault()
     }
     window.addEventListener('keydown', keyGuard)
@@ -83,7 +94,7 @@ export function Preloader() {
 
     const finish = () => {
       finished = true
-      setScrollLocked(false)
+      releaseLock()
       window.removeEventListener('keydown', keyGuard)
       setLeaving(true)
       if (reduced) {
@@ -120,7 +131,7 @@ export function Preloader() {
       window.removeEventListener('load', onLoad)
       window.removeEventListener('keydown', keyGuard)
       // Never leave the site locked (StrictMode re-mount, HMR).
-      setScrollLocked(false)
+      releaseLock()
     }
   }, [])
 

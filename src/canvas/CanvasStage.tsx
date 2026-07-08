@@ -79,8 +79,10 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      w = window.innerWidth
-      h = window.innerHeight
+      // Floor at 1px: a 0-sized viewport (hidden embed, minimized restore)
+      // would give scenes degenerate geometry — a thrown frame kills the loop.
+      w = Math.max(1, window.innerWidth)
+      h = Math.max(1, window.innerHeight)
       canvas.width = Math.round(w * dpr)
       canvas.height = Math.round(h * dpr)
       // Scenes draw in CSS px; the transform owns the DPR scale.

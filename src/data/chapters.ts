@@ -251,9 +251,9 @@ export const CHAPTERS: Chapter[] = [
     // The Work items (the five floating windows) are data-driven from
     // `src/data/projects.ts` → the dev scene + DevWindowLinks read them.
   },
-  // 09 — NOW: the contact finale (FINAL v2.5). The world behind it is the
-  // C3 placeholder until the contact scene lands; the email is a
-  // placeholder until the domain exists (forwarding at launch, CLAUDE.md).
+  // 09 — NOW: the contact finale (FINAL v2.5). The world behind it is the C3
+  // spiral-galaxy scene; the email is the real launched address (Cloudflare
+  // Email Routing on svobodamartin.dev → set at D1).
   {
     id: 'contact-now',
     theme: 'contact',

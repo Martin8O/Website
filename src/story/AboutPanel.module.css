@@ -18,6 +18,8 @@
   width: min(560px, 100%);
   max-height: 100%;
   overflow-y: auto;
+  /* Reaching the panel's end must not chain into scrolling the story behind. */
+  overscroll-behavior: contain;
   background: linear-gradient(180deg, #0b0d16 0%, #08090f 100%);
   border: 1px solid color-mix(in srgb, var(--amber) 22%, transparent);
   border-radius: 16px;

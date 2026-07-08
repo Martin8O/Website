@@ -42,6 +42,9 @@ export function ScrollProvider({ children }: { children: ReactNode }) {
         // A long jump (Contact from the top) gets a fixed flight time instead
         // of Lenis's distance-based default, which would take ~forever.
         duration: 2.2,
+        // Land even while the scroll gate holds (preloader boot, a closing
+        // dialog): a skip-link/CTA jump must never silently no-op.
+        force: true,
       })
     })
 

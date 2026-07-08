@@ -239,7 +239,7 @@ export const PROJECTS: Project[] = [
       'The scrollytelling site you are travelling through right now — from an empty folder to production deployment in 3½ intensive days.',
     stack: ['React', 'TypeScript', 'Vite', 'Canvas 2D', 'Lenis'],
     era: 'claude',
-    link: { href: 'https://martin-website-beta.vercel.app', display: 'martin-website-beta.vercel.app' },
+    link: { href: 'https://svobodamartin.dev', display: 'svobodamartin.dev' },
     live: true,
     build: { days: 3.5, commits: 13 },
     workOrder: 4,

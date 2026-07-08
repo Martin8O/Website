@@ -7,6 +7,8 @@ import type { Lang } from './langStore'
  */
 export type UiStrings = {
   docTitle: string
+  navLandmark: string
+  projectsLandmark: string
   navHome: string
   navWork: string
   navContact: string
@@ -24,6 +26,8 @@ export type UiStrings = {
   workBeforeHead: string
   workBeforeSub: string
   workStack: string
+  workLoadError: string
+  screenshotAlt: string
   close: string
   aboutEyebrow: string
   aboutTitle: string
@@ -52,6 +56,8 @@ export function buildLine(lang: Lang, days: number, commits: number): string {
 export const STRINGS: Record<Lang, UiStrings> = {
   en: {
     docTitle: 'Martin — Scroll Through a Life',
+    navLandmark: 'Site',
+    projectsLandmark: 'Projects',
     navHome: 'Home — back to the start',
     navWork: 'Work',
     navContact: 'Contact',
@@ -69,6 +75,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     workBeforeHead: 'Before',
     workBeforeSub: '· first builds & experiments',
     workStack: 'Stack',
+    workLoadError: 'The Work panel failed to load — please reload the page.',
+    screenshotAlt: 'screenshot',
     close: 'Close',
     aboutEyebrow: 'About',
     aboutTitle: 'About me',
@@ -79,6 +87,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
   },
   cs: {
     docTitle: 'Martin — proskrolujte si jeden život',
+    navLandmark: 'Web',
+    projectsLandmark: 'Projekty',
     navHome: 'Domů — na začátek příběhu',
     navWork: 'Práce',
     navContact: 'Kontakt',
@@ -96,6 +106,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     workBeforeHead: 'Předtím',
     workBeforeSub: '· první weby a experimenty',
     workStack: 'Technologie',
+    workLoadError: 'Panel s projekty se nepodařilo načíst — obnovte prosím stránku.',
+    screenshotAlt: 'snímek obrazovky',
     close: 'Zavřít',
     aboutEyebrow: 'O mně',
     aboutTitle: 'Kdo jsem',

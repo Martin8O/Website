@@ -5,6 +5,7 @@ import { PROJECT_SHOTS } from '../data/projectShots'
 import { useLang } from '../i18n/useLang'
 import { STRINGS, buildLine, type UiStrings } from '../i18n/strings'
 import type { Lang } from '../i18n/langStore'
+import { useModalA11y } from './useModalA11y'
 import styles from './WorkPanel.module.css'
 
 /**
@@ -38,7 +39,7 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
             <img
               key={s.url}
               src={s.url}
-              alt={`${p.name} screenshot${i > 0 ? ` ${i + 1}` : ''}`}
+              alt={`${p.name} — ${t.screenshotAlt}${i > 0 ? ` ${i + 1}` : ''}`}
               loading="lazy"
               decoding="async"
             />
@@ -51,7 +52,8 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
         {p.badge && <span className={styles.badge}>{p.badge}</span>}
       </div>
       <div className={styles.body}>
-        <h3 className={styles.name}>{p.name}</h3>
+        {/* h4: cards sit under their era's h3 group heading in the outline. */}
+        <h4 className={styles.name}>{p.name}</h4>
         <p className={styles.tagline}>{p.tagline}</p>
         {/* Bottom block, pinned down so it lines up across cards: stack tags,
             the link, and the real build stats (GitHub snapshot) centered
@@ -86,21 +88,20 @@ export function WorkPanel({ onClose }: { onClose: () => void }) {
   const claude = projects.filter((p) => p.era === 'claude').sort(byOrder)
   const before = projects.filter((p) => p.era === 'pre-claude').sort(byOrder)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     closeRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [])
+  // Escape closes, Tab stays inside, the story behind stops scrolling.
+  useModalA11y(panelRef, onClose)
 
   // Portal to <body>: the nav pill's backdrop-filter makes it a containing
   // block for fixed descendants, which would trap (and collapse) the overlay.
   return createPortal(
     <div className={styles.overlay} onMouseDown={onClose} data-lenis-prevent>
       <div
+        ref={panelRef}
         className={styles.panel}
         role="dialog"
         aria-modal="true"

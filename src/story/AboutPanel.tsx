@@ -5,6 +5,7 @@ import { scrollToProgress } from '../scroll/scrollStore'
 import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
 import type { Lang } from '../i18n/langStore'
+import { useModalA11y } from './useModalA11y'
 import styles from './AboutPanel.module.css'
 
 /**
@@ -63,21 +64,20 @@ export function AboutPanel({ onClose }: { onClose: () => void }) {
   const t = STRINGS[lang]
   const copy = COPY[lang]
   const closeRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     closeRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [])
+  // Escape closes, Tab stays inside, the story behind stops scrolling.
+  useModalA11y(panelRef, onClose)
 
   // Portal to <body>: the nav pill's backdrop-filter makes it a containing
   // block for fixed descendants, which would trap (and collapse) the overlay.
   return createPortal(
     <div className={styles.overlay} onMouseDown={onClose} data-lenis-prevent>
       <div
+        ref={panelRef}
         className={styles.panel}
         role="dialog"
         aria-modal="true"

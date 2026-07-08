@@ -4,6 +4,41 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-027 — D2: pre-launch code + security review — chunk error boundary, modal focus trap, security headers (2026-07-08)
+The launch-readiness review (full code, not just a diff), run as a 31-agent ultracode workflow: seven parallel
+reviewers across security + correctness dimensions, every finding adversarially verified by two independent lenses
+(reproduce + refute) before it counted. The security surface came back **clean** — the two `dangerouslySetInnerHTML`
+sinks render only first-party compile-time strings, every external link already carries `rel="noopener noreferrer"`,
+no secrets in the bundle or git history, supply chain is three runtime deps. The decisions on what to *change*:
+1. **Both code-split islands get an error boundary; a failed chunk never blanks the site.** The canvas world and the
+   Work panel are `React.lazy`; with no boundary, a rejected import unmounts the *entire* root — a blank page — which
+   defeats the whole design intent that the canvas is decorative and the DOM story stands alone. Two real triggers:
+   a flaky mobile fetch, and **deploy skew** (an open tab requests an old hashed chunk after a redeploy; the SPA
+   rewrite serves it `index.html`, which fails the module MIME check and rejects the `import()`). One tiny
+   `ChunkBoundary` (class component — boundaries have no hook form) wraps both: the world falls back to `null` (the
+   dark stage already covers it), the Work panel to a localized "failed to load — reload" alert.
+2. **The modal scroll-lock became a counter, not a boolean.** Reusing the preloader's Lenis gate for the dialogs
+   meant two independent holders (preloader, an open dialog) could overlap, and a boolean lock let one release steal
+   the other's hold. `setScrollLocked` now increments/decrements a count and only drives Lenis on the 0↔1 edges;
+   each holder balances its own acquire/release. This also fixed "the story scrolls behind an open dialog"
+   (`data-lenis-prevent` stops wheel *inside* the panel, but nothing had stopped the page).
+3. **Security headers live in `vercel.json`, and the CSP is tight because the code earns it.** Production served only
+   HSTS. The added CSP is `default-src 'none'` with each source enumerated — crucially **no `'unsafe-inline'` for
+   scripts or styles**, because the build emits zero inline scripts and the components use zero `style=` string
+   attributes (verified in the built `dist/`), so the strict policy actually holds. `img-src` allows `data:` (the
+   baked sprites), `style-src`/`font-src` allow the two Google Fonts origins. Plus `nosniff`, `X-Frame-Options:
+   DENY` + `frame-ancestors 'none'`, `Referrer-Policy`, `Permissions-Policy` (camera/mic/geo off), `COOP`, and a
+   day-long cache for the un-hashed public media (the 2.6 MB GIF was re-fetched every visit). Verified before
+   shipping by serving `dist/` locally under the *exact* headers and driving a full scroll headless: zero CSP
+   violations, zero console errors.
+4. **`vitest` bumped 2.1.9 → 4.1.10 to clear the audit, kept out of the launch-critical path.** All five npm-audit
+   findings were dev-toolchain-only (the vitest→vite→esbuild chain, zero visitor exposure), but the major bump is
+   clean and low-risk here (pure-logic tests): `npm audit` now reports **0 vulnerabilities**, 180 tests unchanged.
+   Verification harnesses (`local/tmp/csp-test-server.mjs`, `cdp-csp-verify.mjs`, `cdp-review-verify.mjs`) are the
+   reusable proof that the headers and the a11y fixes actually hold in a real browser. Deferred as taste/post-launch
+   calls: self-hosting the fonts (drops the last third-party origin, no SRI possible on a CDN stylesheet) and
+   re-reading `prefers-reduced-motion` on mid-session OS toggle.
+
 ### ADR-026 — D1: ship L1 — code-split the world, show+copy+mailto contact, mobile-only repositioning, Cloudflare domain+email (2026-07-08)
 The launch pass. The decisions:
 1. **The canvas world is code-split behind `React.lazy`; React is its own vendor chunk.** The 2D world (six scene

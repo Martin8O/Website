@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CHAPTERS } from '../data/chapters'
 import { projectsFor, type DevProject } from '../data/projects'
 import { useLang } from '../i18n/useLang'
+import { STRINGS } from '../i18n/strings'
 import { DEV, windowLayout } from '../canvas/scenes/devMath'
 import styles from './DevWindowLinks.module.css'
 
@@ -51,7 +52,7 @@ export function DevWindowLinks({ pos }: { pos: number }) {
 
   const slots = windowLayout(aspect)
   return (
-    <nav className={styles.links} aria-label="Projects">
+    <nav className={styles.links} aria-label={STRINGS[lang].projectsLandmark}>
       {links.slice(0, DEV.windows).map((link, i) => (
         <a
           key={link.href}

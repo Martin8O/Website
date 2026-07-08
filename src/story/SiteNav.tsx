@@ -4,6 +4,7 @@ import { useLang } from '../i18n/useLang'
 import { setLang } from '../i18n/langStore'
 import { STRINGS } from '../i18n/strings'
 import { AboutPanel } from './AboutPanel'
+import { ChunkBoundary } from './ChunkBoundary'
 import styles from './SiteNav.module.css'
 
 /**
@@ -34,7 +35,7 @@ export function SiteNav() {
   }, [])
 
   return (
-    <nav className={styles.nav} aria-label="Site">
+    <nav className={styles.nav} aria-label={t.navLandmark}>
       <button
         className={`${styles.item} ${styles.home}`}
         onClick={() => scrollToProgress(0, { immediate: true })}
@@ -84,9 +85,13 @@ export function SiteNav() {
       </button>
       {open === 'about' && <AboutPanel onClose={closeAbout} />}
       {open === 'work' && (
-        <Suspense fallback={null}>
-          <WorkPanel onClose={closeWork} />
-        </Suspense>
+        // Deploy skew can 404 the lazy chunk hours after page load — tell the
+        // visitor instead of blanking the whole site (ChunkBoundary).
+        <ChunkBoundary fallback={<p className={styles.loadError} role="alert">{t.workLoadError}</p>}>
+          <Suspense fallback={null}>
+            <WorkPanel onClose={closeWork} />
+          </Suspense>
+        </ChunkBoundary>
       )}
     </nav>
   )

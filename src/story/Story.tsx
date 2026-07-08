@@ -6,6 +6,7 @@ import { chapterPosition, nearestChapter } from '../timeline'
 import { buildRuns } from '../canvas/sceneTimeline'
 import { accentAt } from './accent'
 import { ChapterCards } from './ChapterCards'
+import { ChunkBoundary } from './ChunkBoundary'
 import { DevWindowLinks } from './DevWindowLinks'
 import { Hud } from './Hud'
 import { TickScale } from './TickScale'
@@ -50,9 +51,13 @@ export function Story() {
 
   return (
     <div className={styles.stage} style={{ ['--accent' as string]: accent }}>
-      <Suspense fallback={null}>
-        <CanvasStage chapters={CHAPTERS} />
-      </Suspense>
+      {/* If the world chunk fails (flaky network, deploy skew), the dark
+          stage stays and the DOM story keeps working — never a blank site. */}
+      <ChunkBoundary>
+        <Suspense fallback={null}>
+          <CanvasStage chapters={CHAPTERS} />
+        </Suspense>
+      </ChunkBoundary>
       <ChapterCards pos={pos} chapters={chapters} />
       <DevWindowLinks pos={pos} />
       <Vignette />
