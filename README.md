@@ -1,4 +1,6 @@
-# Martin — Scroll Through a Life
+<h1 align="center">Martin — Scroll Through a Life</h1>
+
+<p align="center"><em>Built in 3.5 intense days with Claude Code.</em></p>
 
 A personal **scrollytelling website**: you scroll, and a life flies past — school &
 Pascal chess → military fighter pilot (Z‑142, L‑39, L‑159) → Afghanistan → airshow
@@ -6,6 +8,8 @@ display flying → self‑healing → Bitcoin → building with Claude Code. **S
 The story is the hook, the projects are the proof, a single email is the goal.
 
 Live: **https://svobodamartin.dev**
+
+![Fighter chapter — L‑159 above the clouds, with the amber HUD through‑line](docs/assets/hero-fighters.png)
 
 ## Stack
 
@@ -34,6 +38,8 @@ smoothed on the Lenis ticker.
   — it is decorative (`aria-hidden`) and loads during the preloader hold.
 - **Text / HUD / scale / vignette / cards** are DOM components — the story text stays
   real HTML for SEO and screen readers.
+
+![The final chapter — the Work panel: real projects, live links, and the GitHub takeoff](docs/assets/solo-developer.png)
 
 ## Accessibility & performance (Done‑criteria, not extras)
 
