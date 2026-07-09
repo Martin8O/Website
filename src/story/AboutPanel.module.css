@@ -101,9 +101,9 @@
   margin: 0 0 0.9rem;
   font-size: 0.95rem;
   line-height: 1.62;
-  /* Martin: justified block, like the chapter bodies. */
+  /* Martin: justified block, like the chapter bodies — no hyphenation
+     (split words at line ends read badly, esp. on narrow phones). */
   text-align: justify;
-  hyphens: auto;
   color: color-mix(in srgb, var(--fg) 86%, transparent);
 }
 .body strong {

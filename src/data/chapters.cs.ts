@@ -49,13 +49,13 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: '2016–2017',
     num: '04 – Airshow',
     title: 'Display<br>pilot',
-    body: 'Dvě sezóny jako display pilot, letecké dny napříč Evropou. <span class="a-hud">Deset minut maxima ze všeho</span>: rychlost, přetížení, soustředění. Dva letouny pár metrů od sebe, desetitisíce lidí dole. Splněný sen.',
+    body: 'Dvě sezóny jako display pilot, letecké dny napříč Evropou. <span class="a-hud">Deset minut maxima ze všeho</span>: rychlost, přetížení, soustředění. Dva letouny pár metrů od sebe, desetitisíce diváků. Splněný sen.',
   },
   'sky-sunset': {
     era: '2020–2022',
     num: '05 – Konec služby',
     title: 'Instruktor,<br>zkušební pilot',
-    body: '<span class="a-hud">Dvacet let u&nbsp;vzdušných sil, ~1&nbsp;700 hodin ve vzduchu</span>&nbsp;–&nbsp;poslední roky jako instruktor, inspektor bezpečnosti létání a&nbsp;zkušební pilot. V&nbsp;roce 2021 jsem se sám rozhodl odejít z&nbsp;armády a&nbsp;od roku 2022 jsem svým pánem. Před odchodem jsem získal rekvalifikaci na počítačové sítě a&nbsp;systémy. Neměl jsem ale žádný masterplan, jen důvěru v&nbsp;prostor a&nbsp;touhu skočit do světa. Následovalo intenzivní cestování, půl roku ročně v&nbsp;cizině, dobrovolnictví v&nbsp;buddhistických centrech a&nbsp;na kurzech. Meditace patřila k&nbsp;mému životu od roku 2005&nbsp;–&nbsp;teď dostala víc prostoru.',
+    body: '<span class="a-hud">Dvacet let u&nbsp;vzdušných sil, ~1&nbsp;700 hodin ve vzduchu</span>&nbsp;–&nbsp;poslední roky jako instruktor, inspektor bezpečnosti létání a&nbsp;zkušební pilot. V&nbsp;roce 2021 jsem se sám rozhodl odejít z&nbsp;armády a&nbsp;od roku 2022 jsem svým pánem. Před odchodem jsem získal rekvalifikaci na počítačové sítě a&nbsp;systémy. Neměl jsem ale žádný masterplan, jen důvěru v&nbsp;prostor a&nbsp;touhu skočit do světa. Následovalo intenzivní cestování, půl roku ročně v&nbsp;cizině, dobrovolnictví v&nbsp;buddhistických centrech a&nbsp;na kurzech. Meditace patří k&nbsp;mému životu od roku 2005&nbsp;–&nbsp;teď má víc prostoru.',
   },
   'calm-healing': {
     era: '2014–2016',
@@ -90,7 +90,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     body: 'Světy jsou všech velikostí&nbsp;–&nbsp;automatizace, nástroj, aplikace, web. Pokud to dokážete popsat, dá se to postavit. Co přináším: soustředění vojenského pilota, přesnost, smysl pro detail a&nbsp;odpovědnost pilota zkušebního, klid jednadvaceti let pravidelné meditace a&nbsp;tempo stavby měřené ve dnech.<br><br>Pokud máte něco, co stojí za postavení, rád se o&nbsp;tom dozvím víc.',
     ctaEyebrow: '+ Ozvěte se',
     cta: {
-      label: '[ martin@svobodamartin.dev ]',
+      label: 'martin@svobodamartin.dev',
       href: 'mailto:martin@svobodamartin.dev',
     },
     ctaHint: 'Stačí tři řádky: co to je, pro koho a kdy to potřebujete.',

@@ -204,7 +204,7 @@ export const CHAPTERS: Chapter[] = [
     // 5.76–5.97), hold through the touchdown + braking (~pos 6.1–6.3),
     // and clear the frame before the healing lake bleeds in (~6.5).
     cardFull: [-0.05, 0.4],
-    body: '<span class="a-hud">Twenty years in the Air Force, ~1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and test pilot. In 2021 I chose to leave the military; since 2022 I’ve been my own boss. Before that I retrained in computer networks and systems. But I had no masterplan&nbsp;—&nbsp;just trust in the open road ahead and the urge to leap into the world. What followed was intense travel: half of every year abroad, volunteering at Buddhist centres and courses. Meditation had been part of my life since 2005&nbsp;—&nbsp;now it had more room to breathe.',
+    body: '<span class="a-hud">Twenty years in the Air Force, ~1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and test pilot. In 2021 I chose to leave the military; since 2022 I’ve been my own boss. Before that I retrained in computer networks and systems. But I had no masterplan&nbsp;—&nbsp;just trust in the open road ahead and the urge to leap into the world. What followed was intense travel: half of every year abroad, volunteering at Buddhist centres and courses. Meditation has been part of my life since 2005&nbsp;—&nbsp;now it has more room to breathe.',
     align: 'left',
   },
   // The story is THEMATIC here, not strictly chronological: healing (2014–16)
@@ -303,8 +303,11 @@ export const CHAPTERS: Chapter[] = [
     cardFull: [-0.05, 0],
     body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
+    // Plain address, no decorative brackets — they wrapped onto their own
+    // lines on phones and guard nothing (the address is plaintext in the
+    // mailto: href anyway).
     cta: {
-      label: '[ martin@svobodamartin.dev ]',
+      label: 'martin@svobodamartin.dev',
       href: 'mailto:martin@svobodamartin.dev',
     },
     ctaHint: 'Three lines is enough: what it is, who it’s for, when you need it.',

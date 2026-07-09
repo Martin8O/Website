@@ -44,6 +44,7 @@ import {
   drawStars,
   fillVerticalGradient,
   hash1,
+  lerp,
   mixHex,
   rgba,
   smoothstep,
@@ -251,9 +252,14 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   // On phones the card drops to the bottom, so the spiral centres horizontally
   // and lifts into the free space between the top nav and the copy (Martin's
   // mobile call); desktop keeps the nucleus right-of-centre for the left card.
+  // The galaxy must still be BORN from the dev scene's singularity (w*0.5,
+  // ~h*0.55 — DEV.horizon 0.6 minus the 0.05h core lift) exactly like on
+  // desktop, so on mobile the centre rides the bloom's own growth up to the
+  // resting spot instead of appearing at the top (Martin's mobile fix).
   const mobile = w < 720
+  const rise = (bloomR - 0.22) / 0.78
   const cx = mobile ? w * 0.5 : w * 0.6
-  const cy = mobile ? h * 0.23 : h * 0.48
+  const cy = mobile ? lerp(h * 0.55, h * 0.23, rise) : h * 0.48
   const R = Math.min(w, h) * 0.85
 
   // --- The star cluster the finale cruises through -------------------------

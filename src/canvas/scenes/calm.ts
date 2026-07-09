@@ -713,11 +713,15 @@ export const renderCalm: Renderer = (ctx, alpha, t, time, cfg) => {
     // Martin's figure from meditace.jpg — a pixel-exact sprite, nothing
     // redrawn. Seated far enough up the bank that BOTH legs rest on solid
     // ground (the slope falls away to the left), base sunk a touch in.
+    // On phones the figure is tall relative to the bank (figH rides `h`,
+    // the bank's x-geometry rides `w`), so it shifts right + a touch down
+    // to keep the left leg on the shore (Martin's mobile fix).
+    const mobileFig = w < 720
     const figH = h * 0.075
     const img = meditatorImgs()[0]
     if (img && img.complete && img.naturalWidth) {
-      const fx = w * 0.875
-      const baseY = h * 0.868
+      const fx = w * (mobileFig ? 0.93 : 0.875)
+      const baseY = h * (mobileFig ? 0.873 : 0.868)
       const fw = figH * MEDITATOR_SPRITES[0].aspect
       drawGlow(ctx, fx, baseY - figH * 0.55, figH * 1.5, accent, alpha * (0.08 + 0.14 * light))
       drawGlow(ctx, fx, baseY - figH * 0.85, figH * 0.45, PALE, alpha * (0.05 + 0.12 * light))

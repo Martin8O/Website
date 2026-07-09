@@ -253,6 +253,28 @@
   border-color: var(--accent, var(--amber));
 }
 
+/* The contact finale centres its whole sign-off block (eyebrow + email +
+   Copy + hint) under the copy (Martin) — the card itself stays alignLeft
+   for the galaxy, so these ID rules out-rank the .alignLeft edge-pins. */
+:global(#contact-now) .ctaEyebrow,
+:global(#contact-now) .ctaHint {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+:global(#contact-now) .ctaRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* On phones the long mono address needs the whole line — Copy drops below. */
+@media (max-width: 719px) {
+  :global(#contact-now) .ctaRow {
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+}
+
 /* The contact finale's email address in light blue (Martin's call) — overrides
    the chapter-accent colour just for the mailto link in #contact-now. */
 :global(#contact-now) .cta {

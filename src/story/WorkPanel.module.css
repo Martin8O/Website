@@ -246,9 +246,9 @@
   font-size: 0.82rem;
   line-height: 1.45;
   /* Justified block (Martin) + grows, so stats/tags/link pin to the bottom
-     and line up across neighbouring cards. */
+     and line up across neighbouring cards. No hyphenation — split words
+     at line ends read badly, esp. on narrow phones. */
   text-align: justify;
-  hyphens: auto;
   flex: 1;
   color: color-mix(in srgb, var(--fg) 78%, transparent);
 }

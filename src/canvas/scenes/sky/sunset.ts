@@ -734,8 +734,12 @@ export const renderSunset: Renderer = (ctx, alpha, t, time, cfg) => {
   }
 
   // --- The overhead pass: the belly swallows the sky, the screen goes BLACK ---
+  // Desktop-only: the planform is sized off `w`, so on a portrait phone it
+  // reads as a small complete aircraft hanging in the sky instead of a
+  // shadow blotting it out (Martin's mobile fix) — there the black veil
+  // below carries the flash alone and the first jet seen is the rear view.
   const sweepP = smoothstep(L.sweepIn, L.blackFull, t)
-  if (sweepP > 0.01 && sweepP < 0.999) {
+  if (sweepP > 0.01 && sweepP < 0.999 && w >= 720) {
     // Small enough that the WHOLE planform reads as an aircraft blotting out
     // the sky (the veil snaps shut only near the end of the sweep).
     drawL159Belly(ctx, {

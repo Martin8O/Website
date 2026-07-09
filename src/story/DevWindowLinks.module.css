@@ -68,7 +68,6 @@
   font-size: 0.74rem;
   line-height: 1.4;
   text-align: justify;
-  hyphens: auto;
   color: color-mix(in srgb, var(--fg) 76%, transparent);
 }
 .tipStack {

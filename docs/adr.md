@@ -4,6 +4,31 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-033 — Mobile-parity fixes: canvas branches keyed to width, no auto-hyphenation, centred contact sign-off (2026-07-09)
+Martin's mobile review turned up a set of portrait-only defects; each fix is width-gated so **desktop is
+byte-identical**. Durable decisions:
+1. **Canvas mobile branches key on `w < 720`, matched to the DOM breakpoint.** The contact galaxy now blooms from
+   the dev singularity (`w*0.5, ~h*0.55`) and rides its own bloom-reach up to the phone resting spot, instead of
+   appearing pre-parked at the top — it emerges from the singularity exactly like desktop. The ch-05 L-159 belly
+   sweep (sized off `w`) is skipped entirely on phones, where it read as a small aircraft hanging in the sky rather
+   than a shadow blotting it out; the black veil + rear view carry the pass alone. The calm meditator shifts right
+   (`0.875w→0.93w`) + a touch down so both legs sit on the bank (the figure height rides `h`, the bank geometry
+   rides `w`, so they drift apart on tall viewports).
+2. **No automatic hyphenation anywhere.** Dropped `hyphens: auto` from the three justified blocks (Work cards,
+   About body, dev-window tooltips). Justify keeps the block edges; splitting words at line ends read badly,
+   especially on narrow phones. Real in-sentence dashes are unaffected.
+3. **Contact address is a plain string, sign-off is centred.** Removed the decorative `[ … ]` brackets around the
+   email (they wrapped onto their own lines on phones and guard nothing — the address is plaintext in the `mailto:`
+   href regardless; it's a public contact by design). The `#contact-now` sign-off block (eyebrow + email + Copy +
+   hint) now centres under the copy on every width (ID rules out-rank the card's `.alignLeft` edge-pins, which stay
+   for the galaxy); on phones the Copy button drops below the full-width address.
+4. **Copy accuracy.** Airshow CZ "desetitisíce lidí dole" → "desetitisíce diváků"; ch-05 meditation line to the
+   present tense in both languages ("Meditation **has** been… now it **has** more room" / "Meditace **patří**… teď
+   **má** víc prostoru") — it's ongoing, not past.
+*Why gate on width, not a runtime device check:* the site already draws its mobile DOM layout at 720px; keeping the
+canvas seams on the same number means one mental model and a provably-untouched desktop. Verified live over the CDP
+mobile harness (390×844) + desktop (1280×800). Gate green (187).
+
 ### ADR-032 — Biography fact-check: accurate dates/terminology, a non-chapter era schedule, humbler claims (2026-07-09)
 A full fact-check of every claim on the site (Martin's review), reconciled against the sources of truth — his own
 health site and his corrections — not memory. Durable decisions:
