@@ -4,6 +4,18 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-034 — Contact finale: Copy stacks under the email on every width, address shown lowercase (2026-07-09)
+Two small polish calls on the `#contact-now` sign-off:
+1. **Copy button drops below the email on desktop too** (was side-by-side; only phones stacked it). The `.ctaRow`
+   is now `flex-direction: column`, centred — email on top, Copy beneath, the whole block centred under the copy.
+2. **The address renders lowercase.** The apparent capitals were never in the data (`chapters.ts` label has always
+   been `martin@svobodamartin.dev`) — `.cta` carries a global `text-transform: uppercase` for outbound CTAs, and it
+   was catching the email. Overrode it to `text-transform: none` on `#contact-now .cta` only; an email should read
+   exactly as typed. Verified live (computed styles: column/centre/gap, `text-transform: none`, lowercase text).
+   Gate green (187).
+
+---
+
 ### ADR-033 — Mobile-parity fixes: canvas branches keyed to width, no auto-hyphenation, centred contact sign-off (2026-07-09)
 Martin's mobile review turned up a set of portrait-only defects; each fix is width-gated so **desktop is
 byte-identical**. Durable decisions:
