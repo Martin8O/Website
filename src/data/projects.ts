@@ -261,7 +261,7 @@ export const PROJECTS: Project[] = [
     id: 'this-site',
     name: 'This Site',
     tagline:
-      'The scrollytelling site you are travelling through right now — from an empty folder to a live production deployment.',
+      'The scrollytelling site you are travelling through right now — from an empty folder to a live production deployment in 4 days.',
     stack: ['React', 'TypeScript', 'Vite', 'Canvas 2D', 'Lenis'],
     era: 'claude',
     link: { href: 'https://svobodamartin.dev', display: 'svobodamartin.dev' },

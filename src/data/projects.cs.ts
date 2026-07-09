@@ -65,6 +65,6 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   'this-site': {
     name: 'Tento web',
     tagline:
-      'Scrollytelling web, kterým právě procházíte – od prázdné složky k živému nasazení do produkce.',
+      'Scrollytelling web, kterým právě procházíte – od prázdné složky k živému nasazení do produkce za 4 dny.',
   },
 }
