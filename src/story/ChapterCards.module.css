@@ -275,15 +275,33 @@
 /* The contact finale's email address in light blue (Martin's call) — overrides
    the chapter-accent colour just for the mailto link in #contact-now. */
 :global(#contact-now) .cta {
-  color: #8ec6ff;
-  border-bottom-color: color-mix(in srgb, #8ec6ff 45%, transparent);
+  /* Brighter blue + a soft blue glow layered over the base dark shadow, so the
+     address lifts clear of the colourful galaxy behind it (Martin: it was
+     getting lost in the background). */
+  /* Light amber — the same tint the GitHub/LinkedIn proof links now carry. */
+  color: color-mix(in srgb, var(--amber) 58%, var(--fg));
+  border-bottom-color: color-mix(in srgb, var(--amber) 45%, transparent);
+  /* A touch larger than the generic CTA — it's the whole point of the page. */
+  font-size: clamp(0.86rem, 2vw, 1.02rem);
   /* Show the address exactly as written — no forced caps (it's an email). */
   text-transform: none;
+  /* A very strong but TIGHT black outline — many stacked near-solid rings that
+     hug the glyphs (max ~7px radius) so the address punches off the galaxy
+     WITHOUT the soft bloom bleeding down into the Copy button below. */
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 1),
+    0 0 1px rgba(0, 0, 0, 1),
+    0 0 2px rgba(0, 0, 0, 1),
+    0 0 2px rgba(0, 0, 0, 1),
+    0 0 3px rgba(0, 0, 0, 1),
+    0 0 4px rgba(0, 0, 0, 1),
+    0 0 5px rgba(0, 0, 0, 1),
+    0 0 7px rgba(0, 0, 0, 0.9);
 }
 :global(#contact-now) .cta:hover,
 :global(#contact-now) .cta:focus-visible {
-  color: #b8dbff;
-  border-bottom-color: #8ec6ff;
+  color: var(--amber);
+  border-bottom-color: var(--amber);
 }
 
 /* `.compact` no longer changes the font size — every chapter shares the one

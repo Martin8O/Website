@@ -4,6 +4,21 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-035 — Contact finale legibility + About-copy chronology (2026-07-09)
+Polish on the contact finale and a chronology fix in the About panel:
+1. **The email address leads with amber + a strong tight black halo.** It was light blue (`#8ec6ff`) and got lost
+   in the colourful galaxy behind it. Now a light-amber tint (`amber 58% + fg`, matched to the profile links), a
+   touch larger (`clamp(0.86rem, 2vw, 1.02rem)`), and — after trying a blue glow (blurred it) — the site's own
+   **black text-shadow idiom dialled up**: 8 stacked near-solid rings that hug the glyphs (max ~7px radius, so the
+   halo never bleeds down into the Copy button below). Hover → full amber.
+2. **GitHub/LinkedIn proof links are stronger amber.** The `#contact-now` `SiteFooter` links (bottom-right) went
+   from muted grey to `amber 82% + fg` (+ a heavier amber underline) so the proof reads clearly as the HUD orange,
+   not buried. (An earlier tint on the *About-panel* footer links was reverted — Martin meant the contact page.)
+3. **About-panel chronology corrected.** The self-healing came *during* the flying career (~2014), not after, and
+   Claude Code is *now* — so "Then a self-healing" → **"Mid-career, a self-healing"** (CZ "Pak" → "Uprostřed toho")
+   and **"and now Claude Code"** (CZ "a teď Claude Code"). The one long cumulative sentence stays (deliberate).
+Verified live via computed styles (colour/size/shadow, footer match) + a contact-finale screenshot. Gate green (187).
+
 ### ADR-034 — Contact finale: Copy stacks under the email on every width, address shown lowercase (2026-07-09)
 Two small polish calls on the `#contact-now` sign-off:
 1. **Copy button drops below the email on desktop too** (was side-by-side; only phones stacked it). The `.ctaRow`
