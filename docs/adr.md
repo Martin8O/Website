@@ -4,6 +4,34 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-036 — Text pass: achievement framing, scope humility, symmetric card 00 (2026-07-10)
+A bilingual (EN+CZ) copy pass plus one typography pattern, all verified live:
+1. **Card 00 (School & Pascal) reframed to achievement, not absence.** Was "…chess … but it couldn't come up with a
+   single move. The first lines of code, with no idea where they would lead" — which promoted ignorance / lack of
+   confidence. Now the chess is Martin's **school-leaving project that enforced every rule of the game**. CZ centres
+   the lead line "Maturita z matematiky a programování." over a justified block; EN "Graduated in maths and
+   programming." — content-matched.
+2. **Card 00 layout = centred header + justified block + centred footer.** New **global `.lead`** class
+   (`display:block; text-align:center`) centres the first sentence; **`.body:has(:global(.lead)) { text-align-last:
+   center }`** centres the last line too, scoped to card 00 only. Standard justify leaves the last line ragged-left;
+   here we want symmetry on a short card.
+3. **Intro** "One life, many worlds" → "**many chapters**" (the "world" metaphor was over-reused / a touch lofty).
+4. **Contact 09 de-grandiosed + scope-honest.** Title "The next world could be yours" → "**Your idea could be
+   next**"; "Worlds come in all sizes" → "**Whatever you need built** comes in all sizes"; added "**I take on the
+   small-to-medium ones and build them properly, end to end**" (honest scope = a trust asset, not a weakness). "What
+   I bring" unchanged.
+5. **About panel tightened.** Dropped "seventeen of them flying"; the Bitcoin clause "…what I trust — trust grounded
+   in deep technical understanding, not in promises —" → "…what I trust: **technical understanding over promises**";
+   "And now Claude Code turned the computer screen I once walked away from…" → "And now, with Claude Code, **we've
+   built** a hyper-efficient workshop…" (partnership framing; the screen callback stays in the story chapters); "a
+   full platform" → "a website".
+6. **Healing 06** — dropped the colonoscopy mention (proof stays via the CTA to mojecestakezdravi.cz).
+**Justify RETAINED site-wide.** A left-align experiment was tried and **reverted at Martin's call** — the decision is
+that line-end stretch is solved by *wording* (arranging words so lines fill) and, on short cards, by `<br>`/`.lead` +
+`text-align-last`, NOT by dropping justify. **Learning:** numeric justify-stretch measurement (word-gap ratios via
+Range) throws false positives around accent-span boundaries + off-screen cards → trust the eye; only card 00 was
+genuinely stretched (Martin's first screenshot confirmed it). Gate green (187).
+
 ### ADR-035 — Contact finale legibility + About-copy chronology (2026-07-09)
 Polish on the contact finale and a chronology fix in the About panel:
 1. **The email address leads with amber + a strong tight black halo.** It was light blue (`#8ec6ff`) and got lost

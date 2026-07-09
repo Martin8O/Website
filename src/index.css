@@ -96,6 +96,15 @@ html.lenis body {
   white-space: nowrap;
 }
 
+/* A centered lead line inside an otherwise-justified body (chapter 00: the
+   school-leaving line sits centered above the justified paragraph). Being a
+   block, it also breaks the line — no <br> needed. Global — chapter HTML is
+   injected. */
+.lead {
+  display: block;
+  text-align: center;
+}
+
 /* A title word that arrives on its own scroll cue (ChapterCards drives
    --late per card; the "Bitcoin" reveal at 88 %). */
 .t-late {

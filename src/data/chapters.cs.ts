@@ -19,13 +19,13 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
   intro: {
     num: '↓ Skrolujte a cestujte se mnou časem',
     title: 'Martin',
-    body: 'Jeden život, mnoho světů.<br>Skrolujte a&nbsp;rozběhněte slunce po obloze.',
+    body: 'Jeden život, mnoho kapitol.<br>Skrolujte a&nbsp;rozběhněte slunce po obloze.',
   },
   'origin-school': {
     era: '1991–1998 · Škola',
     num: '00 – Počátek',
     title: 'Škola<br>a Pascal',
-    body: 'Maturita z&nbsp;matematiky a&nbsp;programování. V&nbsp;Pascalu jsem napsal <span class="a-gold">šachy pro dva hráče</span>&nbsp;<span class="nw">–&nbsp;znaly</span> každé pravidlo hry, ale samy nevymyslely jediný tah. První řádky kódu, bez tušení, kam jednou povedou.',
+    body: '<span class="lead">Maturita z&nbsp;matematiky a&nbsp;programování.</span>Několik let s&nbsp;Pascalem vyvrcholilo maturitním programem: <span class="a-gold">šachy pro dva hráče</span>, který hlídal pravidla hry.',
   },
   'sky-climb': {
     era: '1999–2005 · ČVUT → Brno',
@@ -61,7 +61,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: '2014–2016',
     num: '06 – Zkouška',
     title: 'Sebeuzdravení',
-    body: 'Ulcerózní kolitida&nbsp;–&nbsp;„na celý život, příčina neznámá, léčba neexistuje.“ Šel jsem na ni ze <span class="a-cyan">všech stran</span>: osmnáct měsíců přestavby všeho&nbsp;–&nbsp;strava, střevo, mysl, životní styl. Od té doby v&nbsp;remisi&nbsp;–&nbsp;<span class="a-cyan">bez léků</span>, potvrzeno kolonoskopií v&nbsp;roce 2016. Vyšel jsem z&nbsp;toho zdravější a&nbsp;s&nbsp;hlubší znalostí sebe sama.',
+    body: 'Ulcerózní kolitida&nbsp;–&nbsp;„na celý život, příčina neznámá, léčba neexistuje.“ Šel jsem na ni ze <span class="a-cyan">všech stran</span>: osmnáct měsíců přestavby všeho&nbsp;–&nbsp;strava, střevo, mysl, životní styl. Od té doby v&nbsp;remisi&nbsp;–&nbsp;<span class="a-cyan">bez léků</span>. Vyšel jsem z&nbsp;toho zdravější a&nbsp;s&nbsp;hlubší znalostí sebe sama.',
     cta: {
       label: 'Přečtěte si celou cestu →',
       href: 'https://mojecestakezdravi.cz/',
@@ -86,8 +86,8 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
   'contact-now': {
     era: 'teď',
     num: '09 – Teď',
-    title: 'Další svět<br>může být váš.',
-    body: 'Světy jsou všech velikostí&nbsp;–&nbsp;automatizace, nástroj, aplikace, web. Pokud to dokážete popsat, dá se to postavit. Co přináším: soustředění vojenského pilota, přesnost, smysl pro detail a&nbsp;odpovědnost pilota zkušebního, klid jednadvaceti let pravidelné meditace a&nbsp;tempo stavby měřené ve dnech.<br><br>Pokud máte něco, co stojí za postavení, rád se o&nbsp;tom dozvím víc.',
+    title: 'Váš nápad<br>může být další.',
+    body: 'Cokoliv potřebujete postavit, může mít různou velikost&nbsp;–&nbsp;automatizace, nástroj, aplikace, web. Beru si ty malé až střední a&nbsp;stavím je pořádně, od začátku do konce. Pokud to dokážete popsat, dá se to postavit. Co přináším: soustředění vojenského pilota, přesnost, smysl pro detail a&nbsp;odpovědnost pilota zkušebního, klid jednadvaceti let pravidelné meditace a&nbsp;tempo stavby měřené ve dnech.<br><br>Pokud máte něco, co stojí za postavení, rád se o&nbsp;tom dozvím víc.',
     ctaEyebrow: '+ Ozvěte se',
     cta: {
       label: 'martin@svobodamartin.dev',

@@ -160,12 +160,20 @@
   max-width: 34ch;
   margin: 1.25rem auto 0;
   /* Bodies set as a justified block (Martin's call, rev15/16) — titles and
-     eyebrows keep their card alignment. */
+     eyebrows keep their card alignment. Line-end stretch is solved by wording
+     (arranging words so lines fill), NOT by dropping justify. */
   text-align: justify;
   text-shadow:
     0 0 2px rgba(0, 0, 0, 0.95),
     0 1px 4px rgba(0, 0, 0, 0.9),
     0 2px 16px rgba(0, 0, 0, 0.8);
+}
+
+/* Card 00 (any body carrying a centered .lead line): centre the LAST line too,
+   so the short body reads as centred header + justified block + centred footer.
+   Standard justify leaves the final line ragged-left; here we want symmetry. */
+.body:has(:global(.lead)) {
+  text-align-last: center;
 }
 
 /* Intro lede: a short, centered two-line tagline — not a justified paragraph. */

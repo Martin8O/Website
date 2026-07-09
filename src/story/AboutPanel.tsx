@@ -22,12 +22,11 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
   en: {
     p1: (
       <>
-        Twenty years in the Air Force, seventeen of them flying&nbsp;—&nbsp;military jet pilot,
-        instructor, display pilot, test pilot. Mid-career, a
-        self-healing that rebuilt how I live, a Bitcoin rabbit hole that rebuilt what I
-        trust&nbsp;—&nbsp;trust grounded in deep technical understanding, not in
-        promises&nbsp;—&nbsp;and now Claude&nbsp;Code, which turned the computer screen I once walked
-        away from into a hyper-efficient workshop: five real apps in about a month, and{' '}
+        Twenty years in the Air Force&nbsp;—&nbsp;military jet pilot, instructor, display pilot,
+        test pilot. Mid-career, a self-healing that rebuilt how I live and a Bitcoin rabbit hole
+        that rebuilt what I trust: technical understanding over promises. And now, with
+        Claude&nbsp;Code, we&rsquo;ve built a hyper-efficient workshop&nbsp;—&nbsp;five real apps in
+        about a month, and{' '}
         <span className={styles.highlight}>this site</span>&nbsp;—&nbsp;from an empty folder to a
         live production deploy <span className={styles.highlight}>in 4&nbsp;days</span>.
       </>
@@ -36,7 +35,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
       <>
         What that means for you is simple:{' '}
         <strong>I can build you almost anything, fast.</strong> An automation, a tool, an
-        app, a full platform&nbsp;—&nbsp;if you can describe it, it can be built. I bring a
+        app, a website&nbsp;—&nbsp;if you can describe it, it can be built. I bring a
         pilot&rsquo;s precision, a meditator&rsquo;s calm, and a build pace measured in days.
       </>
     ),
@@ -44,12 +43,11 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
   cs: {
     p1: (
       <>
-        Dvacet let u letectva, sedmnáct z nich ve vzduchu&nbsp;–&nbsp;pilot proudových letounů, instruktor,
-        display pilot, zkušební pilot. Uprostřed toho
-        sebeuzdravení, které přestavělo, jak žiju, bitcoinová králičí nora, která přestavěla,
-        čemu věřím&nbsp;–&nbsp;důvěře postavené na hlubokém technickém porozumění, ne na
-        slibech&nbsp;–&nbsp;a teď Claude&nbsp;Code, který proměnil obrazovku počítače, od níž jsem
-        kdysi odešel, v super efektivní dílnu: pět skutečných aplikací za zhruba měsíc a{' '}
+        Dvacet let u letectva&nbsp;–&nbsp;pilot proudových letounů, instruktor, display pilot,
+        zkušební pilot. Uprostřed toho sebeuzdravení, které přestavělo, jak žiju, a&nbsp;bitcoinová
+        králičí nora, po&nbsp;které věřím spíš technickému porozumění než slibům. A&nbsp;teď
+        jsme s&nbsp;Claude&nbsp;Code postavili super efektivní dílnu&nbsp;–&nbsp;pět skutečných
+        aplikací za zhruba měsíc a{' '}
         <span className={styles.highlight}>tento web</span>&nbsp;–&nbsp;kompletně z prázdné složky
         až po produkční nasazení <span className={styles.highlight}>za 4&nbsp;dny</span>.
       </>
@@ -58,7 +56,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
       <>
         Co to znamená pro vás, je jednoduché:{' '}
         <strong>Mohu vám postavit téměř cokoli, rychle.</strong> Automatizaci, nástroj,
-        aplikaci, celou platformu&nbsp;–&nbsp;pokud to dokážete popsat, dá se to postavit.
+        aplikaci, <span className="nw">web&nbsp;–&nbsp;pokud</span> to dokážete popsat, dá se to postavit.
         Přináším přesnost pilota, klid meditujícího a tempo stavby měřené ve dnech.
       </>
     ),

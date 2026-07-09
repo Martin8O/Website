@@ -110,7 +110,7 @@ export const CHAPTERS: Chapter[] = [
     num: '↓ Scroll to travel through time with me',
     title: 'Martin',
     centerBody: true,
-    body: 'One life, many worlds.<br>Scroll and send the sun racing across the sky.',
+    body: 'One life, many chapters.<br>Scroll and send the sun racing across the sky.',
   },
   {
     id: 'origin-school',
@@ -122,7 +122,7 @@ export const CHAPTERS: Chapter[] = [
     // Copy FINAL v2.5 (local/ode mne/texty/texty-v2.md) from here on.
     // Em-dashes ride non-breaking spaces on BOTH sides everywhere, so a
     // dash never strands at a line start or end in the justified bodies.
-    body: 'A school-leaving exam in maths and programming. In Pascal I wrote <span class="a-gold">chess for two players</span>&nbsp;—&nbsp;it knew every rule of the game, but it couldn\'t come up with a single move. The first lines of code, with no idea where they would lead.',
+    body: '<span class="lead">Graduated in maths and programming.</span>Several years with Pascal culminated in my final project&nbsp;—&nbsp;<span class="a-gold">chess for two players</span> that enforced every rule of the game.',
   },
   {
     id: 'sky-climb',
@@ -226,7 +226,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2014–2016',
     num: '06 — The Test',
     title: 'Selfhealing',
-    body: 'Ulcerative colitis&nbsp;—&nbsp;“lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle</span>: eighteen months of rebuilding everything&nbsp;—&nbsp;food, gut, mind, lifestyle. In remission ever since&nbsp;—&nbsp;<span class="a-cyan">off all medication</span>, confirmed clear by colonoscopy in 2016. I came out healthier, knowing myself from the inside.',
+    body: 'Ulcerative colitis&nbsp;—&nbsp;“lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle</span>: eighteen months of rebuilding everything&nbsp;—&nbsp;food, gut, mind, lifestyle. In remission ever since&nbsp;—&nbsp;<span class="a-cyan">off all medication</span>. I came out healthier, knowing myself from the inside.',
     cta: {
       label: 'Read the whole journey →',
       href: 'https://mojecestakezdravi.cz/',
@@ -293,7 +293,7 @@ export const CHAPTERS: Chapter[] = [
     enterFade: [0.7, 0.97],
     era: 'now',
     num: '09 — Now',
-    title: 'The next world<br>could be yours.',
+    title: 'Your idea<br>could be next.',
     compact: true,
     // The galaxy's nucleus holds the right of the frame (C3 rev5) — the
     // card keeps the left so neither blocks the other.
@@ -301,7 +301,7 @@ export const CHAPTERS: Chapter[] = [
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Worlds come in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. If you can describe it, it can be built. What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Whatever you need built comes in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built. What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
     // Plain address, no decorative brackets — they wrapped onto their own
     // lines on phones and guard nothing (the address is plaintext in the
