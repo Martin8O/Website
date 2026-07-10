@@ -8,7 +8,9 @@ import styles from './SiteFooter.module.css'
  * for the whole journey. Hidden from pointer + tab order until visible.
  */
 export function SiteFooter({ progress }: { progress: number }) {
-  const u = Math.min(1, Math.max(0, (progress - 0.975) / 0.02))
+  // Synced to the contact card's own rise (cardFull [-0.05, 0] on the last
+  // chapter, ease 0.13 → pos 10.82..10.95 of 11 = progress 0.984..0.996).
+  const u = Math.min(1, Math.max(0, (progress - 0.984) / 0.012))
   const o = u * u * (3 - 2 * u)
   return (
     <footer

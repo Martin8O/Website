@@ -119,14 +119,18 @@ describe('activeEra', () => {
     expect(activeEra(0.58, over)).toBe('A') // B held back past its 0.25 midpoint
     expect(activeEra(0.585, over)).toBe('B') // flips exactly at the override
   })
-  it('drives the real story eras — L-39 at 20 %, L-159 at 24 %, sunset at 59 %', () => {
+  it('drives the real story eras — L-39 at 18 %, L-159 at 21 %, sunset at 53 %', () => {
     const en = CHAPTERS
     const eraOf = (id: string) => en.find((c) => c.id === id)?.era
-    expect(activeEra(0.18, en, EXTRA_ERAS)).toBe(eraOf('sky-climb')) // ČVUT→Brno before 20 %
-    expect(activeEra(0.21, en, EXTRA_ERAS)).toBe('2005–2012 · L-39') // the extra L-39 stop
-    expect(activeEra(0.23, en, EXTRA_ERAS)).toBe(eraOf('sky-cruise')) // L-159 at the gold ring
-    expect(activeEra(0.58, en, EXTRA_ERAS)).toBe(eraOf('sky-airshow')) // "2016–2017" holds through 58 %
-    expect(activeEra(0.59, en, EXTRA_ERAS)).toBe(eraOf('sky-sunset')) // "2020–2026" from 59 %
+    expect(activeEra(0.16, en, EXTRA_ERAS)).toBe(eraOf('sky-climb')) // ČVUT→Brno before 18 %
+    expect(activeEra(0.19, en, EXTRA_ERAS)).toBe('2005–2012 · L-39') // the extra L-39 stop
+    expect(activeEra(0.21, en, EXTRA_ERAS)).toBe(eraOf('sky-cruise')) // L-159 at the gold ring
+    expect(activeEra(0.52, en, EXTRA_ERAS)).toBe(eraOf('sky-airshow')) // "2016–2017" holds to 53 %
+    expect(activeEra(0.54, en, EXTRA_ERAS)).toBe(eraOf('sky-sunset')) // "2020–2022" from 53 %
+    // The mission chapter (09) carries no era of its own — the HUD keeps
+    // dev's "from 2026" across it until the finale's "now".
+    expect(activeEra(0.9, en, EXTRA_ERAS)).toBe(eraOf('dev-explosion'))
+    expect(activeEra(0.96, en, EXTRA_ERAS)).toBe(eraOf('contact-now'))
   })
 })
 

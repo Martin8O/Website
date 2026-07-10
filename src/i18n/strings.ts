@@ -9,6 +9,7 @@ export type UiStrings = {
   docTitle: string
   navLandmark: string
   projectsLandmark: string
+  offerLandmark: string
   navHome: string
   navWork: string
   navContact: string
@@ -59,6 +60,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     docTitle: 'Martin — Scroll Through a Life',
     navLandmark: 'Site',
     projectsLandmark: 'Projects',
+    offerLandmark: 'Working together',
     navHome: 'Home — back to the start',
     navWork: 'Projects',
     navContact: 'Contact',
@@ -91,6 +93,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     docTitle: 'Martin – proskrolujte si jeden život',
     navLandmark: 'Web',
     projectsLandmark: 'Projekty',
+    offerLandmark: 'Spolupráce',
     navHome: 'Domů – na začátek příběhu',
     navWork: 'Projekty',
     navContact: 'Kontakt',

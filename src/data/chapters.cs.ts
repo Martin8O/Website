@@ -83,9 +83,13 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     title: 'Sólo<br>vývojář',
     body: 'Začalo to opatrně&nbsp;–&nbsp;nejdřív malé aplikace. Pak jsem objevil <span class="a-cyan">Claude Code</span> a&nbsp;opatrnost skončila: <span class="a-mag">pět skutečných aplikací za zhruba měsíc</span>&nbsp;–&nbsp;vznášejí se tady okolo. Dokonce během vývoje zapisovaly do trezoru <strong>dev-brain</strong> tematické lekce, které <strong>BrainQuest</strong> mění ve výuku ve stylu Duolinga&nbsp;–&nbsp;takže se pořád učím, ne jen přihlížím. Graf příspěvků níže vypadá jako strmý vzlet; všechno předtím mohl být trénink na tohle. <em>(Nakonec mě ta obrazovka přece jen baví.)</em>',
   },
+  'offer-mission': {
+    num: '09 – Vaše mise',
+    title: 'Váš letový<br>plán',
+  },
   'contact-now': {
     era: 'teď',
-    num: '09 – Teď',
+    num: '10 – Teď',
     title: 'Váš nápad<br>může být další.',
     body: 'Cokoliv potřebujete postavit, může mít různou velikost&nbsp;–&nbsp;automatizace, nástroj, aplikace, web. Beru si ty malé až střední a&nbsp;stavím je pořádně, od začátku do konce. Pokud to dokážete popsat, dá se to postavit. Co přináším: soustředění vojenského pilota, přesnost, smysl pro detail a&nbsp;odpovědnost pilota zkušebního, klid jednadvaceti let pravidelné meditace a&nbsp;tempo stavby měřené ve dnech.<br><br>Pokud máte něco, co stojí za postavení, rád se o&nbsp;tom dozvím víc.',
     ctaEyebrow: '+ Ozvěte se',

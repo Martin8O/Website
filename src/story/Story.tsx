@@ -8,6 +8,7 @@ import { accentAt } from './accent'
 import { ChapterCards } from './ChapterCards'
 import { ChunkBoundary } from './ChunkBoundary'
 import { DevWindowLinks } from './DevWindowLinks'
+import { OfferPanels } from './OfferPanels'
 import { Hud } from './Hud'
 import { TickScale } from './TickScale'
 import { ScrollHint } from './ScrollHint'
@@ -62,6 +63,7 @@ export function Story() {
       </ChunkBoundary>
       <ChapterCards pos={pos} chapters={chapters} />
       <DevWindowLinks pos={pos} />
+      <OfferPanels pos={pos} />
       <Vignette />
       <Hud era={era} progress={progress} />
       <TickScale progress={progress} count={count} />

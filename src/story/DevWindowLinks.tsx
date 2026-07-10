@@ -46,9 +46,9 @@ export function DevWindowLinks({ pos }: { pos: number }) {
   }, [])
 
   // Live only while the landed constellation owns the frame: from the
-  // touchdown (chapter + 0.5) until 98 % (chapter + 0.8), where the contact
-  // galaxy takes over — past that the windows are only a fading backdrop and
-  // must NOT stay clickable / hover-lit under the nebula (Martin).
+  // touchdown (chapter + 0.5) until chapter + 0.8 (~89 %), where the mission
+  // HUD takes over — past that the windows are only a fading backdrop and
+  // must NOT stay clickable / hover-lit under the reticle (Martin).
   const landed = pos >= DEV_INDEX + 0.5 && pos <= DEV_INDEX + 0.8
   if (!landed) return null
 

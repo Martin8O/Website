@@ -1,0 +1,354 @@
+.panels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Ride the same engine-driven shake + micro-parallax as the chapter cards
+     so the blocks float on the text plane, one level above the painted map. */
+  transform: translate3d(
+    calc(var(--cam-shake-x, 0px) + var(--par-x, 0px)),
+    calc(var(--cam-shake-y, 0px) + var(--par-y, 0px)),
+    0
+  );
+}
+
+/* A chart information box: dark glass plate, hairline amber frame, two
+   bracket corners. JS drives opacity + a small translateY settle via
+   --tx/--ty, like the cards. */
+.panel {
+  position: absolute;
+  width: min(30vw, 23.5rem);
+  padding: 0.85rem 1.1rem 0.9rem;
+  pointer-events: auto;
+  background: color-mix(in srgb, #06080e 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--amber) 26%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 0 30px 0 color-mix(in srgb, var(--amber) 14%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  will-change: opacity, transform;
+}
+
+.panel::before,
+.panel::after {
+  content: '';
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 2px solid color-mix(in srgb, var(--amber) 80%, transparent);
+}
+
+.panel::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 8px;
+}
+
+.panel::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 8px;
+}
+
+/* Desktop: each panel is anchored near its OWN waypoint, spread wide so the
+   plotted route reads clearly between them — 01/03 up top, 02/04 down low.
+   Top-row panels anchor by their TOP edge and grow downward; bottom-row by
+   their BOTTOM edge and grow upward — so a panel of any height opens away
+   from the chart's centre and the two on a side can never collide.
+   The `.col` wrappers are layout-transparent; the id selectors place. */
+.col {
+  display: contents;
+}
+
+/* Full-screen scene → the four cards flow with the flight path. Each card is
+   anchored by its CENTRE on the exact spot Martin marked on his layout
+   sketch (fractions measured off the red boxes), via the same --tx/--ty
+   translate the mobile slot uses — so the fit holds whatever the card's
+   content height: 01 (20 %, 33 %) · 02 (27.5 %, 76 %) · 03 (53 %, 46 %) ·
+   04 (83 %, 61 %). The plotted route threads START → 2 → 3 → DEST beside
+   them. */
+.what,
+.process,
+.trust,
+.proof {
+  --tx: -50%;
+  --ty: -50%;
+}
+
+.what {
+  left: 20%;
+  top: 33%;
+}
+
+/* 02/03 nudged ±1–1.5 % off the sketch reading so their corners clear each
+   other — and 02's foot text clears the era/HUD pill — even on short
+   (~700 px) viewports. */
+.process {
+  left: 29%;
+  top: 76.5%;
+}
+
+.trust {
+  left: 53%;
+  top: 44%;
+}
+
+/* Proof carries the tall measured-quality block — its centre sits lower so
+   the whole card still clears the nav above and the screen edge below. */
+.proof {
+  left: 83%;
+  top: 61%;
+}
+
+/* The measured-quality block INSIDE the proof panel, after the claims — set
+   off by a clear empty gap + a hairline rule (Martin: a blank line before
+   the Lighthouse part). */
+.quality {
+  margin-top: 0.9rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid color-mix(in srgb, var(--amber) 18%, transparent);
+}
+
+/* Line 1: what the block reports · line 2: the tool (Lighthouse) — both
+   centred over the gauges. */
+.qualityHeading {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: color-mix(in srgb, var(--amber) 82%, #fff);
+  margin: 0 0 0.55rem;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.95);
+}
+
+/* The self-reported "This website" lines sit tight under the heading. */
+.quality .items {
+  gap: 0.3rem;
+  margin-bottom: 0.55rem;
+}
+
+.qualityGaugesLabel {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #17e07f;
+  margin: 0.2rem 0 0.5rem;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.95);
+}
+
+@media (max-width: 719px) {
+  /* One central slot: the panels take turns (offerMath's mobile windows),
+     cross-fading exactly like chapter cards. The desktop columns dissolve. */
+  .col {
+    display: contents;
+  }
+
+  .what,
+  .process,
+  .proof,
+  .trust {
+    left: 50%;
+    right: auto;
+    top: 62%;
+    bottom: auto;
+    --tx: -50%;
+    --ty: -50%;
+    width: min(90vw, 26rem);
+  }
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(0.78rem, 1.7vw, 0.92rem);
+  font-weight: 600;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 0.55rem;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.34rem;
+}
+
+.item,
+.stepItem {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+  font-family: var(--font-body);
+  /* Close to the chapter-card body measure — Martin: no squinting. */
+  font-size: clamp(0.86rem, 1.7vw, 0.95rem);
+  line-height: 1.42;
+  color: #eef3fa;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* The chart's own list marker — the same `+` idiom as the contact eyebrow. */
+.item::before {
+  content: '+';
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: color-mix(in srgb, var(--amber) 85%, transparent);
+  flex: none;
+}
+
+.step {
+  font-family: var(--font-mono);
+  font-size: 0.74em;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--amber) 90%, #fff);
+  border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+  border-radius: 3px;
+  padding: 0 0.34em;
+  line-height: 1.55;
+  flex: none;
+}
+
+.item strong,
+.stepItem strong {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Proof lines are real outbound links — quiet amber underline, the visitor
+   can verify every claim in one click ("Don't trust — verify"). */
+.link {
+  color: color-mix(in srgb, var(--amber) 55%, var(--fg));
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+  padding-bottom: 1px;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.link::after {
+  content: ' ↗';
+  font-size: 0.85em;
+  color: color-mix(in srgb, var(--amber) 75%, transparent);
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--amber);
+  border-bottom-color: var(--amber);
+}
+
+.foot {
+  font-family: var(--font-body);
+  font-size: clamp(0.78rem, 1.6vw, 0.88rem);
+  font-style: italic;
+  color: var(--muted);
+  margin: 0.7rem 0 0;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+/* --- The quality strip's gauges + grades ---------------------------------- */
+
+.gauges {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+/* A Lighthouse-style ring: conic progress in the tool's own green — the
+   instantly recognizable "measured quality" mark. */
+.gaugeRing {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #17e07f;
+  background:
+    radial-gradient(circle at center, color-mix(in srgb, #06080e 88%, transparent) 58%, transparent 59%),
+    conic-gradient(#0cce6b calc(var(--val, 0) * 1%), color-mix(in srgb, #0cce6b 16%, transparent) 0);
+}
+
+.gaugeLabel {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fg) 74%, transparent);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Left-aligned, wrapping: Observatory (the wide one) takes the first line,
+   SecurityHeaders + Hardenize share the next (Martin). */
+.grades {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+
+/* The tool name runs AMBER, the score GREEN, the re-scan arrow a DARKER
+   amber (Martin). */
+.grade {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  color: var(--amber);
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
+  border-radius: 4px;
+  padding: 0.26rem 0.5rem;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.grade strong {
+  font-weight: 700;
+  color: #17e07f;
+}
+
+.grade::after {
+  content: ' ↗';
+  color: color-mix(in srgb, var(--amber) 62%, #000);
+}
+
+.grade:hover,
+.grade:focus-visible {
+  color: color-mix(in srgb, var(--amber) 80%, #fff);
+  border-color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 10%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link,
+  .grade {
+    transition: none;
+  }
+}

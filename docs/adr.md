@@ -4,6 +4,51 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-037 — "Ground Control": the flight-plan offer scene (chapter 09) (2026-07-10)
+A **new canvas theme `offer`** inserted between `dev` (08) and `contact` (10) — the site's first outright
+*call-to-action* scene. Chapter count 11 → 12; the contact finale renumbered 09 → **10 · Now**. Many live
+review rounds with Martin; the shape below is where it settled.
+
+1. **A night-mode, full-bleed IFR/enroute chart, NOT a combat reticle.** The first build was a cockpit
+   targeting reticle locking onto the visitor; Martin steered it to a **civil ATC / SID-chart idiom** —
+   airways between five-letter fixes, sector polygons with altitude blocks, a red-hatched LKR, a VOR compass
+   rose — re-inked for the site's night palette. **No geography** (aeronautical charts carry airspace, not
+   terrain/rivers/towns). The scene runs **edge to edge** — the earlier rounded "plate" with dark margins was
+   removed at Martin's call (`mx=0, my0=0`, full-screen wash, no border/clip).
+2. **A plotted VFR route = the four mission cards.** FOUR waypoints, one per card, drawn as you scroll:
+   **START(1) → 2 → 3 → DEST(4)**. Panel *N* reveals the instant the pencil reaches waypoint *N* — the panel
+   windows are **derived from the route arc-length** in `offerMath` (one timing source for canvas + DOM), so
+   the choreography can never drift from the drawing.
+3. **Card layout measured off Martin's sketch.** Final positions are the **centres** of the red boxes he drew
+   (fractions read off the image), anchored via `--tx/--ty:-50%` so the fit holds at any content height:
+   01 (20 %, 33 %) · 02 (29 %, 76.5 %) · 03 (53 %, 44 %) · 04 (83 %, 61 %). A flowing diagonal cascade, not
+   four rigid corners (earlier iterations tried corners; the reticle centre; a centre-column zig — all
+   rejected).
+4. **Ambient ATC traffic — five airliners.** Each flies a **4-point airway (two junction turns, always
+   forward)** at a pace **proportional to its own airspeed** (250–400 kt); one rides the **LEMBI↔USUPA bottom
+   corridor run out to both screen edges**. Marker = a small aircraft glyph; **history = four fading, shrinking
+   copies of that glyph** trailing behind; a **speed vector**; a data tag (registration · speed · squawk,
+   fictional Czech `OK-` marks). **KEY FIX:** the speed vector "peeled off" the flown line because the heading
+   was computed in **fraction space** but drawn in **screen space** on a non-square viewport — corrected to
+   `atan2(h·segDy, w·segDx)` so marker, vector and history sit **exactly on the track**. All motion rides
+   `time`, so **reduced motion freezes it** (unit-tested).
+5. **Copy + card semantics (Martin's calls).** ① "web apps and websites" leads card 01. ② The licence line was
+   **de-MIT'd** — the client owns and decides ("**the code is yours — full handover, you own it, no lock-in**"),
+   MIT is only for *this* open-source site. ③ Card 03 renamed **Trust → "Good to know" / "Dobré vědět"** — a
+   broad heading the ownership/privacy/language/remote items actually fit. ④ Card 04's **"this website" facts
+   (200 tests · WCAG · open source) moved under a "This website" sub-block** with the Lighthouse gauges + the
+   security grades; the "independently checked" sub-heading was **dropped** (tests/source are self-reported, not
+   independently verified). Security grades read **amber label · green score · darker-amber arrow**, every one a
+   live re-scan link (Observatory A+ 125/100 · SecurityHeaders A+ · Hardenize all green; Lighthouse
+   99/100/92/100). The scene card itself carries only eyebrow + title (**no lede** — the route threads the
+   centre where a lede would sit).
+6. **Global-% retune for +1 chapter.** All hard-coded scroll fractions rescaled for 12 chapters: `eraFrom`
+   (0.23→0.209, 0.585→0.532), `EXTRA_ERAS` (0.2→0.182, 0.62→0.564), `SiteFooter` fade (0.975→0.984), plus the
+   `activeEra` test %s. Scene local-`t` means no *visual* beat moved (bitcoin impulse, dev landings verified
+   unchanged). Data-driven: a new `Theme` + one registry entry; `data/offer.ts`(+`.cs`) + `OfferPanels.tsx`
+   + `scenes/offer.ts` + pure `offerMath.ts` (Vitest). Gate green (206). Verified live over CDP (desktop
+   EN/CZ/reduced-motion + mobile), card centres measured to 0.1 %.
+
 ### ADR-036 — Text pass: achievement framing, scope humility, symmetric card 00 (2026-07-10)
 A bilingual (EN+CZ) copy pass plus one typography pattern, all verified live:
 1. **Card 00 (School & Pascal) reframed to achievement, not absence.** Was "…chess … but it couldn't come up with a

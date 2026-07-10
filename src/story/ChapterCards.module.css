@@ -114,6 +114,13 @@
   }
 }
 
+/* 09 — the mission: eyebrow + title + one-line lede are TOP-anchored on every
+   width, so the canvas reticle and the four HUD panels own the frame below. */
+:global(#offer-mission) {
+  top: clamp(3.2rem, 9vh, 6rem);
+  --ty: 0px;
+}
+
 /* The B2 sky scenes get BRIGHT (cumulus sea, the cloud-punch white-out,
    desert noon) — a soft dark halo keeps the light text readable there and
    disappears on dark scenes. */
