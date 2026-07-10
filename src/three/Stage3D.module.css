@@ -1,0 +1,8 @@
+/* The 3D augmentation layer: same fixed footprint as the 2D world, one layer
+   above it in DOM order, still under every DOM story layer. Pure decoration —
+   never interactive (the R3F event system sees nothing through this). */
+.stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}

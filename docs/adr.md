@@ -4,6 +4,44 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-039 — L2 begins: the additive R3F 3D layer (E1) (2026-07-10)
+Phase E (the deferred R3F 3D fly-through) opens. The strategy is locked for the whole phase and is the key
+decision: **AUGMENT, never rewrite.** A second, transparent R3F `<Canvas>` rides one layer above the shipped 2D
+canvas world and adds true depth scene-by-scene via its own theme registry — but the 2D world keeps painting
+every scene exactly as before and IS the fallback (reduced-motion / no-WebGL2 / kill-switch). Both layers derive
+everything from the SAME `scrollProgress` + `sceneTimeline`, so cross-fades can never desync. A scene only ever
+flips to "3D-owned" (2D stops painting it) as an explicit later decision (E2+), never implicitly.
+
+1. **Capability gate (`src/three/worldMode.ts`).** Pure `resolveWorldMode({ webgl2, reducedMotion, override })`
+   + a live `useWorldMode()` hook. Order: `prefers-reduced-motion` → 2D (the a11y contract — the 3D layer is
+   motion by nature, so it never mounts under reduced motion and its chunk is never fetched); no WebGL2 → 2D
+   (one cached throwaway-context probe); `?world=2d` kill-switch → 2D. `?world=3d` states intent but cannot
+   override the two hard gates. Story unmounts the whole island the moment the hook returns '2d'.
+2. **Stage3D (`src/three/Stage3D.tsx`) — the transparent augmentation stage.** A lazy R3F island between the 2D
+   canvas and the DOM layers: `flat` (no tone mapping → shader hexes match the 2D palette), `dpr=[1,2]`,
+   `alpha`, `pointer-events:none`, `aria-hidden`. A `FrameController` (`useFrame` priority −1) reads
+   `getScrollProgress()` imperatively (zero per-frame React), resolves the SAME `resolveSceneFrame`, and writes
+   one shared mutable snapshot (`frame3d.ts`, allocation-free) that every scene reads the same frame. Owns the
+   eased-pointer channel (CanvasStage semantics) → camera micro-parallax (a pure translation; near stars answer
+   more than far ones = the depth read; zero on touch / at presence 0).
+3. **Depth starfield — the first true-3D content.** Pure `starfieldMath.ts` (seeded star bake → `Float32Array`s
+   + per-theme presence curves — origin's **mirror the 2D dawn math exactly** so the deep stars die with the 2D
+   star layers; contact's ramp in ahead of the galaxy `bloomT0` and hold) + a `Starfield` scene: one additive
+   `THREE.Points` draw, soft round sprite + per-star twinkle computed in the fragment shader (no textures/assets),
+   `depthWrite:false`. Scroll dollies the field toward the camera = real depth parallax. Registered for `origin`
+   + `contact` in `registry3d.ts` (total over `Theme`, `null` = 2D carries it alone).
+4. **three pinned to r182.** R3F v8 (the React-18 line; v9 needs React 19) uses `THREE.Clock`, which three r183
+   deprecates with a runtime console warning → r182 is the last clean release. `chunkSizeWarningLimit` 700 → 900
+   (the three chunk is ~880 kB raw / 237 kB gz, code-split — the initial shell bundle is unchanged).
+
+Verified live over CDP on dev AND the prod build (real headless Chrome — the in-app Browser pane can't size R3F,
+no ResizeObserver): `?world=2d` + reduced-motion → one canvas, **0 bytes of three fetched**; 3D mode → the
+starfield presence tracks the 2D cross-fade weights to 3 decimals (contact 0.583 = the exact slot alpha); the
+3D layer costs ~0 ms (finale 7.8–8.4 ms/frame vs 8.4 ms 2D-only, in software GL); console clean; pointer eases
+0 → 0.994. Gate green (220, +14). Model-fit: 🔥 Fable 5 · high.
+
+---
+
 ### ADR-038 — Offer-scene polish, chapter-10 nav reframe, RL public (2026-07-10)
 Follow-up refinement of the ADR-037 flight-plan scene, the contact finale reframed to *close* the flight
 metaphor, and the RL Lab repo going public. Many live review rounds with Martin (desktop + mobile, EN/CZ),

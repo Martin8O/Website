@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useScrollProgress } from '../scroll/useScrollProgress'
+import { useWorldMode } from '../three/worldMode'
 import { CHAPTERS, chaptersFor, EXTRA_ERAS } from '../data/chapters'
 import { useLang } from '../i18n/useLang'
 import { activeEra, chapterPosition } from '../timeline'
@@ -26,6 +27,14 @@ const CanvasStage = lazy(() =>
   import('../canvas/CanvasStage').then((m) => ({ default: m.CanvasStage })),
 )
 
+// The L2 3D augmentation layer (three + R3F) is heavier still and equally
+// decorative — its own lazy chunk, fetched ONLY when the capability gate says
+// '3d' (never under reduced motion / without WebGL2 / with ?world=2d, where
+// the site stays exactly L1). See src/three/worldMode.ts.
+const Stage3D = lazy(() =>
+  import('../three/Stage3D').then((m) => ({ default: m.Stage3D })),
+)
+
 // Scene runs for the static EN chapters (theme/timing only — identical for
 // both languages), built once at module load for the accent blend.
 const RUNS = buildRuns(CHAPTERS)
@@ -39,6 +48,7 @@ const RUNS = buildRuns(CHAPTERS)
 export function Story() {
   const progress = useScrollProgress()
   const lang = useLang()
+  const worldMode = useWorldMode()
   // Localized copy for the DOM layers; the canvas keeps the static EN array
   // (it reads only theme/timing fields, and a stable identity means the
   // language toggle never re-initializes the render loop).
@@ -61,6 +71,16 @@ export function Story() {
           <CanvasStage chapters={CHAPTERS} />
         </Suspense>
       </ChunkBoundary>
+      {/* The 3D layer AUGMENTS the 2D world (which keeps painting either
+          way) — if this chunk fails or the gate says '2d', the site is
+          simply L1. Static EN chapters for the same reason as above. */}
+      {worldMode === '3d' && (
+        <ChunkBoundary>
+          <Suspense fallback={null}>
+            <Stage3D chapters={CHAPTERS} />
+          </Suspense>
+        </ChunkBoundary>
+      )}
       <ChapterCards pos={pos} chapters={chapters} />
       <DevWindowLinks pos={pos} />
       <OfferPanels pos={pos} />
