@@ -34,9 +34,10 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
     p2: (
       <>
         What that means for you is simple:{' '}
-        <strong>I can build you almost anything, fast.</strong> An automation, a tool, an
-        app, a website&nbsp;—&nbsp;if you can describe it, it can be built. I bring a
-        pilot&rsquo;s precision, a meditator&rsquo;s calm, and a build pace measured in days.
+        <strong>I can build you almost anything, fast.</strong> A website, an app, a tool,
+        an automation. I take on the small-to-medium ones and build them properly, end to
+        end. If you can describe it, it can be built. I bring a pilot&rsquo;s precision, a
+        meditator&rsquo;s calm, and a build pace measured in days.
       </>
     ),
   },
@@ -55,9 +56,10 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
     p2: (
       <>
         Co to znamená pro vás, je jednoduché:{' '}
-        <strong>Mohu vám postavit téměř cokoli, rychle.</strong> Automatizaci, nástroj,
-        aplikaci, <span className="nw">web&nbsp;–&nbsp;pokud</span> to dokážete popsat, dá se to postavit.
-        Přináším přesnost pilota, klid meditujícího a tempo stavby měřené ve dnech.
+        <strong>Mohu vám postavit téměř cokoli, rychle.</strong> Web, aplikaci, nástroj,
+        automatizaci. Beru si ty malé až střední projekty a&nbsp;stavím je pořádně, od
+        začátku do konce. Pokud to dokážete popsat, dá se to postavit. Přináším přesnost pilota, klid
+        meditujícího a&nbsp;tempo stavby měřené ve dnech.
       </>
     ),
   },

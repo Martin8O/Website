@@ -53,7 +53,23 @@ export function OfferPanels({ pos }: { pos: number }) {
           {p.items.map((item, j) => (
             <li key={j} className={p.numbered ? styles.stepItem : styles.item}>
               {p.numbered && <span className={styles.step}>{j + 1}</span>}
-              {item.href ? (
+              {item.label && item.href ? (
+                // Proof panel (Martin): only the NAME is the amber link; the
+                // description trails it as smaller, muted text.
+                <span>
+                  <a
+                    className={`${styles.link} ${styles.nameLink}`}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    dangerouslySetInnerHTML={{ __html: item.label }}
+                  />
+                  <span
+                    className={styles.itemDesc}
+                    dangerouslySetInnerHTML={{ __html: item.html }}
+                  />
+                </span>
+              ) : item.href ? (
                 <a
                   className={styles.link}
                   href={item.href}
@@ -76,21 +92,39 @@ export function OfferPanels({ pos }: { pos: number }) {
           <div className={styles.quality}>
             <p className={styles.qualityHeading}>{quality.heading}</p>
             <ul className={styles.items}>
-              {quality.selfItems.map((item, j) => (
-                <li key={j} className={styles.item}>
-                  {item.href ? (
-                    <a
-                      className={styles.link}
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      dangerouslySetInnerHTML={{ __html: item.html }}
-                    />
-                  ) : (
-                    <span dangerouslySetInnerHTML={{ __html: item.html }} />
-                  )}
-                </li>
-              ))}
+              {quality.selfItems.map((item, j) => {
+                // On phones a shorter phrasing (htmlMobile) saves the tall
+                // proof card the lines it can't spare.
+                const html = mobile && item.htmlMobile ? item.htmlMobile : item.html
+                return (
+                  <li key={j} className={styles.item}>
+                    {item.linkText && item.href ? (
+                      // Bold lead stays plain text; only the trailing phrase is
+                      // the link (Martin: link just "here").
+                      <span>
+                        <span dangerouslySetInnerHTML={{ __html: html }} />
+                        <a
+                          className={styles.link}
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          dangerouslySetInnerHTML={{ __html: item.linkText }}
+                        />
+                      </span>
+                    ) : item.href ? (
+                      <a
+                        className={styles.link}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        dangerouslySetInnerHTML={{ __html: html }}
+                      />
+                    ) : (
+                      <span dangerouslySetInnerHTML={{ __html: html }} />
+                    )}
+                  </li>
+                )
+              })}
             </ul>
             <p className={styles.qualityGaugesLabel}>{quality.gaugesLabel}</p>
             <div className={styles.gauges}>

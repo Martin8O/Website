@@ -46,7 +46,8 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   },
   tenovice: {
     name: 'Těnovice',
-    tagline: 'Fundraisingová stránka pro Těnovice, buddhistické retreatové centrum.',
+    tagline:
+      'Dvojjazyčná sbírková aplikace pro buddhistické retreatové centrum Těnovice – živá kalkulačka příslibů, která ukazuje dopad na cíl, anonymní veřejné přísliby a úpravy přes účet, celé na serverless AWS stacku.',
   },
   registrace: {
     tagline:
@@ -54,8 +55,8 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   },
   'rl-lab': {
     tagline:
-      'Trénujte, sledujte a hrajte proti agentům posilovaného učení – od CartPole po Atari, fyziku, Doom i deskové hry. 9 algoritmů ve více než 100 prostředích; Data Lab přidává výzkumné metriky, seed sweepy a exporty na jedno kliknutí.',
-    status: 'Zatím privátní, řeším licencování · běží lokálně',
+      'Trénujte, sledujte a hrajte proti AI – od CartPole po Atari, fyziku, Doom i deskové hry. 9 algoritmů ve více než 100 prostředích; Data Lab přidává výzkumné metriky, seed sweepy a exporty na jedno kliknutí.',
+    status: 'Běží lokálně — bez hostované ukázky',
   },
   brainquest: {
     tagline:

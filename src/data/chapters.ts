@@ -329,7 +329,7 @@ export const CHAPTERS: Chapter[] = [
     enterFade: [0.7, 0.97],
     era: 'now',
     num: '10 — Now',
-    title: 'Your idea<br>could be next.',
+    title: 'Set your<br>destination.',
     compact: true,
     // The galaxy's nucleus holds the right of the frame (C3 rev5) — the
     // card keeps the left so neither blocks the other.
@@ -337,7 +337,7 @@ export const CHAPTERS: Chapter[] = [
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Whatever you need built comes in all sizes&nbsp;—&nbsp;an automation, a tool, an app, a website. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built. What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Your destination can take any form&nbsp;—&nbsp;a website, an app, a tool, an automation. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built.<br><br>What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
     // Plain address, no decorative brackets — they wrapped onto their own
     // lines on phones and guard nothing (the address is plaintext in the

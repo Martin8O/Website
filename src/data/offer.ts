@@ -16,10 +16,15 @@ import type { Lang } from '../i18n/langStore'
 import { OFFER_COPY_CS, OFFER_QUALITY_CS } from './offer.cs'
 
 export type OfferItem = {
-  /** Authored HTML line (may carry <strong> emphasis). */
+  /** Authored HTML line (may carry <strong> emphasis). On the proof panel it
+   *  is the muted DESCRIPTION that follows the linked `label`. */
   html: string
   /** Real outbound link — the proof panel's "verify it yourself" hook. */
   href?: string
+  /** Proof-panel design (Martin): only the project NAME is the amber link;
+   *  `html` renders after it as a smaller, muted description — so a long
+   *  description no longer reads as one giant orange link. */
+  label?: string
 }
 
 export type OfferPanelId = 'what' | 'process' | 'proof' | 'trust'
@@ -65,9 +70,9 @@ export const OFFER_PANELS: OfferPanel[] = [
     id: 'trust',
     eyebrow: '03 · Good to know',
     items: [
-      { html: 'The code is yours&nbsp;—&nbsp;full handover, you own it, no lock-in.' },
-      { html: 'No tracking&nbsp;—&nbsp;this site collects nothing about you.' },
-      { html: 'English or Czech · remote, wherever you are.' },
+      { html: 'The code is yours&nbsp;—&nbsp;no lock-in.' },
+      { html: 'I build in English or Czech&nbsp;—&nbsp;your app can speak both.' },
+      { html: 'Fully remote&nbsp;—&nbsp;we can work together from anywhere.' },
     ],
   },
   // Proof comes LAST (Martin): verification makes most sense at the end,
@@ -79,11 +84,18 @@ export const OFFER_PANELS: OfferPanel[] = [
     eyebrow: '04 · Don’t trust — verify',
     items: [
       {
-        html: '<strong>Registrace</strong>&nbsp;—&nbsp;sign-ups for 25 Buddhist centres, handover soon',
+        label: 'RL Lab + Data Lab',
+        html: '&nbsp;—&nbsp;train, watch &amp; play against AI, 100+ environments from Atari to Doom, physics and board games, 9 algorithms, research-grade metrics and one-click exports',
+        href: 'https://github.com/Martin8O/RL-Lab',
+      },
+      {
+        label: 'Registrace',
+        html: '&nbsp;—&nbsp;bilingual event registration, self-service sign-ups, server-side pricing, emailed confirmations and role-scoped admin',
         href: 'https://registrace.online',
       },
       {
-        html: '<strong>Těnovice</strong>&nbsp;—&nbsp;fundraising site, live · a collab',
+        label: 'Těnovice',
+        html: '&nbsp;—&nbsp;live pledge calculator, anonymous public pledges, account-based editing, all on serverless AWS · a collab',
         href: 'https://www.one-tenovice.cz',
       },
     ],
@@ -103,8 +115,12 @@ export type OfferQuality = {
   /** Centred heading — everything below is about THIS very site. */
   heading: string
   /** Self-reported facts about this site (tests, WCAG, open source) — the
-   *  `+` lines right under the heading, above the measured scores. */
-  selfItems: { html: string; href?: string }[]
+   *  `+` lines right under the heading, above the measured scores. When
+   *  `linkText` is set, `html` is a plain bold lead and only `linkText` is the
+   *  outbound anchor (Martin: link just "here", not the whole line).
+   *  `htmlMobile`, when present, is a shorter phrasing used ≤719px to save the
+   *  vertical lines the tall proof card can't spare on a phone. */
+  selfItems: { html: string; href?: string; linkText?: string; htmlMobile?: string }[]
   /** Centred sub-label over the gauges — the tool that measured. */
   gaugesLabel: string
   gauges: { label: string; value: number }[]
@@ -119,9 +135,17 @@ export const OFFER_QUALITY: OfferQuality = {
   // subject (Martin).
   heading: 'This website',
   selfItems: [
-    { html: '<strong>200 automated tests</strong> · WCAG accessibility' },
     {
-      html: '<strong>Open source</strong>&nbsp;—&nbsp;read the code',
+      html: '<strong>200 automated tests</strong> · WCAG accessibility',
+      htmlMobile: '<strong>200 automated tests</strong> · WCAG',
+    },
+    {
+      html: '<strong>No tracking</strong>&nbsp;—&nbsp;this site collects nothing about you',
+      htmlMobile: '<strong>No tracking</strong>&nbsp;—&nbsp;collects nothing',
+    },
+    {
+      html: '<strong>Open source</strong>&nbsp;—&nbsp;',
+      linkText: 'read the code',
       href: 'https://github.com/Martin8O/Website',
     },
   ],

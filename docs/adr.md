@@ -4,6 +4,41 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-038 — Offer-scene polish, chapter-10 nav reframe, RL public (2026-07-10)
+Follow-up refinement of the ADR-037 flight-plan scene, the contact finale reframed to *close* the flight
+metaphor, and the RL Lab repo going public. Many live review rounds with Martin (desktop + mobile, EN/CZ),
+verified over CDP by driving the offer band and reading rendered geometry/text.
+
+1. **Proof-panel "design A" — the name is the only link.** A long description rendered as one amber underlined
+   hyperlink read as an overloaded "giant orange link". Split it: the project **name** is the amber link (new
+   `label` field + `.nameLink`), the **description** trails as smaller muted text (`.itemDesc`). Same on the
+   "This website" *Open source* line — **only "read the code" / "zde" is the anchor** (new `linkText` on
+   selfItems), the bold lead stays plain text.
+2. **Card 04 = the proof / flagship stack.** RL Lab + Data Lab leads as the flagship (links to the now-public
+   `Martin8O/RL-Lab`), then Registrace, then Těnovice — each with an **accurate, feature-rich description sourced
+   from the real repo** (Těnovice's fundraising features fetched from `AnnaRozumova/Tenovice_fund_page`: pledge
+   calculator, anonymous public pledges, account/Cognito editing, serverless AWS). "No tracking" moved into the
+   "This website" block (bolded to match its neighbours). As the card grew, its centre was re-tuned so its
+   **bottom stays aligned with card 02** (top → 58.4 %).
+3. **Hover/focus lights a card up.** `:hover` + `:focus-within` on a panel brightens the frame and **enlarges the
+   amber glow** (30 → 60 px, symmetric, zero offset = no drop shadow — Martin's "no shadows").
+4. **Mobile offer layout — per-card edge anchoring (mobile only; desktop untouched).** The panels take turns in
+   one slot but each at its own spot: 02/04 top-anchored under the flight-plan title, 03 centred ~⅓ up, 01
+   bottom-anchored just above the bottom HUD (TickScale is `display:none` on mobile → the era HUD *is* the "time
+   axis"). The anchor (`--ty` 0 / −50 % / −100 %) picks which edge lands, so any card height tucks correctly.
+   Mobile also gets **shorter self-copy** (`htmlMobile`: drops "accessibility"/"přístupnost", trims "No tracking")
+   + a tighter "This website" gap — freeing the vertical lines the tall card can't spare on a phone.
+5. **Chapter 10 reframed to close the flight metaphor.** "Your idea could be next" felt detached from the 09
+   flight plan. Retitled **"Set your destination" / "Zadejte svůj cíl"** (the plotted route's DESTINATION = the
+   visitor's project); opening line reworked ("Your destination can take any form — a website, an app, a tool, an
+   automation"). List order unified to **web · app · tool · automation** in chapter 10 + the About panel, whose
+   p2 was synced to the same copy ("I take on the small-to-medium projects, built properly, end to end"); "What I
+   bring" split onto its own paragraph.
+6. **RL Lab public.** `projects.ts` `live:false → true`, "private while licensing" status dropped; the CZ RL
+   tagline now says **"AI"** rather than "agentům posilovaného učení" (accessible framing, Martin).
+
+---
+
 ### ADR-037 — "Ground Control": the flight-plan offer scene (chapter 09) (2026-07-10)
 A **new canvas theme `offer`** inserted between `dev` (08) and `contact` (10) — the site's first outright
 *call-to-action* scene. Chapter count 11 → 12; the contact finale renumbered 09 → **10 · Now**. Many live

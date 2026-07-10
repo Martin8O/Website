@@ -37,11 +37,18 @@ export const OFFER_COPY_CS: Record<OfferPanelId, OfferPanelCopy> = {
     eyebrow: '04 · Nevěř – ověřuj',
     items: [
       {
-        html: '<strong>Registrace</strong>&nbsp;–&nbsp;přihlašování pro 25 buddhistických center, předání se blíží',
+        label: 'RL Lab + Data Lab',
+        html: '&nbsp;–&nbsp;trénujte, sledujte a&nbsp;hrajte proti AI, 100+ prostředí od Atari po Doom, fyziku i&nbsp;deskové hry, 9 algoritmů, výzkumné metriky a&nbsp;exporty na jedno kliknutí',
+        href: 'https://github.com/Martin8O/RL-Lab',
+      },
+      {
+        label: 'Registrace',
+        html: '&nbsp;–&nbsp;dvojjazyčná registrace na akce, samoobslužné přihlášky, ceny počítané na serveru, potvrzovací e-maily a&nbsp;administrace podle rolí',
         href: 'https://registrace.online',
       },
       {
-        html: '<strong>Těnovice</strong>&nbsp;–&nbsp;sbírkový web, běží naostro · spolupráce',
+        label: 'Těnovice',
+        html: '&nbsp;–&nbsp;živá kalkulačka příslibů, anonymní veřejné přísliby, úpravy přes účet, celé na serverless AWS · spolupráce',
         href: 'https://www.one-tenovice.cz',
       },
     ],
@@ -49,9 +56,9 @@ export const OFFER_COPY_CS: Record<OfferPanelId, OfferPanelCopy> = {
   trust: {
     eyebrow: '03 · Dobré vědět',
     items: [
-      { html: 'Kód je váš&nbsp;–&nbsp;kompletní předání, patří vám, žádné vázání.' },
-      { html: 'Žádné sledování&nbsp;–&nbsp;tento web o&nbsp;vás nic nesbírá.' },
-      { html: 'Česky i&nbsp;anglicky · na dálku, ať jste kdekoli.' },
+      { html: 'Kód je váš&nbsp;–&nbsp;nejste na mně závislí.' },
+      { html: 'Stavím v&nbsp;češtině i&nbsp;angličtině&nbsp;–&nbsp;vaše aplikace může mluvit oběma.' },
+      { html: 'Plně na dálku&nbsp;–&nbsp;spolupracovat můžeme odkudkoli.' },
     ],
   },
 }
@@ -62,9 +69,17 @@ export const OFFER_COPY_CS: Record<OfferPanelId, OfferPanelCopy> = {
 export const OFFER_QUALITY_CS: Partial<OfferQuality> = {
   heading: 'Tento web',
   selfItems: [
-    { html: '<strong>200 automatických testů</strong> · přístupnost WCAG' },
     {
-      html: '<strong>Otevřený kód</strong>&nbsp;–&nbsp;přečtěte si zdrojový kód',
+      html: '<strong>200 automatických testů</strong> · přístupnost WCAG',
+      htmlMobile: '<strong>200 automatických testů</strong> · WCAG',
+    },
+    {
+      html: '<strong>Žádné sledování</strong>&nbsp;–&nbsp;tento web o&nbsp;vás nic nesbírá',
+      htmlMobile: '<strong>Žádné sledování</strong>&nbsp;–&nbsp;nic nesbírá',
+    },
+    {
+      html: '<strong>Otevřený kód</strong>&nbsp;–&nbsp;',
+      linkText: 'zde',
       href: 'https://github.com/Martin8O/Website',
     },
   ],

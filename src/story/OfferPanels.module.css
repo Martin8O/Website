@@ -26,6 +26,17 @@
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   will-change: opacity, transform;
+  /* Only the glow + frame animate on hover — never the JS-driven transform. */
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+
+/* Hover / keyboard focus lights the card up: a brighter frame and a bigger,
+   deeper amber GLOW around it — pure symmetric bloom (0 offset), no drop
+   shadow. `:focus-within` mirrors it for keyboard + CDP verification. */
+.panel:hover,
+.panel:focus-within {
+  border-color: color-mix(in srgb, var(--amber) 55%, transparent);
+  box-shadow: 0 0 60px 4px color-mix(in srgb, var(--amber) 30%, transparent);
 }
 
 .panel::before,
@@ -67,8 +78,8 @@
    anchored by its CENTRE on the exact spot Martin marked on his layout
    sketch (fractions measured off the red boxes), via the same --tx/--ty
    translate the mobile slot uses — so the fit holds whatever the card's
-   content height: 01 (20 %, 33 %) · 02 (27.5 %, 76 %) · 03 (53 %, 46 %) ·
-   04 (83 %, 61 %). The plotted route threads START → 2 → 3 → DEST beside
+   content height: 01 (23 %, 33 %) · 02 (32 %, 78 %) · 03 (56 %, 47 %) ·
+   04 (80 %, 58.4 %). The plotted route threads START → 2 → 3 → DEST beside
    them. */
 .what,
 .process,
@@ -79,28 +90,28 @@
 }
 
 .what {
-  left: 20%;
+  left: 23%;
   top: 33%;
 }
 
-/* 02/03 nudged ±1–1.5 % off the sketch reading so their corners clear each
-   other — and 02's foot text clears the era/HUD pill — even on short
-   (~700 px) viewports. */
+/* 02/03 nudged off the sketch reading so their corners clear each other — and
+   02's foot text clears the era/HUD pill — even on short (~700 px) viewports. */
 .process {
-  left: 29%;
-  top: 76.5%;
+  left: 32%;
+  top: 78%;
 }
 
 .trust {
-  left: 53%;
-  top: 44%;
+  left: 56%;
+  top: 47%;
 }
 
-/* Proof carries the tall measured-quality block — its centre sits lower so
-   the whole card still clears the nav above and the screen edge below. */
+/* Proof carries the tall measured-quality block — its centre sits low so its
+   BOTTOM edge lines up with card 02's bottom (Martin), while its top still
+   clears the nav. Measured at desktop width against the current content. */
 .proof {
-  left: 83%;
-  top: 61%;
+  left: 80%;
+  top: 58.4%;
 }
 
 /* The measured-quality block INSIDE the proof panel, after the claims — set
@@ -146,7 +157,11 @@
 
 @media (max-width: 719px) {
   /* One central slot: the panels take turns (offerMath's mobile windows),
-     cross-fading exactly like chapter cards. The desktop columns dissolve. */
+     cross-fading exactly like chapter cards. The desktop columns dissolve.
+     Each panel takes its turn at its OWN vertical spot (Martin): the anchor
+     (--ty) decides which edge lands on the target, so a card of any height
+     tucks where intended. TickScale is display:none here, so the bottom HUD
+     (era pill) is the "time axis" 01 sits above. */
   .col {
     display: contents;
   }
@@ -157,11 +172,40 @@
   .trust {
     left: 50%;
     right: auto;
-    top: 62%;
     bottom: auto;
     --tx: -50%;
-    --ty: -50%;
     width: min(90vw, 26rem);
+  }
+
+  /* 02 & 04: top edge just under the flight-plan title (top-anchored, so their
+     height grows downward, never up over the title). */
+  .process,
+  .proof {
+    top: 21%;
+    --ty: 0%;
+  }
+
+  /* 03: centred around the upper third. */
+  .trust {
+    top: 33%;
+    --ty: -50%;
+  }
+
+  /* 01: bottom edge just above the bottom HUD / time axis (bottom-anchored). */
+  .what {
+    top: 90%;
+    --ty: -100%;
+  }
+
+  /* The tall proof card is tightest on a phone — pull the "This website" block
+     right up under the project list (Martin: much tighter gap). */
+  .quality {
+    margin-top: 0.4rem;
+    padding-top: 0.3rem;
+  }
+
+  .qualityHeading {
+    margin-bottom: 0.4rem;
   }
 }
 
@@ -243,6 +287,19 @@
   content: ' ↗';
   font-size: 0.85em;
   color: color-mix(in srgb, var(--amber) 75%, transparent);
+}
+
+/* Proof panel (Martin, design A): the project name is the only link — bold so
+   it reads as the heading of its line. */
+.nameLink {
+  font-weight: 600;
+}
+
+/* Its trailing description: smaller + muted so a longer line stays legible
+   without inflating the card, and the amber name clearly leads. */
+.itemDesc {
+  font-size: 0.82em;
+  color: color-mix(in srgb, var(--fg) 80%, transparent);
 }
 
 .link:hover,
@@ -347,6 +404,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .panel,
   .link,
   .grade {
     transition: none;

@@ -13,10 +13,9 @@
  * the catalog a later Work list / nav can draw from.
  *
  * Real links + real shots only (Martin's rule): every URL here was verified
- * live (C1). The repos are now published (Phase P) — ClearFeed, BrainQuest,
- * Registrace, Website and strc-check are all public. RL Lab stays private
- * (runs locally) → it alone carries `live: false`; the link still renders per
- * Martin's "link every repo, publish over time" policy.
+ * live (C1). All the publishable repos are now public (Phase P) — ClearFeed,
+ * BrainQuest, Registrace, Website, strc-check and RL Lab. RL Lab links to its
+ * public GitHub repo (it runs locally — there is no hosted demo).
  */
 
 import type { Lang } from '../i18n/langStore'
@@ -199,7 +198,8 @@ export const PROJECTS: Project[] = [
   {
     id: 'tenovice',
     name: 'Těnovice',
-    tagline: 'A fundraising page for Těnovice, a Buddhist retreat centre.',
+    tagline:
+      'A bilingual fundraising app for the Těnovice Buddhist retreat centre — a live pledge calculator that shows your impact on the goal, anonymous public pledges and account-based editing, all on a serverless AWS stack.',
     // Cognito verified in the public repo (cdk/src/constructs/cognito.py —
     // user pool + JWT authorizer on the API).
     stack: ['AWS CDK', 'Cognito', 'DynamoDB', 'Serverless'],
@@ -231,12 +231,12 @@ export const PROJECTS: Project[] = [
     name: 'RL Lab + Data Lab',
     // Counts from the repo's own hero (9 algorithms, 100+ environments).
     tagline:
-      'Train, watch & play against reinforcement-learning agents — from CartPole to Atari, physics, Doom and board games. 9 algorithms across 100+ environments; Data Lab adds research-grade metrics, seed sweeps and one-click exports.',
+      'Train, watch & play against AI — from CartPole to Atari, physics, Doom and board games. 9 algorithms across 100+ environments; Data Lab adds research-grade metrics, seed sweeps and one-click exports.',
     stack: ['Python', 'FastAPI', 'PyTorch', 'React 19', 'TypeScript', 'Vite'],
     era: 'claude',
     link: { href: 'https://github.com/Martin8O/RL-Lab', display: 'github.com/Martin8O/RL-Lab' },
-    live: false,
-    status: 'Private while licensing is sorted out · runs locally',
+    live: true,
+    status: 'Runs locally — no hosted demo',
     build: { days: 23, commits: 112 },
     workOrder: 1,
     window: { tint: CORAL, kind: 'anim', shot: 'rllab', aspect: 0.58 },
