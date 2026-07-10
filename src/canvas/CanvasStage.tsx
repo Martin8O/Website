@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { chapterPosition } from '../timeline'
 import { getScrollProgress, setScrollProgress } from '../scroll/scrollStore'
+import { paints2D } from '../three/owned3d'
+import type { WorldMode } from '../three/worldMode'
 import { RENDERERS } from './registry'
 import { landingShake } from './scenes/sky/skyMath'
 import { buildRuns, resolveSceneFrame, type SceneSlot } from './sceneTimeline'
@@ -18,9 +20,21 @@ import styles from './CanvasStage.module.css'
  * duties: DPR-capped sizing (≤2), rebuild on resize, pause when the tab is
  * hidden, freeze ambient time under reduced motion (and skip repaints there
  * unless scroll moved), and a filmic grain pass over the composed frame.
+ *
+ * `worldMode` (E2): themes in the 3D layer's `OWNED_3D` set are skipped here
+ * while the mode is '3d' — read through a ref so a mode flip never re-inits
+ * the render loop. In '2d' mode this stage paints everything, always.
  */
-export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
+export function CanvasStage({
+  chapters,
+  worldMode = '2d',
+}: {
+  chapters: readonly Chapter[]
+  worldMode?: WorldMode
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const modeRef = useRef(worldMode)
+  modeRef.current = worldMode
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -91,6 +105,9 @@ export function CanvasStage({ chapters }: { chapters: readonly Chapter[] }) {
     }
 
     const drawSlot = (slot: SceneSlot, time: number) => {
+      // A 3D-owned theme's frame belongs to the Stage3D layer (empty set
+      // today — the explicit flip mechanism, see owned3d.ts).
+      if (!paints2D(slot.run.theme, modeRef.current)) return
       const cfg: SceneConfig = {
         w,
         h,

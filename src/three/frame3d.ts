@@ -11,6 +11,7 @@
 
 import type { Theme } from '../data/chapters'
 import type { SceneSlot } from '../canvas/sceneTimeline'
+import type { FlightPose } from './flightMath'
 
 export type Slot3D = {
   theme: Theme
@@ -34,6 +35,10 @@ export type Frame3D = {
    *  on arrival and back out on leave/blur/touch-lift (the 2D channel's
    *  semantics). Scenes must look complete at a = 0. */
   pointer: { x: number; y: number; a: number }
+  /** This frame's flight pose (E2) — the camera's place on the path BEFORE
+   *  the pointer micro-parallax offset. Scenes and tooling read it; only the
+   *  frame controller writes it. */
+  camera: FlightPose
 }
 
 export function createFrame3D(): Frame3D {
@@ -44,6 +49,7 @@ export function createFrame3D(): Frame3D {
     count: 0,
     slots: [slot(), slot()],
     pointer: { x: 0.5, y: 0.5, a: 0 },
+    camera: { x: 0, y: 0, z: 0, fx: 0, fy: 0, fz: -1, roll: 0 },
   }
 }
 

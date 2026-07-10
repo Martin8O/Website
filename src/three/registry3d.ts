@@ -1,13 +1,25 @@
 import type { ComponentType } from 'react'
 import type { Theme } from '../data/chapters'
+import type { SceneRun } from '../canvas/sceneTimeline'
+import type { FlightPath } from './flightMath'
 import type { Frame3D } from './frame3d'
 import { Starfield } from './scenes3d/Starfield'
 
-/** Props every 3D scene receives: which theme slot it augments + the shared
- *  mutable frame snapshot (read inside useFrame, never in render). */
+/** The shared world's flight rig (E2): the baked camera path plus the story
+ *  runs it was built from — scenes anchor their world-space volumes on it. */
+export type FlightRig = {
+  path: FlightPath
+  runs: readonly SceneRun[]
+  count: number
+}
+
+/** Props every 3D scene receives: which theme slot it augments, the shared
+ *  mutable frame snapshot (read inside useFrame, never in render), and the
+ *  flight rig for world-space placement. */
 export type Scene3DProps = {
   theme: Theme
   frame: Frame3D
+  flight: FlightRig
 }
 
 /**

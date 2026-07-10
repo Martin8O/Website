@@ -4,6 +4,48 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-040 — E2: scroll-flight camera rig + 3D-owned mechanism (2026-07-10)
+The 3D layer stops being a set of camera-space fields and becomes a **shared world the camera flies through**.
+`scrollProgress → pos → camera pose` along ONE in-code Catmull-Rom path; scenes become world-space *places*.
+
+1. **Flight path (`src/three/flightMath.ts`, pure + three-free, 10 tests).** The path is baked from the SAME run
+   windows the 2D timeline uses — a new shared helper `runWindow(run, count)` in `sceneTimeline.ts` is now the
+   single definition (`runLocalT` and the flight path both derive from it, so the worlds can't disagree about
+   where a scene lives). Per-run easing lives in the **stop spacing, not a time-warp**: inside a registered
+   theme's window the camera travels exactly that theme's `TRAVEL` distance (the E1 dolly verbatim — origin 5,
+   contact 8), cruising between scenes; because every window edge sits on the 0.5-pos stop grid, the travel across
+   a window is EXACT. Catmull-Rom C1-smooths the pace changes; a gentle weave + bank-into-turn (≤ ~5°) is the
+   "flight". `dolly` moved out of the starfield spec into `TRAVEL` — one source of truth for pace.
+2. **Starfields are world-space places (`Starfield.tsx`).** Each field is anchored at its scene window's START,
+   oriented along the window chord (`flightAnchorAt`), and the camera flies through it — the depth read is
+   identical to E1's dolly, the motion just belongs to the camera now. Star view-cones gained margin (tanX/tanY,
+   +count) so the flight weave never shows a cone edge; the ambient roll moved to an inner group so the anchor
+   pose stays put.
+3. **Camera rig (`Stage3D.tsx`).** The `FrameController` writes the flight pose into the shared snapshot
+   (`frame3d.ts` gains `camera: FlightPose`), aims the camera down the path forward, banks by rolling the up
+   vector, and applies the E1 pointer micro-parallax as a translation **along the camera's own right/up axes**
+   (composes with any heading; orientation still comes from the pose alone — never the parallax-offset eye).
+   Allocation-free (module-level scratch vectors).
+4. **3D-owned scene mechanism (`src/three/owned3d.ts`).** The explicit registry flip the phase reserves: a theme
+   in `OWNED_3D` is skipped by the 2D stage while the mode is '3d' (`paints2D()`, read through a ref in
+   `CanvasStage` so a mode flip never re-inits the loop; in '2d' the 2D world always paints everything). **Ships
+   EMPTY on purpose** — no 3D scene outclasses its 2D original yet; a flip is a per-scene product decision (E3+).
+   Documented caveat before any real flip: wire 3D-chunk-load failure back into the world mode (mode says '3d'
+   even if the chunk failed), or a flaky fetch leaves a hole in the story.
+
+**Contact starfield recolor (same session, Martin's note):** the E1 contact field read too white/large against
+the 2D galaxy's small coloured dots → palette swapped to the 2D galaxy hexes (no pure white), sizes 0.04–0.13 →
+0.026–0.08, anchor boost 2.2 → 1.7.
+
+Verified live over CDP on dev AND the prod build: camera flies monotonically (z 0 → −67), travels each registered
+window by exactly its `TRAVEL` distance (origin 5, contact 8), cruise between; presence still tracks the 2D
+cross-fade to 3 decimals (contact 0.583); `?world=2d` + reduced-motion → one canvas, 0 bytes of three; 3D layer
+~free (finale 8.4–9.0 ms vs 8.9 ms 2D-only, software GL); console clean. The owned-flip was proven by temporarily
+flipping `contact` (2D galaxy vanished, 3D owned the frame; '2d' mode still L1) then reverting to the empty set.
+Gate green (234, +14). Scope: `src/three/` (new `flightMath`+`owned3d` +tests, edited `Stage3D`/`Starfield`/
+`frame3d`/`registry3d`/`starfieldMath`) + `sceneTimeline.ts` (additive `runWindow`) + `CanvasStage`/`Story`
+wire-in. 2D scene renderers untouched.
+
 ### ADR-039 — L2 begins: the additive R3F 3D layer (E1) (2026-07-10)
 Phase E (the deferred R3F 3D fly-through) opens. The strategy is locked for the whole phase and is the key
 decision: **AUGMENT, never rewrite.** A second, transparent R3F `<Canvas>` rides one layer above the shipped 2D

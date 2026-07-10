@@ -68,7 +68,7 @@ export function Story() {
           stage stays and the DOM story keeps working — never a blank site. */}
       <ChunkBoundary>
         <Suspense fallback={null}>
-          <CanvasStage chapters={CHAPTERS} />
+          <CanvasStage chapters={CHAPTERS} worldMode={worldMode} />
         </Suspense>
       </ChunkBoundary>
       {/* The 3D layer AUGMENTS the 2D world (which keeps painting either

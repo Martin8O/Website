@@ -66,10 +66,22 @@ export function buildRuns(
 }
 
 /**
- * Progress (0..1) through a run's ownership window. The window reaches half a
- * chapter beyond the run on each side (where cross-fades live), clamped to the
- * story's ends, so a scene's `localT` moves smoothly across every chapter it
- * owns — e.g. the origin sun arcs over both intro and school without a jump.
+ * A run's ownership window in `pos` space: half a chapter beyond the run on
+ * each side (where cross-fades live), clamped to the story's ends. The ONE
+ * definition — `runLocalT` and the L2 flight path both derive from it, so the
+ * worlds can't disagree about where a scene begins and ends.
+ */
+export function runWindow(run: SceneRun, count: number): readonly [number, number] {
+  const lastIndex = Math.max(count - 1, 0)
+  const winStart = run.start === 0 ? 0 : run.start - 0.5
+  const winEnd = run.end === lastIndex ? lastIndex : run.end + 0.5
+  return [winStart, winEnd]
+}
+
+/**
+ * Progress (0..1) through a run's ownership window, so a scene's `localT`
+ * moves smoothly across every chapter it owns — e.g. the origin sun arcs over
+ * both intro and school without a jump.
  */
 export function runLocalT(pos: number, run: SceneRun, count: number): number {
   return clamp01(runLocalTRaw(pos, run, count))
@@ -78,9 +90,7 @@ export function runLocalT(pos: number, run: SceneRun, count: number): number {
 /** `runLocalT` without the clamp — continuous across the window edges, for
  *  ambient motion that must not freeze while a scene cross-fades. */
 export function runLocalTRaw(pos: number, run: SceneRun, count: number): number {
-  const lastIndex = Math.max(count - 1, 0)
-  const winStart = run.start === 0 ? 0 : run.start - 0.5
-  const winEnd = run.end === lastIndex ? lastIndex : run.end + 0.5
+  const [winStart, winEnd] = runWindow(run, count)
   if (winEnd <= winStart) return 0
   return (pos - winStart) / (winEnd - winStart)
 }

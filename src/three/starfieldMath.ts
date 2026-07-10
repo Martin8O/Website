@@ -3,9 +3,11 @@
  * star buffers (positions/colors/sizes/phases) and the per-theme presence
  * curves that tie the 3D field to the 2D world's own story beats.
  *
- * The field lives in CAMERA space: the camera sits at the origin looking down
- * −z, and stars fill a view cone wide enough for any real aspect ratio, so
- * the volume needs no per-resize rebuild. All randomness is `hash1`-seeded —
+ * The bake is ANCHOR-local: stars fill a view cone down local −z, wide enough
+ * for any real aspect ratio (plus flight-weave margin), so the volume needs
+ * no per-resize rebuild. Since E2 the volume is PLACED in world space where
+ * its scene's window begins (oriented along the window chord) and the
+ * scroll-flight camera flies through it. All randomness is `hash1`-seeded —
  * a given seed always bakes the same sky (scrub-safe, testable).
  */
 
@@ -18,15 +20,17 @@ export type StarfieldSpec = {
   /** Deterministic seed — same seed, same sky. */
   seed: number
   /** View-cone half-tangents the volume covers. Vertical fov 55° → tan ≈ 0.52;
-   *  horizontal is that × a generous max aspect so ultrawide stays filled. */
+   *  horizontal is that × a generous max aspect so ultrawide stays filled,
+   *  and both carry margin for the flight path's weave yaw/pitch (≤ ~8.5°,
+   *  see flightMath WEAVE_*) so the cone edges never show in a turn. */
   tanX: number
   tanY: number
   /** Depth band, positive distances in front of the camera. */
   near: number
   far: number
-  /** Weighted sRGB palette — mostly near-white so it reads as stars. Fed to
-   *  the shader raw (no colour-space transform): the additive layer must
-   *  match the 2D world's CSS hexes exactly. */
+  /** Weighted sRGB palette. Fed to the shader raw (no colour-space
+   *  transform): the additive layer must match the 2D world's CSS hexes
+   *  exactly. */
   palette: ReadonlyArray<readonly [hex: string, weight: number]>
   /** World-unit point-size band (the shader divides by depth). */
   sizeMin: number
@@ -34,11 +38,9 @@ export type StarfieldSpec = {
   /** Share of stars promoted to bright anchors, and their size boost. */
   anchorShare: number
   anchorBoost: number
-  /** How far the field slides toward the camera across its run (scroll dolly
-   *  = the real depth parallax; drives off tRaw so it never freezes). */
-  dolly: number
   /** Ambient roll, rad/s (frozen with `time` under reduced motion — where the
-   *  3D layer never mounts anyway). */
+   *  3D layer never mounts anyway). How far the camera travels THROUGH the
+   *  field lives in flightMath's `TRAVEL` (E2 — the camera owns the motion). */
   rotSpeed: number
 }
 
@@ -50,14 +52,15 @@ export type StarBuffers = {
 }
 
 /** The two E1 fields. Origin: sparse, deep, warm-white pre-dawn glints that
- *  live BETWEEN the 2D parallax star layers. Contact: a richer cosmic field
- *  in the nebula palette, the backdrop the galaxy blooms into. */
+ *  live BETWEEN the 2D parallax star layers. Contact: small coloured motes in
+ *  the 2D galaxy's own palette (contact.ts GALAXY colours — no pure white, so
+ *  the deep field never out-shines the little coloured dots it backs). */
 export const STARFIELDS: Partial<Record<Theme, StarfieldSpec>> = {
   origin: {
-    count: 650,
+    count: 800,
     seed: 41,
-    tanX: 1.3,
-    tanY: 0.56,
+    tanX: 1.5,
+    tanY: 0.62,
     near: 6,
     far: 70,
     palette: [
@@ -70,30 +73,28 @@ export const STARFIELDS: Partial<Record<Theme, StarfieldSpec>> = {
     sizeMax: 0.11,
     anchorShare: 0.06,
     anchorBoost: 2.1,
-    dolly: 5,
     rotSpeed: 0.004,
   },
   contact: {
-    count: 950,
+    count: 1150,
     seed: 977,
-    tanX: 1.3,
-    tanY: 0.56,
+    tanX: 1.5,
+    tanY: 0.62,
     near: 6,
     far: 80,
     palette: [
-      ['#ffffff', 4],
-      ['#cfe0ff', 2],
-      ['#f5c451', 1.4],
-      ['#35d0e0', 1],
-      ['#5b3aa8', 1.2],
-      ['#2a4bd8', 1],
-      ['#e0459b', 0.6],
+      ['#cfe0ff', 1.1],
+      ['#f5c451', 1.5],
+      ['#f7931a', 0.9],
+      ['#35d0e0', 1.6],
+      ['#5b3aa8', 1.8],
+      ['#2a4bd8', 1.5],
+      ['#e0459b', 1.1],
     ],
-    sizeMin: 0.04,
-    sizeMax: 0.13,
-    anchorShare: 0.07,
-    anchorBoost: 2.2,
-    dolly: 8,
+    sizeMin: 0.026,
+    sizeMax: 0.08,
+    anchorShare: 0.05,
+    anchorBoost: 1.7,
     rotSpeed: 0.002,
   },
 }

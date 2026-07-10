@@ -1,9 +1,11 @@
 /**
- * DEPTH STARFIELD — the first true-3D content (E1). A baked cloud of stars at
- * real depths behind the 2D world's own layers: scroll dollies the field
- * toward the camera (real depth parallax), the pointer sways the camera a
- * few centimetres (near stars answer more than far ones), and each star
- * twinkles on its own baked phase.
+ * DEPTH STARFIELD — the first true-3D content (E1), a world-space PLACE on
+ * the flight path since E2. A baked cloud of stars at real depths behind the
+ * 2D world's own layers, anchored where its scene's window begins: the
+ * scroll-flight camera flies THROUGH it (real depth parallax — E1's dolly,
+ * now owned by the camera), the pointer sways the camera a few centimetres
+ * (near stars answer more than far ones), and each star twinkles on its own
+ * baked phase.
  *
  * Story rules, same as every 2D renderer: presence derives from the SAME
  * scene timeline (slot alpha × the theme's presence curve — origin's stars
@@ -15,6 +17,8 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { runWindow } from '../../canvas/sceneTimeline'
+import { flightAnchorAt, createPose } from '../flightMath'
 import { STARFIELDS, genStars, starPresence } from '../starfieldMath'
 import type { Scene3DProps } from '../registry3d'
 
@@ -59,7 +63,7 @@ const FRAGMENT = /* glsl */ `
   }
 `
 
-export function Starfield({ theme, frame }: Scene3DProps) {
+export function Starfield({ theme, frame, flight }: Scene3DProps) {
   const spec = STARFIELDS[theme]
   if (!spec) {
     // A registry entry without a spec is a wiring bug — fail loudly in dev.
@@ -67,6 +71,15 @@ export function Starfield({ theme, frame }: Scene3DProps) {
   }
 
   const stars = useMemo(() => genStars(spec), [spec])
+  // World anchor: the pose where this theme's scene window begins, oriented
+  // along the window's chord — the volume sits THERE and the camera flies
+  // into it. (First run carries the field; no registered theme has two.)
+  const anchor = useMemo(() => {
+    const run = flight.runs.find((r) => r.theme === theme)
+    if (!run) throw new Error(`Starfield: theme "${theme}" has no run in the story`)
+    const [winStart, winEnd] = runWindow(run, flight.count)
+    return flightAnchorAt(flight.path, winStart, winEnd, createPose())
+  }, [flight, theme])
   const material = useMemo(
     () =>
       new THREE.ShaderMaterial({
@@ -95,25 +108,33 @@ export function Starfield({ theme, frame }: Scene3DProps) {
   }, [size, dpr, material])
 
   const groupRef = useRef<THREE.Group>(null)
+  const rollRef = useRef<THREE.Group>(null)
+
+  // Place the volume at its world anchor, −z aligned with the window chord
+  // (the same convention the bake uses: stars live down local −z).
+  useEffect(() => {
+    const group = groupRef.current
+    if (!group) return
+    group.position.set(anchor.x, anchor.y, anchor.z)
+    const m = new THREE.Matrix4().lookAt(
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(anchor.fx, anchor.fy, anchor.fz),
+      new THREE.Vector3(0, 1, 0),
+    )
+    group.quaternion.setFromRotationMatrix(m)
+  }, [anchor])
 
   useFrame(() => {
     const group = groupRef.current
     if (!group) return
 
     // Presence = Σ slot alpha × story curve — the exact 2D cross-fade weights,
-    // so the field fades with its scene, never on its own schedule. The
-    // dominant slot's tRaw drives the dolly (continuous through cross-fades).
+    // so the field fades with its scene, never on its own schedule.
     let presence = 0
-    let tRaw = 0
-    let best = -1
     for (let i = 0; i < frame.count; i++) {
       const slot = frame.slots[i]
       if (slot.theme !== theme) continue
       presence += slot.alpha * starPresence(theme, slot.t)
-      if (slot.alpha > best) {
-        best = slot.alpha
-        tRaw = slot.tRaw
-      }
     }
 
     // Dev-only verification hook (the __paintFrame idiom): tooling asserts
@@ -129,23 +150,26 @@ export function Starfield({ theme, frame }: Scene3DProps) {
 
     material.uniforms.uAlpha.value = Math.min(presence, 1)
     material.uniforms.uTime.value = frame.time
-    group.position.z = spec.dolly * tRaw
-    group.rotation.z = frame.time * spec.rotSpeed
+    // Ambient roll on the INNER group — the outer one owns the anchor pose.
+    const roll = rollRef.current
+    if (roll) roll.rotation.z = frame.time * spec.rotSpeed
   })
 
   return (
     <group ref={groupRef} visible={false}>
-      {/* The group translates/rolls a camera-space volume — a moving bounding
-          sphere would make whole-cloud frustum culling flicker; cull per-GPU. */}
-      <points frustumCulled={false}>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[stars.positions, 3]} />
-          <bufferAttribute attach="attributes-aColor" args={[stars.colors, 3]} />
-          <bufferAttribute attach="attributes-aSize" args={[stars.sizes, 1]} />
-          <bufferAttribute attach="attributes-aPhase" args={[stars.phases, 1]} />
-        </bufferGeometry>
-        <primitive object={material} attach="material" />
-      </points>
+      <group ref={rollRef}>
+        {/* The camera flies through the volume — a moving bounding sphere
+            would make whole-cloud frustum culling flicker; cull per-GPU. */}
+        <points frustumCulled={false}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[stars.positions, 3]} />
+            <bufferAttribute attach="attributes-aColor" args={[stars.colors, 3]} />
+            <bufferAttribute attach="attributes-aSize" args={[stars.sizes, 1]} />
+            <bufferAttribute attach="attributes-aPhase" args={[stars.phases, 1]} />
+          </bufferGeometry>
+          <primitive object={material} attach="material" />
+        </points>
+      </group>
     </group>
   )
 }
