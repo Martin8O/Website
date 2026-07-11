@@ -65,6 +65,24 @@ export function cloudPunch(t: number): PunchState {
   return { fog, above, approach }
 }
 
+/**
+ * The climb's phase curve while the 3D layer owns its hero (E3b): the WHOLE
+ * chapter stays below the deck — Martin's full Part-1 climb flies under it —
+ * and the white-out rises only at the very end, swallowing the L-39 as it
+ * tops out (climbMath: last snap at t ≈ 0.834) and HOLDING white while
+ * chapter 02 cross-fades in over it (pos 2.3–2.7): the next scene emerges
+ * out of the cloud. `above` never comes — the above-deck world belongs to
+ * chapter 02. One function used by BOTH the 2D environment (climb.ts) and
+ * the 3D heroes' fog-swallow, so the two layers cannot disagree.
+ */
+export function heroClimbPunch(t: number): PunchState {
+  return {
+    fog: smoothstep(0.72, 0.9, t),
+    above: 0,
+    approach: smoothstep(0.06, 0.65, t),
+  }
+}
+
 // ---------------------------------------------------------------------------
 // THE SECTION SUN — one shared trajectory for the whole Air-Force arc
 // ---------------------------------------------------------------------------

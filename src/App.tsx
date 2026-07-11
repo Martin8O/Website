@@ -3,7 +3,7 @@ import { Story } from './story/Story'
 import { SiteNav } from './story/SiteNav'
 import { SkipLinks } from './story/SkipLinks'
 import { Preloader } from './story/Preloader'
-import { CHAPTERS } from './data/chapters'
+import { CHAPTERS, CHAPTER_WEIGHTS } from './data/chapters'
 import { trackHeightVh } from './timeline'
 import styles from './App.module.css'
 
@@ -24,7 +24,7 @@ function App() {
       <Story />
       <div
         className={styles.scrollTrack}
-        style={{ height: `${trackHeightVh(CHAPTERS.length)}vh` }}
+        style={{ height: `${trackHeightVh(CHAPTERS.length, CHAPTER_WEIGHTS)}vh` }}
         aria-hidden="true"
       />
       {/* Last in DOM, highest z — the C4 boot gate over everything. */}

@@ -17,6 +17,10 @@ export type SceneConfig = {
   tRaw?: number
   /** True → `time` is frozen at 0; the scene must look complete when static. */
   reducedMotion: boolean
+  /** True → the 3D layer owns this scene's HERO AIRCRAFT right now (E3b,
+   *  `owned3d.paintsHero2D`): paint the full environment but skip the
+   *  aircraft story — the real GLB hero flies in the layer above. */
+  hero3d?: boolean
   /** The engine-smoothed pointer, CSS px, with presence `a` easing 0→1 as
    *  the pointer arrives and back after it leaves (0 on touch rest, under
    *  reduced motion, and until the first move). Purely an ENHANCEMENT

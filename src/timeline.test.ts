@@ -3,13 +3,16 @@ import {
   VH_PER_CHAPTER,
   trackHeightVh,
   chapterPosition,
+  buildChapterWeights,
+  posFromProgress,
+  progressFromPos,
   resolveTimeline,
   nearestChapter,
   activeEra,
   cardOpacity,
   cardOpacityWindowed,
 } from './timeline'
-import { CHAPTERS, EXTRA_ERAS } from './data/chapters'
+import { CHAPTERS, CHAPTER_WEIGHTS, EXTRA_ERAS } from './data/chapters'
 
 describe('trackHeightVh', () => {
   it('scales linearly with chapter count', () => {
@@ -119,18 +122,59 @@ describe('activeEra', () => {
     expect(activeEra(0.58, over)).toBe('A') // B held back past its 0.25 midpoint
     expect(activeEra(0.585, over)).toBe('B') // flips exactly at the override
   })
-  it('drives the real story eras — L-39 at 18 %, L-159 at 21 %, sunset at 53 %', () => {
+  it('drives the real story eras — L-39 at 21 %, L-159 at 26 %, sunset at 57 %', () => {
+    // The real story rides the WEIGHTED map (climb scrollWeight 2).
     const en = CHAPTERS
     const eraOf = (id: string) => en.find((c) => c.id === id)?.era
-    expect(activeEra(0.16, en, EXTRA_ERAS)).toBe(eraOf('sky-climb')) // ČVUT→Brno before 18 %
-    expect(activeEra(0.19, en, EXTRA_ERAS)).toBe('2005–2012 · L-39') // the extra L-39 stop
-    expect(activeEra(0.21, en, EXTRA_ERAS)).toBe(eraOf('sky-cruise')) // L-159 at the gold ring
-    expect(activeEra(0.52, en, EXTRA_ERAS)).toBe(eraOf('sky-airshow')) // "2016–2017" holds to 53 %
-    expect(activeEra(0.54, en, EXTRA_ERAS)).toBe(eraOf('sky-sunset')) // "2020–2022" from 53 %
+    expect(activeEra(0.16, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-climb'))
+    expect(activeEra(0.22, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe('2005–2012 · L-39') // pos 2.0 stop
+    expect(activeEra(0.27, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-cruise')) // pos 2.3
+    expect(activeEra(0.56, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-airshow')) // holds to 57 %
+    expect(activeEra(0.58, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-sunset'))
     // The mission chapter (09) carries no era of its own — the HUD keeps
     // dev's "from 2026" across it until the finale's "now".
-    expect(activeEra(0.9, en, EXTRA_ERAS)).toBe(eraOf('dev-explosion'))
-    expect(activeEra(0.96, en, EXTRA_ERAS)).toBe(eraOf('contact-now'))
+    expect(activeEra(0.9, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('dev-explosion'))
+    expect(activeEra(0.96, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('contact-now'))
+  })
+})
+
+describe('scroll weights (the climb stretch, E3b)', () => {
+  it('bakes the real story to total 12 (climb doubles its unit span)', () => {
+    expect(CHAPTER_WEIGHTS.total).toBeCloseTo(12, 10)
+    expect(CHAPTER_WEIGHTS.w[2]).toBe(2)
+  })
+
+  it('maps the knots of the climb span exactly', () => {
+    // climb owns pos [1.5, 2.5]; weight 2 → progress [1.5/12, 3.5/12]
+    expect(progressFromPos(1.5, CHAPTER_WEIGHTS)).toBeCloseTo(1.5 / 12, 10)
+    expect(progressFromPos(2.5, CHAPTER_WEIGHTS)).toBeCloseTo(3.5 / 12, 10)
+    // outside the climb the line shifts by exactly the extra unit
+    expect(progressFromPos(1.0, CHAPTER_WEIGHTS)).toBeCloseTo(1 / 12, 10)
+    expect(progressFromPos(6.2, CHAPTER_WEIGHTS)).toBeCloseTo(7.2 / 12, 10)
+    expect(progressFromPos(11, CHAPTER_WEIGHTS)).toBe(1)
+  })
+
+  it('posFromProgress inverts progressFromPos across the whole line', () => {
+    for (let pos = 0; pos <= 11; pos += 0.37) {
+      expect(posFromProgress(progressFromPos(pos, CHAPTER_WEIGHTS), CHAPTER_WEIGHTS)).toBeCloseTo(
+        pos,
+        8,
+      )
+    }
+  })
+
+  it('is the identity when every weight is 1', () => {
+    const uniform = buildChapterWeights(Array.from({ length: 12 }, () => ({})))
+    for (const p of [0, 0.25, 0.5, 0.99, 1]) {
+      expect(posFromProgress(p, uniform)).toBeCloseTo(p * 11, 10)
+      expect(chapterPosition(p, 12, uniform)).toBeCloseTo(chapterPosition(p, 12), 10)
+    }
+  })
+
+  it('grows the track by exactly the extra weight (others keep their pace)', () => {
+    expect(trackHeightVh(12, CHAPTER_WEIGHTS)).toBe(Math.round(12 * VH_PER_CHAPTER * (12 / 11)))
+    const uniform = buildChapterWeights(Array.from({ length: 12 }, () => ({})))
+    expect(trackHeightVh(12, uniform)).toBe(12 * VH_PER_CHAPTER)
   })
 })
 

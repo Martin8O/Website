@@ -4,6 +4,7 @@ import type { SceneRun } from '../canvas/sceneTimeline'
 import type { FlightPath } from './flightMath'
 import type { Frame3D } from './frame3d'
 import { Starfield } from './scenes3d/Starfield'
+import { ClimbHeroes } from './scenes3d/ClimbHeroes'
 
 /** The shared world's flight rig (E2): the baked camera path plus the story
  *  runs it was built from — scenes anchor their world-space volumes on it. */
@@ -29,11 +30,15 @@ export type Scene3DProps = {
  * scene only flips to 3D-owned when its 3D version clearly outclasses the 2D).
  *
  * E1 registers the two space scenes: the origin dawn and the contact finale
- * both gain a true-depth starfield.
+ * both gain a true-depth starfield. E3b gives the climb its REAL GLB heroes
+ * (Martin's authored Part-1 sequence), whose 2D counterpart steps aside via
+ * the hero-level flip in `owned3d.ts`. The parametric fly-bys (Jets.tsx) are
+ * UNMOUNTED by Martin's call — only his real aircraft fly; later sky scenes
+ * get their own authored sequences (Part 2+), the code stays as reference.
  */
 export const RENDERERS_3D: Record<Theme, ComponentType<Scene3DProps> | null> = {
   origin: Starfield,
-  sky: null,
+  sky: ClimbHeroes,
   calm: null,
   bitcoin: null,
   dev: null,

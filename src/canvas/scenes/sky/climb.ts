@@ -29,16 +29,41 @@ import {
 import { drawAircraft, drawTrail } from './aircraft'
 import { drawCloudDeck, drawCloudSea, drawPuff } from './clouds'
 import { bvrPicture, drawCockpitHud } from './hud'
-import { GRADUATION, cloudPunch, graduationAt, sunArc } from './skyMath'
+import { GRADUATION, cloudPunch, graduationAt, heroClimbPunch, sunArc } from './skyMath'
+import { CLIMB_SEQ, buildTrack, createClimbPose, heroPosAt } from '../../../three/climbMath'
 
 const GOLD = '#ffd27a'
 const MONO = '"Chakra Petch", ui-monospace, Consolas, monospace'
 
+// The authored Part-1 flight (pure, three-free): while the 3D layer owns the
+// hero, the ENVIRONMENT streams against the aircraft's own motion — sky and
+// ground drift derive from the hero's position, still a pure fn of scroll.
+const TRACKS = CLIMB_SEQ.aircraft.map((a) => buildTrack(a))
+const HERO_POSE = createClimbPose()
+
 export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
   const { w, h } = cfg
   const unit = Math.min(w, h)
-  const { fog, above, approach } = cloudPunch(t)
+  // Hero-flip mode retimes the whole chapter: everything below the deck, the
+  // white-out only at the very end (the L-39 melts into it), no above phase.
+  const { fog, above, approach } = cfg.hero3d ? heroClimbPunch(t) : cloudPunch(t)
   const below = 1 - above
+
+  // World drift: 2D-only mode keeps the original "scroll IS the climb"
+  // streaming; in hero-flip mode the world answers the AIRCRAFT — flying
+  // right streams the scraps left, climbing sinks them (and the ground),
+  // descending in the loop floats them back up.
+  let driftX = t * 1.1
+  let driftY = t * 1.45
+  let groundShift = t * 0.55
+  if (cfg.hero3d) {
+    heroPosAt(TRACKS, cfg.tRaw ?? t, HERO_POSE)
+    const hx = HERO_POSE.p[0] + 5.657 // 0 at Ulla's first snap
+    const hy = HERO_POSE.p[1] + 3.917
+    driftX = t * 0.25 + hx * 0.09
+    driftY = t * 0.35 + hy * 0.16
+    groundShift = t * 0.12 + hy * 0.08
+  }
 
   // ==== BELOW THE DECK ======================================================
   if (below > 0.004) {
@@ -67,12 +92,12 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
 
     // The countryside FLYING PAST backwards and sinking away — the same
     // landscape translating (scrollX), never remodelling.
-    const groundY = h * (0.8 + t * 0.55)
+    const groundY = h * (0.8 + groundShift)
     if (groundY < h * 1.1) {
-      const groundA = a * (1 - smoothstep(0.3, 0.45, t))
+      const groundA = a * (1 - smoothstep(0.3, 0.45, cfg.hero3d ? groundShift / 0.55 : t))
       drawRidge(ctx, {
         w, y: groundY, amp: h * 0.02, seed: 21,
-        color: mixHex('#2b3550', '#1c2438', dim), bottom: h + 2, scrollX: t * w * 1.6, alpha: groundA,
+        color: mixHex('#2b3550', '#1c2438', dim), bottom: h + 2, scrollX: driftX * w * 1.45, alpha: groundA,
       })
       fillVerticalGradient(
         ctx, 0, groundY - h * 0.05, w, h * 0.1,
@@ -87,9 +112,9 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
     for (let i = 0; i < 13; i++) {
       const hx = hash1(60 + i * 13.7)
       const hs = hash1(80 + i * 7.3)
-      const drop = hash1(70 + i * 9.1) + t * 1.45 + time * 0.004
+      const drop = hash1(70 + i * 9.1) + driftY + time * 0.004
       const py = (drop % 1.3) * h * 1.15 - h * 0.06
-      const px = ((((hx - t * 1.1 * (0.6 + hs)) % 1.15) + 1.15) % 1.15) * w * 1.1 - w * 0.05
+      const px = ((((hx - driftX * (0.6 + hs)) % 1.15) + 1.15) % 1.15) * w * 1.1 - w * 0.05
       const r = h * (0.03 + hs * 0.045)
       const shade = mixHex('#8fa3c4', '#5d6d8c', dim)
       const lit = mixHex('#e6eefa', '#9aa8c2', dim)
@@ -102,58 +127,65 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
 
     // --- The graduation beat -------------------------------------------------
     // Left of frame (the chapter text lives on the right), creeping forward.
-    const grad = graduationAt(t)
-    const rung = GRADUATION[grad.index]
-    const cx = w * (0.2 + t * 0.14)
-    const cy = h * (0.66 - t * 0.36) + Math.sin(time * 1.1) * h * 0.004
-    const tilt = 0.2
-    const size = unit * (0.105 + grad.index * 0.02) // each craft a touch bigger
-    const body = mixHex('#232c44', '#161d30', dim)
+    // Skipped when the 3D layer owns the hero (E3b): the REAL Ulla → Z-142 →
+    // L-39 fly the ladder in the layer above this very environment.
+    if (!cfg.hero3d) {
+      const grad = graduationAt(t)
+      const rung = GRADUATION[grad.index]
+      const cx = w * (0.2 + t * 0.14)
+      const cy = h * (0.66 - t * 0.36) + Math.sin(time * 1.1) * h * 0.004
+      const tilt = 0.2
+      const size = unit * (0.105 + grad.index * 0.02) // each craft a touch bigger
+      const body = mixHex('#232c44', '#161d30', dim)
 
-    if (grad.index >= 2) {
-      // Contrail exactly opposite the velocity — a hint, not a stripe.
-      drawTrail(
-        ctx,
-        cx - size * 0.5, cy + size * 0.2,
-        cx - size * 0.5 - Math.cos(tilt) * size * 3.6, cy + size * 0.2 + Math.sin(tilt) * size * 3.6,
-        size * 0.05, '#dfe9f7', a * 0.08,
-      )
-    }
-    drawAircraft(ctx, rung.craft, {
-      x: cx, y: cy, size, tilt, color: body, glint: '#cfe2ff', alpha: a, time,
-    })
+      if (grad.index >= 2) {
+        // Contrail exactly opposite the velocity — a hint, not a stripe.
+        drawTrail(
+          ctx,
+          cx - size * 0.5, cy + size * 0.2,
+          cx - size * 0.5 - Math.cos(tilt) * size * 3.6, cy + size * 0.2 + Math.sin(tilt) * size * 3.6,
+          size * 0.05, '#dfe9f7', a * 0.08,
+        )
+      }
+      drawAircraft(ctx, rung.craft, {
+        x: cx, y: cy, size, tilt, color: body, glint: '#cfe2ff', alpha: a, time,
+      })
 
-    // Unlock pulse: an expanding golden ring + the craft's name, per step-up.
-    if (grad.pulse > 0.01) {
-      const spread = 1 - grad.pulse
+      // Unlock pulse: an expanding golden ring + the craft's name, per step-up.
+      if (grad.pulse > 0.01) {
+        const spread = 1 - grad.pulse
+        ctx.save()
+        ctx.strokeStyle = rgba(GOLD, a * grad.pulse * 0.55)
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.arc(cx, cy, size * (0.55 + spread * 1.1), 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.restore()
+      }
+      const labelA = a * (0.3 + grad.pulse * 0.65)
       ctx.save()
-      ctx.strokeStyle = rgba(GOLD, a * grad.pulse * 0.55)
-      ctx.lineWidth = 1.5
-      ctx.beginPath()
-      ctx.arc(cx, cy, size * (0.55 + spread * 1.1), 0, Math.PI * 2)
-      ctx.stroke()
+      ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = rgba(GOLD, labelA)
+      ctx.fillText(rung.label, cx + size * 0.62, cy + size * 0.52)
       ctx.restore()
     }
-    const labelA = a * (0.3 + grad.pulse * 0.65)
-    ctx.save()
-    ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
-    ctx.textAlign = 'left'
-    ctx.textBaseline = 'middle'
-    ctx.fillStyle = rgba(GOLD, labelA)
-    ctx.fillText(rung.label, cx + size * 0.62, cy + size * 0.52)
-    ctx.restore()
 
     // The ceiling overhead — a dark, dense cumulus sea upside-down, looming
     // lower as we climb at it (and streaming with the scroll like the rest
-    // of the world).
-    const deckIn = smoothstep(0.16, 0.5, t)
+    // of the world). In hero-flip mode it looms across the SECOND half of
+    // the stretched chapter — the whole authored flight happens under it,
+    // and the L-39's final vertical climb drives straight into it.
+    const deckIn = cfg.hero3d ? smoothstep(0.38, 0.82, t) : smoothstep(0.16, 0.5, t)
     if (deckIn > 0.001) {
       // Greys over deep blue — a heavy, overcast ceiling (never green: the
       // palette keeps r=g with blue a full step above, quantization-proof).
       drawCloudDeck(ctx, {
         w, h, edgeY: lerp(-h * 0.04, h * 0.62, deckIn),
         lit: '#767684', shade: '#1e1e2c', haze: '#424250',
-        alpha: a * smoothstep(0.16, 0.28, t), t, time, sunX: w * 0.18, seed: 9,
+        alpha: a * (cfg.hero3d ? smoothstep(0.38, 0.52, t) : smoothstep(0.16, 0.28, t)),
+        t, time, sunX: w * 0.18, seed: 9,
       })
     }
   }
@@ -213,95 +245,101 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
     }
     ctx.restore()
 
-    // The L-39 punching out LEFT — near where it climbed — then riding
-    // forward to the exact spot + attitude the cruise solo holds, BEFORE the
-    // cross-fade starts (so the two scenes overlap pixel-close, no ghost).
-    const rise = smoothstep(0.6, 0.8, t)
-    const px = w * (0.3 + rise * 0.2)
-    const py = h * (0.56 - rise * 0.22) + Math.sin(time * 0.9) * h * 0.004
-    const tilt = lerp(0.3, 0.06, rise)
+    // The whole above-deck AIRCRAFT story is the hero's — skipped when the
+    // 3D layer owns it (E3b): there the L-39 is still climbing THROUGH this
+    // sea toward its cloud entry, and the L-159/HUD beat belongs to the
+    // cruise scene that takes the frame next.
+    if (!cfg.hero3d) {
+      // The L-39 punching out LEFT — near where it climbed — then riding
+      // forward to the exact spot + attitude the cruise solo holds, BEFORE the
+      // cross-fade starts (so the two scenes overlap pixel-close, no ghost).
+      const rise = smoothstep(0.6, 0.8, t)
+      const px = w * (0.3 + rise * 0.2)
+      const py = h * (0.56 - rise * 0.22) + Math.sin(time * 0.9) * h * 0.004
+      const tilt = lerp(0.3, 0.06, rise)
 
-    // Contrail: there from the very first frame out of the white — straight
-    // back along the flight path, still just a hint.
-    drawTrail(
-      ctx,
-      px - Math.cos(tilt) * unit * 0.07, py + Math.sin(tilt) * unit * 0.07 + unit * 0.012,
-      px - Math.cos(tilt) * unit * 0.55, py + Math.sin(tilt) * unit * 0.55 + unit * 0.012,
-      unit * 0.007, '#f2f7ff', a * 0.1 * smoothstep(0.6, 0.63, t),
-    )
+      // Contrail: there from the very first frame out of the white — straight
+      // back along the flight path, still just a hint.
+      drawTrail(
+        ctx,
+        px - Math.cos(tilt) * unit * 0.07, py + Math.sin(tilt) * unit * 0.07 + unit * 0.012,
+        px - Math.cos(tilt) * unit * 0.55, py + Math.sin(tilt) * unit * 0.55 + unit * 0.012,
+        unit * 0.007, '#f2f7ff', a * 0.1 * smoothstep(0.6, 0.63, t),
+      )
 
-    // THE L-159 UNLOCK — the moment the jet levels off after the punch-out
-    // (the burst puffs have just dissolved), the graduation ladder ends: the
-    // L-39 dissolves into the stores L-159 (2012), ringed by the same golden
-    // pulse the earlier rungs got. From here on he flies the modern jet —
-    // level, all the way through the cruise hand-over (Martin: switch early,
-    // give the L-159 a long straight run before the one-circle fight).
-    const toL159 = smoothstep(0.8, 0.88, t)
-    if (toL159 < 1) {
-      drawAircraft(ctx, 'l39', {
-        x: px, y: py, size: unit * 0.13, tilt, color: '#22314e', glint: '#dcecff', alpha: a * (1 - toL159), time,
-      })
-    }
-    if (toL159 > 0) {
-      drawAircraft(ctx, 'l159p', {
-        x: px, y: py, size: unit * 0.14, tilt, color: '#22314e', glint: '#dcecff', alpha: a * toL159, time,
-      })
-      // The "L-159" tag rides WITH the jet (not just the unlock flash) so the
-      // aircraft stays named as it flies out — matches the HUD era flipping to
-      // "2012–2021 · L-159" at this exact beat (Martin).
-      ctx.save()
-      ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
-      ctx.textAlign = 'left'
-      ctx.textBaseline = 'middle'
-      ctx.fillStyle = rgba(GOLD, a * toL159 * 0.9)
-      ctx.fillText('L-159', px + unit * 0.1, py + unit * 0.09)
-      ctx.restore()
-    }
-    const pulse = smoothstep(0.8, 0.84, t) * (1 - smoothstep(0.92, 0.98, t))
-    if (pulse > 0.01) {
-      const spread = smoothstep(0.8, 0.98, t)
-      ctx.save()
-      ctx.strokeStyle = rgba(GOLD, a * pulse * 0.55)
-      ctx.lineWidth = 1.5
-      ctx.beginPath()
-      ctx.arc(px, py, unit * 0.14 * (0.55 + spread * 1.1), 0, Math.PI * 2)
-      ctx.stroke()
-      ctx.restore()
-    }
-
-    // The green cockpit HUD snaps ON — COMPLETE, full intensity, no fade —
-    // the instant the L-159 shows (26 %, mid-ring; Martin: the whole picture
-    // at once, framed contacts included, exactly as it looks a beat later).
-    // The BVR picture is one shared function of the story position, so the
-    // contacts drift and their ranges count down seamlessly into the cruise.
-    if (toL159 > 0.2) {
-      const bvr = bvrPicture(1.5 + (cfg.tRaw ?? t), w, h)
-      drawCockpitHud(ctx, {
-        w, h, alpha: a,
-        attack: 0,
-        target: bvr.target,
-        target2: bvr.target2,
-        rangeNm: bvr.rangeNm,
-        mach: 0.74,
-        altFt: 21500,
-        hdg: 139,
-      })
-    }
-
-    // The burst: only the LATE phase — a ring of torn white already flying
-    // apart (the tight in-transition puffs died with the dissolve).
-    const burst = smoothstep(0.6, 0.62, t) * (1 - smoothstep(0.66, 0.74, t))
-    if (burst > 0.01) {
-      const exitX = w * 0.3
-      const exitY = h * 0.57
-      const rad = unit * (0.12 + smoothstep(0.6, 0.74, t) * 0.16)
-      ctx.save()
-      for (let i = 0; i < 10; i++) {
-        const ang = (i / 10) * Math.PI * 2 + hash1(i + 260) * 0.6
-        const rr = rad * (0.8 + hash1(i + 270) * 0.5)
-        drawPuff(ctx, exitX + Math.cos(ang) * rr, exitY + Math.sin(ang) * rr * 0.7, unit * 0.03, '#ffffff', a * burst * 0.7)
+      // THE L-159 UNLOCK — the moment the jet levels off after the punch-out
+      // (the burst puffs have just dissolved), the graduation ladder ends: the
+      // L-39 dissolves into the stores L-159 (2012), ringed by the same golden
+      // pulse the earlier rungs got. From here on he flies the modern jet —
+      // level, all the way through the cruise hand-over (Martin: switch early,
+      // give the L-159 a long straight run before the one-circle fight).
+      const toL159 = smoothstep(0.8, 0.88, t)
+      if (toL159 < 1) {
+        drawAircraft(ctx, 'l39', {
+          x: px, y: py, size: unit * 0.13, tilt, color: '#22314e', glint: '#dcecff', alpha: a * (1 - toL159), time,
+        })
       }
-      ctx.restore()
+      if (toL159 > 0) {
+        drawAircraft(ctx, 'l159p', {
+          x: px, y: py, size: unit * 0.14, tilt, color: '#22314e', glint: '#dcecff', alpha: a * toL159, time,
+        })
+        // The "L-159" tag rides WITH the jet (not just the unlock flash) so the
+        // aircraft stays named as it flies out — matches the HUD era flipping to
+        // "2012–2021 · L-159" at this exact beat (Martin).
+        ctx.save()
+        ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
+        ctx.textAlign = 'left'
+        ctx.textBaseline = 'middle'
+        ctx.fillStyle = rgba(GOLD, a * toL159 * 0.9)
+        ctx.fillText('L-159', px + unit * 0.1, py + unit * 0.09)
+        ctx.restore()
+      }
+      const pulse = smoothstep(0.8, 0.84, t) * (1 - smoothstep(0.92, 0.98, t))
+      if (pulse > 0.01) {
+        const spread = smoothstep(0.8, 0.98, t)
+        ctx.save()
+        ctx.strokeStyle = rgba(GOLD, a * pulse * 0.55)
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.arc(px, py, unit * 0.14 * (0.55 + spread * 1.1), 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.restore()
+      }
+
+      // The green cockpit HUD snaps ON — COMPLETE, full intensity, no fade —
+      // the instant the L-159 shows (26 %, mid-ring; Martin: the whole picture
+      // at once, framed contacts included, exactly as it looks a beat later).
+      // The BVR picture is one shared function of the story position, so the
+      // contacts drift and their ranges count down seamlessly into the cruise.
+      if (toL159 > 0.2) {
+        const bvr = bvrPicture(1.5 + (cfg.tRaw ?? t), w, h)
+        drawCockpitHud(ctx, {
+          w, h, alpha: a,
+          attack: 0,
+          target: bvr.target,
+          target2: bvr.target2,
+          rangeNm: bvr.rangeNm,
+          mach: 0.74,
+          altFt: 21500,
+          hdg: 139,
+        })
+      }
+
+      // The burst: only the LATE phase — a ring of torn white already flying
+      // apart (the tight in-transition puffs died with the dissolve).
+      const burst = smoothstep(0.6, 0.62, t) * (1 - smoothstep(0.66, 0.74, t))
+      if (burst > 0.01) {
+        const exitX = w * 0.3
+        const exitY = h * 0.57
+        const rad = unit * (0.12 + smoothstep(0.6, 0.74, t) * 0.16)
+        ctx.save()
+        for (let i = 0; i < 10; i++) {
+          const ang = (i / 10) * Math.PI * 2 + hash1(i + 260) * 0.6
+          const rr = rad * (0.8 + hash1(i + 270) * 0.5)
+          drawPuff(ctx, exitX + Math.cos(ang) * rr, exitY + Math.sin(ang) * rr * 0.7, unit * 0.03, '#ffffff', a * burst * 0.7)
+        }
+        ctx.restore()
+      }
     }
   }
 

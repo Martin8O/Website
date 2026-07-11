@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import type { Theme } from '../data/chapters'
-import { OWNED_3D, paints2D } from './owned3d'
+import { afterEach, describe, expect, it } from 'vitest'
+import type { Sky, Theme } from '../data/chapters'
+import { HERO_3D, OWNED_3D, paints2D, paintsHero2D, setHero3DReady } from './owned3d'
 
 const ALL_THEMES: Theme[] = ['origin', 'sky', 'calm', 'bitcoin', 'dev', 'offer', 'contact']
 
@@ -27,6 +27,38 @@ describe('paints2D', () => {
   it('with the shipped set, 3d mode still paints everything', () => {
     for (const theme of ALL_THEMES) {
       expect(paints2D(theme, '3d')).toBe(true)
+    }
+  })
+})
+
+describe('paintsHero2D (the hero-level flip, E3b)', () => {
+  const ALL_SKIES: Sky[] = ['climb', 'cruise', 'desert', 'airshow', 'sunset']
+
+  afterEach(() => {
+    // readiness is module state — leave it as the site boots: not ready
+    for (const sky of ALL_SKIES) setHero3DReady(sky, false)
+  })
+
+  it('ships with exactly the climb flipped', () => {
+    expect([...HERO_3D]).toEqual(['climb'])
+  })
+
+  it('keeps the 2D hero until the 3D scene reports READY', () => {
+    // chunk still loading / GLB fetch failed → the 2D hero must keep flying
+    expect(paintsHero2D('climb', '3d')).toBe(true)
+    setHero3DReady('climb', true)
+    expect(paintsHero2D('climb', '3d')).toBe(false)
+    // unmount (reduced-motion flip mid-session) hands the hero straight back
+    setHero3DReady('climb', false)
+    expect(paintsHero2D('climb', '3d')).toBe(true)
+  })
+
+  it('never touches 2d mode, non-flipped moods, or non-sky themes', () => {
+    setHero3DReady('climb', true)
+    expect(paintsHero2D('climb', '2d')).toBe(true)
+    expect(paintsHero2D(undefined, '3d')).toBe(true)
+    for (const sky of ALL_SKIES.filter((s) => s !== 'climb')) {
+      expect(paintsHero2D(sky, '3d')).toBe(true)
     }
   })
 })

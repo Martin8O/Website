@@ -4,6 +4,45 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-041 — E3b: 3D climb heroes + chapter-01 scroll stretch + hero-level flip (2026-07-11)
+The FIRST scene to hand its hero to the 3D layer: Martin's authored Part-1 climb (Piper "Ulla" →
+Z-142/PA-28 → L-39) flies as real CC-BY GLB models in the R3F layer, below the cloud deck of a
+stretched chapter 01, ending with the L-39 melting into the white-out. The 2D world keeps painting the
+whole environment and IS the fallback (`?world=2d`).
+
+1. **Sequence is DATA, not code.** A choreo-lab JSON is converted (`local/tools/seq/convert.mjs`) into a
+   generated `src/three/climbSequence.ts` (`CLIMB_SEQ`), re-exported by `climbMath.ts`. Re-authoring the
+   climb is a one-command data swap — the engine, runtime scene, framing, ownership flip and model bakes
+   never change. The converter re-bases the lab's absolute scroll-% into the site's window-t and WARNS if
+   the new scene length falls outside the white-out band (→ a 2-line `heroClimbPunch` retune) or uses an
+   un-baked model.
+2. **Pure pose engine (`climbMath.ts`, three-free, ported 1:1 from the lab, tested).** Snapshots `{p,q,step}`
+   → monotone-cubic (Fritsch–Carlson) time-warp `u(t)` over a CENTRIPETAL Catmull-Rom + quat slerp →
+   C1-continuous speed, keyframe timing exact. Time base = the climb run's OWN localT (the same clock the
+   2D env breathes by), scaled by `SCROLL_TO_T` — so a future chapter re-weight stretches both worlds
+   together by construction.
+3. **Chapter scroll-weight (`timeline.ts`).** New `chapter.scrollWeight` (climb = 2) warps progress↔pos on
+   the half-integer knot grid (the same grid scene windows sit on), so a weighted chapter stretches exactly
+   its own scene window; the track gains the extra height so every weight-1 chapter keeps its real pace.
+   One `CHAPTER_WEIGHTS` bake threads through App/Story/CanvasStage/Stage3D; era stops + footer retuned.
+   Decision: chapter 01 owns the whole authored climb below the deck and ENDS at cloud entry — 01 and 02
+   are NOT merged (the above-deck world belongs to 02, which cross-fades in out of the white).
+4. **Hero-level ownership flip (`owned3d.ts`).** Finer than `OWNED_3D` (a whole frame): `HERO_3D` +
+   `paintsHero2D()` let the 2D climb keep its whole environment and skip ONLY its aircraft story — and only
+   while the 3D scene is live (`setHero3DReady`, cleared on unmount / a failed model fetch), so a flaky
+   chunk simply leaves the 2D hero flying.
+5. **The 3D env answers the flight (Martin's note — the sky must not "approach" when the plane banks/dives).**
+   `climb.ts` in flip mode derives its cloud-scrap + ground drift from the HERO's position (a pure fn of
+   scroll via the shared tracks), not from raw scroll — fly right → scraps stream left, climb → world sinks.
+   2D-only mode keeps the original streaming untouched.
+6. **Grade + fidelity.** E3a bakes 3 clean GLBs (`local/tools/bake/`) — normalize-to-10, prop split onto a
+   spin pivot (a triangle-plane cut, since the source welds blades into the airframe — the lab's
+   component rule only caught the spinner tip), meshopt + webp; 7 MB lazy, ~free at 60 fps. Lab audience
+   camera reproduced (contain-framing), 2D-style name tags (below-right, "Ultralight"), unlock spheres
+   (grow + dissolve, opacity lifted for daylight), RoomEnvironment + ACES on the hero materials only.
+   Parametric fly-bys (`Jets.tsx`) UNMOUNTED — only Martin's real models fly; the code stays as reference.
+   CC-BY credits render in the footer (`data/credits.ts`).
+
 ### ADR-040 — E2: scroll-flight camera rig + 3D-owned mechanism (2026-07-10)
 The 3D layer stops being a set of camera-space fields and becomes a **shared world the camera flies through**.
 `scrollProgress → pos → camera pose` along ONE in-code Catmull-Rom path; scenes become world-space *places*.

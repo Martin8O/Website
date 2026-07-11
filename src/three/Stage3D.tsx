@@ -15,7 +15,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import type { Chapter, Theme } from '../data/chapters'
+import { CHAPTER_WEIGHTS, type Chapter, type Theme } from '../data/chapters'
 import { chapterPosition } from '../timeline'
 import { getScrollProgress } from '../scroll/scrollStore'
 import { buildRuns, resolveSceneFrame } from '../canvas/sceneTimeline'
@@ -137,7 +137,7 @@ function FrameController({ flight, frame }: { flight: FlightRig; frame: Frame3D 
   }, [ptr])
 
   useFrame((state) => {
-    const pos = chapterPosition(getScrollProgress(), count)
+    const pos = chapterPosition(getScrollProgress(), count, CHAPTER_WEIGHTS)
     const resolved = resolveSceneFrame(pos, runs, count)
     frame.pos = pos
     frame.time = state.clock.elapsedTime

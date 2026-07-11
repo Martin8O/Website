@@ -14,6 +14,7 @@
  */
 
 import type { Lang } from '../i18n/langStore'
+import { buildChapterWeights } from '../timeline'
 import { CHAPTER_COPY_CS } from './chapters.cs'
 
 /** Visual worlds. Extensible union — a new *kind* later (e.g. 'sport') slots
@@ -53,6 +54,12 @@ export type Chapter = {
    *  [0.3, 0.7] — see sceneTimeline). The sunset landing holds back until
    *  the airshow's farewell flares have fallen (B2.3c). */
   enterFade?: readonly [number, number]
+  /** Scroll weight (default 1): how much scroll this chapter's span of the
+   *  pos line claims relative to the others. The track gains the extra
+   *  height, so weighting a chapter never speeds the rest up — it only
+   *  gives THIS scene more room (timeline.buildChapterWeights). The climb
+   *  carries Martin's full authored Part-1 sequence, hence its 2. */
+  scrollWeight?: number
   /** Optional card-visibility window in pos-offsets from this chapter's
    *  index: the card holds at FULL opacity across it (easing just outside)
    *  instead of peaking at the chapter centre — the Selfhealing card stays
@@ -88,12 +95,13 @@ export type Chapter = {
  *  labels (L-39, then L-159) inside the single "cruise" chapter's scroll span.
  *  Language-agnostic (aircraft designations). Merged in `timeline.activeEra`. */
 export const EXTRA_ERAS: readonly { from: number; era: string }[] = [
-  // Global fractions ride the 12-chapter scroll (% = pos/11): L-39 at pos 2.0.
-  { from: 0.182, era: '2005–2012 · L-39' },
+  // Global fractions ride the WEIGHTED 12-chapter scroll (the climb carries
+  // scrollWeight 2 — progressFromPos in timeline.ts): L-39 at pos 2.0.
+  { from: 0.208, era: '2005–2012 · L-39' },
   // The free years after the Air Force — appears mid-way through the sunset
   // chapter's card (pos 6.2), as the body turns from "end of service" to
   // "the open road".
-  { from: 0.564, era: '2022–2026' },
+  { from: 0.6, era: '2022–2026' },
 ]
 
 export const THEME_ACCENT: Record<Theme, string> = {
@@ -136,8 +144,13 @@ export const CHAPTERS: Chapter[] = [
     era: '1999–2005 · CTU → Brno',
     num: '01 — The Decision',
     title: 'Upward',
-    // Clear the frame BEFORE the cloud-punch white-out: hold to 19 %, then
-    // a quick fade — chapter 02 needs the stage from 20 % (L-159 at ~22 %).
+    // DOUBLE scroll: the chapter carries the whole authored Part-1 climb
+    // (Ulla → Z-142 → L-39, ~13 % of scroll below the deck) and must END
+    // with the L-39 melting into the cloud ceiling — the white-out is this
+    // section's exit, the above-deck world belongs to chapter 02 (E3b).
+    scrollWeight: 2,
+    // Clear the frame BEFORE the cloud-punch white-out (pos-space window —
+    // it stretches with the chapter's scroll weight automatically).
     cardFull: [-0.3, 0.1],
     cardEase: 0.15,
     // The faculty was electrical engineering; the FIELD was informatics —
@@ -151,10 +164,10 @@ export const CHAPTERS: Chapter[] = [
     sky: 'cruise',
     era: '2012–2022 · L-159',
     // Two era stops span this chapter: the L-39 years (2005–2012, EXTRA_ERAS)
-    // arrive at 18 %, then the L-159 takes the lead at 21 % — synced to the
-    // golden unlock ring in the climb scene (climb localT 0.8 = pos 2.3 = 21 %,
-    // per sceneTimeline: the climb run's window is pos [1.5, 2.5]).
-    eraFrom: 0.209,
+    // arrive at pos 2.0, then the L-159 takes the lead at pos 2.3 = 25.8 %
+    // through the weighted map (climb scrollWeight 2 → progress =
+    // (1.5 + 2·(pos − 1.5)) / 12 inside the climb's span).
+    eraFrom: 0.258,
     num: '02 — Military jets',
     title: 'Above the<br>clouds',
     // Rises out of the white-out from 21 %, full at 22 % — right as the
@@ -200,10 +213,10 @@ export const CHAPTERS: Chapter[] = [
     // Split across the chapter (title stays the military roles): "2020–2022"
     // = the last service years (landing = leaving the Air Force), then a
     // "2022–2026" stop (EXTRA_ERAS) at mid-card, where the body turns to the
-    // free years that followed. Arrives at 53 % (pos 5.85), as the landing
-    // enters.
+    // free years that followed. Arrives at 57 % (pos 5.85 through the
+    // weighted map), as the landing enters.
     era: '2020–2022',
-    eraFrom: 0.532,
+    eraFrom: 0.571,
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
     // Wait for the airshow to fly clean off (sunset scene enters pos
@@ -349,6 +362,11 @@ export const CHAPTERS: Chapter[] = [
     ctaHint: 'Three lines is enough: what it is, who it’s for, when you need it.',
   },
 ]
+
+/** The story's scroll-weight warp, baked once from the canonical array —
+ *  every progress↔pos conversion in the app rides this one instance (the
+ *  CS overlay never touches timing fields, so one bake serves both). */
+export const CHAPTER_WEIGHTS = buildChapterWeights(CHAPTERS)
 
 /**
  * The story in the requested language. EN = the canonical array above; CS =

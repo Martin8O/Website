@@ -9,11 +9,6 @@
 /** Scroll distance the track gives each chapter, in viewport heights. */
 export const VH_PER_CHAPTER = 110
 
-/** Total scroll-track height (in vh) for a story of `count` chapters. */
-export function trackHeightVh(count: number): number {
-  return Math.max(count, 1) * VH_PER_CHAPTER
-}
-
 function clamp01(n: number): number {
   return n < 0 ? 0 : n > 1 ? 1 : n
 }
@@ -23,11 +18,82 @@ function clampInt(n: number, lo: number, hi: number): number {
 }
 
 /**
+ * SCROLL WEIGHTS (E3b follow-up) — a chapter may claim MORE scroll than its
+ * uniform share: `chapter.scrollWeight` (default 1) stretches its span of the
+ * pos line without touching pos-space itself. The warp is piecewise-linear
+ * with knots on the HALF-INTEGER grid (chapter i owns pos [i−0.5, i+0.5] —
+ * the same grid scene run-windows sit on, so a weighted chapter stretches
+ * EXACTLY its own scene window and both worlds stretch together). Everything
+ * downstream keeps thinking in pos; only progress↔pos changes, and the track
+ * gains the extra height so unweighted chapters keep their real scroll pace.
+ */
+export type ChapterWeights = {
+  /** Per-chapter weight (default 1). */
+  w: readonly number[]
+  /** Weighted length of the pos line up to each knot (knot i = pos i − 0.5;
+   *  knot 0 = pos 0). cum[count] = the total weighted length. */
+  cum: readonly number[]
+  total: number
+}
+
+export function buildChapterWeights(
+  chapters: ReadonlyArray<{ scrollWeight?: number }>,
+): ChapterWeights {
+  const w = chapters.map((c) => Math.max(c.scrollWeight ?? 1, 0.01))
+  const n = w.length
+  const cum: number[] = [0]
+  for (let i = 0; i < n; i++) {
+    // chapter i's span on the pos line: half-spans at both story ends
+    const len = n <= 1 ? 1 : i === 0 || i === n - 1 ? 0.5 : 1
+    cum.push(cum[i] + len * w[i])
+  }
+  return { w, cum, total: cum[n] }
+}
+
+/** The knot (pos of chapter i's span start) for segment i. */
+function knotPos(i: number): number {
+  return i === 0 ? 0 : i - 0.5
+}
+
+/** progress (0..1) → continuous pos (0..count−1) through the weight warp. */
+export function posFromProgress(progress: number, weights: ChapterWeights): number {
+  const { w, cum, total } = weights
+  const n = w.length
+  if (n <= 1) return 0
+  const target = clamp01(progress) * total
+  let i = 0
+  while (i < n - 1 && target > cum[i + 1]) i++
+  return knotPos(i) + (target - cum[i]) / w[i]
+}
+
+/** Continuous pos → progress (0..1) — the inverse warp, for retuning any
+ *  progress-anchored value off the pos-space moment it marks. */
+export function progressFromPos(pos: number, weights: ChapterWeights): number {
+  const { w, cum, total } = weights
+  const n = w.length
+  if (n <= 1) return 0
+  const p = Math.min(Math.max(pos, 0), n - 1)
+  let i = 0
+  while (i < n - 1 && p > knotPos(i + 1)) i++
+  return (cum[i] + (p - knotPos(i)) * w[i]) / total
+}
+
+/** Total scroll-track height (in vh): weighted chapters ADD height, so every
+ *  weight-1 chapter keeps exactly the pace it always had. */
+export function trackHeightVh(count: number, weights?: ChapterWeights): number {
+  const base = Math.max(count, 1) * VH_PER_CHAPTER
+  if (!weights || count <= 1) return base
+  return Math.round(base * (weights.total / (count - 1)))
+}
+
+/**
  * Continuous position along the chapter line, from 0 (first chapter centered)
  * to `count - 1` (last chapter centered). This is the value cards fade around.
+ * With `weights` the scroll is warped so weighted chapters own more of it.
  */
-export function chapterPosition(progress: number, count: number): number {
+export function chapterPosition(progress: number, count: number, weights?: ChapterWeights): number {
   if (count <= 1) return 0
+  if (weights) return posFromProgress(progress, weights)
   return clamp01(progress) * (count - 1)
 }
 
@@ -66,11 +132,16 @@ export function activeEra(
   progress: number,
   chapters: readonly { era?: string; eraFrom?: number }[],
   extra: readonly { from: number; era: string }[] = [],
+  weights?: ChapterWeights,
 ): string {
   const p = clamp01(progress)
   const span = Math.max(chapters.length - 1, 1)
+  // Default breakpoint = the chapter's span start (pos i − 0.5) expressed in
+  // progress — through the weight warp when the story carries one.
+  const defFrom = (i: number) =>
+    weights ? progressFromPos(i - 0.5, weights) : (i - 0.5) / span
   const stops = chapters
-    .map((ch, i) => (ch.era ? { from: ch.eraFrom ?? (i - 0.5) / span, era: ch.era } : null))
+    .map((ch, i) => (ch.era ? { from: ch.eraFrom ?? defFrom(i), era: ch.era } : null))
     .filter((s): s is { from: number; era: string } => s !== null)
     .concat(extra)
   let era = ''

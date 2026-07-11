@@ -9,8 +9,9 @@ export default defineConfig({
   build: {
     // The canvas world, the Work panel and the L2 3D layer (three + R3F) are
     // code-split (React.lazy), so the per-chunk sizes are intentional, not
-    // accidents — quiet the 500 kB warn (the three chunk is ~880 kB raw).
-    chunkSizeWarningLimit: 900,
+    // accidents — quiet the 500 kB warn (the three chunk is ~955 kB raw:
+    // three + R3F + GLTFLoader/meshopt decoder/RoomEnvironment for E3b).
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         // Keep the rarely-changing React runtime in its own long-cache chunk,

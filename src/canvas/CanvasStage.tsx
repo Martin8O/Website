@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { chapterPosition } from '../timeline'
+import { CHAPTER_WEIGHTS } from '../data/chapters'
 import { getScrollProgress, setScrollProgress } from '../scroll/scrollStore'
-import { paints2D } from '../three/owned3d'
+import { paints2D, paintsHero2D } from '../three/owned3d'
 import type { WorldMode } from '../three/worldMode'
 import { RENDERERS } from './registry'
 import { landingShake } from './scenes/sky/skyMath'
@@ -116,6 +117,10 @@ export function CanvasStage({
         sky: slot.run.sky,
         tRaw: slot.tRaw,
         reducedMotion,
+        // Hero-level flip (E3b): true only while the 3D hero scene is LIVE —
+        // until the models are decoded (and again if the layer unmounts) the
+        // 2D hero keeps flying, so the story never shows a hole.
+        hero3d: !paintsHero2D(slot.run.sky, modeRef.current),
         pointer: { x: ptrX, y: ptrY, a: reducedMotion ? 0 : ptrA },
       }
       RENDERERS[slot.run.theme](ctx, slot.alpha, slot.t, time, cfg)
@@ -134,7 +139,7 @@ export function CanvasStage({
         ptrY += (ptrTY - ptrY) * 0.1
         ptrA += (ptrTA - ptrA) * 0.06
       }
-      const frame = resolveSceneFrame(chapterPosition(progress, count), runs, count)
+      const frame = resolveSceneFrame(chapterPosition(progress, count, CHAPTER_WEIGHTS), runs, count)
 
       // Safety floor — scenes contract to paint opaque, but never flash white.
       ctx.fillStyle = '#06070a'

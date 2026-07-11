@@ -9,12 +9,15 @@
  * codebase idiom — pre-baked buffers, zero per-frame garbage).
  */
 
-import type { Theme } from '../data/chapters'
+import type { Sky, Theme } from '../data/chapters'
 import type { SceneSlot } from '../canvas/sceneTimeline'
 import type { FlightPose } from './flightMath'
 
 export type Slot3D = {
   theme: Theme
+  /** The run's sky sub-mood — `sky`-theme scenes are one run PER mood (the
+   *  scene timeline splits them), and the 3D jets choreograph per mood. */
+  sky: Sky | undefined
   /** Cross-fade weight 0..1 — identical meaning to the 2D renderer `alpha`. */
   alpha: number
   /** Clamped localT through the run — the story clock. */
@@ -42,7 +45,7 @@ export type Frame3D = {
 }
 
 export function createFrame3D(): Frame3D {
-  const slot = (): Slot3D => ({ theme: 'origin', alpha: 0, t: 0, tRaw: 0 })
+  const slot = (): Slot3D => ({ theme: 'origin', sky: undefined, alpha: 0, t: 0, tRaw: 0 })
   return {
     pos: 0,
     time: 0,
@@ -56,6 +59,7 @@ export function createFrame3D(): Frame3D {
 /** Copy a resolved 2D scene slot into a mutable 3D slot (no allocation). */
 export function writeSlot3D(target: Slot3D, source: SceneSlot): void {
   target.theme = source.run.theme
+  target.sky = source.run.sky
   target.alpha = source.alpha
   target.t = source.t
   target.tRaw = source.tRaw

@@ -5,9 +5,41 @@
   bottom: calc(1.6rem + env(safe-area-inset-bottom));
   right: calc(1.6rem + env(safe-area-inset-right));
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+.links {
+  display: flex;
   align-items: baseline;
   gap: 1.2rem;
-  pointer-events: auto;
+}
+
+/* CC-BY model attribution (E3b) — a whisper under the proof links: same mono
+   chrome, but muted foreground so it never competes with the CTA. */
+.credits {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--fg) 42%, transparent);
+  text-align: right;
+  max-width: 34rem;
+}
+/* .footer .credits beats the generic `.footer a` amber (it sits later in the
+   file and ties on specificity otherwise). */
+.footer .credits a {
+  font-size: inherit;
+  letter-spacing: inherit;
+  color: color-mix(in srgb, var(--fg) 55%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--fg) 25%, transparent);
+}
+.footer .credits a:hover,
+.footer .credits a:focus-visible {
+  color: var(--amber);
+  border-color: var(--amber);
 }
 
 .footer a {
