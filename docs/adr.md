@@ -62,6 +62,24 @@ plays the whole story without them (the L2 fallback contract, upheld).
 commit + that one deploy together; prod shows the original 2D climb. **Not the demo's ceiling** — the
 patrols are original, math-driven, unit-tested. Model-fit: 🔥 Fable 5 · high (build + iteration).
 
+**Follow-up (same day) — the 3D layer's FIRST real deploy exposed two CSP conflicts.** E3b was only ever
+verified on a local `vite preview` build, which does NOT apply `vercel.json` headers, so the models had
+never met the hardened CSP (ADR-031) until this push — and rendered NOTHING on prod (GLB 200s, never
+decodes). Two independent causes, fixed to disturb the CSP as little as possible:
+1. **meshopt decoder needs WebAssembly + a blob worker.** `EXT_meshopt_compression`'s runtime decoder
+   trips `script-src 'self'` (no `'wasm-unsafe-eval'`). Rather than grant WASM execution, the bake drops
+   `meshopt()` and keeps `quantize()` only — `KHR_mesh_quantization`, which three.js reads NATIVELY, no
+   decoder, no WASM (`local/tools/bake/bake.mjs`; l159 407 KB → 731 KB, lazy). The `MeshoptDecoder` wiring
+   is removed from `SkyPatrols.tsx`. **No `script-src` change.**
+2. **GLTFLoader loads the GLB's embedded texture through a `blob:` URL** (fetch), tripping
+   `connect-src 'self'`. The minimal safe grant: **`connect-src 'self' blob:` + `img-src 'self' data: blob:`**
+   (in `vercel.json`). `blob:` URLs are same-origin, in-memory, created by our own three.js — no external
+   surface; Observatory/SecurityHeaders do not penalize it (unlike `unsafe-*`/`*`), so the A+ grades hold.
+   Deliberately NOT `'wasm-unsafe-eval'` (the meshopt-free bake means the more sensitive code-execution
+   grant is never needed). Re-verified on the live deploy (real headless Chrome): both flypasts render,
+   console clean. **Lesson: the 3D/GLB path must be checked against the REAL deployed CSP, not just a
+   preview build** — a preview is CSP-blind.
+
 ---
 
 ### ADR-041 — E3b: 3D climb heroes + chapter-01 scroll stretch + hero-level flip (2026-07-11)
