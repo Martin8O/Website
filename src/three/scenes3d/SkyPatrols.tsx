@@ -28,7 +28,6 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import type { Slot3D } from '../frame3d'
 import {
@@ -185,8 +184,11 @@ let l159Promise: Promise<THREE.Group> | null = null
 
 function loadL159(): Promise<THREE.Group> {
   if (l159Promise) return l159Promise
+  // No meshopt decoder: the GLB is baked with quantize only (KHR_mesh_
+  // quantization, read natively) — EXT_meshopt_compression's WASM+blob
+  // decoder is blocked by the site's hardened CSP, so the model is meshopt-
+  // free by design (bake.mjs). Keep this loader WASM-free.
   const loader = new GLTFLoader()
-  loader.setMeshoptDecoder(MeshoptDecoder)
   l159Promise = new Promise<THREE.Group>((resolve, reject) => {
     loader.load(MODEL_URL, (gltf) => resolve(gltf.scene), undefined, reject)
   })
