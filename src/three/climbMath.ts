@@ -77,11 +77,13 @@ export const LAB_BOX = { X0: -6, X1: 6, Y0: -4, Y1: 4, PLANE_Z: -3 } as const
  *  scene cross-fades in around t −0.2..0.2, Ulla parks on snap 0 until here. */
 export const SEQ_START_T = 0.06
 
-/** Authored "% of scroll" → window-t. The climb window spans pos [1.5, 2.5]
- *  weighted ×2 on a total weight of 12 (chapters.ts) → it owns 2/12 of the
- *  scroll, so 1.0 of scroll = 6.0 of window-t. Re-weighting the chapter
- *  rescales the sequence with the window automatically — update this factor
- *  ONLY if the authored pacing itself should change speed. */
+/** Authored "% of scroll" → window-t, pinned to the reference frame the
+ *  sequence was authored in: TOTAL 12 with the climb chapter at
+ *  scrollWeight 2 (= 240 vh of chapter scroll). NOTE the climb v1 is
+ *  currently UNMOUNTED and the chapter back at weight 1 (Martin's call) —
+ *  this factor only matters again if a v2 remounts ClimbHeroes, and then
+ *  the chapter must get its scrollWeight 2 back too, or the authored motion
+ *  would play at twice the scroll speed. Keep convert.mjs in sync. */
 export const SCROLL_TO_T = 6
 
 /** Unlock-sphere styling: the lab's gold pair, opacities lifted for the

@@ -95,13 +95,14 @@ export type Chapter = {
  *  labels (L-39, then L-159) inside the single "cruise" chapter's scroll span.
  *  Language-agnostic (aircraft designations). Merged in `timeline.activeEra`. */
 export const EXTRA_ERAS: readonly { from: number; era: string }[] = [
-  // Global fractions ride the WEIGHTED 12-chapter scroll (the climb carries
-  // scrollWeight 2 — progressFromPos in timeline.ts): L-39 at pos 2.0.
-  { from: 0.208, era: '2005–2012 · L-39' },
+  // Global fractions ride the WEIGHTED 12-chapter scroll (sunset scrollWeight
+  // 1.7 → total 11.7 — progressFromPos in timeline.ts): L-39 at pos 2.0
+  // = 2.0 / 11.7.
+  { from: 0.171, era: '2005–2012 · L-39' },
   // The free years after the Air Force — appears mid-way through the sunset
-  // chapter's card (pos 6.2), as the body turns from "end of service" to
-  // "the open road".
-  { from: 0.6, era: '2022–2026' },
+  // chapter's card (pos 6.2 = (5.5 + 0.7·1.7) / 11.7), as the body turns
+  // from "end of service" to "the open road".
+  { from: 0.572, era: '2022–2026' },
 ]
 
 export const THEME_ACCENT: Record<Theme, string> = {
@@ -144,13 +145,13 @@ export const CHAPTERS: Chapter[] = [
     era: '1999–2005 · CTU → Brno',
     num: '01 — The Decision',
     title: 'Upward',
-    // DOUBLE scroll: the chapter carries the whole authored Part-1 climb
-    // (Ulla → Z-142 → L-39, ~13 % of scroll below the deck) and must END
-    // with the L-39 melting into the cloud ceiling — the white-out is this
-    // section's exit, the above-deck world belongs to chapter 02 (E3b).
-    scrollWeight: 2,
-    // Clear the frame BEFORE the cloud-punch white-out (pos-space window —
-    // it stretches with the chapter's scroll weight automatically).
+    // Pure 2D at the ORIGINAL tempo (Martin's call): the E3b 3D climb v1 is
+    // UNMOUNTED (SkyPatrols.SkyScenes) and its scrollWeight-2 stretch is
+    // gone with it — whether a re-choreographed v2 ever ships is a separate
+    // later decision. Restoring v2 = remount ClimbHeroes + scrollWeight 2
+    // here + retune the progress anchors below (total 11.7 → 12.7).
+    // Clear the frame BEFORE the cloud-punch white-out: hold to 19 %, then
+    // a quick fade — chapter 02 needs the stage from 20 % (L-159 at ~22 %).
     cardFull: [-0.3, 0.1],
     cardEase: 0.15,
     // The faculty was electrical engineering; the FIELD was informatics —
@@ -164,10 +165,10 @@ export const CHAPTERS: Chapter[] = [
     sky: 'cruise',
     era: '2012–2022 · L-159',
     // Two era stops span this chapter: the L-39 years (2005–2012, EXTRA_ERAS)
-    // arrive at pos 2.0, then the L-159 takes the lead at pos 2.3 = 25.8 %
-    // through the weighted map (climb scrollWeight 2 → progress =
-    // (1.5 + 2·(pos − 1.5)) / 12 inside the climb's span).
-    eraFrom: 0.258,
+    // arrive at pos 2.0, then the L-159 takes the lead at pos 2.3 = 19.7 %
+    // through the weighted map (total 11.7 — all pre-sunset chapters sit at
+    // progress = pos / 11.7).
+    eraFrom: 0.197,
     num: '02 — Military jets',
     title: 'Above the<br>clouds',
     // Rises out of the white-out from 21 %, full at 22 % — right as the
@@ -206,23 +207,35 @@ export const CHAPTERS: Chapter[] = [
     id: 'sky-sunset',
     theme: 'sky',
     sky: 'sunset',
-    // Hold the landing back until the airshow pair has flown clean off and
-    // the farewell flares have dropped to the runway — 0.76 of chapter 5
-    // = 52 % of the whole scroll.
-    enterFade: [0.76, 0.97],
+    // Hold the landing back until the airshow pair has flown clean off, the
+    // farewell flares have dropped AND the new 3D head-on pass has mostly
+    // streaked through (patrolMath.PASS lives at airshow tRaw 1.175–1.455 =
+    // pos 5.68–5.96). The dusk then arrives as a REAL crossfade from 53 %
+    // (Martin: 53 % still shows the jets' tails, 54 % must not hard-cut to
+    // the full landing — a visible gradual hand-over across the step).
+    enterFade: [0.912, 0.995],
+    // STRETCHED ×1.7: the chapter carries two new beats after the landing —
+    // the armed pair's break onto the downwind (patrolMath.BREAK) needs room
+    // to fly, and the head-on pass borrows this chapter's early span (pos
+    // 5.5–6.0 rides THIS weight). Everything t-keyed inside the scene
+    // stretches with it in sync; only progress-space anchors were retuned
+    // (total 11.7).
+    scrollWeight: 1.7,
     // Split across the chapter (title stays the military roles): "2020–2022"
     // = the last service years (landing = leaving the Air Force), then a
     // "2022–2026" stop (EXTRA_ERAS) at mid-card, where the body turns to the
-    // free years that followed. Arrives at 57 % (pos 5.85 through the
-    // weighted map), as the landing enters.
+    // free years that followed. Arrives at 53 % (pos 5.912 through the
+    // weighted map), as the landing starts blending in.
     era: '2020–2022',
-    eraFrom: 0.571,
+    eraFrom: 0.53,
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
-    // Wait for the airshow to fly clean off (sunset scene enters pos
-    // 5.76–5.97), hold through the touchdown + braking (~pos 6.1–6.3),
-    // and clear the frame before the healing lake bleeds in (~6.5).
-    cardFull: [-0.05, 0.4],
+    // Wait for the airshow + the head-on pass to fly clean off (the pass
+    // streaks out by pos 5.96; the card starts rising only then), hold
+    // through the touchdown + braking and the pair's break overhead
+    // (~pos 6.1–6.4), and clear the frame before the healing lake bleeds
+    // in (~6.5).
+    cardFull: [0.08, 0.42],
     body: '<span class="a-hud">Twenty years in the Air Force, ~1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and test pilot. In 2021 I chose to leave the military; since 2022 I’ve been my own boss. Before that I retrained in computer networks and systems. But I had no masterplan&nbsp;—&nbsp;just trust in the open road ahead and the urge to leap into the world. What followed was intense travel: half of every year abroad, volunteering at Buddhist centres and courses. Meditation has been part of my life since 2005&nbsp;—&nbsp;now it has more room to breathe.',
     align: 'left',
   },

@@ -4,6 +4,66 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-042 — Locked additions: airliner contrails + two L-159 flypasts; E3b climb v1 retired (2026-07-12)
+Content Martin wanted "for sure" on the site, decoupled from the still-uncertain 3D climb. Additive by
+construction: the 2D scenes paint their full environments and know nothing of the 3D jets, so `?world=2d`
+plays the whole story without them (the L2 fallback contract, upheld).
+
+1. **Airliner contrails (2D, `canvas/scenes/sky/contrails.ts`, both worlds).** A framing detail that opens
+   the story (origin dawn) and answers it (sunset landing): two high airliners drawing condensation trails.
+   **The trail lives on a FIXED station grid in crossing-space** — each patch of sky keeps its own wobble
+   and dissolution (smooth value-noise keyed by the ABSOLUTE station index), and only its AGE grows as the
+   plane pulls away, so the trail waves + melts IN PLACE instead of dragging its pattern behind the jet.
+   The head draws a PARTIAL segment to the exact condensation-gap point (whole-station steps read as
+   "skokově"); `lineCap:'butt'` (round caps double-blend at joints → beads); per-plane `shrink` gives a
+   receding lane (segments keep their laid-at size). Sun-proximity tint on the sunset trails (lit up top,
+   cooling down-sky). One plane holds a level lane, the other climbs and recedes.
+2. **Two L-159 flypasts (3D, `three/scenes3d/SkyPatrols.tsx` + pure `three/patrolMath.ts`, tested).** Real
+   baked GLB (`public/models/l159.glb`), camera-glued like the retired climb heroes. **Choreography is pure
+   screen-anchored math** (`anchorPoint`/`screenOf` back-project viewport fractions through the stage FOV,
+   so a composition — "the 40 % line", "right of the tower" — holds at any aspect; unit-tested round-trip).
+   (a) *Airshow head-on pass*: after the 2D display exits (airshow tRaw 1.175–1.455), a GRAY pair straight
+   at the crowd in daylight, simultaneous mirrored 3/4 vykrut → opposite knife-edge breaks that CROSS on
+   screen at a safe depth split (the near-miss illusion). (b) *Landing break*: an ARMED pair (generic
+   tanks + AIM-9s hung on the real pylons at runtime) PUNCHES THROUGH the observer from behind — first seen
+   close + huge at the first 57 % stop — and breaks right onto the downwind, leader then wingman one tick
+   later over the same fix, the 180° coming out right of the 2D tower while Martin's own jet brakes below.
+3. **Homogeneous trails, no ribbon.** Display smoke + wingtip vortices are soft additive POINT-SPRITES
+   distributed by ARC LENGTH (equal density through the fast break sweep), with a per-point coverage
+   equalizer `aB ∝ 1/d` (the far approach stops piling bright, the near after-pass stops thinning) and a
+   width ramp that fattens the plume after the roll. A view-facing ribbon tore into polygonal bowties at
+   grazing angles; per-point random jitter tore the dense plume into separated dots → replaced by a smooth
+   low-frequency meander so neighbours drift together.
+4. **Material correctness (`makeInstance`).** The bake's `dedup` merged look-alike materials, so a shared
+   clone let the red beacon tint the canopy. Light + glass meshes now get UNIQUE clones (`SPECIAL_MESH`);
+   tip + formation lights emit warm WHITE-YELLOW with a 4-ray sparkle sprite, only the spine beacon is red.
+   Per-scene grade + a bespoke light rig each (bright side-sun airshow with a ground-bounce hemisphere;
+   low-red-sun dusk) so the gray airframe reads plastic, never flat. **Entry alpha is BINARY** — any
+   opacity < 1 on the big close airframes turned them see-through (transparent self-overlap has no
+   self-occlusion), and they arrive from off-frame so no fade-in is needed.
+5. **The overhead-pass blink, retimed for a stretched chapter (`skyMath.LANDING`).** The 2D landing's black
+   flash + camera shake is compressed to a ~2 vh burst centred on the 55↔56 HUD-step BOUNDARY (t 0.5844 =
+   55.50 %), so a scroll stop parked ON a readout never catches it humming — it only streaks past mid-glide.
+6. **Sunset stretched ×1.7, climb un-stretched (total weight 11.7).** The two new beats need scroll room, so
+   `sky-sunset` carries `scrollWeight 1.7` (its t-keyed 2D choreography stretches in sync — both worlds are
+   pure fns of the same localT). The E3b 3D climb **v1 is UNMOUNTED** (`SkyScenes` mounts only the patrols;
+   `ClimbHeroes.tsx` kept as reference like `Jets.tsx`) and `sky-climb` is back at weight 1 → chapter 01 is
+   pure 2D at its ORIGINAL tempo (Martin's call — v1 was never wanted live, a re-choreographed v2 is a
+   separate later decision). `climbMath.SCROLL_TO_T` stays pinned to the total-12/weight-2 frame the
+   sequence was authored in — restoring v2 means remounting `ClimbHeroes` AND restoring `scrollWeight 2`,
+   or the motion plays 2× fast (flagged in `climbMath.ts` + `convert.mjs`). Progress-anchored values
+   (era stops, card windows, footer fade) retuned to 11.7; the airshow→sunset hand-over is a real crossfade
+   from 53 %.
+7. **The sunset overhead-pass artifact removed.** A top-view belly planform slid in before the black blink —
+   a top-down silhouette in a head-on scene read as a glitch; deleted (the flash + rear-view reveal carry
+   the beat alone, as they already did on mobile).
+
+**Push decision:** `main` was ahead 1 (the E3b commit `6b61bf2`, whose 3D climb this tree unmounts) — this
+commit + that one deploy together; prod shows the original 2D climb. **Not the demo's ceiling** — the
+patrols are original, math-driven, unit-tested. Model-fit: 🔥 Fable 5 · high (build + iteration).
+
+---
+
 ### ADR-041 — E3b: 3D climb heroes + chapter-01 scroll stretch + hero-level flip (2026-07-11)
 The FIRST scene to hand its hero to the 3D layer: Martin's authored Part-1 climb (Piper "Ulla" →
 Z-142/PA-28 → L-39) flies as real CC-BY GLB models in the R3F layer, below the cloud deck of a

@@ -32,17 +32,27 @@ import {
   drawStars,
   fillVerticalGradient,
   hash1,
-  lerp,
   mixHex,
   rgba,
   smoothstep,
 } from '../../toolkit'
-import { L159_REAR_FIN_TIP, drawL159Belly, drawL159Rear } from './aircraft'
+import { L159_REAR_FIN_TIP, drawL159Rear } from './aircraft'
 import { drawPuff } from './clouds'
+import { drawContrails, type ContrailPlane } from './contrails'
 import { LANDING, LANDING_S, landingDepth, landingPov, landingShake, sunArc } from './skyMath'
 
 /** Dusk silhouette ink — buildings, far masses. */
 const INK = '#151020'
+
+/** Two airliners crossing high above the dusk (contrails.ts) — enroute
+ *  traffic that never notices the airbase below. Upper sky only: the sun's
+ *  whole setting lane (y ≥ 0.38 h) stays clear. Distinct tracks: one holds
+ *  its level lane, the other climbs across the frame and RECEDES into the
+ *  last light. */
+const LINERS: readonly ContrailPlane[] = [
+  { seed: 71, y: 0.135, slope: 0.045, dir: 1, period: 175, scale: 1 },
+  { seed: 143, y: 0.25, slope: -0.125, dir: -1, period: 145, scale: 0.85, shrink: 0.4 },
+]
 
 /** Kutná Hora tiny on the LEFT horizon (ref `kutna hora silueta.jpg`, same
  *  reading as the airshow's B2.3b skyline): St. Barbara's three concave tent
@@ -213,6 +223,24 @@ export const renderSunset: Renderer = (ctx, alpha, t, time, cfg) => {
   ctx.arc(sunX, sunY, unit * (0.028 + smoothstep(0.38, 0.72, sun.y) * 0.024), 0, TAU)
   ctx.fill()
   ctx.restore()
+
+  // Two airliners drawing contrails high over the dusk — the framing detail
+  // the origin dawn opens with, closing the story's daylight. Physically
+  // honest: the trails ride 10 km up, so they stay SUNLIT long after the
+  // ground has dimmed — burning salmon near the setting point, cooling to
+  // dusk violet down-sky — and only surrender once the afterglow itself dies
+  // and the stars take over.
+  const trailGate = 1 - smoothstep(0.5, 0.98, cool)
+  if (trailGate > 0.01) {
+    drawContrails(ctx, w, h, time, alpha * trailGate, {
+      head: mixHex('#ffe7d0', '#ff9d7c', setProg),
+      tail: mixHex('#d9b8c2', '#8a6f92', cool * 0.8),
+      alpha: 0.34,
+      lit: { color: '#ff6b46', amount: 0.55 * setProg, x: sunX, y: sunY, spread: w * 0.34 },
+      speck: '#ffe3cf',
+      speckAlpha: 0.55,
+    }, LINERS)
+  }
 
   // Thin stratus bars crossing the sun — the classic sunset signature. The
   // ones NEAR the sinking sun catch its red; the far ones stay dusk-dark.
@@ -733,24 +761,13 @@ export const renderSunset: Renderer = (ctx, alpha, t, time, cfg) => {
     drawGlow(ctx, jetX, jetY - span * 0.3, Math.max(unit * 0.009, span * 0.07), '#ff3524', alpha * beacon * na * 0.8)
   }
 
-  // --- The overhead pass: the belly swallows the sky, the screen goes BLACK ---
-  // Desktop-only: the planform is sized off `w`, so on a portrait phone it
-  // reads as a small complete aircraft hanging in the sky instead of a
-  // shadow blotting it out (Martin's mobile fix) — there the black veil
-  // below carries the flash alone and the first jet seen is the rear view.
-  const sweepP = smoothstep(L.sweepIn, L.blackFull, t)
-  if (sweepP > 0.01 && sweepP < 0.999 && w >= 720) {
-    // Small enough that the WHOLE planform reads as an aircraft blotting out
-    // the sky (the veil snaps shut only near the end of the sweep).
-    drawL159Belly(ctx, {
-      x: w * 0.5,
-      y: lerp(-0.55 * h, 0.66 * h, Math.pow(sweepP, 1.25)),
-      size: lerp(0.75, 1.3, sweepP) * w,
-      rot: Math.PI / 2, // nose down-screen — flying away toward the runway
-      color: '#0d0812',
-      alpha: alpha * Math.min(1, sweepP * 4),
-    })
-  }
+  // --- The overhead pass: the screen BLINKS black -----------------------------
+  // The pass is pure sound-and-fury: the black veil snaps shut as the jet
+  // blasts over the observer's head and lifts on its tail-on view already
+  // ahead. (The sweeping belly planform that used to slide in from the top
+  // was cut — a top-view silhouette in a head-on scene read as a glitch, not
+  // a shadow; the shake + blink carry the beat alone, as they always did on
+  // mobile. Martin's call.)
   if (pov.black > 0.004) {
     ctx.fillStyle = rgba('#07040b', alpha * pov.black)
     ctx.fillRect(0, 0, w, h)

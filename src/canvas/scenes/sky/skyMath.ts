@@ -395,10 +395,15 @@ export function opposingDisplay(t: number, w: number, h: number): DisplayPose {
  *  for the tail-on view — the swap hides entirely inside it, exactly like the
  *  climb's cloud-punch white-out hides the world swap. */
 export const LANDING = {
-  sweepIn: 0.53, // the belly shadow sweeps through — a fast swipe
-  blackFull: 0.548, // screen fully black — the pass-over swap hides here
-  blackLift: 0.554, // the BLINK ends: the jet already fills the whole screen
-  reveal: 0.57, // view clear: the jet shrinking down the line to the piano keys
+  // The whole blink is a ~2 vh FLASH centred EXACTLY on the 55↔56 HUD-step
+  // BOUNDARY (t 0.5844 → progress 0.5550 on the total-11.7 map): Martin's
+  // scroll stops park ON the readouts, and a mid-55 flash kept catching his
+  // stop — between two steps it only ever streaks past mid-glide, never
+  // hangs black + humming on a parked frame.
+  sweepIn: 0.5795, // the rush arrives — a fast swipe
+  blackFull: 0.5837, // screen fully black — the pass-over swap hides here
+  blackLift: 0.5857, // the BLINK ends: the jet already fills the whole screen
+  reveal: 0.5893, // view clear: the jet shrinking down the line to the piano keys
   touchdown: 0.685,
   stop: 0.875,
 } as const
@@ -425,17 +430,19 @@ export function landingDepth(s: number): number {
 
 /** Camera shake of the overhead pass, unit amplitude — one shared source
  *  for the canvas world AND the DOM text (the whole view rocks together,
- *  Martin's ask). Lives strictly inside the 67–68 % window: silent before
- *  the sweep, dead again by 68 %. `time` rumbles it while it lasts; the
- *  scroll-driven terms keep even a parked frame displaced. */
+ *  Martin's ask). A sub-scroll-step BLINK like the black-out it brackets:
+ *  silent before the sweep, dead right after the reveal — it must never
+ *  sit humming on one parked HUD step. `time` rumbles it while it lasts;
+ *  the scroll-driven terms keep even a parked frame displaced. */
 export function landingShake(t: number, time: number): { x: number; y: number } {
-  // Dead before the HUD's readout can ROUND to 68 % (progress .675 = t .575).
   const env =
-    smoothstep(LANDING.sweepIn + 0.002, LANDING.blackFull, t) * (1 - smoothstep(0.558, 0.573, t))
+    smoothstep(LANDING.sweepIn, LANDING.blackFull, t) *
+    (1 - smoothstep(LANDING.blackLift, LANDING.reveal, t))
   if (env <= 0.01) return { x: 0, y: 0 }
+  const a = env * 0.8
   return {
-    x: (Math.sin(time * 87) * 0.6 + Math.sin(t * 913 + 1.7) * 0.4) * env,
-    y: (Math.cos(time * 71 + 0.9) * 0.6 + Math.sin(t * 787 + 4.1) * 0.4) * env,
+    x: (Math.sin(time * 87) * 0.6 + Math.sin(t * 913 + 1.7) * 0.4) * a,
+    y: (Math.cos(time * 71 + 0.9) * 0.6 + Math.sin(t * 787 + 4.1) * 0.4) * a,
   }
 }
 
@@ -469,9 +476,11 @@ const BRAKE_BITE = 0.45
 export function landingPov(t: number): LandingPov {
   const L = LANDING
   // The veil snaps shut through the second half of the sweep — the swallow
-  // reads as a fast swipe, not a hovering shape.
+  // reads as a fast swipe, not a hovering shape (relative offset: the blink
+  // window is only ~0.01 t wide now).
   const black =
-    smoothstep(L.sweepIn + 0.006, L.blackFull, t) * (1 - smoothstep(L.blackLift, L.reveal, t))
+    smoothstep(L.sweepIn + (L.blackFull - L.sweepIn) * 0.3, L.blackFull, t) *
+    (1 - smoothstep(L.blackLift, L.reveal, t))
   if (t < L.touchdown) {
     const tau = (t - OVERHEAD) / (L.touchdown - OVERHEAD)
     const s = Math.sign(tau) * Math.pow(Math.abs(tau), APPROACH_P)

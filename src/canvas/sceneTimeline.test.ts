@@ -133,20 +133,22 @@ describe('resolveSceneFrame', () => {
     expect(frame?.incoming).toBeUndefined()
   })
 
-  it('the sunset waits for the flares: its enterFade overrides the window', () => {
-    // Chapter 5 = airshow, chapter 6 = sunset with enterFade [0.76, 0.97] —
-    // 64 % of the whole scroll before the landing starts to appear.
+  it('the sunset waits for the flares + the head-on pass: enterFade override', () => {
+    // Chapter 5 = airshow, chapter 6 = sunset with enterFade [0.912, 0.995] —
+    // the emptied airshow sky holds the frame for the 3D pass (patrolMath
+    // PASS: tRaw 1.175–1.455 = pos 5.675–5.955); the dusk then arrives as a
+    // REAL crossfade from 53 % across the hand-over step.
     const early = resolveSceneFrame(5 + FADE_START + 0.05, runs, count)
     expect(early?.base.run.sky).toBe('airshow')
     expect(early?.incoming).toBeUndefined()
-    const still = resolveSceneFrame(5.75, runs, count)
+    const still = resolveSceneFrame(5.9, runs, count)
     expect(still?.incoming).toBeUndefined()
-    const rising = resolveSceneFrame(5.82, runs, count)
+    const rising = resolveSceneFrame(5.975, runs, count)
     expect(rising?.base.run.sky).toBe('airshow')
     expect(rising?.incoming?.run.sky).toBe('sunset')
     expect(rising?.incoming?.alpha).toBeGreaterThan(0)
     expect(rising?.incoming?.alpha).toBeLessThan(1)
-    const done = resolveSceneFrame(5.985, runs, count)
+    const done = resolveSceneFrame(5.997, runs, count)
     expect(done?.base.run.sky).toBe('sunset')
     expect(done?.incoming).toBeUndefined()
   })

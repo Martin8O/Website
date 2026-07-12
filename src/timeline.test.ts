@@ -122,35 +122,40 @@ describe('activeEra', () => {
     expect(activeEra(0.58, over)).toBe('A') // B held back past its 0.25 midpoint
     expect(activeEra(0.585, over)).toBe('B') // flips exactly at the override
   })
-  it('drives the real story eras — L-39 at 21 %, L-159 at 26 %, sunset at 57 %', () => {
-    // The real story rides the WEIGHTED map (climb scrollWeight 2).
+  it('drives the real story eras — L-39 at 17 %, L-159 at 20 %, sunset at 54 %', () => {
+    // The real story rides the WEIGHTED map (sunset scrollWeight 1.7,
+    // total 11.7 — the climb is un-stretched again with the 3D v1 unmounted).
     const en = CHAPTERS
     const eraOf = (id: string) => en.find((c) => c.id === id)?.era
-    expect(activeEra(0.16, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-climb'))
-    expect(activeEra(0.22, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe('2005–2012 · L-39') // pos 2.0 stop
-    expect(activeEra(0.27, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-cruise')) // pos 2.3
-    expect(activeEra(0.56, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-airshow')) // holds to 57 %
-    expect(activeEra(0.58, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-sunset'))
+    expect(activeEra(0.14, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-climb'))
+    expect(activeEra(0.18, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe('2005–2012 · L-39') // pos 2.0 stop
+    expect(activeEra(0.22, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-cruise')) // pos 2.3
+    expect(activeEra(0.52, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-airshow')) // holds to 53 %
+    expect(activeEra(0.55, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-sunset'))
     // The mission chapter (09) carries no era of its own — the HUD keeps
     // dev's "from 2026" across it until the finale's "now".
     expect(activeEra(0.9, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('dev-explosion'))
-    expect(activeEra(0.96, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('contact-now'))
+    expect(activeEra(0.97, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('contact-now'))
   })
 })
 
-describe('scroll weights (the climb stretch, E3b)', () => {
-  it('bakes the real story to total 12 (climb doubles its unit span)', () => {
-    expect(CHAPTER_WEIGHTS.total).toBeCloseTo(12, 10)
-    expect(CHAPTER_WEIGHTS.w[2]).toBe(2)
+describe('scroll weights (the sunset stretch)', () => {
+  it('bakes the real story to total 11.7 (sunset ×1.7, climb back to 1)', () => {
+    expect(CHAPTER_WEIGHTS.total).toBeCloseTo(11.7, 10)
+    expect(CHAPTER_WEIGHTS.w[2]).toBe(1)
+    expect(CHAPTER_WEIGHTS.w[6]).toBe(1.7)
   })
 
-  it('maps the knots of the climb span exactly', () => {
-    // climb owns pos [1.5, 2.5]; weight 2 → progress [1.5/12, 3.5/12]
-    expect(progressFromPos(1.5, CHAPTER_WEIGHTS)).toBeCloseTo(1.5 / 12, 10)
-    expect(progressFromPos(2.5, CHAPTER_WEIGHTS)).toBeCloseTo(3.5 / 12, 10)
-    // outside the climb the line shifts by exactly the extra unit
-    expect(progressFromPos(1.0, CHAPTER_WEIGHTS)).toBeCloseTo(1 / 12, 10)
-    expect(progressFromPos(6.2, CHAPTER_WEIGHTS)).toBeCloseTo(7.2 / 12, 10)
+  it('maps the knots of the weighted spans exactly', () => {
+    // sunset owns pos [5.5, 6.5]; weight 1.7 → [5.5/11.7, 7.2/11.7]
+    expect(progressFromPos(5.5, CHAPTER_WEIGHTS)).toBeCloseTo(5.5 / 11.7, 10)
+    expect(progressFromPos(6.5, CHAPTER_WEIGHTS)).toBeCloseTo(7.2 / 11.7, 10)
+    // before the stretch the line is plain pos/total…
+    expect(progressFromPos(1.0, CHAPTER_WEIGHTS)).toBeCloseTo(1 / 11.7, 10)
+    expect(progressFromPos(2.5, CHAPTER_WEIGHTS)).toBeCloseTo(2.5 / 11.7, 10)
+    // …inside it the 1.7 slope applies, after it the +0.7 shift
+    expect(progressFromPos(6.2, CHAPTER_WEIGHTS)).toBeCloseTo((5.5 + 0.7 * 1.7) / 11.7, 10)
+    expect(progressFromPos(7.2, CHAPTER_WEIGHTS)).toBeCloseTo(7.9 / 11.7, 10)
     expect(progressFromPos(11, CHAPTER_WEIGHTS)).toBe(1)
   })
 
@@ -172,7 +177,7 @@ describe('scroll weights (the climb stretch, E3b)', () => {
   })
 
   it('grows the track by exactly the extra weight (others keep their pace)', () => {
-    expect(trackHeightVh(12, CHAPTER_WEIGHTS)).toBe(Math.round(12 * VH_PER_CHAPTER * (12 / 11)))
+    expect(trackHeightVh(12, CHAPTER_WEIGHTS)).toBe(Math.round(12 * VH_PER_CHAPTER * (11.7 / 11)))
     const uniform = buildChapterWeights(Array.from({ length: 12 }, () => ({})))
     expect(trackHeightVh(12, uniform)).toBe(12 * VH_PER_CHAPTER)
   })

@@ -30,4 +30,9 @@ export const MODEL_CREDITS: readonly ModelCredit[] = [
     author: 'Jeyhun1985',
     href: 'https://sketchfab.com/3d-models/l-39za-art-albatros-4f694d2badee4852b917b25e567857d8',
   },
+  {
+    title: 'Aero L-159A ALCA',
+    author: 'Yo Boy',
+    href: 'https://sketchfab.com/3d-models/aero-l-159a-alca-08e7ac1986734239ae0c2179897ad972',
+  },
 ]

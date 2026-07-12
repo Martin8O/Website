@@ -30,6 +30,16 @@ import {
   rgba,
   smoothstep,
 } from '../toolkit'
+import { drawContrails, type ContrailPlane } from './sky/contrails'
+
+/** Two airliners crossing the dawn (contrails.ts) — kept to the upper sky so
+ *  the rook constellation and the rising sun own their own lanes. Distinct
+ *  tracks: one holds its level lane, the other climbs diagonally across the
+ *  frame and RECEDES — shrinking away into the distance. */
+const LINERS: readonly ContrailPlane[] = [
+  { seed: 31, y: 0.1, slope: 0.05, dir: 1, period: 185, scale: 0.9 },
+  { seed: 97, y: 0.21, slope: -0.115, dir: -1, period: 150, scale: 0.85, shrink: 0.38 },
+]
 
 /**
  * Chess-ROOK constellation, unit box, y down. `[x, y, weight]` — weight
@@ -137,6 +147,29 @@ export const renderOrigin: Renderer = (ctx, alpha, t, time, cfg) => {
     w, h: starBand, count: 20, seed: 71, alpha: starAlpha, size: 2,
     time, twinkle: 0.65, xShift: time * 0.0021, yShift: -t * 0.1 - time * 0.0021,
   })
+
+  // --- Two airliners, high and far, drawing contrails -----------------------
+  // The story's first aircraft are someone else's: enroute traffic crawling
+  // across the pre-dawn, their trails catching the sun long before the
+  // ground does — pink against the dying night, then plain white threads on
+  // the morning blue. A framing detail the sunset landing will answer.
+  const linerGate = smoothstep(0.03, 0.1, t)
+  if (linerGate > 0.01) {
+    drawContrails(ctx, w, h, time, alpha * linerGate, {
+      head: mixHex('#f4a58e', '#fbfdff', morning),
+      tail: mixHex('#a98894', '#dfe9f2', morning),
+      alpha: 0.3,
+      lit: {
+        color: '#ff8a66',
+        amount: 0.5 * (1 - daylight),
+        x: sunX,
+        y: sunY,
+        spread: w * 0.42,
+      },
+      speck: '#eef4ff',
+      speckAlpha: 0.5,
+    }, LINERS)
+  }
 
   // --- The knight constellation (the Pascal-chess seed) --------------------
   // Appears as the school chapter nears, its lines drawing in point by point;
