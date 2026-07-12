@@ -35,6 +35,8 @@ export type UiStrings = {
   aboutTitle: string
   aboutCta: string
   profiles: string
+  credits: string
+  creditsBody: string
   copyEmail: string
   emailCopied: string
 }
@@ -86,6 +88,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     aboutTitle: 'About me',
     aboutCta: 'Get in touch →',
     profiles: 'Profiles',
+    credits: 'Credits',
+    creditsBody: '3D aircraft — based on Sketchfab originals (modified), under CC BY 4.0:',
     copyEmail: 'Copy',
     emailCopied: 'Copied ✓',
   },
@@ -119,6 +123,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     aboutTitle: 'Kdo jsem',
     aboutCta: 'Ozvěte se →',
     profiles: 'Profily',
+    credits: 'Credits',
+    creditsBody: '3D letadla — vychází ze Sketchfab originálů (upraveno), pod CC BY 4.0:',
     copyEmail: 'Kopírovat',
     emailCopied: 'Zkopírováno ✓',
   },

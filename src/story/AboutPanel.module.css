@@ -139,12 +139,22 @@
   outline: none;
 }
 
-.links {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1.4rem;
+.foot {
   padding: 0.85rem clamp(1.1rem, 3vw, 1.8rem) clamp(1rem, 2.5vw, 1.4rem);
   border-top: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+/* Row: quiet Credits toggle hard-left, profile links hard-right. */
+.footRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.links {
+  display: flex;
+  gap: 1.4rem;
 }
 .links a {
   font-family: var(--font-mono);
@@ -159,6 +169,26 @@
 .links a:focus-visible {
   color: var(--amber);
   border-color: var(--amber);
+  outline: none;
+}
+
+/* Deliberately understated — a whisper, not a heading (Martin: "ne moc
+   křiklavé, spíš nenápadně"). */
+.creditsToggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fg) 34%, transparent);
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+.creditsToggle:hover,
+.creditsToggle:focus-visible {
+  color: color-mix(in srgb, var(--amber) 78%, transparent);
   outline: none;
 }
 

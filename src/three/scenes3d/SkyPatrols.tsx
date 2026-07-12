@@ -42,6 +42,7 @@ import {
   type PatrolPose,
 } from '../patrolMath'
 import type { Scene3DProps } from '../registry3d'
+import { buildAIM9 } from './aim9'
 
 /** The registry's 'sky' entry. The E3b climb heroes are deliberately NOT
  *  mounted (v1 retired; ClimbHeroes.tsx kept as reference) — the 2D climb
@@ -262,37 +263,6 @@ function buildDropTank(len: number, rad: number): THREE.Mesh {
   return new THREE.Mesh(geo, mat)
 }
 
-/** AIM-9 — ogive nose, body, fore canards, aft cruciform fins (the
- *  showcase's license-clean generic). Origin-centred, nose +X. */
-function buildAIM9(len: number, rad: number): THREE.Group {
-  const g = new THREE.Group()
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd8dde4, metalness: 0.25, roughness: 0.5 })
-  const finMat = new THREE.MeshStandardMaterial({ color: 0x9aa2ad, metalness: 0.3, roughness: 0.45 })
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(rad, rad, len * 0.82, 16), bodyMat)
-  body.rotation.z = Math.PI / 2
-  g.add(body)
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(rad, len * 0.14, 16), bodyMat)
-  nose.rotation.z = -Math.PI / 2
-  nose.position.x = len * 0.48
-  g.add(nose)
-  const tail = new THREE.Mesh(new THREE.CylinderGeometry(rad * 0.75, rad, len * 0.06, 16), bodyMat)
-  tail.rotation.z = Math.PI / 2
-  tail.position.x = -len * 0.44
-  g.add(tail)
-  const fin = (span: number, chord: number, x: number): void => {
-    for (let i = 0; i < 4; i++) {
-      const f = new THREE.Mesh(new THREE.BoxGeometry(chord, span, rad * 0.14), finMat)
-      f.position.set(x, 0, 0)
-      f.geometry.translate(0, span / 2 + rad * 0.6, 0)
-      f.rotation.x = (i * Math.PI) / 2
-      g.add(f)
-    }
-  }
-  fin(rad * 2.0, len * 0.1, len * 0.34)
-  fin(rad * 2.6, len * 0.12, -len * 0.4)
-  return g
-}
-
 /** Shared wingtip-star texture: a soft warm core with four thin rays — the
  *  "mírný hvězdičkový efekt" on the tip lights. Baked once. */
 let starTex: THREE.CanvasTexture | null = null
@@ -349,7 +319,7 @@ function attachStores(root: THREE.Group): void {
   }
   for (const side of ['L', 'R'] as const) {
     hang(`Pylon1${side}`, () => buildDropTank(2.35, 0.27), 0.23, 0)
-    hang(`Pylon3${side}`, () => buildAIM9(2.35, 0.086), 0.1, 0.26)
+    hang(`Pylon3${side}`, () => buildAIM9(2.4, 0.066), 0.1, 0.26)
   }
 }
 

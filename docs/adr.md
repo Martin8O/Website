@@ -4,6 +4,40 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-043 — AIM-9 store remodel (accurate procedural L/M) + model credits → About "Credits" mini-window (2026-07-12)
+Two Martin-driven refinements to the E3b/ADR-042 layer, both additive.
+
+1. **AIM-9 remodel — `three/scenes3d/aim9.ts` (extracted, still 100 % PROCEDURAL).** The old store was a
+   flat-grey body + eight box fins — "hrozná, nepřesná, bezbarvá". Replaced with a recognisable **AIM-9L/M
+   Sidewinder**, but built the SAME way (our own THREE geometry, no third-party asset → nothing to credit).
+   Signature silhouette = **BIG fins on a SLIM body** (fin spans ~2.5–3.35× body radius, not stubs); slimmed
+   the call to `buildAIM9(2.4, 0.066)`. Sections nose→tail: dark-glass IR **seeker dome + chrome retaining
+   ring** → dark-olive **Guidance & Control Section** carrying four **swept canards** → **brass joint +
+   yellow** live-warhead band → light-grey body + **brown** live-motor band → four **flat swept rear fins**
+   + nozzle recess. **Rollerons** (the gyro wheels at the fin tips) were modelled, then **REMOVED at Martin's
+   call** (he flew these — the store reads as plain flat fins). Because `buildAIM9` IS the function the scene
+   calls in `attachStores`, improving it in place **auto-swaps the store** under the armed pair's outboard
+   pylons in the landing break — no separate "fitting" step. Verified close-up on a throwaway RoomEnvironment
+   turntable (side / front-¾ / rear-¾), then the harness removed.
+2. **Model credits → About "Credits" mini-window; the footer line retired.** LEGAL: all four deployed heroes
+   are **CC-BY-4.0** (commercial use allowed; verified from each `license.txt`). The licence asks for **TASL**
+   (Title, Author, Source, Licence name+link) **plus a modified-work notice** (we bake / strip / meshopt-free
+   the meshes). The old footer credit had T/A/S but **no licence LINK and no modification notice** — a real
+   gap. Fixed with `MODEL_LICENSE` + the intro *"based on Sketchfab originals (modified), under CC BY 4.0"* +
+   a licence link = full TASL + derivative notice. **Moved OUT of the site footer INTO a dedicated mini-window**
+   (`story/CreditsPopup.tsx`) opened from a quiet, deliberately understated **"Credits"** link bottom-left in
+   the About panel. Martin's constraint: the licences must **not sit next to the about-me copy** → the popup
+   **REPLACES** the About panel (`SiteNav` `open: 'work' | 'about' | 'credits'`), so only **one dialog stands
+   at a time (shared `useModalA11y` manners apply cleanly; closing Credits returns to About). Per-model
+   optional `note` renders the story stand-in — **"aka Z-142"** on the Piper PA-28 Cadet. The AIM-9 is our own
+   geometry → uncredited by design. Gate green (301). Verified live: About→Credits shows only the credits
+   (about-me hidden), the four attributions + `note` + licence link, and close returns to About.
+
+*(Unrelated: a parallel session's drop-tank remodel `three/scenes3d/droptank.ts` is separate WIP, not in
+this commit.)*
+
+---
+
 ### ADR-042 — Locked additions: airliner contrails + two L-159 flypasts; E3b climb v1 retired (2026-07-12)
 Content Martin wanted "for sure" on the site, decoupled from the still-uncertain 3D climb. Additive by
 construction: the 2D scenes paint their full environments and know nothing of the 3D jets, so `?world=2d`

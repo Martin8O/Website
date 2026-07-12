@@ -1,4 +1,3 @@
-import { MODEL_CREDITS } from '../data/credits'
 import { PROFILE } from '../data/profile'
 import styles from './SiteFooter.module.css'
 
@@ -7,8 +6,8 @@ import styles from './SiteFooter.module.css'
  * On a scrollytelling site the "footer" is the finale: it fades in only as the
  * contact chapter settles (the galaxy + email CTA), so the corner stays clean
  * for the whole journey. Hidden from pointer + tab order until visible.
- * E3b adds the CC-BY model credits as a second, quieter line — attribution
- * for the 3D aircraft heroes, rendered where credits belong: at the end.
+ * The CC-BY model credits live in the About panel's Credits popover (not here)
+ * — Martin's call: attribution in one place, unobtrusive.
  */
 export function SiteFooter({ progress }: { progress: number }) {
   // Synced to the contact card's own rise (cardFull [-0.05, 0] on the last
@@ -29,19 +28,6 @@ export function SiteFooter({ progress }: { progress: number }) {
           </a>
         ))}
       </div>
-      <p className={styles.credits}>
-        3D aircraft:{' '}
-        {MODEL_CREDITS.map((c, i) => (
-          <span key={c.href}>
-            {i > 0 && ' · '}
-            <a href={c.href} target="_blank" rel="noopener noreferrer">
-              {c.title}
-            </a>{' '}
-            by {c.author}
-          </span>
-        ))}{' '}
-        (CC-BY 4.0)
-      </p>
     </footer>
   )
 }

@@ -4,6 +4,7 @@ import { useLang } from '../i18n/useLang'
 import { setLang } from '../i18n/langStore'
 import { STRINGS } from '../i18n/strings'
 import { AboutPanel } from './AboutPanel'
+import { CreditsPopup } from './CreditsPopup'
 import { ChunkBoundary } from './ChunkBoundary'
 import styles from './SiteNav.module.css'
 
@@ -21,7 +22,10 @@ const WorkPanel = lazy(() => import('./WorkPanel').then((m) => ({ default: m.Wor
 export function SiteNav() {
   const lang = useLang()
   const t = STRINGS[lang]
-  const [open, setOpen] = useState<'work' | 'about' | null>(null)
+  // 'credits' is a mini window opened FROM about — it replaces the about panel
+  // (Martin: the licences must not show next to the about-me copy), so only one
+  // dialog stands at a time. Closing it returns to about.
+  const [open, setOpen] = useState<'work' | 'about' | 'credits' | null>(null)
   const workRef = useRef<HTMLButtonElement>(null)
   const aboutRef = useRef<HTMLButtonElement>(null)
 
@@ -83,7 +87,10 @@ export function SiteNav() {
       >
         {t.langSwitch}
       </button>
-      {open === 'about' && <AboutPanel onClose={closeAbout} />}
+      {open === 'about' && (
+        <AboutPanel onClose={closeAbout} onCredits={() => setOpen('credits')} />
+      )}
+      {open === 'credits' && <CreditsPopup onClose={() => setOpen('about')} />}
       {open === 'work' && (
         // Deploy skew can 404 the lazy chunk hours after page load — tell the
         // visitor instead of blanking the whole site (ChunkBoundary).

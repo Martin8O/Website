@@ -65,7 +65,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
   },
 }
 
-export function AboutPanel({ onClose }: { onClose: () => void }) {
+export function AboutPanel({ onClose, onCredits }: { onClose: () => void; onCredits: () => void }) {
   const lang = useLang()
   const t = STRINGS[lang]
   const copy = COPY[lang]
@@ -125,12 +125,24 @@ export function AboutPanel({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <footer className={styles.links} aria-label={t.profiles}>
-          {[PROFILE.github, PROFILE.linkedin].map((p) => (
-            <a key={p.label} href={p.href} target="_blank" rel="noopener noreferrer">
-              {p.label} <span aria-hidden="true">↗</span>
-            </a>
-          ))}
+        <footer className={styles.foot}>
+          <div className={styles.footRow}>
+            <button
+              type="button"
+              className={styles.creditsToggle}
+              onClick={onCredits}
+              aria-haspopup="dialog"
+            >
+              {t.credits}
+            </button>
+            <div className={styles.links} aria-label={t.profiles}>
+              {[PROFILE.github, PROFILE.linkedin].map((p) => (
+                <a key={p.label} href={p.href} target="_blank" rel="noopener noreferrer">
+                  {p.label} <span aria-hidden="true">↗</span>
+                </a>
+              ))}
+            </div>
+          </div>
         </footer>
       </div>
     </div>,
