@@ -14,6 +14,13 @@
   animation: fade 180ms ease;
 }
 
+/* The About↔Credits swap: the returning backdrop must stand INSTANTLY —
+   re-running the fade would flash the story scene between the two dialogs
+   (the panel still rises; only the backdrop skips its entrance). */
+.overlay.instant {
+  animation: none;
+}
+
 .panel {
   width: min(560px, 100%);
   max-height: 100%;

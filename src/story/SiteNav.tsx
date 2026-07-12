@@ -26,6 +26,11 @@ export function SiteNav() {
   // (Martin: the licences must not show next to the about-me copy), so only one
   // dialog stands at a time. Closing it returns to about.
   const [open, setOpen] = useState<'work' | 'about' | 'credits' | null>(null)
+  // About↔Credits is a SWAP, not a fresh open: the returning About must skip
+  // its backdrop fade-in, or the story scene flashes at full strength for a
+  // frame between the two dark overlays (Martin's catch — same reason the
+  // Credits overlay never animates its backdrop at all).
+  const returning = useRef(false)
   const workRef = useRef<HTMLButtonElement>(null)
   const aboutRef = useRef<HTMLButtonElement>(null)
 
@@ -72,7 +77,10 @@ export function SiteNav() {
       <button
         ref={aboutRef}
         className={styles.item}
-        onClick={() => setOpen('about')}
+        onClick={() => {
+          returning.current = false
+          setOpen('about')
+        }}
         aria-haspopup="dialog"
         aria-expanded={open === 'about'}
       >
@@ -88,7 +96,14 @@ export function SiteNav() {
         {t.langSwitch}
       </button>
       {open === 'about' && (
-        <AboutPanel onClose={closeAbout} onCredits={() => setOpen('credits')} />
+        <AboutPanel
+          instant={returning.current}
+          onClose={closeAbout}
+          onCredits={() => {
+            returning.current = true
+            setOpen('credits')
+          }}
+        />
       )}
       {open === 'credits' && <CreditsPopup onClose={() => setOpen('about')} />}
       {open === 'work' && (

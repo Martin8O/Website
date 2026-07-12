@@ -1,0 +1,11 @@
+/* The cockpit-glass layer: same fixed footprint as the world canvases, one
+   layer above the 3D stage in DOM order, still under every DOM story layer.
+   Pure decoration — never interactive. */
+.glass {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}

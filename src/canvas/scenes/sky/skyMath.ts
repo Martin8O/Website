@@ -395,15 +395,19 @@ export function opposingDisplay(t: number, w: number, h: number): DisplayPose {
  *  for the tail-on view — the swap hides entirely inside it, exactly like the
  *  climb's cloud-punch white-out hides the world swap. */
 export const LANDING = {
-  // The whole blink is a ~2 vh FLASH centred EXACTLY on the 55↔56 HUD-step
-  // BOUNDARY (t 0.5844 → progress 0.5550 on the total-11.7 map): Martin's
-  // scroll stops park ON the readouts, and a mid-55 flash kept catching his
-  // stop — between two steps it only ever streaks past mid-glide, never
-  // hangs black + humming on a parked frame.
-  sweepIn: 0.5795, // the rush arrives — a fast swipe
-  blackFull: 0.5837, // screen fully black — the pass-over swap hides here
-  blackLift: 0.5857, // the BLINK ends: the jet already fills the whole screen
-  reveal: 0.5893, // view clear: the jet shrinking down the line to the piano keys
+  // The whole blink is a ~2 vh FLASH centred EXACTLY on the 57↔58 HUD-step
+  // BOUNDARY (t 0.5721 → progress 0.5750 on the total-12.5... now total-12.3
+  // map with the cruise ×1.6 stretch). AND the shake/blink no longer relies
+  // on that alone: the engine's scroll-velocity gate (CanvasStage →
+  // cfg.shakeGate) kills the trembling on ANY parked frame — wheel stops
+  // land on an arbitrary pixel grid, so a t-anchor can never guarantee
+  // "between steps" by itself; parked = still frame, gliding = the shake.
+  // Widened ×1.6 (Martin: the blink + shake had become nearly invisible in
+  // a glide) — still centred on the same boundary, still velocity-gated.
+  sweepIn: 0.5641, // the rush arrives — a fast swipe
+  blackFull: 0.5701, // screen fully black — the pass-over swap hides here
+  blackLift: 0.5741, // the BLINK ends: the jet already fills the whole screen
+  reveal: 0.5801, // view clear: the jet shrinking down the line to the piano keys
   touchdown: 0.685,
   stop: 0.875,
 } as const

@@ -138,10 +138,14 @@ export const renderSunset: Renderer = (ctx, alpha, t, time, cfg) => {
 
   // --- Camera shake: the jet blasting feet over our head rocks the view -----
   // One shared source (skyMath.landingShake — the DOM text rides the same
-  // signal via CanvasStage): scroll-enveloped strictly inside 67–68 %,
+  // signal via CanvasStage): scroll-enveloped inside the sweep window,
   // time-rumbled while it lasts; the slight zoom hides the shaken edges.
-  // Reduced motion keeps the camera dead still.
-  const sh = cfg.reducedMotion ? { x: 0, y: 0 } : landingShake(t, time)
+  // GATED by the engine's scroll velocity (cfg.shakeGate) — a parked frame
+  // inside the window holds dead still instead of trembling on the spot.
+  // Reduced motion keeps the camera dead still too.
+  const shGate = cfg.reducedMotion ? 0 : (cfg.shakeGate ?? 1)
+  const shRaw = shGate < 0.001 ? { x: 0, y: 0 } : landingShake(t, time)
+  const sh = { x: shRaw.x * shGate, y: shRaw.y * shGate }
   const shaking = Math.abs(sh.x) + Math.abs(sh.y) > 0.001
   if (shaking) {
     ctx.save()

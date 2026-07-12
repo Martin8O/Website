@@ -18,25 +18,49 @@
 
 import type { Renderer } from '../../types'
 import {
+  clamp01,
   drawGlow,
   fillVerticalGradient,
+  hash1,
+  lerp,
   mixHex,
   rgba,
   smoothstep,
 } from '../../toolkit'
+// Beat timing + the cloud-sink curve are SHARED with the 3D ballet
+// (balletMath is three-free by contract) — one clock, two worlds.
+import {
+  BALLET,
+  COMAO,
+  balletPresence,
+  balletTurns,
+  cloudSink,
+  cruiseHud,
+} from '../../../three/scenes3d/balletMath'
 import { drawAircraft, drawTrail } from './aircraft'
-import { drawCloudSea } from './clouds'
-import { bvrPicture, drawCockpitHud } from './hud'
+import { drawCloudSea, drawPuff } from './clouds'
+import { bvrPicture, drawCockpitHudSoft } from './hud'
 import { helixPoint, sunArc } from './skyMath'
+
+// The unlock ring + tag colours — the climb's own (its beat continues here).
+const GOLD = '#ffd27a'
+const MONO = '"Chakra Petch", ui-monospace, Consolas, monospace'
 
 export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   const { w, h } = cfg
   const unit = Math.min(w, h)
-  // Day slides toward a GOLDEN AFTERNOON only (the sun has the whole section
-  // still to cross — deep twilight belongs to the sunset chapter).
-  const gold = smoothstep(0.55, 0.9, t)
+  // Day slides toward a GOLDEN AFTERNOON only at the very end of the beat —
+  // the ballet flies under the noon sun (top-centre, hard light); the warmth
+  // arrives with its fade-out so the COMAO rides the golden afternoon and
+  // the desert enters warm (deep twilight belongs to the sunset chapter).
+  const gold = smoothstep(0.88, 0.99, t)
 
   // --- Sky: noon blue warming gently at the horizon --------------------------
+  // The 19 % cut must be INVISIBLE in the environment (Martin: same clouds,
+  // same light — only the aircraft story switches): the gradient STARTS as
+  // the climb's exact above-deck sky and eases into the cruise's own across
+  // the solo run, far too slowly for the eye to catch.
+  const fromClimb = 1 - smoothstep(0, 0.3, t)
   fillVerticalGradient(
     ctx,
     0,
@@ -44,10 +68,10 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
     w,
     h,
     [
-      [0, mixHex('#0d47a1', '#1b55a4', gold)],
-      [0.45, mixHex('#4f8ecf', '#5e93c8', gold)],
-      [0.78, mixHex('#bcdcf0', '#cfd3d8', gold)],
-      [1, mixHex('#e6f3fb', '#f2cf9e', gold)],
+      [0, mixHex(mixHex('#0d47a1', '#0c3f8c', fromClimb), '#1b55a4', gold)],
+      [lerp(0.45, 0.5, fromClimb), mixHex(mixHex('#4f8ecf', '#3f7cc4', fromClimb), '#5e93c8', gold)],
+      [0.78, mixHex(mixHex('#bcdcf0', '#9fcbe8', fromClimb), '#cfd3d8', gold)],
+      [1, mixHex(mixHex('#e6f3fb', '#eaf5fc', fromClimb), '#f2cf9e', gold)],
     ],
     alpha,
   )
@@ -73,7 +97,13 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   // sky + sun, not in the cloud paint). Same sea as the climb — and the
   // drift phase CONTINUES where the climb ended (t + 1 at the same rate), so
   // the cross-fade overlays one identical, identically-moving sea.
-  const horizonY = h * 0.56
+  // THE CLIMB READ: the ballet camera rides the corkscrewing pair upward, so
+  // the deck SINKS across the fight (shared `cloudSink` curve — the 3D world
+  // climbs on the same clock) and holds low for the COMAO; some sea always
+  // stays in frame. The sun does NOT move with it — `sunArc` is one object
+  // across every flying scene.
+  const sink = cloudSink(t)
+  const horizonY = h * (0.56 + 0.2 * sink)
   drawCloudSea(ctx, {
     w, h, horizonY,
     lit: '#ffffff',
@@ -81,9 +111,31 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
     haze: '#e4edf6',
     alpha, t: 1 + (cfg.tRaw ?? t), time, sunX, seed: 4, drift: 0.8,
   })
+  // The climb's three far cumulus TOWERS above the sea line continue here
+  // pixel-identically (same hashes; the drift clock `1 + tRaw` IS the
+  // climb's own t at the hand-over) and ride the sinking horizon — the
+  // 19 % cut removes NOTHING from the environment (Martin's catch).
+  {
+    const tc = 1 + (cfg.tRaw ?? t)
+    ctx.save()
+    for (let i = 0; i < 3; i++) {
+      const tx = ((((0.14 + hash1(140 + i * 31) * 0.7 - tc * 0.3) % 1) + 1) % 1) * w
+      const tr = h * (0.03 + hash1(150 + i * 17) * 0.025)
+      drawPuff(ctx, tx, horizonY - tr * 0.5, tr, '#e9f2fb', alpha * 0.5)
+      drawPuff(ctx, tx + tr * 0.7, horizonY - tr * 0.15, tr * 0.7, '#dfeaf7', alpha * 0.45)
+    }
+    ctx.restore()
+  }
 
-  // --- COMAO entry gate (seg-3) ----------------------------------------------
-  const seg3 = smoothstep(0.6, 0.7, t)
+  // --- COMAO entry gate (seg-3): ONE constant speed from the first
+  // off-screen metre, with a SHORT braking arc over the window's last
+  // fifth so the package SETTLES onto its marks — a hard linear stop left
+  // whatever motion remained snapping through at the start of a glide
+  // (Martin: the last leg must move exactly as fast as the others). The
+  // 1/0.9 gain keeps the cruising speed identical despite the braking
+  // distance (the window is 2.0 % wide for the same reason).
+  const u3 = clamp01((t - COMAO.in0) / (COMAO.in1 - COMAO.in0))
+  const seg3 = u3 <= 0.8 ? u3 / 0.9 : (u3 - ((u3 - 0.8) * (u3 - 0.8)) / 0.4) / 0.9
 
   // --- 1. SOLO — the L-159 riding level --------------------------------------
   // The L-39→L-159 unlock already happened at the top of the climb (Martin:
@@ -91,7 +143,10 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   // the one-circle fight). Position/attitude/size are EXACTLY the climb's
   // hand-over state, so the cross-fade stacks two identical jets — one
   // aircraft, no ghost.
-  const solo = (1 - smoothstep(0.24, 0.34, t)) * alpha
+  // The solo owns the frame from the 19 % cut to the ballet's pop at 21 %,
+  // where it VANISHES the same frame the pair appears (Martin: an instant
+  // swap, never a cross-fade overlap).
+  const solo = (t < BALLET.in0 ? 1 : 0) * alpha
   if (solo > 0.004) {
     // Holds the exact hand-over spot until the cross-fade has fully resolved
     // (t = 0.2), then creeps forward — zero ghost during the blend.
@@ -108,25 +163,61 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
     drawAircraft(ctx, 'l159p', {
       x: sx, y: sy, size: unit * 0.14, tilt: stilt, color: '#22314e', glint: '#dcecff', alpha: solo, time,
     })
+
+    // The golden unlock ring + the "L-159" tag CONTINUE across the 19 % cut
+    // on the climb's own clock (`1 + tRaw` IS the climb's t) — the ring
+    // finishes its whole farewell, dissolving AS IT GROWS exactly like the
+    // Z-142 and L-39 rings before it, and the tag fades out across the
+    // following scroll step instead of dying with the cut (Martin).
+    const tc = 1 + (cfg.tRaw ?? t)
+    // Identical formula to the climb's: the ring dissolves AS it grows —
+    // ever more transparent with the spread — and is gone well before its
+    // maximum reach (never a constant-brightness hoop).
+    const spread = smoothstep(0.8, 0.98, tc)
+    const ringA = solo * 0.55 * smoothstep(0.8, 0.84, tc) * Math.pow(1 - spread, 1.6)
+    if (ringA > 0.01) {
+      ctx.save()
+      ctx.strokeStyle = rgba(GOLD, ringA)
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(sx, sy, unit * 0.14 * (0.55 + spread * 1.1), 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.restore()
+    }
+    const tagA = solo * 0.9 * (1 - smoothstep(0.88, 1.0, tc))
+    if (tagA > 0.01) {
+      ctx.save()
+      ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = rgba(GOLD, tagA)
+      ctx.fillText('L-159', sx + unit * 0.1, sy + unit * 0.09)
+      ctx.restore()
+    }
   }
 
   // --- 2. THE ONE-CIRCLE FIGHT — a vertical helix, corkscrewing UP ----------
-  // (Martin's diagram, inverted start: they enter low over the sea and climb
-  // the shared axis together.) Depth carries the drama: the near pass is the
-  // biggest jet with the strongest trail; on the far side both fade small.
-  const ballet = smoothstep(0.24, 0.34, t) * (1 - smoothstep(0.58, 0.68, t)) * alpha
-  if (ballet > 0.004) {
+  // (Martin's diagram.) The 3D layer OWNS this beat when its models are live
+  // (`cfg.hero3d` — CruiseBallet flies the real GLB pair); this 2D corkscrew
+  // is the complete fallback, on the SAME clock (`balletTurns`) and the same
+  // fade windows. The view rides the climbing pair (the 3D framing), so the
+  // jets hold mid-frame while the cloud deck sinks and their trails stream
+  // away BELOW them — the climb reads through the world, not the jets' y.
+  const ballet = balletPresence(t) * alpha
+  if (ballet > 0.004 && !cfg.hero3d) {
     const axisX = w * 0.5
-    const bottomY = h * 0.62 // enter just above the sea…
+    const midY = h * 0.45 // the tracked pair rides the upper-middle frame
     const Rx = unit * 0.24 // horizontal reach of the helix
-    const pitch = h * 0.26 // vertical CLIMB per revolution
-    const turns = (t - 0.28) * 3.2
+    const pitch = h * 0.2 // vertical climb per revolution → the trail's sag
+    const turns = balletTurns(t)
     const project = (turnsAt: number, phase: number) => {
       const p = helixPoint(turnsAt, phase)
       const persp = 1 + 0.3 * p.z // near side swings wider
       return {
         x: axisX + p.x * Rx * persp,
-        y: bottomY - turnsAt * pitch, // …and corkscrew upward
+        // Slightly-from-above view: the near side sits lower on screen;
+        // older samples drop below as the pair climbs away from them.
+        y: midY + p.z * Rx * 0.22 + (turns - turnsAt) * pitch,
         z: p.z,
       }
     }
@@ -187,14 +278,19 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
 
   // --- 3. COMAO + the strike --------------------------------------------------
   if (seg3 > 0.004) {
-    const a = seg3 * alpha
-    const slide = (1 - seg3) * w * 0.18
+    // FULL intensity from the very first frame (Martin: never a half-ghost
+    // arrival) — the package FLIES IN from beyond the left frame edge, so
+    // the entrance is pure motion, no alpha ramp; only the chapter
+    // cross-fade ever touches the opacity.
+    const a = alpha
+    const slide = (1 - seg3) * w
     const bob = Math.sin(time * 0.8) * h * 0.003
     const body = mixHex('#2a3550', '#242e46', gold)
 
     // Lead L-159 (you fly the other one) + wingman — both in the stores
     // configuration (the real COMAO fit, traced from Martin's render).
-    const leadX = w * 0.6 - slide
+    // Slide multipliers put every start position OFF the left edge.
+    const leadX = w * 0.6 - slide * 0.78
     const leadY = h * 0.36 + bob
     // Trail runs straight back along his own flight line, clear of the wingman.
     drawTrail(ctx, leadX - unit * 0.1, leadY + unit * 0.01, leadX - w * 0.4, leadY + unit * 0.026, unit * 0.008, '#dde8f8', a * 0.08)
@@ -202,21 +298,24 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
       x: leadX, y: leadY, size: unit * 0.19, tilt: 0.04, color: body, glint: '#d7ecff', alpha: a, time,
     })
     drawAircraft(ctx, 'l159p', {
-      x: w * 0.47 - slide * 1.2, y: h * 0.43 - bob, size: unit * 0.15, tilt: 0.04, color: body, glint: '#d7ecff', alpha: a * 0.95, time,
+      x: w * 0.47 - slide * 0.7, y: h * 0.43 - bob, size: unit * 0.15, tilt: 0.04, color: body, glint: '#d7ecff', alpha: a * 0.95, time,
     })
 
-    // The exercise package: an echelon of Gripen planforms + two Mi-17s low
-    // (real silhouettes from the reference pack — no more generic darts).
+    // The exercise package: an echelon of Gripen planforms + two Mi-17s
+    // hugging the cloud deck (real silhouettes from the reference pack).
     for (let i = 0; i < 4; i++) {
-      const dx = w * (0.14 + i * 0.055) - slide * 1.5
+      const dx = w * (0.14 + i * 0.055) - slide * 0.6
       const dy = h * (0.22 + i * 0.024) + bob * (i % 2 ? 1 : -1)
       drawTrail(ctx, dx - unit * 0.02, dy, dx - unit * 0.12, dy + h * 0.012, unit * 0.004, '#d8e4f4', a * 0.07)
       drawAircraft(ctx, 'gripen', { x: dx, y: dy, size: unit * 0.05, color: body, alpha: a * 0.85, time })
     }
     for (let i = 0; i < 2; i++) {
-      // Low pair riding under the Gripen echelon's tail (Martin's placement).
+      // Low pair riding just above the (sunken) cumulus tops — closer and
+      // bigger than before, skimming the deck (Martin's placement).
       drawAircraft(ctx, 'mi17', {
-        x: w * (0.2 + i * 0.06) - slide, y: h * (0.575 + i * 0.02) + bob, size: unit * 0.06,
+        x: w * (0.2 + i * 0.06) - slide * 0.5,
+        y: horizonY - h * (0.045 - i * 0.02) + bob,
+        size: unit * 0.08,
         color: body, glint: '#cfe2f8', alpha: a * 0.9, time,
       })
     }
@@ -227,8 +326,15 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   // --- The green cockpit HUD — you're inside the L-159 now -------------------
   // Full intensity for the whole chapter: it snapped on with the unlock at
   // the top of the climb (Martin: instrument power-up, no fade) and stays lit
-  // while he flies the L-159. Only the chapter cross-fade touches it.
-  const hudA = alpha
+  // while he flies the L-159. Only the chapter cross-fade touches it — the
+  // glass layer sits above everything, so the HUD dims itself by the
+  // incoming scene's cover (Bagram sweeps over the world; the glass must
+  // dissolve in the same breath, never hang green over the desert).
+  // While the 3D ballet is LIVE the HUD lives on its mid-depth billboard
+  // instead (CruiseBallet — the near jet crosses in front of the glass), so
+  // the overlay copy hands over exactly by the ballet's presence.
+  const ballet3d = cfg.hero3d ? balletPresence(t) : 0
+  const hudA = alpha * (1 - (cfg.cover ?? 0)) * (1 - ballet3d)
   if (hudA > 0.01) {
     // Two BVR contacts far ahead — the shared story-position picture (see
     // bvrPicture): gently drifting frames, ranges counting down all the way
@@ -239,15 +345,23 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
     ctx.fillRect(bvr.target.x - 1.5, bvr.target.y - 1.5, 3, 3)
     ctx.fillRect(bvr.target2.x - 1.5, bvr.target2.y - 1.5, 3, 3)
     ctx.restore()
-    drawCockpitHud(ctx, {
+    // The green HUD is COCKPIT GLASS — nearest thing to the pilot's eye:
+    // it paints on the glass overlay (above the 3D stage), so the ballet
+    // pair corkscrews BEHIND it, like the real world behind a real HUD.
+    // The SOFT painter renders at the ballet billboard's resolution, so
+    // the symbology looks the same before, during and after the fight.
+    drawCockpitHudSoft(cfg.glass ?? ctx, {
       w, h, alpha: hudA,
       attack: 0,
       target: bvr.target,
       target2: bvr.target2,
       rangeNm: bvr.rangeNm,
-      mach: 0.74 + smoothstep(0.8, 0.95, t) * 0.08,
-      altFt: 21500 - t * 4000,
-      hdg: 139,
+      // Shared readouts (balletMath.cruiseHud) — the 3D billboard renders
+      // the identical picture, so the glass↔billboard hand-over is invisible.
+      // The altitude climbs with the fight (the sinking deck, same story).
+      mach: cruiseHud(t).mach,
+      altFt: cruiseHud(t).altFt,
+      hdg: cruiseHud(t).hdg,
     })
   }
 }

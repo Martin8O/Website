@@ -178,12 +178,14 @@ export function cardOpacityWindowed(
   pos: number,
   cardIndex: number,
   full: readonly [number, number],
-  ease = 0.13,
+  ease: number | readonly [number, number] = 0.13,
 ): number {
+  const easeIn = typeof ease === 'number' ? ease : ease[0]
+  const easeOut = typeof ease === 'number' ? ease : ease[1]
   const a = cardIndex + full[0]
   const b = cardIndex + full[1]
-  const up = clamp01((pos - (a - ease)) / ease)
-  const down = clamp01(((b + ease) - pos) / ease)
+  const up = clamp01((pos - (a - easeIn)) / easeIn)
+  const down = clamp01(((b + easeOut) - pos) / easeOut)
   const rise = up * up * (3 - 2 * up)
   const fall = down * down * (3 - 2 * down)
   return Math.min(rise, fall)

@@ -36,8 +36,14 @@ export function paints2D(theme: Theme, mode: WorldMode, owned: ReadonlySet<Theme
  * real GLB heroes of the authored sequence fly in the 3D layer instead, over
  * the very same 2D backdrop — no seam, and the 2D world stays the complete
  * fallback in '2d' mode.
+ *
+ * Per-mood scope of "hero": for 'cruise' the flip covers ONLY the one-circle
+ * fight corkscrew (CruiseBallet flies it in 3D); the solo L-159 and the
+ * COMAO package stay 2D in both modes. ('climb' is in the set but its 3D
+ * scene is unmounted — `setHero3DReady('climb')` never fires, so the 2D
+ * climb keeps its hero; a re-choreographed v2 is a later decision.)
  */
-export const HERO_3D: ReadonlySet<Sky> = new Set<Sky>(['climb'])
+export const HERO_3D: ReadonlySet<Sky> = new Set<Sky>(['climb', 'cruise'])
 
 /**
  * Live readiness of each 3D hero scene — the chunk-failure caveat above,

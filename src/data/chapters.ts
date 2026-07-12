@@ -67,8 +67,10 @@ export type Chapter = {
   cardFull?: readonly [number, number]
   /** Ease width (pos units) on either side of `cardFull` — override the
    *  default for snappy arrivals (the 08 card snaps full within half a
-   *  HUD percent of the landings). */
-  cardEase?: number
+   *  HUD percent of the landings). A tuple gives ASYMMETRIC eases
+   *  [in, out] — the 02 card snaps in with the 19 % cut but dissolves
+   *  visibly across the Bagram sweep. */
+  cardEase?: number | readonly [number, number]
   /** Optional outbound link rendered under the body (real links only). */
   cta?: { label: string; href: string }
   /** Optional mono eyebrow line right above the CTA — the contact finale's
@@ -95,14 +97,14 @@ export type Chapter = {
  *  labels (L-39, then L-159) inside the single "cruise" chapter's scroll span.
  *  Language-agnostic (aircraft designations). Merged in `timeline.activeEra`. */
 export const EXTRA_ERAS: readonly { from: number; era: string }[] = [
-  // Global fractions ride the WEIGHTED 12-chapter scroll (sunset scrollWeight
-  // 1.7 → total 11.7 — progressFromPos in timeline.ts): L-39 at pos 2.0
-  // = 2.0 / 11.7.
-  { from: 0.171, era: '2005–2012 · L-39' },
+  // Global fractions ride the WEIGHTED 12-chapter scroll (cruise ×1.6 +
+  // sunset ×1.7 → total 12.3 — progressFromPos in timeline.ts): L-39 at
+  // pos 2.0 = 2.0 / 12.3.
+  { from: 0.163, era: '2005–2012 · L-39' },
   // The free years after the Air Force — appears mid-way through the sunset
-  // chapter's card (pos 6.2 = (5.5 + 0.7·1.7) / 11.7), as the body turns
-  // from "end of service" to "the open road".
-  { from: 0.572, era: '2022–2026' },
+  // chapter's card (pos 6.2 → (2.5 + 1.6 + 2 + 0.7·1.7) / 12.3), as the body
+  // turns from "end of service" to "the open road".
+  { from: 0.593, era: '2022–2026' },
 ]
 
 export const THEME_ACCENT: Record<Theme, string> = {
@@ -149,10 +151,11 @@ export const CHAPTERS: Chapter[] = [
     // UNMOUNTED (SkyPatrols.SkyScenes) and its scrollWeight-2 stretch is
     // gone with it — whether a re-choreographed v2 ever ships is a separate
     // later decision. Restoring v2 = remount ClimbHeroes + scrollWeight 2
-    // here + retune the progress anchors below (total 11.7 → 12.7).
-    // Clear the frame BEFORE the cloud-punch white-out: hold to 19 %, then
-    // a quick fade — chapter 02 needs the stage from 20 % (L-159 at ~22 %).
-    cardFull: [-0.3, 0.1],
+    // here + retune the progress anchors below (total 12.3 → 13.3).
+    // Clear the frame BEFORE the cloud-punch burst and the (early, tight)
+    // cruise hand-over: gone by pos 2.1 = 17.1 % — the 02 card rises right
+    // behind it (2.11) with no right-aligned overlap between the two.
+    cardFull: [-0.3, -0.05],
     cardEase: 0.15,
     // The faculty was electrical engineering; the FIELD was informatics —
     // that is what makes "a life in front of a computer screen" land.
@@ -165,16 +168,32 @@ export const CHAPTERS: Chapter[] = [
     sky: 'cruise',
     era: '2012–2022 · L-159',
     // Two era stops span this chapter: the L-39 years (2005–2012, EXTRA_ERAS)
-    // arrive at pos 2.0, then the L-159 takes the lead at pos 2.3 = 19.7 %
-    // through the weighted map (total 11.7 — all pre-sunset chapters sit at
-    // progress = pos / 11.7).
-    eraFrom: 0.197,
+    // arrive at pos 2.0, then the L-159 label lands WITH the 19 % cut below.
+    eraFrom: 0.19,
     num: '02 — Military jets',
     title: 'Above the<br>clouds',
-    // Rises out of the white-out from 21 %, full at 22 % — right as the
-    // L-159 takes the lead (~22 %).
-    cardFull: [-0.55, 0.3],
-    cardEase: 0.15,
+    // A HARD CUT, not a fade (Martin): the L-39 flies its climb — white-out
+    // included — all the way to 19 %, where it VANISHES and the complete 02
+    // scene (L-159, green HUD, card) stands in the same instant. The
+    // "blend" window is a sliver (pos 2.334→2.340 ≈ 0.05 % of scroll) so
+    // the swap lives between any two frames of a glide.
+    enterFade: [0.334, 0.34],
+    // The card SNAPS in with the cut (rise 2.33→2.34) and dissolves FAST
+    // across the first half of the Bagram sweep (full till pos 3.30 = 31 %,
+    // gone by 3.40 = 32.2 % — Martin: it must not linger into scene 03).
+    // Asymmetric ease: instant in, quick-but-visible out.
+    // STRETCHED ×1.6: the chapter carries the full flying beat Martin
+    // directed in HUD % — the L-159 (+ its year label) appears ~19 %, is
+    // clear by 20, the 3D one-circle fight fades in 21→22 % (3 of his
+    // scroll stops after the appearance), corkscrews six percent to 28 %,
+    // fades out by 29 % under the arriving 2D COMAO, which then OWNS the
+    // frame two full steps before Bagram sweeps in (31.3→33 %). Beat
+    // windows derive through the live weight map in
+    // `three/scenes3d/balletMath.ts` — retune THERE, in HUD %, if this
+    // weight ever changes.
+    scrollWeight: 1.6,
+    cardFull: [-0.66, 0.3],
+    cardEase: [0.01, 0.1],
     body: 'The L‑39C, the L‑39ZA, then the <span class="a-hud">L‑159</span>. Every type an upgrade: more thrust, more avionics, more to learn&nbsp;—&nbsp;and less room for error. The horizon curved, the clouds stayed below the wings, and time was measured in g-forces.',
     align: 'right',
   },
@@ -182,6 +201,21 @@ export const CHAPTERS: Chapter[] = [
     id: 'sky-desert',
     theme: 'sky',
     sky: 'desert',
+    // A SHORT hand-over, and only AFTER the COMAO has stood on its marks
+    // for two full HUD steps (Martin: he must get to SEE the package —
+    // arrival completes at 29.3 %, Bagram sweeps in 31.3→33 %). The blend
+    // finishes BEFORE this run's own window starts (pos 3.474 < 3.5), so
+    // the desert story — the departing C-17 included — plays from its very
+    // first beat in full view, never half-burned under the fade.
+    enterFade: [0.344, 0.474],
+    // The label waits for the sweep too (the default pos-3.5 breakpoint
+    // would flip it mid-COMAO, before any desert is on screen).
+    eraFrom: 0.313,
+    // The card rides the SWEEP itself (Martin: text 03 fades in exactly
+    // with scene 03 — full as the desert owns the frame at 33 %, while the
+    // C-17 is still mid-takeoff), then holds until the airshow hand-over.
+    cardFull: [-0.526, 0.3],
+    cardEase: [0.13, 0.2],
     era: '2010 · Bagram',
     num: '03 — Afghanistan',
     title: 'A different<br>sky',
@@ -219,15 +253,15 @@ export const CHAPTERS: Chapter[] = [
     // to fly, and the head-on pass borrows this chapter's early span (pos
     // 5.5–6.0 rides THIS weight). Everything t-keyed inside the scene
     // stretches with it in sync; only progress-space anchors were retuned
-    // (total 11.7).
+    // (total 12.3 with the cruise ×1.6).
     scrollWeight: 1.7,
     // Split across the chapter (title stays the military roles): "2020–2022"
     // = the last service years (landing = leaving the Air Force), then a
     // "2022–2026" stop (EXTRA_ERAS) at mid-card, where the body turns to the
-    // free years that followed. Arrives at 53 % (pos 5.912 through the
-    // weighted map), as the landing starts blending in.
+    // free years that followed. Arrives at 55.3 % (pos 5.912 through the
+    // weighted map, total 12.3), as the landing starts blending in.
     era: '2020–2022',
-    eraFrom: 0.53,
+    eraFrom: 0.553,
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
     // Wait for the airshow + the head-on pass to fly clean off (the pass
@@ -302,12 +336,12 @@ export const CHAPTERS: Chapter[] = [
     // Headline number is "five real apps in about a month" (accented, matches
     // the five floating canvas windows); the projects aren't listed in prose.
     // The card arrives AFTER the landings settle: it rises across the back
-    // half of the "86 %" HUD readout (touchdown at pos 9.5 = 86.4 %) and is
-    // FULL the instant the HUD flips to 87 (progress 0.868 — the HUD rounds),
-    // so no half-faded step; it holds through "88", then dissolves with the
-    // scene.
+    // half of the "88 %" HUD readout (touchdown at pos 9.5 = 87.8 % on the
+    // total-12.3 map) and is FULL the instant the HUD flips to 89 (progress
+    // 0.885 — the HUD rounds), so no half-faded step; it holds, then
+    // dissolves with the scene.
     // Compact: the long v2.5 body must share the frame with the dashboard.
-    cardFull: [0.55, 0.7],
+    cardFull: [0.585, 0.7],
     cardEase: 0.05,
     compact: true,
     body: 'It began carefully&nbsp;—&nbsp;small apps first. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">five real apps in about a month</span>&nbsp;—&nbsp;floating all around you. During the builds they even wrote the lessons they taught me into the <strong>dev-brain</strong> vault, which <strong>BrainQuest</strong> turns into Duolingo-style learning&nbsp;—&nbsp;so I’m still learning the craft, not just watching. The contribution graph below looks like a steep takeoff; maybe everything above was training for it. <em>(Turns out I love the screen after all.)</em>',
@@ -363,7 +397,7 @@ export const CHAPTERS: Chapter[] = [
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Your destination can take any form&nbsp;—&nbsp;a website, an app, a tool, an automation. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built.<br><br>What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of twenty-one years of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Your destination can take any form&nbsp;—&nbsp;a website, an app, a tool, an automation. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built.<br><br>What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
     // Plain address, no decorative brackets — they wrapped onto their own
     // lines on phones and guard nothing (the address is plaintext in the

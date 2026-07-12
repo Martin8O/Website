@@ -65,7 +65,18 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
   },
 }
 
-export function AboutPanel({ onClose, onCredits }: { onClose: () => void; onCredits: () => void }) {
+export function AboutPanel({
+  onClose,
+  onCredits,
+  instant = false,
+}: {
+  onClose: () => void
+  onCredits: () => void
+  /** True when About REPLACES the Credits popup (the return leg of the
+   *  swap): the dark backdrop must stand instantly — a fade-from-zero
+   *  would flash the story scene at full strength between the dialogs. */
+  instant?: boolean
+}) {
   const lang = useLang()
   const t = STRINGS[lang]
   const copy = COPY[lang]
@@ -81,7 +92,11 @@ export function AboutPanel({ onClose, onCredits }: { onClose: () => void; onCred
   // Portal to <body>: the nav pill's backdrop-filter makes it a containing
   // block for fixed descendants, which would trap (and collapse) the overlay.
   return createPortal(
-    <div className={styles.overlay} onMouseDown={onClose} data-lenis-prevent>
+    <div
+      className={instant ? `${styles.overlay} ${styles.instant}` : styles.overlay}
+      onMouseDown={onClose}
+      data-lenis-prevent
+    >
       <div
         ref={panelRef}
         className={styles.panel}

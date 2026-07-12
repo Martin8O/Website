@@ -39,8 +39,8 @@ describe('paintsHero2D (the hero-level flip, E3b)', () => {
     for (const sky of ALL_SKIES) setHero3DReady(sky, false)
   })
 
-  it('ships with exactly the climb flipped', () => {
-    expect([...HERO_3D]).toEqual(['climb'])
+  it('ships with the climb + cruise flipped (cruise = the ballet corkscrew)', () => {
+    expect([...HERO_3D].sort()).toEqual(['climb', 'cruise'])
   })
 
   it('keeps the 2D hero until the 3D scene reports READY', () => {
@@ -55,9 +55,11 @@ describe('paintsHero2D (the hero-level flip, E3b)', () => {
 
   it('never touches 2d mode, non-flipped moods, or non-sky themes', () => {
     setHero3DReady('climb', true)
+    setHero3DReady('cruise', true)
     expect(paintsHero2D('climb', '2d')).toBe(true)
+    expect(paintsHero2D('cruise', '2d')).toBe(true)
     expect(paintsHero2D(undefined, '3d')).toBe(true)
-    for (const sky of ALL_SKIES.filter((s) => s !== 'climb')) {
+    for (const sky of ALL_SKIES.filter((s) => !HERO_3D.has(s))) {
       expect(paintsHero2D(sky, '3d')).toBe(true)
     }
   })

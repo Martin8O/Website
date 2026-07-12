@@ -290,11 +290,36 @@ function breakRail(
   const B = BREAK
   if (t < brk) {
     // Initial: the pass THROUGH the observer — a straight world-space line
-    // from over the shoulder to the fix. Constant-speed geometry already
-    // reads violent up close and calm far out (real perspective); the ease
-    // just sharpens the first instants of the rush.
-    const p = clamp01((t - B.enter) / (brk - B.enter))
-    const pe = 1 - Math.pow(1 - p, 1.45)
+    // from over the shoulder to the fix, in FOUR phases tuned so the two
+    // parked stops a visitor gets show exactly Martin's two locked frames:
+    //  1. a FAST pop-in (p < 0.06, a fraction of one scroll step) from over
+    //     the shoulder down to d ≈ 5;
+    //  2. a near-HOLD across one step (bellies right overhead, d ≈ 5–7 —
+    //     the FIRST stop, wherever it lands);
+    //  3. a compressed RUSH (barely an eighth of a step wide in scroll) —
+    //     the pair tears away mid-glide;
+    //  4. a slow pre-break drift AT the fix (d ≈ 64→68) — the SECOND stop
+    //     always shows them far out, an instant before the break bites.
+    // The phase clock runs on the LEADER's leg for BOTH jets, so the pair
+    // rushes away TOGETHER (Martin: the wingman must fly the same
+    // departure, not hang close while the leader leaves); the wingman's
+    // `wingDelay` then simply parks him on the far fix a beat longer
+    // before his own turn — invisible at that distance.
+    const p = clamp01((t - B.enter) / (B.breakAt - B.enter))
+    let pe: number
+    if (p < 0.06) {
+      const u = p / 0.06
+      pe = 0.042 * (u * u * (3 - 2 * u))
+    } else if (p < 0.44) {
+      pe = 0.042 + ((p - 0.06) / 0.38) * 0.033
+    } else if (p < 0.56) {
+      // LINEAR rush — one flat-out speed for the whole departure (a
+      // smoothstep here read as a slow first half then a lunge, inside
+      // the same scroll step — Martin's catch).
+      pe = 0.075 + 0.885 * ((p - 0.44) / 0.12)
+    } else {
+      pe = 0.96 + 0.04 * ((p - 0.56) / 0.44)
+    }
     anchorPoint(B.sxBreak, B.syBreak, B.dBreak, aspect, out)
     out[0] = lerp(B.entry[0], out[0], pe)
     out[1] = lerp(B.entry[1], out[1], pe)

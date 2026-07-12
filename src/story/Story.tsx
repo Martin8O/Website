@@ -8,6 +8,7 @@ import { buildRuns } from '../canvas/sceneTimeline'
 import { accentAt } from './accent'
 import { ChapterCards } from './ChapterCards'
 import { ChunkBoundary } from './ChunkBoundary'
+import { CockpitGlass } from './CockpitGlass'
 import { DevWindowLinks } from './DevWindowLinks'
 import { OfferPanels } from './OfferPanels'
 import { Hud } from './Hud'
@@ -81,6 +82,11 @@ export function Story() {
           </Suspense>
         </ChunkBoundary>
       )}
+      {/* Cockpit glass: the green HUD paints HERE (via CanvasStage's loop),
+          above the 3D world — the ballet flies behind the glass — and still
+          under every text layer. Mounted in both world modes so the HUD
+          renders identically with or without the 3D stage. */}
+      <CockpitGlass />
       <ChapterCards pos={pos} chapters={chapters} />
       <DevWindowLinks pos={pos} />
       <OfferPanels pos={pos} />

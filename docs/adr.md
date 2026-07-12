@@ -4,6 +4,46 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-044 — Chapter-02 one-circle-fight ballet ported to 3D (real L-159 GLBs) + cockpit-glass depth layer (2026-07-13)
+The `l159-ballet-3d` showcase (a coordinated-turn double-helix "one-circle fight") ported into the live site as
+the **chapter-02 hero beat**, plus the infrastructure and the many Martin-driven refinements it needed. Additive,
+gated, 2D-complete as the fallback — the phase strategy holds.
+
+1. **Pure engine `three/scenes3d/balletMath.ts` (three-free, tested).** The showcase's physics lifted 1:1: the
+   analytic breathing/climbing double helix + the **coordinated-turn bank** (required specific force `a − g`,
+   lift ⟂ the flight path, bank = signed angle about it — the jets bank INTO the turn as the turn+climb demand,
+   never a scripted pose). Beat windows are authored in **HUD %** (Martin directs in the bottom-left readout) and
+   converted ONCE through the live weight map, so a re-weighting moves every beat instead of breaking it. The
+   orbit camera reproduces Martin's locked "distance 46" through the 44°→55° FOV change, with a fit-guard so the
+   pair **never leaves the frame** at any viewport.
+2. **Runtime `CruiseBallet.tsx` + shared `l159.ts`/`droptank.ts`/`aim9.ts`.** Real baked `l159.glb` pair, stores
+   hung off the real pylons (inner drop tanks, outer AIM-9s — the shared procedural stores now committed), noon
+   light rig + **real shadow maps** (one jet shadows the other on close passes), continuous wingtip vapour. The
+   showcase's world-space helix + chasing camera become **camera-glued** on the site (the virtual orbit camera is
+   inverted onto the ballet group; the real Stage3D camera flies its path untouched).
+3. **Cockpit-glass depth layer (`canvas/glass.ts` + `story/CockpitGlass.tsx`).** A second transparent 2D canvas
+   sits ABOVE the 3D stage and under the DOM — the green HUD paints THERE, so the ballet flies *behind* the glass
+   like a real HUD. During the fight the HUD is a **mid-depth billboard** inside the 3D scene (near jet crosses in
+   front, far jet behind); the chapter **text** sits at the same mid-depth via a viewport-space mask hole so the
+   near pass reads in front of the copy too. One shared raster (`drawCockpitHudSoft`, HUD_TEX_W) gives the HUD an
+   identical look before/during/after the fight (Martin locked that "real-jet" character).
+4. **Instant swaps, not fades (Martin's repeated call).** The climb→cruise hand-over is a **hard cut at 19 %**
+   (L-39 + white-out → the complete 02 scene in one frame); the solo→ballet and ballet→COMAO hand-overs are
+   **binary presence** (any partial alpha turned the big airframes see-through or grainy). The fight flies full
+   motion to its last frame then pops out; the golden unlock ring + "L-159" tag continue across the cut on the
+   climb's own clock (ring dissolves as it grows, like the Z-142/L-39 rings). Environment continuity across the
+   cut is exact (same gradient + the three far cumulus towers carry through — the cut removes nothing but swaps
+   the aircraft story).
+5. **Timing + housekeeping.** Chapter 02 stretched ×1.6 (total 12.3) to hold Martin's HUD-step choreography; all
+   downstream progress anchors retuned (eras, SiteFooter, dev card, the landing blink/shake — now velocity-gated
+   so a parked frame never trembles). Landing-break entry re-profiled so the two parked stops show exactly
+   Martin's reference frames (close overhead → far pre-break, both jets departing together). Credits-popup flash
+   fixed (About↔Credits swap skips the backdrop fade). Contact copy de-specified (dropped "21 years"/"many years"
+   of meditation → "the calm of regular meditation"). *Why the whole shape:* the site's beloved moments are
+   instant cuts and camera-glued additive beats; a cross-fade or a hashed dissolve on a hero airframe reads as a
+   glitch. Verified live over CDP (desktop + mobile + `?world=2d` fallback) across ~7 review rounds. Model-fit:
+   🔥 Fable 5 (build/iteration) + Opus 4.8 (retunes/wrap-up).
+
 ### ADR-043 — AIM-9 store remodel (accurate procedural L/M) + model credits → About "Credits" mini-window (2026-07-12)
 Two Martin-driven refinements to the E3b/ADR-042 layer, both additive.
 

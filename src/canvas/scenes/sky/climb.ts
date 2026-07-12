@@ -28,7 +28,7 @@ import {
 } from '../../toolkit'
 import { drawAircraft, drawTrail } from './aircraft'
 import { drawCloudDeck, drawCloudSea, drawPuff } from './clouds'
-import { bvrPicture, drawCockpitHud } from './hud'
+import { bvrPicture, drawCockpitHudSoft } from './hud'
 import { GRADUATION, cloudPunch, graduationAt, heroClimbPunch, sunArc } from './skyMath'
 import { CLIMB_SEQ, buildTrack, createClimbPose, heroPosAt } from '../../../three/climbMath'
 
@@ -294,11 +294,15 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
         ctx.fillText('L-159', px + unit * 0.1, py + unit * 0.09)
         ctx.restore()
       }
-      const pulse = smoothstep(0.8, 0.84, t) * (1 - smoothstep(0.92, 0.98, t))
-      if (pulse > 0.01) {
-        const spread = smoothstep(0.8, 0.98, t)
+      // The ring DISSOLVES as it grows — opacity falls away with the spread
+      // itself (never a constant-brightness hoop ballooning across the sky;
+      // Martin's catch), gone well before its maximum reach. The cruise
+      // scene continues this exact formula across the 19 % cut.
+      const spread = smoothstep(0.8, 0.98, t)
+      const ringA = a * 0.55 * smoothstep(0.8, 0.84, t) * Math.pow(1 - spread, 1.6)
+      if (ringA > 0.01) {
         ctx.save()
-        ctx.strokeStyle = rgba(GOLD, a * pulse * 0.55)
+        ctx.strokeStyle = rgba(GOLD, ringA)
         ctx.lineWidth = 1.5
         ctx.beginPath()
         ctx.arc(px, py, unit * 0.14 * (0.55 + spread * 1.1), 0, Math.PI * 2)
@@ -313,8 +317,14 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
       // contacts drift and their ranges count down seamlessly into the cruise.
       if (toL159 > 0.2) {
         const bvr = bvrPicture(1.5 + (cfg.tRaw ?? t), w, h)
-        drawCockpitHud(ctx, {
-          w, h, alpha: a,
+        // Cockpit glass (same layer the cruise HUD lives on): nearest to
+        // the eye, above the 3D stage — seamless across the hand-over.
+        // Nothing occludes the glass, so the HUD dims by the incoming
+        // cruise's cover while its twin rises there (identical picture —
+        // the cross-fade is invisible by design). Soft painter = the one
+        // raster look shared with the ballet billboard.
+        drawCockpitHudSoft(cfg.glass ?? ctx, {
+          w, h, alpha: a * (1 - (cfg.cover ?? 0)),
           attack: 0,
           target: bvr.target,
           target2: bvr.target2,
@@ -325,8 +335,10 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
         })
       }
 
-      // The burst: only the LATE phase — a ring of torn white already flying
-      // apart (the tight in-transition puffs died with the dissolve).
+      // The burst: only the LATE phase — a ring of TORN CLOUD already flying
+      // apart. Each shred is a small cluster of overlapping, flattened,
+      // shaded puffs (lit white over a cooler grey base), not one round
+      // ball — single circles read as white bubbles, Martin's catch.
       const burst = smoothstep(0.6, 0.62, t) * (1 - smoothstep(0.66, 0.74, t))
       if (burst > 0.01) {
         const exitX = w * 0.3
@@ -336,7 +348,25 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
         for (let i = 0; i < 10; i++) {
           const ang = (i / 10) * Math.PI * 2 + hash1(i + 260) * 0.6
           const rr = rad * (0.8 + hash1(i + 270) * 0.5)
-          drawPuff(ctx, exitX + Math.cos(ang) * rr, exitY + Math.sin(ang) * rr * 0.7, unit * 0.03, '#ffffff', a * burst * 0.7)
+          const px = exitX + Math.cos(ang) * rr
+          const py = exitY + Math.sin(ang) * rr * 0.7
+          const base = unit * (0.02 + hash1(i + 281) * 0.014)
+          // Cool under-shadow first, then the lit lobes over it.
+          drawPuff(ctx, px + base * 0.3, py + base * 0.5, base * 1.15, '#c9d6e4', a * burst * 0.3, 1.7)
+          for (let k = 0; k < 3; k++) {
+            const hx = hash1(i * 7 + k * 13 + 300) - 0.5
+            const hy = hash1(i * 11 + k * 17 + 320) - 0.5
+            const kr = base * (0.5 + hash1(i * 5 + k * 3 + 340) * 0.65)
+            drawPuff(
+              ctx,
+              px + hx * base * 2.1,
+              py + hy * base * 0.9,
+              kr,
+              '#ffffff',
+              a * burst * (0.3 + hash1(i * 3 + k + 360) * 0.18),
+              1.6,
+            )
+          }
         }
         ctx.restore()
       }

@@ -130,6 +130,15 @@ describe('sunset landing break', () => {
     expect(pose.z).toBeGreaterThan(-12)
   })
 
+  it('HANGS close through the first scroll stop before the rush away', () => {
+    // One HUD step ≈ t 0.047 on the sunset run (1.7 slope, total 12.5 map):
+    // wherever the visitor's first parked stop lands inside that, the pair
+    // must still fill the frame (Martin: first position = the close pair).
+    landingBreakPose(BREAK.enter + 0.047, ASPECT, 0, pose)
+    expect(pose.z).toBeGreaterThan(-16)
+    expect(pose.alpha).toBe(1)
+  })
+
   it('arrives over the field on the 40 %-height line at the break fix', () => {
     landingBreakPose(BREAK.breakAt, ASPECT, 0, pose)
     const s = project(pose)

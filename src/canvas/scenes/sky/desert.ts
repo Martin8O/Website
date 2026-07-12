@@ -297,11 +297,14 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   ctx.restore()
 
   // --- The C-17 departure: the scene OPENS with it just lifting off right
-  // of the tower — it accelerates out to the right, gone by t ≈ 0.22 (the
-  // Apache pair drifts in slower from the left; the Mi-17s only arrive once
-  // the C-17 has cleared the frame).
+  // of the tower — it accelerates out to the right (the Apache pair drifts
+  // in slower from the left; the Mi-17s only arrive once the C-17 has
+  // cleared the frame). Keyed off the UNCLAMPED tRaw with the Bagram
+  // sweep's own lead (enterFade completes at tRaw ≈ −0.026, starts −0.156),
+  // so the jet is ALREADY rolling while the desert fades in — a frozen
+  // aircraft snapping into motion at full blend read as a glitch (Martin).
   {
-    const p = clamp01(t / 0.28)
+    const p = clamp01(((cfg.tRaw ?? t) + 0.16) / 0.44)
     if (p < 0.999) {
       const run = (p * p + p) / 2 // still accelerating
       const climb = smoothstep(0.15, 0.9, p)

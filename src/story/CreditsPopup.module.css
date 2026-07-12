@@ -11,7 +11,9 @@
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   pointer-events: auto;
-  animation: fade 160ms ease;
+  /* NO backdrop fade: Credits only ever opens as a REPLACEMENT of the About
+     panel — fading in from zero flashed the story scene at full strength
+     between the two dialogs (Martin's catch). The panel itself still rises. */
 }
 
 .panel {
@@ -117,11 +119,6 @@
   outline: none;
 }
 
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-}
 @keyframes rise {
   from {
     opacity: 0;

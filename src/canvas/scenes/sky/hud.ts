@@ -55,6 +55,52 @@ export type CockpitHudOptions = {
   hdg: number
 }
 
+/** The HUD raster resolution — shared with the 3D ballet's mid-depth
+ *  billboard texture, so the symbology reads IDENTICALLY everywhere. */
+export const HUD_TEX_W = 1408
+
+// Off-screen sprite for drawCockpitHudSoft — module-level, reused.
+let hudSprite: HTMLCanvasElement | null = null
+
+/**
+ * The cockpit HUD with the ballet billboard's exact raster character: the
+ * symbology is drawn at the fixed HUD_TEX_W resolution and STRETCHED onto
+ * the target — the slight raster softness of glass optics (Martin locked
+ * that look during the ballet: "temer identicky vjem jako z realneho
+ * letadla"), now THE look before, during and after it. Brightness, weight
+ * and layout are untouched — everything scales off w/h.
+ */
+export function drawCockpitHudSoft(ctx: CanvasRenderingContext2D, o: CockpitHudOptions): void {
+  if (o.alpha <= 0.01) return
+  const W = HUD_TEX_W
+  const H = Math.max(256, Math.round((W * o.h) / o.w))
+  if (!hudSprite) hudSprite = document.createElement('canvas')
+  if (hudSprite.width !== W || hudSprite.height !== H) {
+    hudSprite.width = W
+    hudSprite.height = H
+  }
+  const g = hudSprite.getContext('2d')
+  if (!g) {
+    drawCockpitHud(ctx, o)
+    return
+  }
+  const kx = W / o.w
+  const ky = H / o.h
+  g.clearRect(0, 0, W, H)
+  drawCockpitHud(g, {
+    ...o,
+    w: W,
+    h: H,
+    alpha: 1,
+    target: { x: o.target.x * kx, y: o.target.y * ky },
+    target2: o.target2 ? { x: o.target2.x * kx, y: o.target2.y * ky } : undefined,
+  })
+  ctx.save()
+  ctx.globalAlpha = o.alpha
+  ctx.drawImage(hudSprite, 0, 0, o.w, o.h)
+  ctx.restore()
+}
+
 export function drawCockpitHud(ctx: CanvasRenderingContext2D, o: CockpitHudOptions): void {
   if (o.alpha <= 0.01) return
   // Centred on the screen at full strength (Martin's placement) — the pilot's

@@ -27,7 +27,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import type { Slot3D } from '../frame3d'
 import {
@@ -43,28 +42,26 @@ import {
 } from '../patrolMath'
 import type { Scene3DProps } from '../registry3d'
 import { buildAIM9 } from './aim9'
+// The remodelled 500 l tank (pointed ogive, matte grey, ventral fin) — the
+// same store the cruise ballet hangs; the landing-break pair flies it too.
+import { buildDropTank } from './droptank'
+import { CruiseBallet } from './CruiseBallet'
+import { JET_SCALE, REST_Y, TIP_X, loadL159 } from './l159'
 
-/** The registry's 'sky' entry. The E3b climb heroes are deliberately NOT
- *  mounted (v1 retired; ClimbHeroes.tsx kept as reference) — the 2D climb
- *  paints its original story at its original tempo (`cfg.hero3d` stays
- *  false because `setHero3DReady` never fires). */
+/** The registry's 'sky' entry: the two flypast beats plus the chapter-02
+ *  one-circle fight (CruiseBallet — the ballet showcase, ported). The E3b
+ *  climb heroes are deliberately NOT mounted (v1 retired; ClimbHeroes.tsx
+ *  kept as reference) — the 2D climb paints its original story at its
+ *  original tempo (`cfg.hero3d` stays false because `setHero3DReady` never
+ *  fires for 'climb'). */
 export function SkyScenes(props: Scene3DProps) {
-  return <SkyPatrols {...props} />
+  return (
+    <>
+      <SkyPatrols {...props} />
+      <CruiseBallet {...props} />
+    </>
+  )
 }
-
-const MODEL_URL = '/models/l159.glb'
-
-/** GLB → canonical nose −Z. The baked L-159 flies nose −X (verified on live
- *  screenshots; matches the showcase stores note), so the rest is −π/2 per
- *  the lab rule "nose −X → [0, −π/2, 0]". */
-const REST_Y = -Math.PI / 2
-
-/** World scale — the baked GLB is 10-normalized along its length. */
-const JET_SCALE = 0.5
-
-/** Wingtip offset in canonical pivot space (native span ±3.78 along Z maps
- *  to ±X after the rest), scaled to world — the vortex trails' anchor. */
-const TIP_X = 3.78 * JET_SCALE
 
 /** Start fetching the 2 MB model only once the story nears the sky section —
  *  a visitor who never scrolls past the origin pays nothing. */
@@ -180,25 +177,8 @@ type JetInstance = {
   stars: THREE.Sprite[]
 }
 
-/** One session-wide fetch+parse; instances clone the cached scene. */
-let l159Promise: Promise<THREE.Group> | null = null
-
-function loadL159(): Promise<THREE.Group> {
-  if (l159Promise) return l159Promise
-  // No meshopt decoder: the GLB is baked with quantize only (KHR_mesh_
-  // quantization, read natively) — EXT_meshopt_compression's WASM+blob
-  // decoder is blocked by the site's hardened CSP, so the model is meshopt-
-  // free by design (bake.mjs). Keep this loader WASM-free.
-  const loader = new GLTFLoader()
-  l159Promise = new Promise<THREE.Group>((resolve, reject) => {
-    loader.load(MODEL_URL, (gltf) => resolve(gltf.scene), undefined, reject)
-  })
-  // A failed fetch lets a later mount retry instead of caching the rejection.
-  l159Promise.catch(() => {
-    l159Promise = null
-  })
-  return l159Promise
-}
+// The shared L-159 loader + model conventions live in `l159.ts` — one
+// fetch+parse serves the patrols AND the cruise ballet.
 
 /** Sobel a texture's luminance into a subtle tangent-space normal map (the
  *  showcase's surface lift — panel-line relief from the paint's own dark
@@ -245,22 +225,6 @@ function normalFromMap(tex: THREE.Texture): THREE.Texture | null {
   nt.flipY = tex.flipY
   nt.needsUpdate = true
   return nt
-}
-
-/** Drop tank — the showcase's lathe teardrop (submarine-bow ends, no fins),
- *  re-centred at its origin, long axis X. Model units. */
-function buildDropTank(len: number, rad: number): THREE.Mesh {
-  const pts: THREE.Vector2[] = []
-  const prof = [
-    [0.0, 0.0], [0.55, 0.025], [0.82, 0.07], [0.95, 0.14], [1.0, 0.22],
-    [1.0, 0.78], [0.95, 0.86], [0.8, 0.93], [0.5, 0.98], [0.0, 1.0],
-  ] as const
-  for (const [r, y] of prof) pts.push(new THREE.Vector2(r * rad, y * len))
-  const geo = new THREE.LatheGeometry(pts, 20)
-  geo.rotateZ(Math.PI / 2) // long axis Y → X
-  geo.translate(len / 2, 0, 0) // re-centre (the lathe ran x −len..0)
-  const mat = new THREE.MeshStandardMaterial({ color: 0x8f97a3, metalness: 0.35, roughness: 0.42 })
-  return new THREE.Mesh(geo, mat)
 }
 
 /** Shared wingtip-star texture: a soft warm core with four thin rays — the

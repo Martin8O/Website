@@ -26,6 +26,24 @@ export type SceneConfig = {
    *  reduced motion, and until the first move). Purely an ENHANCEMENT
    *  channel: scenes must look complete at a = 0. */
   pointer?: { x: number; y: number; a: number }
+  /** Cockpit glass: a transparent 2D layer ABOVE the 3D stage (and under
+   *  the DOM text). Glass symbology — the green head-up display — paints
+   *  here so the 3D world flies BEHIND it. Absent → paint the same content
+   *  on the main ctx (identical result when no overlay is mounted). */
+  glass?: CanvasRenderingContext2D
+  /** Cross-fade weight (0..1) of the scene painted ON TOP of this slot —
+   *  the incoming scene's alpha while this one is the base. On the main
+   *  canvas the newcomer simply paints over; NOTHING occludes the glass
+   *  layer, so glass symbology must dim itself by (1 − cover) to dissolve
+   *  in step with its own world. 0 when absent / when this slot is the
+   *  incoming one. */
+  cover?: number
+  /** Scroll-velocity gate 0..1 (engine-smoothed): 1 while the story is
+   *  moving, easing to 0 on a parked frame. Trembling beats (the landing
+   *  shake) MUST scale by it — a stop can land anywhere on the pixel grid,
+   *  so a parked frame may sit inside any window and must hold still.
+   *  Absent → treat as 1. */
+  shakeGate?: number
 }
 
 /**
