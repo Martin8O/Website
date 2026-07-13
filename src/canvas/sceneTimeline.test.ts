@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { CHAPTERS } from '../data/chapters'
 import {
-  FADE_END,
   FADE_START,
   buildRuns,
   resolveSceneFrame,
@@ -103,10 +102,15 @@ describe('resolveSceneFrame', () => {
     expect(frame?.incoming).toBeUndefined()
   })
 
-  it('cross-fade opens after FADE_START of a run-boundary chapter', () => {
-    const before = resolveSceneFrame(1 + FADE_START - 0.01, runs, count)
+  // The climb's enterFade [0.548, 0.6145] — the scene stands at exactly
+  // 12→13 % HUD on the total-13.3 map (E3b-v2); the DEFAULT [0.3, 0.7]
+  // window is covered by the synthetic-story suites above.
+  const CLIMB_FADE: readonly [number, number] = [0.548, 0.6145]
+
+  it('cross-fade opens after the climb fade-in of the run-boundary chapter', () => {
+    const before = resolveSceneFrame(1 + CLIMB_FADE[0] - 0.01, runs, count)
     expect(before?.incoming).toBeUndefined()
-    const during = resolveSceneFrame(1.5, runs, count)
+    const during = resolveSceneFrame(1 + (CLIMB_FADE[0] + CLIMB_FADE[1]) / 2, runs, count)
     expect(during?.base.run.theme).toBe('origin')
     expect(during?.incoming?.run.theme).toBe('sky')
     expect(during?.incoming?.alpha).toBeGreaterThan(0)
@@ -115,19 +119,19 @@ describe('resolveSceneFrame', () => {
 
   it('blend grows monotonically through the zone and reaches 1', () => {
     let prev = 0
-    for (let f = FADE_START; f < FADE_END; f += 0.05) {
+    for (let f = CLIMB_FADE[0]; f < CLIMB_FADE[1]; f += 0.01) {
       const frame = resolveSceneFrame(1 + f, runs, count)
       const a = frame?.incoming?.alpha ?? (frame?.base.run.theme === 'sky' ? 1 : 0)
       expect(a).toBeGreaterThanOrEqual(prev)
       prev = a
     }
-    const done = resolveSceneFrame(1 + FADE_END + 0.001, runs, count)
+    const done = resolveSceneFrame(1 + CLIMB_FADE[1] + 0.001, runs, count)
     expect(done?.base.run.theme).toBe('sky')
     expect(done?.incoming).toBeUndefined()
   })
 
-  it('after FADE_END the next scene becomes the base (no dead layer below)', () => {
-    const frame = resolveSceneFrame(1 + FADE_END + 0.05, runs, count)
+  it('after the fade the next scene becomes the base (no dead layer below)', () => {
+    const frame = resolveSceneFrame(1 + CLIMB_FADE[1] + 0.05, runs, count)
     expect(frame?.base.run.theme).toBe('sky')
     expect(frame?.base.alpha).toBe(1)
     expect(frame?.incoming).toBeUndefined()

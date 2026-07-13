@@ -18,10 +18,9 @@
  *    the turns, nav lights alive in the dusk.
  *
  * Choreography is pure math in `patrolMath.ts` (tested); this file is only
- * the three.js binding. `SkyScenes` is the registry's 'sky' entry — it used
- * to ALSO mount the E3b climb heroes; that v1 is UNMOUNTED by Martin's call
- * (whether a re-choreographed v2 ships is a later decision — ClimbHeroes.tsx
- * stays in the tree as reference, like Jets.tsx).
+ * the three.js binding. `SkyScenes` is the registry's 'sky' entry — it also
+ * mounts the chapter-02 one-circle fight (CruiseBallet) and the E3b-v2
+ * climb heroes (ClimbHeroes — Martin's re-authored Part-1 sequence).
  */
 
 import { useEffect, useMemo, useRef } from 'react'
@@ -45,20 +44,22 @@ import { buildAIM9 } from './aim9'
 // The remodelled 500 l tank (pointed ogive, matte grey, ventral fin) — the
 // same store the cruise ballet hangs; the landing-break pair flies it too.
 import { buildDropTank } from './droptank'
+import { ClimbHeroes } from './ClimbHeroes'
 import { CruiseBallet } from './CruiseBallet'
 import { JET_SCALE, REST_Y, TIP_X, loadL159 } from './l159'
+import { normalFromMap } from './surface'
 
-/** The registry's 'sky' entry: the two flypast beats plus the chapter-02
- *  one-circle fight (CruiseBallet — the ballet showcase, ported). The E3b
- *  climb heroes are deliberately NOT mounted (v1 retired; ClimbHeroes.tsx
- *  kept as reference) — the 2D climb paints its original story at its
- *  original tempo (`cfg.hero3d` stays false because `setHero3DReady` never
- *  fires for 'climb'). */
+/** The registry's 'sky' entry: the two flypast beats, the chapter-02
+ *  one-circle fight (CruiseBallet — the ballet showcase, ported) and the
+ *  E3b-v2 climb heroes (Martin's re-authored Ulla → Z-142 → L-39 sequence,
+ *  physics-polished). While the climb models load, `cfg.hero3d` stays false
+ *  and the 2D silhouette hero keeps flying — the fallback contract. */
 export function SkyScenes(props: Scene3DProps) {
   return (
     <>
       <SkyPatrols {...props} />
       <CruiseBallet {...props} />
+      <ClimbHeroes {...props} />
     </>
   )
 }
@@ -180,52 +181,8 @@ type JetInstance = {
 // The shared L-159 loader + model conventions live in `l159.ts` — one
 // fetch+parse serves the patrols AND the cruise ballet.
 
-/** Sobel a texture's luminance into a subtle tangent-space normal map (the
- *  showcase's surface lift — panel-line relief from the paint's own dark
- *  lines; the source ships baseColor only). Computed once, shared. */
-function normalFromMap(tex: THREE.Texture): THREE.Texture | null {
-  const img = tex.image as { width?: number; height?: number } | undefined
-  if (!img || !img.width || !img.height) return null
-  const w = Math.min(img.width, 1024)
-  const h = Math.min(img.height, 1024)
-  const c = document.createElement('canvas')
-  c.width = w
-  c.height = h
-  const ctx = c.getContext('2d')
-  if (!ctx) return null
-  ctx.drawImage(tex.image as CanvasImageSource, 0, 0, w, h)
-  const src = ctx.getImageData(0, 0, w, h).data
-  const out = ctx.createImageData(w, h)
-  const lum = (x: number, y: number): number => {
-    const i = (y * w + x) * 4
-    return (src[i] * 0.3 + src[i + 1] * 0.59 + src[i + 2] * 0.11) / 255
-  }
-  const S = 2.2
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const xl = Math.max(x - 1, 0)
-      const xr = Math.min(x + 1, w - 1)
-      const yt = Math.max(y - 1, 0)
-      const yb = Math.min(y + 1, h - 1)
-      const dx = (lum(xl, y) - lum(xr, y)) * S
-      const dy = (lum(x, yt) - lum(x, yb)) * S
-      const nz = 1
-      const len = Math.hypot(dx, dy, nz)
-      const i = (y * w + x) * 4
-      out.data[i] = ((dx / len) * 0.5 + 0.5) * 255
-      out.data[i + 1] = ((dy / len) * 0.5 + 0.5) * 255
-      out.data[i + 2] = (nz / len) * 255
-      out.data[i + 3] = 255
-    }
-  }
-  ctx.putImageData(out, 0, 0)
-  const nt = new THREE.CanvasTexture(c)
-  nt.wrapS = tex.wrapS
-  nt.wrapT = tex.wrapT
-  nt.flipY = tex.flipY
-  nt.needsUpdate = true
-  return nt
-}
+// normalFromMap (the showcase's baseColor→normal surface lift) moved to the
+// shared `surface.ts` — the climb heroes bake the same panel-line relief.
 
 /** Shared wingtip-star texture: a soft warm core with four thin rays — the
  *  "mírný hvězdičkový efekt" on the tip lights. Baked once. */

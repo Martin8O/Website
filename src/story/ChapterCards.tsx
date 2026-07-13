@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { cardOpacity, cardOpacityWindowed } from '../timeline'
+import { heroLive } from '../three/owned3d'
+import type { WorldMode } from '../three/worldMode'
 import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
 import styles from './ChapterCards.module.css'
@@ -63,14 +65,29 @@ function Cta({ cta }: { cta: NonNullable<Chapter['cta']> }) {
  * center and out as it passes — driven purely by the continuous `pos`. Text is
  * real DOM (good for SEO/a11y); titles/bodies are our own authored HTML —
  * already in the active language (Story passes `chaptersFor(lang)`).
+ *
+ * A chapter whose HERO is 3D-live may carry its own card window for that
+ * state (`cardFull3d` — the climb text rides the 3D scene's fade); the pick
+ * re-evaluates on every scroll render, exactly like the canvas hero flip.
  */
-export function ChapterCards({ pos, chapters }: { pos: number; chapters: Chapter[] }) {
+export function ChapterCards({
+  pos,
+  chapters,
+  worldMode = '2d',
+}: {
+  pos: number
+  chapters: Chapter[]
+  worldMode?: WorldMode
+}) {
   return (
     <main className={styles.cards}>
       {chapters.map((ch, i) => {
-        const o = ch.cardFull
-          ? cardOpacityWindowed(pos, i, ch.cardFull, ch.cardEase)
-          : cardOpacity(pos, i)
+        const full3d = worldMode === '3d' && ch.cardFull3d && heroLive(ch.sky)
+        const o = full3d
+          ? cardOpacityWindowed(pos, i, ch.cardFull3d!, ch.cardEase3d ?? ch.cardEase)
+          : ch.cardFull
+            ? cardOpacityWindowed(pos, i, ch.cardFull, ch.cardEase)
+            : cardOpacity(pos, i)
         // Cards rise a touch as they fade in, settle at center when focused.
         const rise = (1 - o) * 12
         const Title = i === 0 ? 'h1' : 'h2'

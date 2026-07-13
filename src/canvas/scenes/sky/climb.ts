@@ -30,16 +30,30 @@ import { drawAircraft, drawTrail } from './aircraft'
 import { drawCloudDeck, drawCloudSea, drawPuff } from './clouds'
 import { bvrPicture, drawCockpitHudSoft } from './hud'
 import { GRADUATION, cloudPunch, graduationAt, heroClimbPunch, sunArc } from './skyMath'
-import { CLIMB_SEQ, buildTrack, createClimbPose, heroPosAt } from '../../../three/climbMath'
+import {
+  CLIMB_SEQ,
+  aboveT,
+  buildTrack,
+  climbScreenAt,
+  climbXScale,
+  createClimbPose,
+  heroPosAt,
+  poseTrackAt,
+} from '../../../three/climbMath'
 
 const GOLD = '#ffd27a'
 const MONO = '"Chakra Petch", ui-monospace, Consolas, monospace'
 
 // The authored Part-1 flight (pure, three-free): while the 3D layer owns the
 // hero, the ENVIRONMENT streams against the aircraft's own motion — sky and
-// ground drift derive from the hero's position, still a pure fn of scroll.
+// ground drift derive from the hero's DISPLACEMENT (all three axes), still a
+// pure fn of scroll. Displacement integrals ARE speed-aware: the retimed
+// L-39 moves the world twice as fast per scroll as the Ulla.
 const TRACKS = CLIMB_SEQ.aircraft.map((a) => buildTrack(a))
 const HERO_POSE = createClimbPose()
+const RING_POSE = createClimbPose()
+// Drift origin = Ulla's first snap (the parked fade-in frame drifts nothing).
+const HERO_P0 = CLIMB_SEQ.aircraft[0].snaps[0].p
 
 export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
   const { w, h } = cfg
@@ -50,19 +64,26 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
   const below = 1 - above
 
   // World drift: 2D-only mode keeps the original "scroll IS the climb"
-  // streaming; in hero-flip mode the world answers the AIRCRAFT — flying
-  // right streams the scraps left, climbing sinks them (and the ground),
-  // descending in the loop floats them back up.
+  // streaming; in hero-flip mode the world answers the AIRCRAFT's own
+  // velocity vector, chase-cam style — flying right streams the scraps
+  // left, climbing sinks them (and the ground), advancing INTO the sky
+  // (−z) sinks the world too, and the L-39's descent back down for its low
+  // pass brings the countryside back under it. Displacement-based, so a
+  // fast type streams the world exactly that much faster per scroll.
   let driftX = t * 1.1
   let driftY = t * 1.45
   let groundShift = t * 0.55
   if (cfg.hero3d) {
     heroPosAt(TRACKS, cfg.tRaw ?? t, HERO_POSE)
-    const hx = HERO_POSE.p[0] + 5.657 // 0 at Ulla's first snap
-    const hy = HERO_POSE.p[1] + 3.917
-    driftX = t * 0.25 + hx * 0.09
-    driftY = t * 0.35 + hy * 0.16
-    groundShift = t * 0.12 + hy * 0.08
+    const hx = HERO_POSE.p[0] - HERO_P0[0]
+    const hy = HERO_POSE.p[1] - HERO_P0[1]
+    const hz = HERO_POSE.p[2] - HERO_P0[2] // negative = deeper into the sky
+    // Weights compensated for the data reshape (x ×1.5, z authored —
+    // physics.mjs full-width spread) so the WORLD response Martin approved
+    // stays visually identical per unit of screen motion.
+    driftX = t * 0.22 + hx * 0.0567
+    driftY = t * 0.3 + hy * 0.15 - hz * 0.055
+    groundShift = t * 0.1 + hy * 0.075 - hz * 0.02
   }
 
   // ==== BELOW THE DECK ======================================================
@@ -125,6 +146,59 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
     }
     ctx.restore()
 
+    // --- The type-unlock rings + name flashes (hero-3D mode) ----------------
+    // Martin: the transitions wear the 2D golden-ring language, not a 3D
+    // bubble — the expanding circle dissolves AS it grows (the L-159 unlock
+    // formula verbatim), and the type name flashes close to the airframe in
+    // the 2D tag face, then dissolves fast. Both are drawn at the flying
+    // hero's PROJECTED screen spot (climbMath.climbScreenAt) so they ride
+    // the real 3D aircraft exactly.
+    if (cfg.hero3d) {
+      const tt = cfg.tRaw ?? t
+      const xs = climbXScale(w / Math.max(h, 1))
+      for (let i = 0; i < TRACKS.length; i++) {
+        const craft = CLIMB_SEQ.aircraft[i]
+        const birth = TRACKS[i].times[0]
+        const since = tt - birth
+        if (since < 0 || since > 0.08) continue
+        poseTrackAt(TRACKS[i], tt, RING_POSE)
+        RING_POSE.p[0] *= xs // the rendered heroes carry the same scale
+        const scr = climbScreenAt(RING_POSE.p, w, h)
+        const sizePx = scr.pxPerUnit * craft.size // the airframe's screen length
+        const rx = scr.x * w
+        const ry = scr.y * h
+        if (i > 0) {
+          // Ring only on the unlocks — the first type just gets its name.
+          // FAST farewell (Martin): the circle blooms and is dissolved
+          // within about half a scroll percent — a flash, not a hoop.
+          const spread = smoothstep(birth, birth + 0.055, tt)
+          const ringA = a * 0.55 * smoothstep(birth, birth + 0.012, tt) * Math.pow(1 - spread, 2)
+          if (ringA > 0.01) {
+            ctx.save()
+            ctx.strokeStyle = rgba(GOLD, ringA)
+            ctx.lineWidth = 1.5
+            ctx.beginPath()
+            ctx.arc(rx, ry, sizePx * (0.55 + spread * 1.1), 0, Math.PI * 2)
+            ctx.stroke()
+            ctx.restore()
+          }
+        }
+        const nameA = a * 0.92 * (1 - smoothstep(birth + 0.03, birth + 0.075, tt))
+        if (nameA > 0.01) {
+          ctx.save()
+          ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`
+          ctx.textAlign = 'left'
+          ctx.textBaseline = 'middle'
+          ctx.fillStyle = rgba(GOLD, nameA)
+          // Tight to the airframe (Martin) — the projected LENGTH overshoots
+          // the foreshortened silhouette, so the 2D's 0.62/0.52 offsets read
+          // far out here; ~half of that hugs the wing.
+          ctx.fillText(craft.name, rx + sizePx * 0.34, ry + sizePx * 0.3)
+          ctx.restore()
+        }
+      }
+    }
+
     // --- The graduation beat -------------------------------------------------
     // Left of frame (the chapter text lives on the right), creeping forward.
     // Skipped when the 3D layer owns the hero (E3b): the REAL Ulla → Z-142 →
@@ -174,17 +248,18 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
 
     // The ceiling overhead — a dark, dense cumulus sea upside-down, looming
     // lower as we climb at it (and streaming with the scroll like the rest
-    // of the world). In hero-flip mode it looms across the SECOND half of
-    // the stretched chapter — the whole authored flight happens under it,
-    // and the L-39's final vertical climb drives straight into it.
-    const deckIn = cfg.hero3d ? smoothstep(0.38, 0.82, t) : smoothstep(0.16, 0.5, t)
+    // of the world). In hero-flip mode it appears and SAGS only while the
+    // L-39 is actually CLIMBING (Martin — its amplified zoom starts at
+    // t ≈ 0.6): the deck races down to meet the jet, fully sagged just as
+    // the white-out rise completes (0.63–0.703).
+    const deckIn = cfg.hero3d ? smoothstep(0.605, 0.7, t) : smoothstep(0.16, 0.5, t)
     if (deckIn > 0.001) {
       // Greys over deep blue — a heavy, overcast ceiling (never green: the
       // palette keeps r=g with blue a full step above, quantization-proof).
       drawCloudDeck(ctx, {
         w, h, edgeY: lerp(-h * 0.04, h * 0.62, deckIn),
         lit: '#767684', shade: '#1e1e2c', haze: '#424250',
-        alpha: a * (cfg.hero3d ? smoothstep(0.38, 0.52, t) : smoothstep(0.16, 0.28, t)),
+        alpha: a * (cfg.hero3d ? smoothstep(0.605, 0.65, t) : smoothstep(0.16, 0.28, t)),
         t, time, sunX: w * 0.18, seed: 9,
       })
     }
@@ -245,15 +320,19 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
     }
     ctx.restore()
 
-    // The whole above-deck AIRCRAFT story is the hero's — skipped when the
-    // 3D layer owns it (E3b): there the L-39 is still climbing THROUGH this
-    // sea toward its cloud entry, and the L-159/HUD beat belongs to the
-    // cruise scene that takes the frame next.
-    if (!cfg.hero3d) {
+    // The hero's above-deck story — THE WOW BEAT (Martin: restored): the jet
+    // punches out of the white over the sunlit sea, levels off, and the
+    // L-159 unlock + green HUD bridge to chapter 02. In 2D mode it plays
+    // its original windows; in hero-3D mode the SAME story plays re-timed
+    // onto [ABOVE.out, ABOVE.cut] (climbMath.aboveT) — the 3D heroes ended
+    // inside the white-out, so this silhouette hand-over hides entirely
+    // under it, exactly like the below→above world swap always has.
+    {
+      const m = cfg.hero3d ? aboveT : (x: number) => x
       // The L-39 punching out LEFT — near where it climbed — then riding
       // forward to the exact spot + attitude the cruise solo holds, BEFORE the
       // cross-fade starts (so the two scenes overlap pixel-close, no ghost).
-      const rise = smoothstep(0.6, 0.8, t)
+      const rise = smoothstep(m(0.6), m(0.8), t)
       const px = w * (0.3 + rise * 0.2)
       const py = h * (0.56 - rise * 0.22) + Math.sin(time * 0.9) * h * 0.004
       const tilt = lerp(0.3, 0.06, rise)
@@ -264,7 +343,7 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
         ctx,
         px - Math.cos(tilt) * unit * 0.07, py + Math.sin(tilt) * unit * 0.07 + unit * 0.012,
         px - Math.cos(tilt) * unit * 0.55, py + Math.sin(tilt) * unit * 0.55 + unit * 0.012,
-        unit * 0.007, '#f2f7ff', a * 0.1 * smoothstep(0.6, 0.63, t),
+        unit * 0.007, '#f2f7ff', a * 0.1 * smoothstep(m(0.6), m(0.63), t),
       )
 
       // THE L-159 UNLOCK — the moment the jet levels off after the punch-out
@@ -273,7 +352,7 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
       // pulse the earlier rungs got. From here on he flies the modern jet —
       // level, all the way through the cruise hand-over (Martin: switch early,
       // give the L-159 a long straight run before the one-circle fight).
-      const toL159 = smoothstep(0.8, 0.88, t)
+      const toL159 = smoothstep(m(0.8), m(0.88), t)
       if (toL159 < 1) {
         drawAircraft(ctx, 'l39', {
           x: px, y: py, size: unit * 0.13, tilt, color: '#22314e', glint: '#dcecff', alpha: a * (1 - toL159), time,
@@ -297,9 +376,9 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
       // The ring DISSOLVES as it grows — opacity falls away with the spread
       // itself (never a constant-brightness hoop ballooning across the sky;
       // Martin's catch), gone well before its maximum reach. The cruise
-      // scene continues this exact formula across the 19 % cut.
-      const spread = smoothstep(0.8, 0.98, t)
-      const ringA = a * 0.55 * smoothstep(0.8, 0.84, t) * Math.pow(1 - spread, 1.6)
+      // scene continues this exact formula across the cut.
+      const spread = smoothstep(m(0.8), m(0.98), t)
+      const ringA = a * 0.55 * smoothstep(m(0.8), m(0.84), t) * Math.pow(1 - spread, 1.6)
       if (ringA > 0.01) {
         ctx.save()
         ctx.strokeStyle = rgba(GOLD, ringA)
@@ -339,11 +418,11 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
       // apart. Each shred is a small cluster of overlapping, flattened,
       // shaded puffs (lit white over a cooler grey base), not one round
       // ball — single circles read as white bubbles, Martin's catch.
-      const burst = smoothstep(0.6, 0.62, t) * (1 - smoothstep(0.66, 0.74, t))
+      const burst = smoothstep(m(0.6), m(0.62), t) * (1 - smoothstep(m(0.66), m(0.74), t))
       if (burst > 0.01) {
         const exitX = w * 0.3
         const exitY = h * 0.57
-        const rad = unit * (0.12 + smoothstep(0.6, 0.74, t) * 0.16)
+        const rad = unit * (0.12 + smoothstep(m(0.6), m(0.74), t) * 0.16)
         ctx.save()
         for (let i = 0; i < 10; i++) {
           const ang = (i / 10) * Math.PI * 2 + hash1(i + 260) * 0.6
@@ -374,27 +453,74 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
   }
 
   // ==== THE WHITE-OUT (painted last — it owns the frame at its peak) =======
+  // E3b-v2: the transit is a real PHASE now (fog holds ~1 for a scroll
+  // percent before the ~23 % cut) — so the inside of the cloud lives:
+  // darker vapour wisps race past the canopy, the rain accelerates down the
+  // glass with a wind-smear, and the whole glass layer buffets gently while
+  // the story is actually gliding (velocity-gated — a parked frame is
+  // still). The CUT itself is untouched: the frame under it stays white.
   if (fog > 0.004) {
     const f = alpha * fog
     ctx.save()
     ctx.fillStyle = rgba('#eef2f7', clamp01(f * 0.985))
     ctx.fillRect(0, 0, w, h)
+
+    // Buffeting: a small jitter on the vapour + rain layer only (the flat
+    // white can't show it — the moving details are what tremble). Scroll-
+    // velocity gated like the landing shake; reduced motion freezes time.
+    const buffet = (cfg.shakeGate ?? 0) * f
+    if (buffet > 0.01) {
+      ctx.translate(
+        Math.sin(time * 31) * buffet * unit * 0.004,
+        Math.cos(time * 26 + 1.7) * buffet * unit * 0.0055,
+      )
+    }
+
+    // Vapour wisps INSIDE the cloud — big, soft, slightly darker than the
+    // white, racing DOWN past the glass (the jet entered climbing ~60°) and
+    // fading as the fog thickens toward the cut. Wrapping, scroll-driven.
+    const wispA = f * 0.22
+    if (wispA > 0.01) {
+      for (let i = 0; i < 5; i++) {
+        const hxw = hash1(300 + i * 17.3)
+        const hsw = hash1(310 + i * 9.1)
+        const wy = ((hxw + t * (5.5 + hsw * 2.5) + time * 0.05) % 1) * h * 1.6 - h * 0.3
+        const wx = ((hxw * 1.7 + i * 0.23) % 1.15) * w - w * 0.07
+        const wr = unit * (0.34 + hsw * 0.4)
+        drawPuff(ctx, wx, wy, wr, '#c6d0dd', wispA * (0.5 + hsw * 0.5), 2.4)
+        drawPuff(ctx, wx + wr * 0.55, wy + wr * 0.4, wr * 0.62, '#d9e1ea', wispA * 0.6, 2.1)
+      }
+    }
+
     // Water droplets racing DOWN the canopy glass — clearly visible
-    // outlines, each its own size, opacity and pace. (Inside a cloud the
-    // airflow paints the cockpit with rain.)
+    // outlines, each its own size, opacity and pace, ACCELERATING down the
+    // pane (airflow drags them faster the longer they run) with a faint
+    // wind-smear trailing above. (Inside a cloud the airflow paints the
+    // cockpit with rain.)
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 22; i++) {
       const hx = hash1(90 + i * 11.3)
       const hs = hash1(100 + i * 5.9)
       const hp = hash1(110 + i * 7.7)
       const ha = hash1(120 + i * 3.1)
       const r = unit * (0.007 + hs * 0.014) // bottom-bulb radius
       const tail = r * (1.8 + hp * 1.4) // tail reaching up the glass
-      // Race down with the scroll (plus ambient trickle), wrapping.
-      const y = ((hp + t * (4.5 + hs * 3) + time * 0.06) % 1.25) * h * 1.1 - h * 0.05
+      // Race down with the scroll (plus ambient trickle), wrapping — the
+      // quadratic ease inside each wrap cycle reads as the run speeding up.
+      const cyc = (hp + t * (4.5 + hs * 3) + time * 0.06) % 1.25
+      const y = (cyc * (0.55 + cyc * 0.56)) * h * 1.1 - h * 0.05
       const x = hx * w + Math.sin(y * 0.01 + i) * r * 0.6 // gentle meander
-      const a = f * (0.24 + ha * 0.26)
+      const a = f * (0.3 + ha * 0.3)
+      // Wind-smear: a whisper of a streak above the drop's path.
+      if (hs > 0.45) {
+        ctx.strokeStyle = rgba('#9fb0c6', a * 0.4)
+        ctx.lineWidth = Math.max(1, unit * 0.001)
+        ctx.beginPath()
+        ctx.moveTo(x, y - tail * 2.6)
+        ctx.lineTo(x, y - tail * 1.1)
+        ctx.stroke()
+      }
       ctx.strokeStyle = rgba('#8b9cb4', a)
       ctx.lineWidth = Math.max(1, unit * 0.0017)
       ctx.beginPath()

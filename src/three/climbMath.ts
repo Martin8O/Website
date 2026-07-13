@@ -73,26 +73,112 @@ export type ClimbSequence = {
  *  z = PLANE_Z) onto the viewport exactly like the lab's audience camera. */
 export const LAB_BOX = { X0: -6, X1: 6, Y0: -4, Y1: 4, PLANE_Z: -3 } as const
 
-/** Where the authored motion begins, in the climb window's localT — the
- *  scene cross-fades in around t −0.2..0.2, Ulla parks on snap 0 until here. */
-export const SEQ_START_T = 0.06
+/** Where the authored motion begins, in the climb window's localT (E3b-v2):
+ *  Martin's authored seqStart 12.73 % HUD = (0.1273·13.3 − 1.5)/2. The
+ *  scene cross-fades in over 12→13 % (chapters.ts enterFade), so Ulla parks
+ *  on snap 0 through the fade and sets off just as the scene stands. */
+export const SEQ_START_T = 0.0965
 
-/** Authored "% of scroll" → window-t, pinned to the reference frame the
- *  sequence was authored in: TOTAL 12 with the climb chapter at
- *  scrollWeight 2 (= 240 vh of chapter scroll). NOTE the climb v1 is
- *  currently UNMOUNTED and the chapter back at weight 1 (Martin's call) —
- *  this factor only matters again if a v2 remounts ClimbHeroes, and then
- *  the chapter must get its scrollWeight 2 back too, or the authored motion
- *  would play at twice the scroll speed. Keep convert.mjs in sync. */
-export const SCROLL_TO_T = 6
+/** Authored "% of scroll" → window-t, pinned so 1 authored % = 1 % of the
+ *  LIVE site scroll: total 13.3 with the climb chapter at scrollWeight 2
+ *  → T/W. ⚠️ If the climb weight (or any chapter total) ever changes,
+ *  re-derive BOTH constants here and in convert.mjs, and retune the
+ *  progress anchors in chapters.ts — or the authored motion silently
+ *  drifts off Martin's HUD percents. */
+export const SCROLL_TO_T = 13.3 / 2
 
 /** Unlock-sphere styling: the lab's gold pair, opacities lifted for the
- *  BRIGHT 2D sky behind it (the lab authored against a dark void — at the
- *  lab constants the bubble all but vanished over daylight). */
+ *  BRIGHT 2D sky behind it. NOTE (v3): the 3D sphere is RETIRED from the
+ *  runtime (Martin: the type switches wear the 2D golden ring instead —
+ *  climb.ts draws it at the projected hero position); the math stays as a
+ *  tested library piece. */
 export const SPHERE_SURF_COLOR = 0x6b530f
 export const SPHERE_GRID_COLOR = 0xffd63a
 export const SPHERE_SURF_ALPHA = 0.32
 export const SPHERE_GRID_ALPHA = 0.55
+
+// ---------------------------------------------------------------------------
+// THE PUNCH-OUT ABOVE THE DECK (v3) — Martin's restored 2D wow beat: after
+// the white-out transit the frame punches out over the sunlit cumulus sea
+// and the ORIGINAL 2D above-deck story plays (silhouette L-39 → L-159 unlock
+// → green HUD → the hard cut to 02). The 3D heroes end inside the white
+// (fog swallow), so the 3D→2D hand-over hides entirely in the white-out —
+// the same trick the 2D always used for its below→above world swap.
+// ---------------------------------------------------------------------------
+
+/** Window-t beats of the above phase in HERO-3D mode. `swap` flips the 2D
+ *  environment below→above under full white; the white drops across
+ *  [out, whiteGone] (the punch-out blink); `cut` = where chapters.ts points
+ *  the 02 enterFade (frac = cut − 0.5). */
+export const ABOVE = {
+  swap: 0.772,
+  out: 0.778,
+  whiteGone: 0.798,
+  cut: 0.937,
+} as const
+
+/** The 2D above-deck story was authored on the ORIGINAL tempo over
+ *  t [0.6, 0.84] (punch-out → cut). In hero-3D mode the same story plays
+ *  over [ABOVE.out, ABOVE.cut] — this affine map re-times every window
+ *  constant of that block (climb.ts) and of its cross-cut continuation
+ *  (cruise.ts), so both modes share one authored shape. */
+export function aboveT(x: number): number {
+  return ABOVE.out + (x - 0.6) * ((ABOVE.cut - ABOVE.out) / 0.24)
+}
+
+// ---------------------------------------------------------------------------
+// stage projection (pure) — where a lab-space point lands on screen. The 2D
+// layer draws the golden unlock rings + type-name flashes AT the flying
+// 3D hero, so it needs the exact Stage3D camera math: vertical FOV 55°
+// (Starfield.STAGE_FOV — pinned here three-free, like patrolMath.FOV_TAN),
+// display plane x ±6 / y ±4 at z −3, CONTAIN-framed in the viewport.
+// ---------------------------------------------------------------------------
+
+const STAGE_FOV_TAN = Math.tan((55 * Math.PI) / 360)
+
+/** Contain distance of the display plane for a viewport aspect. */
+function stageD(aspect: number): number {
+  return Math.max(
+    (LAB_BOX.Y1 - LAB_BOX.Y0) / 2 / STAGE_FOV_TAN,
+    (LAB_BOX.X1 - LAB_BOX.X0) / 2 / (aspect * STAGE_FOV_TAN),
+  )
+}
+
+// The widest authored point (the parked Ulla) — the aspect-adaptive lateral
+// scale below pins IT just inside the frame on every viewport.
+const WIDE = CLIMB_SEQ.aircraft
+  .flatMap((a) => a.snaps)
+  .reduce((m, s) => (Math.abs(s.p[0]) > Math.abs(m.p[0]) ? s : m))
+
+/**
+ * Aspect-adaptive lateral scale for the climb choreography (Martin: the
+ * maneuver must span the screen). The DATA is baked WIDE (physics.mjs
+ * X_SPREAD, attitudes derived for it = exact on desktop); this runtime
+ * factor maps the widest snap to ~87 % of the half-frustum at its own depth
+ * — full width on a desktop, automatically pulled in on a phone portrait so
+ * nothing parks off-frame. Applied to every rendered x (ClimbHeroes pivots,
+ * the 2D ring/name projections); never above 1 (the bake IS the maximum).
+ */
+export function climbXScale(aspect: number): number {
+  const dist = stageD(aspect) + (LAB_BOX.PLANE_Z - WIDE.p[2])
+  return Math.min(1, (0.87 * dist * STAGE_FOV_TAN * aspect) / Math.abs(WIDE.p[0]))
+}
+
+export type ClimbScreen = { x: number; y: number; pxPerUnit: number }
+
+/** Project a lab-space point to viewport fractions (+ px per lab unit at
+ *  its depth — the ring/tag size base). Mirrors ClimbHeroes' contain math.
+ *  PURE projection — callers apply `climbXScale` to the x they render. */
+export function climbScreenAt(p: Vec3, w: number, h: number): ClimbScreen {
+  const aspect = w / Math.max(h, 1)
+  const dist = Math.max(stageD(aspect) + (LAB_BOX.PLANE_Z - p[2]), 0.1)
+  const half = dist * STAGE_FOV_TAN
+  return {
+    x: 0.5 + p[0] / (2 * half * aspect),
+    y: 0.5 - p[1] / (2 * half),
+    pxPerUnit: h / (2 * half),
+  }
+}
 
 /** Name-tag envelope — the 2D graduation tag verbatim (climb.ts): a dim
  *  constant presence while the type flies, boosted by the unlock pulse
@@ -109,7 +195,8 @@ export const TAG_PULSE_T = 0.07
  * the sequence's canonical import site. Regenerate with:
  *   node local/tools/seq/convert.mjs local/showcase/sequences/<name>.json
  */
-export { CLIMB_SEQ } from './climbSequence'
+import { CLIMB_SEQ } from './climbSequence'
+export { CLIMB_SEQ }
 
 // ---------------------------------------------------------------------------
 // snapshot timing (window-t)

@@ -3,6 +3,7 @@ import { scrollToProgress } from '../scroll/scrollStore'
 import { useLang } from '../i18n/useLang'
 import { setLang } from '../i18n/langStore'
 import { STRINGS } from '../i18n/strings'
+import { setWorldChoice, useWorldMode, useWorld3DAvailable } from '../three/worldMode'
 import { AboutPanel } from './AboutPanel'
 import { CreditsPopup } from './CreditsPopup'
 import { ChunkBoundary } from './ChunkBoundary'
@@ -10,18 +11,24 @@ import styles from './SiteNav.module.css'
 
 /**
  * Minimal, unobtrusive nav (C2) — one quiet glass pill, top-right:
- * Home (house icon, back to the story start) · Work · Contact · About · CZ/EN.
- * Work + Contact are one click away without scrolling the whole life
- * (ROADMAP §8b). Home/Contact jumps TELEPORT (Martin: no auto-scroll racing
- * through every scene). The language button shows the language it switches TO.
- * The heavy Work panel stays code-split behind React.lazy; About is a page of
- * text and ships inline. Focus returns to the trigger when a dialog closes.
+ * Home (house icon, back to the story start) · Work · Contact · About ·
+ * CZ/EN · 2D/3D. Work + Contact are one click away without scrolling the
+ * whole life (ROADMAP §8b). Home/Contact jumps TELEPORT (Martin: no
+ * auto-scroll racing through every scene). The language button shows the
+ * language it switches TO — and the world toggle follows the same idiom
+ * (shows the world it switches to; 3D is the default, 2D the light
+ * fallback). It hides entirely when the hard gates (reduced motion, no
+ * WebGL2) mean 3D can never run. The heavy Work panel stays code-split
+ * behind React.lazy; About is a page of text and ships inline. Focus
+ * returns to the trigger when a dialog closes.
  */
 const WorkPanel = lazy(() => import('./WorkPanel').then((m) => ({ default: m.WorkPanel })))
 
 export function SiteNav() {
   const lang = useLang()
   const t = STRINGS[lang]
+  const worldMode = useWorldMode()
+  const world3dAvailable = useWorld3DAvailable()
   // 'credits' is a mini window opened FROM about — it replaces the about panel
   // (Martin: the licences must not show next to the about-me copy), so only one
   // dialog stands at a time. Closing it returns to about.
@@ -95,6 +102,19 @@ export function SiteNav() {
       >
         {t.langSwitch}
       </button>
+      {world3dAvailable && (
+        <button
+          className={`${styles.item} ${styles.lang}`}
+          // An explicit choice persists (localStorage) and beats the
+          // weak-client auto-fallback — the visitor's word is final.
+          onClick={() => setWorldChoice(worldMode === '3d' ? '2d' : '3d')}
+          aria-label={worldMode === '3d' ? t.worldTo2dLabel : t.worldTo3dLabel}
+          title={worldMode === '3d' ? t.worldTo2dLabel : t.worldTo3dLabel}
+          aria-pressed={worldMode === '3d'}
+        >
+          {worldMode === '3d' ? '2D' : '3D'}
+        </button>
+      )}
       {open === 'about' && (
         <AboutPanel
           instant={returning.current}

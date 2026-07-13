@@ -66,20 +66,23 @@ export function cloudPunch(t: number): PunchState {
 }
 
 /**
- * The climb's phase curve while the 3D layer owns its hero (E3b): the WHOLE
- * chapter stays below the deck — Martin's full Part-1 climb flies under it —
- * and the white-out rises only at the very end, swallowing the L-39 as it
- * tops out (climbMath: last snap at t ≈ 0.834) and HOLDING white while
- * chapter 02 cross-fades in over it (pos 2.3–2.7): the next scene emerges
- * out of the cloud. `above` never comes — the above-deck world belongs to
- * chapter 02. One function used by BOTH the 2D environment (climb.ts) and
- * the 3D heroes' fog-swallow, so the two layers cannot disagree.
+ * The climb's phase curve while the 3D layer owns its hero (E3b-v2 round 2):
+ * Martin's full Part-1 climb flies below the deck; the white-out rises
+ * through the L-39's amplified zoom (climbMath: last snap at t ≈ 0.705,
+ * right at the top of the rise), HOLDS white through the canopy-rain
+ * transit, then the frame PUNCHES OUT above the deck (the restored 2D wow
+ * beat): the world swaps below→above under full white at climbMath
+ * ABOVE.swap and the white drops across [out, whiteGone] — straight out
+ * into the sunlit cumulus sea, where the original 2D above-deck story
+ * (L-39 → L-159 unlock → HUD) plays to the ~25.5 % cut. One function used
+ * by BOTH the 2D environment (climb.ts) and the 3D heroes' fog-swallow, so
+ * the two layers cannot disagree.
  */
 export function heroClimbPunch(t: number): PunchState {
   return {
-    fog: smoothstep(0.72, 0.9, t),
-    above: 0,
-    approach: smoothstep(0.06, 0.65, t),
+    fog: smoothstep(0.63, 0.703, t) * (1 - smoothstep(0.778, 0.798, t)),
+    above: smoothstep(0.772, 0.778, t),
+    approach: smoothstep(0.097, 0.64, t),
   }
 }
 
@@ -395,19 +398,20 @@ export function opposingDisplay(t: number, w: number, h: number): DisplayPose {
  *  for the tail-on view — the swap hides entirely inside it, exactly like the
  *  climb's cloud-punch white-out hides the world swap. */
 export const LANDING = {
-  // The whole blink is a ~2 vh FLASH centred EXACTLY on the 57↔58 HUD-step
-  // BOUNDARY (t 0.5721 → progress 0.5750 on the total-12.5... now total-12.3
-  // map with the cruise ×1.6 stretch). AND the shake/blink no longer relies
-  // on that alone: the engine's scroll-velocity gate (CanvasStage →
-  // cfg.shakeGate) kills the trembling on ANY parked frame — wheel stops
-  // land on an arbitrary pixel grid, so a t-anchor can never guarantee
-  // "between steps" by itself; parked = still frame, gliding = the shake.
-  // Widened ×1.6 (Martin: the blink + shake had become nearly invisible in
-  // a glide) — still centred on the same boundary, still velocity-gated.
-  sweepIn: 0.5641, // the rush arrives — a fast swipe
-  blackFull: 0.5701, // screen fully black — the pass-over swap hides here
-  blackLift: 0.5741, // the BLINK ends: the jet already fills the whole screen
-  reveal: 0.5801, // view clear: the jet shrinking down the line to the piano keys
+  // The whole blink is a ~2 vh FLASH centred EXACTLY on the 60↔61 HUD-step
+  // BOUNDARY (t 0.5568 → progress 0.6050 on the total-13.3 map with the
+  // climb ×2 + cruise ×1.6 + sunset ×1.7 stretches). AND the shake/blink
+  // no longer relies on that alone: the engine's scroll-velocity gate
+  // (CanvasStage → cfg.shakeGate) kills the trembling on ANY parked frame —
+  // wheel stops land on an arbitrary pixel grid, so a t-anchor can never
+  // guarantee "between steps" by itself; parked = still frame, gliding =
+  // the shake. Widened ×1.6 (Martin: the blink + shake had become nearly
+  // invisible in a glide) — still centred on a step boundary, still
+  // velocity-gated.
+  sweepIn: 0.5488, // the rush arrives — a fast swipe
+  blackFull: 0.5548, // screen fully black — the pass-over swap hides here
+  blackLift: 0.5588, // the BLINK ends: the jet already fills the whole screen
+  reveal: 0.5648, // view clear: the jet shrinking down the line to the piano keys
   touchdown: 0.685,
   stop: 0.875,
 } as const

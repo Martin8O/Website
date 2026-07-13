@@ -132,20 +132,21 @@ describe('activeEra', () => {
     expect(activeEra(0.58, over)).toBe('A') // B held back past its 0.25 midpoint
     expect(activeEra(0.585, over)).toBe('B') // flips exactly at the override
   })
-  it('drives the real story eras — L-39 at 16.3 %, L-159 at 18.7 %, sunset at 55.3 %', () => {
-    // The real story rides the WEIGHTED map (cruise ×1.6 for the ballet,
-    // sunset ×1.7 — total 12.3; the climb stays un-stretched).
+  it('drives the real story eras — L-39 at 16.6 %, L-159 at 25.5 %, sunset at 58.7 %', () => {
+    // The real story rides the WEIGHTED map (climb ×2 for the authored
+    // Part-1 sequence + punch-out, cruise ×1.6 for the ballet, sunset ×1.7 —
+    // total 13.3).
     const en = CHAPTERS
     const eraOf = (id: string) => en.find((c) => c.id === id)?.era
     expect(activeEra(0.14, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-climb'))
-    expect(activeEra(0.17, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe('2005–2012 · L-39') // pos 2.0 stop
-    expect(activeEra(0.22, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-cruise')) // pos 2.3
+    expect(activeEra(0.17, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe('2005–2012 · L-39') // 3D L-39 birth (16.63 %)
+    expect(activeEra(0.26, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-cruise')) // the ~25.5 % cut
     // The L-159 label holds through the whole ballet + COMAO; Bagram's own
-    // label waits for the desert sweep (eraFrom 0.313), not the pos-3.5 knot.
-    expect(activeEra(0.30, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-cruise'))
-    expect(activeEra(0.32, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-desert'))
-    expect(activeEra(0.54, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-airshow')) // holds to 55.3 %
-    expect(activeEra(0.57, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-sunset'))
+    // label waits for the desert sweep (eraFrom 0.3647), not the pos-3.5 knot.
+    expect(activeEra(0.36, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-cruise'))
+    expect(activeEra(0.37, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-desert'))
+    expect(activeEra(0.57, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-airshow')) // holds to 58.7 %
+    expect(activeEra(0.59, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('sky-sunset'))
     // The mission chapter (09) carries no era of its own — the HUD keeps
     // dev's "from 2026" across it until the finale's "now".
     expect(activeEra(0.9, en, EXTRA_ERAS, CHAPTER_WEIGHTS)).toBe(eraOf('dev-explosion'))
@@ -153,27 +154,29 @@ describe('activeEra', () => {
   })
 })
 
-describe('scroll weights (the cruise + sunset stretches)', () => {
-  it('bakes the real story to total 12.3 (cruise ×1.6, sunset ×1.7)', () => {
-    expect(CHAPTER_WEIGHTS.total).toBeCloseTo(12.3, 10)
-    expect(CHAPTER_WEIGHTS.w[2]).toBe(1)
+describe('scroll weights (the climb + cruise + sunset stretches)', () => {
+  it('bakes the real story to total 13.3 (climb ×2, cruise ×1.6, sunset ×1.7)', () => {
+    expect(CHAPTER_WEIGHTS.total).toBeCloseTo(13.3, 10)
+    expect(CHAPTER_WEIGHTS.w[2]).toBe(2)
     expect(CHAPTER_WEIGHTS.w[3]).toBe(1.6)
     expect(CHAPTER_WEIGHTS.w[6]).toBe(1.7)
   })
 
   it('maps the knots of the weighted spans exactly', () => {
-    // cruise owns pos [2.5, 3.5]; weight 1.6 → [2.5/12.3, 4.1/12.3]
-    expect(progressFromPos(2.5, CHAPTER_WEIGHTS)).toBeCloseTo(2.5 / 12.3, 10)
-    expect(progressFromPos(3.5, CHAPTER_WEIGHTS)).toBeCloseTo(4.1 / 12.3, 10)
-    // sunset owns pos [5.5, 6.5]; weight 1.7 → [6.1/12.3, 7.8/12.3]
-    expect(progressFromPos(5.5, CHAPTER_WEIGHTS)).toBeCloseTo(6.1 / 12.3, 10)
-    expect(progressFromPos(6.5, CHAPTER_WEIGHTS)).toBeCloseTo(7.8 / 12.3, 10)
+    // the climb owns pos [1.5, 2.5]; weight 2 → [1.5/13.3, 3.5/13.3]
+    expect(progressFromPos(1.5, CHAPTER_WEIGHTS)).toBeCloseTo(1.5 / 13.3, 10)
+    expect(progressFromPos(2.5, CHAPTER_WEIGHTS)).toBeCloseTo(3.5 / 13.3, 10)
+    // cruise owns pos [2.5, 3.5]; weight 1.6 → [3.5/13.3, 5.1/13.3]
+    expect(progressFromPos(3.5, CHAPTER_WEIGHTS)).toBeCloseTo(5.1 / 13.3, 10)
+    // sunset owns pos [5.5, 6.5]; weight 1.7 → [7.1/13.3, 8.8/13.3]
+    expect(progressFromPos(5.5, CHAPTER_WEIGHTS)).toBeCloseTo(7.1 / 13.3, 10)
+    expect(progressFromPos(6.5, CHAPTER_WEIGHTS)).toBeCloseTo(8.8 / 13.3, 10)
     // before the stretches the line is plain pos/total…
-    expect(progressFromPos(1.0, CHAPTER_WEIGHTS)).toBeCloseTo(1 / 12.3, 10)
+    expect(progressFromPos(1.0, CHAPTER_WEIGHTS)).toBeCloseTo(1 / 13.3, 10)
     // …inside them the slopes apply, after them the shifts accumulate
-    expect(progressFromPos(2.9167, CHAPTER_WEIGHTS)).toBeCloseTo((2.5 + 0.4167 * 1.6) / 12.3, 8)
-    expect(progressFromPos(6.2, CHAPTER_WEIGHTS)).toBeCloseTo((6.1 + 0.7 * 1.7) / 12.3, 10)
-    expect(progressFromPos(7.2, CHAPTER_WEIGHTS)).toBeCloseTo(8.5 / 12.3, 10)
+    expect(progressFromPos(2.9167, CHAPTER_WEIGHTS)).toBeCloseTo((3.5 + 0.4167 * 1.6) / 13.3, 8)
+    expect(progressFromPos(6.2, CHAPTER_WEIGHTS)).toBeCloseTo((7.1 + 0.7 * 1.7) / 13.3, 10)
+    expect(progressFromPos(7.2, CHAPTER_WEIGHTS)).toBeCloseTo(9.5 / 13.3, 10)
     expect(progressFromPos(11, CHAPTER_WEIGHTS)).toBe(1)
   })
 
@@ -195,7 +198,7 @@ describe('scroll weights (the cruise + sunset stretches)', () => {
   })
 
   it('grows the track by exactly the extra weight (others keep their pace)', () => {
-    expect(trackHeightVh(12, CHAPTER_WEIGHTS)).toBe(Math.round(12 * VH_PER_CHAPTER * (12.3 / 11)))
+    expect(trackHeightVh(12, CHAPTER_WEIGHTS)).toBe(Math.round(12 * VH_PER_CHAPTER * (13.3 / 11)))
     const uniform = buildChapterWeights(Array.from({ length: 12 }, () => ({})))
     expect(trackHeightVh(12, uniform)).toBe(12 * VH_PER_CHAPTER)
   })

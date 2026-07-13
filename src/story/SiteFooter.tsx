@@ -11,10 +11,10 @@ import styles from './SiteFooter.module.css'
  */
 export function SiteFooter({ progress }: { progress: number }) {
   // Synced to the contact card's own rise (cardFull [-0.05, 0] on the last
-  // chapter, ease 0.13 → pos 10.82..10.95, = progress 0.9854..0.9959 through
-  // the weighted map (cruise ×1.6 + sunset ×1.7 → pos p ≥ 6.5 sits at
-  // (p + 1.3) / 12.3).
-  const u = Math.min(1, Math.max(0, (progress - 0.9854) / 0.0106))
+  // chapter, ease 0.13 → pos 10.82..10.95, = progress 0.9852..0.9962 through
+  // the weighted map (climb ×2 + cruise ×1.6 + sunset ×1.7 → pos p ≥ 6.5
+  // sits at (p + 2.3) / 13.3).
+  const u = Math.min(1, Math.max(0, (progress - 0.9852) / 0.011))
   const o = u * u * (3 - 2 * u)
   return (
     <footer

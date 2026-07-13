@@ -33,8 +33,9 @@ export type Chapter = {
   /** Progress fraction (0..1) at which this chapter's `era` becomes the active
    *  HUD readout, OVERRIDING the default uniform-midpoint switch — so the year
    *  label flips when the SCENE actually arrives (the L-159 takes the lead at
-   *  ~22 %, the sunset lands ~53 %) rather than at the mechanical chapter
-   *  boundary. Timing field → lives on the EN array only (see timeline.activeEra). */
+   *  the ~23 % cut, the sunset lands ~57 %) rather than at the mechanical
+   *  chapter boundary. Timing field → lives on the EN array only (see
+   *  timeline.activeEra). */
   eraFrom?: number
   /** Eyebrow above the title, e.g. '05 — Airshow'. */
   num?: string
@@ -68,9 +69,17 @@ export type Chapter = {
   /** Ease width (pos units) on either side of `cardFull` — override the
    *  default for snappy arrivals (the 08 card snaps full within half a
    *  HUD percent of the landings). A tuple gives ASYMMETRIC eases
-   *  [in, out] — the 02 card snaps in with the 19 % cut but dissolves
+   *  [in, out] — the 02 card snaps in with the ~23 % cut but dissolves
    *  visibly across the Bagram sweep. */
   cardEase?: number | readonly [number, number]
+  /** Card window override for while this chapter's HERO is 3D-live
+   *  (owned3d.heroLive) — the climb chapter's text rides the SCENE's own
+   *  fade when the real GLB heroes fly (in with the 12→13 % cross-fade,
+   *  dissolving over the white-out rise), but keeps the shorter 2D window
+   *  when the 2D silhouette story plays instead (Martin: text in/out =
+   *  scene in/out). Same units as `cardFull`/`cardEase`. */
+  cardFull3d?: readonly [number, number]
+  cardEase3d?: number | readonly [number, number]
   /** Optional outbound link rendered under the body (real links only). */
   cta?: { label: string; href: string }
   /** Optional mono eyebrow line right above the CTA — the contact finale's
@@ -97,14 +106,16 @@ export type Chapter = {
  *  labels (L-39, then L-159) inside the single "cruise" chapter's scroll span.
  *  Language-agnostic (aircraft designations). Merged in `timeline.activeEra`. */
 export const EXTRA_ERAS: readonly { from: number; era: string }[] = [
-  // Global fractions ride the WEIGHTED 12-chapter scroll (cruise ×1.6 +
-  // sunset ×1.7 → total 12.3 — progressFromPos in timeline.ts): L-39 at
-  // pos 2.0 = 2.0 / 12.3.
-  { from: 0.163, era: '2005–2012 · L-39' },
+  // Global fractions ride the WEIGHTED 12-chapter scroll (climb ×2 +
+  // cruise ×1.6 + sunset ×1.7 → total 13.3 — progressFromPos in
+  // timeline.ts): the L-39 label flips the instant the REAL 3D L-39 is born
+  // in the authored climb (climbSequence: l39 starts +3.9 % after the
+  // seqStart 12.73 % → 16.63 %; the 2D-fallback rung lands nearby).
+  { from: 0.1663, era: '2005–2012 · L-39' },
   // The free years after the Air Force — appears mid-way through the sunset
-  // chapter's card (pos 6.2 → (2.5 + 1.6 + 2 + 0.7·1.7) / 12.3), as the body
-  // turns from "end of service" to "the open road".
-  { from: 0.593, era: '2022–2026' },
+  // chapter's card (pos 6.2 → (7.1 + 0.7·1.7) / 13.3), as the body turns
+  // from "end of service" to "the open road".
+  { from: 0.6236, era: '2022–2026' },
 ]
 
 export const THEME_ACCENT: Record<Theme, string> = {
@@ -145,18 +156,36 @@ export const CHAPTERS: Chapter[] = [
     theme: 'sky',
     sky: 'climb',
     era: '1999–2005 · CTU → Brno',
+    // The year label flips exactly as the scene starts fading in at 12 %
+    // (the default knot would flip it at 11.63 %, over the still-full
+    // origin frame).
+    eraFrom: 0.12,
     num: '01 — The Decision',
     title: 'Upward',
-    // Pure 2D at the ORIGINAL tempo (Martin's call): the E3b 3D climb v1 is
-    // UNMOUNTED (SkyPatrols.SkyScenes) and its scrollWeight-2 stretch is
-    // gone with it — whether a re-choreographed v2 ever ships is a separate
-    // later decision. Restoring v2 = remount ClimbHeroes + scrollWeight 2
-    // here + retune the progress anchors below (total 12.3 → 13.3).
-    // Clear the frame BEFORE the cloud-punch burst and the (early, tight)
-    // cruise hand-over: gone by pos 2.1 = 17.1 % — the 02 card rises right
-    // behind it (2.11) with no right-aligned overlap between the two.
+    // E3b-v2 (Martin's re-authored Part-1 climb): the REAL GLB heroes fly
+    // below the deck, so the scene fades in EXACTLY at 12 % HUD
+    // (pos 1.548→1.6145 = 12→13 % on the total-13.3 map) and Ulla — parked
+    // through the fade — sets off at the authored 12.73 %.
+    enterFade: [0.548, 0.6145],
+    // STRETCHED ×2: the chapter carries the full authored sequence at
+    // Martin's 1:1 HUD pacing (12.73→21.88 %), the white-out rise through
+    // the amplified zoom (20.6→21.85 %), the in-cloud transit, AND the
+    // restored 2D punch-out above the sea (climbMath.ABOVE: out at ~23 %,
+    // L-159 unlock ~25 %) up to the ~25.5 % cut. The authored motion is
+    // pinned to THIS frame via climbMath.SCROLL_TO_T = 13.3/2 — re-derive
+    // both if this weight ever changes.
+    scrollWeight: 2,
+    // 2D-fallback window (silhouette ladder story): clear the frame BEFORE
+    // the cloud-punch burst — gone by pos 2.1 — as always.
     cardFull: [-0.3, -0.05],
     cardEase: 0.15,
+    // 3D window (hero live): the text rides the SCENE itself (Martin) —
+    // rises with the 12→13 % cross-fade (pos 1.548→1.6145, the same window
+    // as the enterFade above), holds through the whole flight, dissolves
+    // across the white-out rise (pos 2.13→2.203 = 20.6→21.85 %), gone
+    // exactly at full white.
+    cardFull3d: [-0.3855, 0.13],
+    cardEase3d: [0.0665, 0.073],
     // The faculty was electrical engineering; the FIELD was informatics —
     // that is what makes "a life in front of a computer screen" land.
     body: 'Two years into computer science at the faculty of electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen&nbsp;—&nbsp;<em>remember that</em>&nbsp;—&nbsp;and there was a boyhood dream waiting: <span class="a-hud">flying military jets</span>. The Z‑142, then the L‑39C&nbsp;—&nbsp;a hundred hours in the air and a totally different life.',
@@ -168,32 +197,33 @@ export const CHAPTERS: Chapter[] = [
     sky: 'cruise',
     era: '2012–2022 · L-159',
     // Two era stops span this chapter: the L-39 years (2005–2012, EXTRA_ERAS)
-    // arrive at pos 2.0, then the L-159 label lands WITH the 19 % cut below.
-    eraFrom: 0.19,
+    // arrive with the 3D L-39's birth, then the L-159 label lands WITH the
+    // ~25.5 % cut below (progress 0.2546 = the blend's completion).
+    eraFrom: 0.2546,
     num: '02 — Military jets',
     title: 'Above the<br>clouds',
-    // A HARD CUT, not a fade (Martin): the L-39 flies its climb — white-out
-    // included — all the way to 19 %, where it VANISHES and the complete 02
-    // scene (L-159, green HUD, card) stands in the same instant. The
-    // "blend" window is a sliver (pos 2.334→2.340 ≈ 0.05 % of scroll) so
+    // A HARD CUT, not a fade (Martin): the climb punches out of the white
+    // above the sea (~23 %), the L-159 unlocks with the golden ring (~25 %),
+    // the green HUD snaps on — and at ~25.5 % the complete 02 scene stands
+    // in the same instant, carrying the identical jet + HUD forward. The
+    // "blend" window is a sliver (pos 2.437→2.443 ≈ 0.05 % of scroll) so
     // the swap lives between any two frames of a glide.
-    enterFade: [0.334, 0.34],
-    // The card SNAPS in with the cut (rise 2.33→2.34) and dissolves FAST
-    // across the first half of the Bagram sweep (full till pos 3.30 = 31 %,
-    // gone by 3.40 = 32.2 % — Martin: it must not linger into scene 03).
+    enterFade: [0.437, 0.443],
+    // The card SNAPS in with the cut (rise 2.437→2.443) and dissolves
+    // FAST across the first half of the Bagram sweep (full till pos 3.30,
+    // gone by 3.40 — Martin: it must not linger into scene 03).
     // Asymmetric ease: instant in, quick-but-visible out.
     // STRETCHED ×1.6: the chapter carries the full flying beat Martin
-    // directed in HUD % — the L-159 (+ its year label) appears ~19 %, is
-    // clear by 20, the 3D one-circle fight fades in 21→22 % (3 of his
-    // scroll stops after the appearance), corkscrews six percent to 28 %,
-    // fades out by 29 % under the arriving 2D COMAO, which then OWNS the
-    // frame two full steps before Bagram sweeps in (31.3→33 %). Beat
-    // windows derive through the live weight map in
-    // `three/scenes3d/balletMath.ts` — retune THERE, in HUD %, if this
-    // weight ever changes.
+    // directed in HUD % — on the total-13.3 map (climb ×2) the L-159
+    // (+ its year label) appears at the ~25.5 % cut, is clear by 26.3, the
+    // 3D one-circle fight pops in 26.9→27.9 %, corkscrews to 33.4 %, pops
+    // out by 34.3 % under the arriving 2D COMAO, which then OWNS the frame
+    // before Bagram sweeps in (36.5→38 %). Beat windows derive through
+    // the live weight map in `three/scenes3d/balletMath.ts` — retune THERE,
+    // in HUD %, if any upstream weight ever changes.
     scrollWeight: 1.6,
-    cardFull: [-0.66, 0.3],
-    cardEase: [0.01, 0.1],
+    cardFull: [-0.557, 0.3],
+    cardEase: [0.006, 0.1],
     body: 'The L‑39C, the L‑39ZA, then the <span class="a-hud">L‑159</span>. Every type an upgrade: more thrust, more avionics, more to learn&nbsp;—&nbsp;and less room for error. The horizon curved, the clouds stayed below the wings, and time was measured in g-forces.',
     align: 'right',
   },
@@ -209,8 +239,9 @@ export const CHAPTERS: Chapter[] = [
     // first beat in full view, never half-burned under the fade.
     enterFade: [0.344, 0.474],
     // The label waits for the sweep too (the default pos-3.5 breakpoint
-    // would flip it mid-COMAO, before any desert is on screen).
-    eraFrom: 0.313,
+    // would flip it mid-COMAO, before any desert is on screen). Progress of
+    // pos 3.344 on the total-13.3 map.
+    eraFrom: 0.3647,
     // The card rides the SWEEP itself (Martin: text 03 fades in exactly
     // with scene 03 — full as the desert owns the frame at 33 %, while the
     // C-17 is still mid-takeoff), then holds until the airshow hand-over.
@@ -258,10 +289,10 @@ export const CHAPTERS: Chapter[] = [
     // Split across the chapter (title stays the military roles): "2020–2022"
     // = the last service years (landing = leaving the Air Force), then a
     // "2022–2026" stop (EXTRA_ERAS) at mid-card, where the body turns to the
-    // free years that followed. Arrives at 55.3 % (pos 5.912 through the
-    // weighted map, total 12.3), as the landing starts blending in.
+    // free years that followed. Arrives at 58.7 % (pos 5.913 through the
+    // weighted map, total 13.3), as the landing starts blending in.
     era: '2020–2022',
-    eraFrom: 0.553,
+    eraFrom: 0.5866,
     num: '05 — End of service',
     title: 'Instructor,<br>test pilot',
     // Wait for the airshow + the head-on pass to fly clean off (the pass
@@ -291,7 +322,7 @@ export const CHAPTERS: Chapter[] = [
     // colonoscopy February 2016 ("over a year without any medication").
     era: '2014–2016',
     num: '06 — The Test',
-    title: 'Selfhealing',
+    title: 'Self-healing',
     body: 'Ulcerative colitis&nbsp;—&nbsp;“lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle</span>: eighteen months of rebuilding everything&nbsp;—&nbsp;food, gut, mind, lifestyle. In remission ever since&nbsp;—&nbsp;<span class="a-cyan">off all medication</span>. I came out healthier, knowing myself from the inside.',
     cta: {
       label: 'Read the whole journey →',
@@ -320,7 +351,7 @@ export const CHAPTERS: Chapter[] = [
     cardFull: [-0.1, 0.4],
     // "Don't trust — verify" stands on its own line (v2.5): it is the
     // method, not just the slogan.
-    body: 'Bitcoin is a multidisciplinary IQ test&nbsp;—&nbsp;and the freedom underneath the technology. Keys, blocks, nodes, trustless consensus. <span class="a-btc">The hardest money nobody can print, seize or censor.</span> So I stopped reading and started running it: a full &amp; Lightning node, solo mining to my own pool.<br><span class="a-btc">Don’t trust&nbsp;—&nbsp;verify.</span>',
+    body: 'The freedom hidden underneath the technology. <span class="a-btc">The hardest money there is&nbsp;—&nbsp;provably scarce, and it can’t be printed, seized or censored.</span> It sits where money, code and trust meet, so almost nobody gets it on the first pass. I didn’t either. Then I stopped reading and started running it: a full and Lightning node, solo mining to my own pool.<br><span class="a-btc">Don’t trust&nbsp;—&nbsp;verify.</span>',
     cta: {
       label: 'Read my Bitcoin intro →',
       href: 'https://medium.com/@shadovv_50954/discover-bitcoin-the-r-evolution-in-the-world-of-money-9de1272b9b13',
@@ -335,14 +366,14 @@ export const CHAPTERS: Chapter[] = [
     title: 'Solo<br>developer',
     // Headline number is "five real apps in about a month" (accented, matches
     // the five floating canvas windows); the projects aren't listed in prose.
-    // The card arrives AFTER the landings settle: it rises across the back
-    // half of the "88 %" HUD readout (touchdown at pos 9.5 = 87.8 % on the
-    // total-12.3 map) and is FULL the instant the HUD flips to 89 (progress
-    // 0.885 — the HUD rounds), so no half-faded step; it holds, then
-    // dissolves with the scene.
+    // The card arrives AFTER the landings settle: it rises right off the
+    // touchdown (pos 9.5 = 88.72 % on the total-13.3 map — the HUD already
+    // reads 89 there) and the whole rise (88.8→89.1 %) lives INSIDE the
+    // 89-step window, so no parked step ever catches it half-faded; it
+    // holds, then dissolves with the scene.
     // Compact: the long v2.5 body must share the frame with the dashboard.
-    cardFull: [0.585, 0.7],
-    cardEase: 0.05,
+    cardFull: [0.545, 0.7],
+    cardEase: [0.035, 0.05],
     compact: true,
     body: 'It began carefully&nbsp;—&nbsp;small apps first. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">five real apps in about a month</span>&nbsp;—&nbsp;floating all around you. During the builds they even wrote the lessons they taught me into the <strong>dev-brain</strong> vault, which <strong>BrainQuest</strong> turns into Duolingo-style learning&nbsp;—&nbsp;so I’m still learning the craft, not just watching. The contribution graph below looks like a steep takeoff; maybe everything above was training for it. <em>(Turns out I love the screen after all.)</em>',
     // The Work items (the five floating windows) are data-driven from

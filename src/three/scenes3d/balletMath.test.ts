@@ -26,15 +26,16 @@ const hudOf = (t: number) => progressFromPos(CRUISE_WIN0 + t, CHAPTER_WEIGHTS) *
 
 describe('the beat windows (Martin directs in HUD %)', () => {
   it('sit exactly on the directed HUD percents through the live weight map', () => {
-    // The L-159 appears ~19 % (still hazed), the white-out clears by ~20.3,
-    // the fade-in starts three of Martin's scroll stops later at 21, the
-    // ballet flies six percent, and the COMAO rides the 28→29 fade-out.
-    expect(hudOf(BALLET.in0)).toBeCloseTo(21, 6)
-    expect(hudOf(BALLET.in1)).toBeCloseTo(22, 6)
-    expect(hudOf(BALLET.out0)).toBeCloseTo(28, 6)
-    expect(hudOf(BALLET.out1)).toBeCloseTo(29, 6)
-    expect(hudOf(COMAO.in0)).toBeCloseTo(27.7, 6)
-    expect(hudOf(COMAO.in1)).toBeCloseTo(29.7, 6)
+    // Martin's original percents (21/22/28/29, COMAO 27.7/29.7) were called
+    // on the total-12.3 map; the E3b-v2 climb stretch (×2 → total 13.3)
+    // re-based each anchor through `new = (old·12.3 + 1.0)/13.3`, which
+    // keeps its POS — the story moment — bit-identical.
+    expect(hudOf(BALLET.in0)).toBeCloseTo(26.9398, 6)
+    expect(hudOf(BALLET.in1)).toBeCloseTo(27.8647, 6)
+    expect(hudOf(BALLET.out0)).toBeCloseTo(33.4135, 6)
+    expect(hudOf(BALLET.out1)).toBeCloseTo(34.3383, 6)
+    expect(hudOf(COMAO.in0)).toBeCloseTo(33.1361, 6)
+    expect(hudOf(COMAO.in1)).toBeCloseTo(34.9857, 6)
   })
 
   it('live inside the cruise run window, ordered, with COMAO riding the fade-out', () => {

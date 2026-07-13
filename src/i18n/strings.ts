@@ -16,6 +16,8 @@ export type UiStrings = {
   navAbout: string
   langSwitch: string
   langSwitchLabel: string
+  worldTo3dLabel: string
+  worldTo2dLabel: string
   skipToContact: string
   scrollHint: string
   loading: string
@@ -69,6 +71,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     navAbout: 'About',
     langSwitch: 'CZ',
     langSwitchLabel: 'Přepnout do češtiny',
+    worldTo3dLabel: 'Switch the world to 3D',
+    worldTo2dLabel: 'Switch to the lighter 2D world',
     skipToContact: 'Skip to contact',
     scrollHint: 'Scroll',
     loading: 'Loading',
@@ -104,6 +108,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     navAbout: 'O mně',
     langSwitch: 'EN',
     langSwitchLabel: 'Switch to English',
+    worldTo3dLabel: 'Přepnout svět do 3D',
+    worldTo2dLabel: 'Přepnout na odlehčený 2D svět',
     skipToContact: 'Přeskočit na kontakt',
     scrollHint: 'Skrolujte',
     loading: 'Načítání',

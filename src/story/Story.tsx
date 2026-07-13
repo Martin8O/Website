@@ -87,7 +87,7 @@ export function Story() {
           under every text layer. Mounted in both world modes so the HUD
           renders identically with or without the 3D stage. */}
       <CockpitGlass />
-      <ChapterCards pos={pos} chapters={chapters} />
+      <ChapterCards pos={pos} chapters={chapters} worldMode={worldMode} />
       <DevWindowLinks pos={pos} />
       <OfferPanels pos={pos} />
       <Vignette />

@@ -37,6 +37,12 @@ import {
   cloudSink,
   cruiseHud,
 } from '../../../three/scenes3d/balletMath'
+// The climb's above-deck window map — the unlock ring/tag that CONTINUE
+// across the cut run on the climb's clock, and in hero-3D mode that story
+// is re-timed (climbMath.aboveT); heroLive tells which timing the climb
+// actually played (three-free, like balletMath).
+import { aboveT } from '../../../three/climbMath'
+import { heroLive } from '../../../three/owned3d'
 import { drawAircraft, drawTrail } from './aircraft'
 import { drawCloudSea, drawPuff } from './clouds'
 import { bvrPicture, drawCockpitHudSoft } from './hud'
@@ -164,17 +170,21 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
       x: sx, y: sy, size: unit * 0.14, tilt: stilt, color: '#22314e', glint: '#dcecff', alpha: solo, time,
     })
 
-    // The golden unlock ring + the "L-159" tag CONTINUE across the 19 % cut
-    // on the climb's own clock (`1 + tRaw` IS the climb's t) — the ring
+    // The golden unlock ring + the "L-159" tag CONTINUE across the cut on
+    // the climb's own clock (`1 + tRaw` IS the climb's t) — the ring
     // finishes its whole farewell, dissolving AS IT GROWS exactly like the
     // Z-142 and L-39 rings before it, and the tag fades out across the
-    // following scroll step instead of dying with the cut (Martin).
+    // following scroll step instead of dying with the cut (Martin). When
+    // the climb played in hero-3D mode its above-deck story was re-timed
+    // (climbMath.aboveT) — mirror the same map here or the continuation
+    // would jump at the seam.
     const tc = 1 + (cfg.tRaw ?? t)
+    const m = heroLive('climb') ? aboveT : (x: number) => x
     // Identical formula to the climb's: the ring dissolves AS it grows —
     // ever more transparent with the spread — and is gone well before its
     // maximum reach (never a constant-brightness hoop).
-    const spread = smoothstep(0.8, 0.98, tc)
-    const ringA = solo * 0.55 * smoothstep(0.8, 0.84, tc) * Math.pow(1 - spread, 1.6)
+    const spread = smoothstep(m(0.8), m(0.98), tc)
+    const ringA = solo * 0.55 * smoothstep(m(0.8), m(0.84), tc) * Math.pow(1 - spread, 1.6)
     if (ringA > 0.01) {
       ctx.save()
       ctx.strokeStyle = rgba(GOLD, ringA)
@@ -184,7 +194,7 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
       ctx.stroke()
       ctx.restore()
     }
-    const tagA = solo * 0.9 * (1 - smoothstep(0.88, 1.0, tc))
+    const tagA = solo * 0.9 * (1 - smoothstep(m(0.88), m(1.0), tc))
     if (tagA > 0.01) {
       ctx.save()
       ctx.font = `${Math.max(10, Math.round(unit * 0.016))}px ${MONO}`

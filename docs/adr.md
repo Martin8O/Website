@@ -4,6 +4,54 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-045 — Chapter-01 climb heroes ported to 3D (real Ulla/Z-142/L-39 GLBs) + 2D/3D visitor toggle (2026-07-13)
+Martin's re-authored Part-1 climb (Piper "Ulla" → Z-142/PA-28 → L-39) ported into the live site as the
+**chapter-01 hero beat**, flying the real baked GLBs below the deck of a stretched chapter 01, ending with the
+L-39 melting into the white-out and the **restored 2D punch-out** carrying the story over the sea to the cut into
+chapter 02. Additive, gated, 2D-complete as the fallback — the phase strategy holds. Iterated over several
+screenshot rounds.
+
+1. **Authored sequence → data, through a two-stage tool chain.** Martin authors in the choreo-lab; a new
+   `local/tools/seq/physics.mjs` runs a **flight-model pass** (no new maneuvers — it makes the authored ones
+   FLY): re-times each leg to a smooth per-type speed profile (Ulla slow → Z-142 up → L-39 clearly a jet, same
+   scene length), rebuilds every attitude from the flight path (nose along the velocity tangent + per-type AoA,
+   bank from the **coordinated-turn** model = balletMath's idiom; deliberate aerobatic rolls detected by roll-rate
+   and kept, everything else coordinated — the Ulla keeps MORE of her authored left lean so the climbing turn-away
+   reads), and re-bases the unlock-effect times onto the new junctions. Then `convert.mjs` re-bases lab units into
+   the site's window-t. A new climb = author → `physics.mjs` → `convert.mjs`, pure data swap.
+2. **Full-width X + kept depth (Martin's calls, two rounds).** The lab audience camera is 45° FOV, the site's
+   Stage3D 55° — the wider camera compressed the deep mid-flight to the centre. Fixed by reshaping the DATA (`X_SPREAD 1.5`, full authored Z so the L-39 still recedes into the distance and sizes breathe ~2×) plus an
+   aspect-adaptive runtime scale `climbMath.climbXScale` that pins the widest snap (the parked Ulla) to ~87 % of
+   the half-frustum on **every** viewport — full width on desktop, auto-pulled-in on a phone portrait so nothing
+   parks off-frame. Environment drift (clouds/horizon/ground) derives from the hero's DISPLACEMENT vector (all
+   three axes), so a fast type streams the world proportionally faster; a full velocity read, not hand-tuned.
+3. **The white-out transit + the restored above-deck wow.** `heroClimbPunch` (shared by the 2D env and the 3D
+   fog-swallow) rises the white through the L-39's amplified zoom, HOLDS white through the canopy-rain transit
+   (accelerating droplets + wind-smear + darker vapour wisps, velocity-gated buffet), then the frame punches out
+   over the sunlit sea and the ORIGINAL 2D above-deck story (silhouette L-39 → **L-159 unlock ring** → green HUD)
+   plays to the hard cut into 02. The 3D→2D hand-over hides entirely in the white, exactly like the 2D
+   below→above world swap always has. The cloud DECK now appears+sags only while the L-39 is CLIMBING (Martin).
+4. **2D golden rings + name flashes (not a 3D bubble).** The v1 3D unlock sphere + sprite tags are RETIRED; the
+   type switches wear the 2D golden-ring language — a fast-dissolving expanding circle + a name close to the
+   airframe, both drawn in the 2D layer at the 3D hero's **projected** screen position (`climbScreenAt`). The
+   morning light rig (key from the 2D sun's upper-left, real self-shadows via the Stage3D `shadows` PROP — R3F's
+   `configure()` re-asserts it every render, so a scene effect can't own it — hemisphere lift as the deck closes).
+5. **The 2D/3D visitor toggle + weak-client auto-fallback.** `worldMode.ts` gains a persisted visitor choice
+   (localStorage) layered under the hard gates (reduced-motion / no-WebGL2 / `?world=` kill-switch); a **weak
+   client** (deviceMemory < 4 GB, ≤ 3 cores, data-saver, ≤ 3g) auto-falls back to 2D unless the visitor
+   explicitly chose 3D. Nav shows a `2D`/`3D` pill (hidden when the hard gates make 3D impossible). The chapter-01
+   card rides the 3D scene's OWN fade when the hero is 3D-live (`cardFull3d`, gated by `owned3d.heroLive`).
+6. **Timing + housekeeping.** Chapter 01 stretched ×2 (total 13.3) to hold Martin's 1:1 HUD pacing + the punch-out
+   room; **all** downstream progress anchors re-retuned (eras, EXTRA_ERAS, ballet/COMAO HUD windows — same POS,
+   re-based %s — desert/sunset eraFrom, SiteFooter, dev card, the landing blink now on the 60↔61 boundary). GLB
+   heroes re-baked **meshopt-free** (quantize only — the CSP lesson from ADR-042) + decimated to the L-159 hero's
+   density class; Z-142 (flies deep) on the hardest diet. Loading kicks at pos 0.15 (scene 00) so the flip never
+   lands mid-scene. `normalFromMap` extracted to shared `surface.ts`. Copy: "Selfhealing" → **"Self-healing"**
+   (06 title); Bitcoin body (07) reworked EN+CZ per Martin. Verified live over CDP (desktop + mobile + `?world=2d`)
+   with a new `cdp-climb2-verify.mjs` (fade sync, handoffs, white transit, punch-out, cut, toggle) + the
+   re-anchored ballet/patrol harnesses + a prod-bundle GLB-decode check. Model-fit: 🔥 Fable 5 (build/iteration) +
+   Opus 4.8 (retunes/wrap-up).
+
 ### ADR-044 — Chapter-02 one-circle-fight ballet ported to 3D (real L-159 GLBs) + cockpit-glass depth layer (2026-07-13)
 The `l159-ballet-3d` showcase (a coordinated-turn double-helix "one-circle fight") ported into the live site as
 the **chapter-02 hero beat**, plus the infrastructure and the many Martin-driven refinements it needed. Additive,

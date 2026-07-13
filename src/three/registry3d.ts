@@ -31,11 +31,12 @@ export type Scene3DProps = {
  *
  * E1 registers the two space scenes: the origin dawn and the contact finale
  * both gain a true-depth starfield. `SkyScenes` carries the L-159 patrols
- * (SkyPatrols.tsx): the airshow head-on pass and the sunset landing break —
- * additive beats over the untouched 2D scenes. The E3b climb heroes v1 and
- * the parametric fly-bys (Jets.tsx) are both UNMOUNTED by Martin's call
- * (the climb runs pure 2D at its original tempo; a re-choreographed v2 is a
- * separate later decision) — the code stays in the tree as reference.
+ * (SkyPatrols.tsx: the airshow head-on pass and the sunset landing break),
+ * the chapter-02 one-circle fight (CruiseBallet.tsx) and the E3b-v2 climb
+ * heroes (ClimbHeroes.tsx — Martin's re-authored Part-1 sequence; its 2D
+ * silhouette story remains the in-scene fallback until the models are
+ * live). Only the parametric fly-bys (Jets.tsx) stay unmounted, kept as
+ * reference.
  */
 export const RENDERERS_3D: Record<Theme, ComponentType<Scene3DProps> | null> = {
   origin: Starfield,

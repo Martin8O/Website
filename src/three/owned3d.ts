@@ -39,9 +39,10 @@ export function paints2D(theme: Theme, mode: WorldMode, owned: ReadonlySet<Theme
  *
  * Per-mood scope of "hero": for 'cruise' the flip covers ONLY the one-circle
  * fight corkscrew (CruiseBallet flies it in 3D); the solo L-159 and the
- * COMAO package stay 2D in both modes. ('climb' is in the set but its 3D
- * scene is unmounted — `setHero3DReady('climb')` never fires, so the 2D
- * climb keeps its hero; a re-choreographed v2 is a later decision.)
+ * COMAO package stay 2D in both modes. For 'climb' it covers the whole
+ * graduation story — the real Ulla → Z-142 → L-39 fly Martin's authored
+ * sequence (ClimbHeroes, E3b-v2) while the 2D paints the environment; the
+ * 2D silhouette ladder returns whenever the models are not live.
  */
 export const HERO_3D: ReadonlySet<Sky> = new Set<Sky>(['climb', 'cruise'])
 
@@ -63,4 +64,12 @@ export function setHero3DReady(sky: Sky, ready: boolean): void {
 /** Should the 2D scene paint its own hero aircraft this frame? */
 export function paintsHero2D(sky: Sky | undefined, mode: WorldMode, owned: ReadonlySet<Sky> = HERO_3D): boolean {
   return mode !== '3d' || sky === undefined || !owned.has(sky) || !heroReady.has(sky)
+}
+
+/** Is a sky mood's 3D hero LIVE right now (chunk mounted, models decoded)?
+ *  The DOM card layer reads this to pick a chapter's 3D card window
+ *  (`chapters.cardFull3d`) — the climb text rides the 3D scene's own fade,
+ *  and falls back to the 2D window the instant the hero does. */
+export function heroLive(sky: Sky | undefined): boolean {
+  return sky !== undefined && heroReady.has(sky)
 }

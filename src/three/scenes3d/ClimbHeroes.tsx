@@ -1,16 +1,29 @@
 /**
- * CLIMB HEROES (E3b) — the first scene whose hero the 3D layer OWNS: the real
- * GLB aircraft of Martin's authored Part-1 sequence (Piper "Ulla" → Z-142
- * stand-in PA-28 → L-39) fly ONE continuous climb below the cloud deck of the
- * stretched chapter 01 (scrollWeight 2), and the section ends with the L-39
- * melting into the rising white-out (`heroClimbPunch`). The 2D scene keeps
- * painting the whole environment — now streaming AGAINST the hero's own
- * motion — and only its painted hero steps aside, and ONLY while this scene
- * is live (`setHero3DReady`).
+ * CLIMB HEROES (E3b-v2) — the chapter-01 hero beat the 3D layer OWNS: the
+ * real GLB aircraft of Martin's authored Part-1 sequence (Piper "Ulla" →
+ * Z-142 stand-in PA-28 → L-39) fly ONE continuous climb below the cloud deck
+ * of the stretched chapter (scrollWeight 2), and this layer's story ends
+ * with the L-39 melting into the rising white-out (`heroClimbPunch`) at the
+ * top of its amplified zoom. The canopy-rain transit then holds white, and
+ * the RESTORED 2D wow beat takes over behind it (climbMath.ABOVE): the
+ * silhouette punch-out over the sunlit sea, the L-159 unlock and the green
+ * HUD — all painted by the 2D scene — carry the story to the hard cut into
+ * chapter 02. The 2D scene keeps painting the whole environment — streaming
+ * AGAINST the hero's own velocity — and only its painted below-deck hero
+ * steps aside, ONLY while this scene is live (`setHero3DReady`).
  *
  * TIME BASE: the climb run's own localT (runLocalTRaw of the SHARED window) —
  * the same clock the 2D environment breathes by, so the two layers cannot
  * desync, and a future chapter re-weight stretches both together.
+ *
+ * LOOK: the 2D world down here is a cool morning under a closing ceiling —
+ * the key is the SAME morning sun the 2D paints upper-left (climb.ts draws
+ * it at 0.18 w / 0.2 h), warm against a blue-grey hemisphere wrap, REAL
+ * shadow maps for self-shadowing (canopy on fuselage, wing roots), and its
+ * intensity couples to the same `approach` dimming the 2D world suffers as
+ * the deck closes in. Materials are graded UNDER THE STAGE'S FLAT (no tone
+ * mapping) OUTPUT — the ballet/patrol precedent; a global ACES flip here
+ * would silently re-grade every other verified beat.
  *
  * Framing is the choreo-lab's audience camera, reproduced relative to the E2
  * flight rig: an inner "room" group rides the camera pose (position + forward
@@ -23,7 +36,6 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { runLocalTRaw } from '../../canvas/sceneTimeline'
 import { heroClimbPunch } from '../../canvas/scenes/sky/skyMath'
@@ -31,21 +43,18 @@ import { setHero3DReady } from '../owned3d'
 import {
   CLIMB_SEQ,
   LAB_BOX,
-  SPHERE_GRID_ALPHA,
-  SPHERE_GRID_COLOR,
-  SPHERE_SURF_ALPHA,
-  SPHERE_SURF_COLOR,
   buildTrack,
+  climbXScale,
   createClimbPose,
+  heroPosAt,
   lifeAlpha,
   poseTrackAt,
   skyPresence,
-  sphereStateAt,
-  tagAlpha,
   type AircraftTrack,
   type ClimbAircraft,
 } from '../climbMath'
 import type { Scene3DProps } from '../registry3d'
+import { normalFromMap } from './surface'
 
 const MODEL_URLS: Record<ClimbAircraft['id'], string> = {
   ulla: '/models/ulla.glb',
@@ -53,20 +62,32 @@ const MODEL_URLS: Record<ClimbAircraft['id'], string> = {
   l39: '/models/l39.glb',
 }
 
-/** Name-tag styling — the 2D climb graduation tag translated to world units:
- *  same face (Chakra Petch, gold), same PROPORTIONAL placement below-right of
- *  the craft (2D: cx + size·0.62 / cy + size·0.52 — canvas y points down),
- *  and a height that lands near the 2D tag's ~11 px at the display plane. */
-const TAG_FONT = '500 44px "Chakra Petch", ui-monospace, Consolas, monospace'
-const TAG_COLOR = '#ffd27a'
-const TAG_HEIGHT = 0.17
-const TAG_DX = 0.62
-const TAG_DY = -0.52
+/** Start fetching the three GLBs early in scene 00 (Martin: the models
+ *  should be loading while the origin still owns the frame, so the hero
+ *  flip never lands mid-scene) — a visitor who never scrolls at all still
+ *  pays nothing; the 2D silhouette hero keeps flying until the models are
+ *  live (`setHero3DReady`). */
+const LOAD_AT_POS = 0.15
 
-/** Key-light base — the lab's 2.2, dimmed by the same `approach` that steals
- *  the 2D world's light as the ceiling closes in (climb.ts `dim`). */
-const KEY_INTENSITY = 2.2
+/** The morning rig: key intensity at the open sky, dimmed by the same
+ *  `approach` that steals the 2D world's light as the ceiling closes in
+ *  (climb.ts `dim`), while the hemisphere RISES a touch — light inside a
+ *  cloud base goes flat, not black. */
+const KEY_INTENSITY = 2.15
 const KEY_DIM = 0.45
+const HEMI_BASE = 0.55
+const HEMI_CLOUD_LIFT = 0.18
+/** Direction the morning sun hangs in room space (upper-left, slightly in
+ *  front — the 2D sun at 0.18 w / 0.2 h), and how far out the shadow key
+ *  camp sits along it. */
+const KEY_DIR = new THREE.Vector3(-7, 6, 6).normalize()
+const KEY_DIST = 16
+
+/** Morning material grade (flat output — no tone mapping): a whisper of the
+ *  scene's cool blue in the skins, moderate env so highlights stay short of
+ *  clipping. */
+const GRADE_MUL = new THREE.Color(0.94, 0.96, 1.0)
+const ENV_INTENSITY = 0.75
 
 type MatRec = {
   mat: THREE.Material & { opacity: number; transparent: boolean }
@@ -83,8 +104,10 @@ let modelsPromise: Promise<Record<ClimbAircraft['id'], LoadedModel>> | null = nu
 
 function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
   if (modelsPromise) return modelsPromise
+  // No meshopt decoder: the GLBs are baked with quantize only (KHR_mesh_
+  // quantization, read natively) — EXT_meshopt_compression's WASM+blob
+  // decoder is blocked by the site's hardened CSP (bake.mjs bakes it out).
   const loader = new GLTFLoader()
-  loader.setMeshoptDecoder(MeshoptDecoder)
   modelsPromise = Promise.all(
     (Object.keys(MODEL_URLS) as ClimbAircraft['id'][]).map(
       (id) =>
@@ -96,22 +119,44 @@ function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
               const mats: MatRec[] = []
               const spins: SpinRec[] = []
               const seen = new Set<THREE.Material>()
+              // Per-model normal-map cache — one Sobel bake per base texture.
+              const normals = new Map<THREE.Texture, THREE.Texture | null>()
               root.traverse((n) => {
                 const spin = (n.userData as { spin?: SpinRec }).spin
                 if (spin && spin.axis) spins.push({ node: n, axis: spin.axis, speed: spin.speed })
                 const mesh = n as THREE.Mesh
                 if (!mesh.isMesh) return
+                mesh.castShadow = true
+                mesh.receiveShadow = true
                 for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+                  if (seen.has(m)) continue
+                  seen.add(m)
+                  mats.push({
+                    mat: m as MatRec['mat'],
+                    baseOpacity: (m as MatRec['mat']).opacity,
+                    baseTransparent: (m as MatRec['mat']).transparent,
+                  })
                   const std = m as THREE.MeshStandardMaterial
-                  if (std.map) std.map.anisotropy = 8
-                  if (!seen.has(m)) {
-                    seen.add(m)
-                    mats.push({
-                      mat: m as MatRec['mat'],
-                      baseOpacity: (m as MatRec['mat']).opacity,
-                      baseTransparent: (m as MatRec['mat']).transparent,
-                    })
+                  if (!('metalness' in std)) continue
+                  // The showcase PBR lift, graded for the cool morning: the
+                  // paint's own dark panel lines become a subtle relief so
+                  // the skins catch the low sun instead of reading flat.
+                  if (std.map) {
+                    std.map.anisotropy = 8
+                    std.metalness = 0.32
+                    std.roughness = 0.5
+                    if (!normals.has(std.map)) normals.set(std.map, normalFromMap(std.map))
+                    const nrm = normals.get(std.map)
+                    if (nrm && !std.normalMap) {
+                      std.normalMap = nrm
+                      std.normalScale = new THREE.Vector2(0.55, 0.55)
+                    }
+                  } else {
+                    std.metalness = 0.42
+                    std.roughness = 0.5
                   }
+                  std.color?.multiply(GRADE_MUL)
+                  std.needsUpdate = true
                 }
               })
               resolve([id, { root, mats, spins }])
@@ -130,101 +175,33 @@ function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
   return modelsPromise
 }
 
-/** The lab's `labelSprite`: a canvas-baked name tag, re-baked when the
- *  webfont arrives. Left-anchored like the 2D tag (textAlign 'left');
- *  `toneMapped: false` — the gold must stay the 2D hex. */
-function makeTag(text: string): THREE.Sprite {
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')!
-  const tex = new THREE.CanvasTexture(canvas)
-  const sprite = new THREE.Sprite(
-    new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, toneMapped: false }),
-  )
-  sprite.renderOrder = 950
-  sprite.center.set(0, 0.5)
-  const draw = () => {
-    const pad = 10
-    ctx.font = TAG_FONT
-    const w = Math.ceil(ctx.measureText(text).width) + pad * 2
-    canvas.width = w
-    canvas.height = 64
-    ctx.font = TAG_FONT
-    ctx.fillStyle = TAG_COLOR
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(text, w / 2, 34)
-    tex.needsUpdate = true
-    sprite.scale.set((TAG_HEIGHT * w) / 64, TAG_HEIGHT, 1)
-  }
-  draw()
-  if (document.fonts && !document.fonts.check(TAG_FONT)) {
-    document.fonts
-      .load(TAG_FONT)
-      .then(draw)
-      .catch(() => {})
-  }
-  return sprite
-}
-
-/** Plain lat/long wire sphere (no triangle diagonals) — the lab's sparse
- *  golden grid inside the unlock bubble. */
-function buildGridSphere(lon = 12, lat = 6, seg = 48): THREE.BufferGeometry {
-  const pts: number[] = []
-  for (let i = 1; i < lat; i++) {
-    const phi = (Math.PI * i) / lat
-    const y = Math.cos(phi)
-    const rr = Math.sin(phi)
-    for (let j = 0; j < seg; j++) {
-      const a0 = (2 * Math.PI * j) / seg
-      const a1 = (2 * Math.PI * (j + 1)) / seg
-      pts.push(rr * Math.cos(a0), y, rr * Math.sin(a0), rr * Math.cos(a1), y, rr * Math.sin(a1))
-    }
-  }
-  for (let i = 0; i < lon; i++) {
-    const th = (2 * Math.PI * i) / lon
-    for (let j = 0; j < seg; j++) {
-      const p0 = (Math.PI * j) / seg
-      const p1 = (Math.PI * (j + 1)) / seg
-      pts.push(
-        Math.sin(p0) * Math.cos(th), Math.cos(p0), Math.sin(p0) * Math.sin(th),
-        Math.sin(p1) * Math.cos(th), Math.cos(p1), Math.sin(p1) * Math.sin(th),
-      )
-    }
-  }
-  const g = new THREE.BufferGeometry()
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3))
-  return g
-}
+// The unlock rings + type-name flashes live in the 2D layer now (climb.ts
+// draws the 2D golden-ring language at the projected hero position —
+// Martin's call; the v1 3D bubble + sprite tags are retired).
 
 type AircraftRes = {
   aircraft: ClimbAircraft
   track: AircraftTrack
   pivot: THREE.Group
-  tag: THREE.Sprite
   model: LoadedModel | null
-}
-
-type SphereRes = {
-  group: THREE.Group
-  surf: THREE.MeshBasicMaterial
-  grid: THREE.LineBasicMaterial
 }
 
 type ClimbDevProbe = {
   ready: boolean
   presence: number
   fog: number
+  above: number
   t: number
   aircraft: Record<string, { alpha: number; x: number; y: number; z: number }>
-  spheres: number[]
-  tags: Record<string, number>
   /** Prop spin angles — the harness samples twice to prove rotation. */
   spinRot: number[]
-  gl: { toneMapping: number; exposure: number; outputColorSpace: string }
+  hero: { x: number; y: number; z: number }
+  gl: { toneMapping: number; exposure: number; outputColorSpace: string; shadows: boolean }
 }
 
 // Hot-path scratch — the frame loop allocates nothing.
 const _pose = createClimbPose()
+const _hero = createClimbPose()
 const _fwd = new THREE.Vector3()
 const _right = new THREE.Vector3()
 const _up = new THREE.Vector3()
@@ -242,17 +219,33 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
     const room = new THREE.Group()
     stage.add(room)
 
-    // The light rig — the lab's two-light setup, graded to the 2D climb's
-    // world: the key rides where the 2D MORNING SUN sits (upper LEFT below
-    // the deck — climb.ts draws it at 0.18 w / 0.2 h), and its intensity
-    // couples to the same `approach` dimming the 2D world suffers as the
-    // ceiling closes in.
-    const key = new THREE.DirectionalLight(0xfff2d8, KEY_INTENSITY)
-    key.position.set(-4.5, 7, 3.5)
+    // The morning light rig. The KEY is the 2D scene's own sun — warm, from
+    // the upper LEFT, slightly in front — and CASTS real shadows: the tight
+    // frustum rides the active hero every frame, so the canopy shades the
+    // spine and one wing shades the root exactly as the maneuver turns the
+    // airframe through the light.
+    const key = new THREE.DirectionalLight(0xffe9c2, KEY_INTENSITY)
+    key.castShadow = true
+    const small = Math.min(window.innerWidth, window.innerHeight) < 720
+    key.shadow.mapSize.set(small ? 512 : 1024, small ? 512 : 1024)
+    key.shadow.camera.near = KEY_DIST - 6
+    key.shadow.camera.far = KEY_DIST + 8
+    key.shadow.camera.left = -4.5
+    key.shadow.camera.right = 4.5
+    key.shadow.camera.top = 4.5
+    key.shadow.camera.bottom = -4.5
+    key.shadow.bias = -0.0004
+    key.shadow.normalBias = 0.02
     room.add(key)
     room.add(key.target)
-    const fill = new THREE.DirectionalLight(0x8ea9c9, 0.5)
-    fill.position.set(0, -5, 0)
+    // Cool morning wrap: pale blue sky above, the blue-grey countryside
+    // below — keeps the shaded flanks alive without flattening the key.
+    const hemi = new THREE.HemisphereLight(0xbdd2ec, 0x39415a, HEMI_BASE)
+    room.add(hemi)
+    // A faint bounce from below-right (the sunlit haze the 2D gradient
+    // carries at the horizon) so bellies never go dead black.
+    const fill = new THREE.DirectionalLight(0x8ea9c9, 0.28)
+    fill.position.set(4, -6, 2)
     room.add(fill)
     room.add(fill.target)
 
@@ -261,42 +254,11 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
       pivot.scale.setScalar(a.size / 10) // GLBs are baked 10-normalized
       pivot.visible = false
       room.add(pivot)
-      const tag = makeTag(a.name)
-      tag.visible = false
-      room.add(tag)
-      return { aircraft: a, track: buildTrack(a), pivot, tag, model: null }
+      return { aircraft: a, track: buildTrack(a), pivot, model: null }
     })
+    const tracks = aircraft.map((r) => r.track)
 
-    const surfGeo = new THREE.SphereGeometry(1, 48, 32)
-    const gridGeo = buildGridSphere()
-    const spheres: SphereRes[] = CLIMB_SEQ.effects.map(() => {
-      const group = new THREE.Group()
-      const surf = new THREE.MeshBasicMaterial({
-        color: SPHERE_SURF_COLOR,
-        transparent: true,
-        opacity: 0,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-        toneMapped: false,
-      })
-      const surfMesh = new THREE.Mesh(surfGeo, surf)
-      surfMesh.renderOrder = 900
-      const grid = new THREE.LineBasicMaterial({
-        color: SPHERE_GRID_COLOR,
-        transparent: true,
-        opacity: 0,
-        depthWrite: false,
-        toneMapped: false,
-      })
-      const gridLines = new THREE.LineSegments(gridGeo, grid)
-      gridLines.renderOrder = 901
-      group.add(surfMesh, gridLines)
-      group.visible = false
-      room.add(group)
-      return { group, surf, grid }
-    })
-
-    return { stage, room, aircraft, spheres, surfGeo, gridGeo, key }
+    return { stage, room, aircraft, tracks, key, hemi, fill }
   }, [])
 
   const climbRun = useMemo(
@@ -309,12 +271,12 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
       ready: false,
       presence: 0,
       fog: 0,
+      above: 0,
       t: 0,
       aircraft: {},
-      spheres: [0, 0],
-      tags: {},
       spinRot: [0, 0, 0],
-      gl: { toneMapping: -1, exposure: 0, outputColorSpace: '' },
+      hero: { x: 0, y: 0, z: 0 },
+      gl: { toneMapping: -1, exposure: 0, outputColorSpace: '', shadows: false },
     }),
     [],
   )
@@ -328,19 +290,57 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
   }, [probe])
 
   const readyRef = useRef(false)
+  const loadKicked = useRef(false)
+  const envRef = useRef<{ env: THREE.Texture; pmrem: THREE.PMREMGenerator } | null>(null)
+  const aliveRef = useRef(true)
 
-  // Load + attach the models, report readiness, flip the 2D hero off. On any
-  // failure the promise cache clears and readiness never fires — the 2D hero
-  // simply keeps flying (the chunk-failure caveat, answered per hero).
+  const gl = useThree((s) => s.gl)
+
+  // Shadow maps for the morning key — enabled once for the whole stage (the
+  // rig is culled with the scene's presence, so the shadow pass costs
+  // nothing anywhere else in the story). Idempotent with the ballet's rig.
   useEffect(() => {
-    let alive = true
+    gl.shadowMap.enabled = true
+    gl.shadowMap.type = THREE.PCFSoftShadowMap
+  }, [gl])
+
+  // Deferred load, kicked from the frame loop as the story nears the climb:
+  // fetch + parse the GLBs, PMREM a RoomEnvironment for the skins, attach,
+  // report readiness — the 2D hero steps aside only then. On any failure the
+  // promise cache clears and readiness never fires — the 2D hero simply
+  // keeps flying (the chunk-failure caveat, answered per hero).
+  const kickLoad = () => {
+    if (loadKicked.current) return
+    loadKicked.current = true
+    if (!envRef.current) {
+      const pmrem = new THREE.PMREMGenerator(gl)
+      envRef.current = { env: pmrem.fromScene(new RoomEnvironment(), 0.04).texture, pmrem }
+    }
+    const applyEnv = () => {
+      const env = envRef.current?.env
+      if (!env) return
+      for (const r of res.aircraft) {
+        if (!r.model) continue
+        for (const rec of r.model.mats) {
+          const std = rec.mat as unknown as THREE.MeshStandardMaterial
+          if ('envMap' in std) {
+            // Unconditional — the parse is session-cached, so a remount must
+            // overwrite the env a previous unmount disposed.
+            std.envMap = env
+            std.envMapIntensity = ENV_INTENSITY
+            std.needsUpdate = true
+          }
+        }
+      }
+    }
     loadModels().then(
       (models) => {
-        if (!alive) return
+        if (!aliveRef.current) return
         for (const r of res.aircraft) {
           r.model = models[r.aircraft.id]
           r.pivot.add(r.model.root)
         }
+        applyEnv()
         readyRef.current = true
         setHero3DReady('climb', true)
         if (import.meta.env.DEV) probe.ready = true
@@ -349,8 +349,12 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
         if (import.meta.env.DEV) console.warn('climb heroes: model load failed —', err)
       },
     )
+  }
+
+  useEffect(() => {
+    aliveRef.current = true
     return () => {
-      alive = false
+      aliveRef.current = false
       readyRef.current = false
       setHero3DReady('climb', false)
       for (const r of res.aircraft) {
@@ -359,76 +363,45 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
           r.model = null
         }
       }
+      loadKicked.current = false
+      if (envRef.current) {
+        envRef.current.env?.dispose()
+        envRef.current.pmrem.dispose()
+        envRef.current = null
+      }
     }
-  }, [res, probe])
-
-  // Environment + tone mapping for the GLB materials only: PMREM'd
-  // RoomEnvironment on each material (never scene.environment — the stage is
-  // shared), ACES on the renderer. Every other material in the 3D layer is a
-  // raw ShaderMaterial or toneMapped:false, so the 2D hex parity the `flat`
-  // stage guarantees is untouched — only the heroes get the lab's grade.
-  const gl = useThree((s) => s.gl)
-  useEffect(() => {
-    const pmrem = new THREE.PMREMGenerator(gl)
-    const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-    const prevTone = gl.toneMapping
-    const prevExposure = gl.toneMappingExposure
-    gl.toneMapping = THREE.ACESFilmicToneMapping
-    gl.toneMappingExposure = 1.12
-    let cancelled = false
-    loadModels().then((models) => {
-      if (cancelled) return
-      for (const id of Object.keys(models) as ClimbAircraft['id'][]) {
-        for (const rec of models[id].mats) {
-          const std = rec.mat as unknown as THREE.MeshStandardMaterial
-          if ('envMap' in std) {
-            std.envMap = env
-            std.envMapIntensity = 1
-            std.needsUpdate = true
-          }
-        }
-      }
-    })
-    return () => {
-      cancelled = true
-      gl.toneMapping = prevTone
-      gl.toneMappingExposure = prevExposure
-      env.dispose()
-      pmrem.dispose()
-    }
-  }, [gl])
-
-  useEffect(
-    () => () => {
-      res.surfGeo.dispose()
-      res.gridGeo.dispose()
-      for (const r of res.aircraft) {
-        r.tag.material.map?.dispose()
-        r.tag.material.dispose()
-      }
-      for (const s of res.spheres) {
-        s.surf.dispose()
-        s.grid.dispose()
-      }
-    },
-    [res],
-  )
+  }, [res])
 
   useFrame((state, delta) => {
     const count = flight.count
+    if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+
     // The scene's clock: the climb run's own (unclamped) localT — the same
     // value the 2D climb environment paints by.
     const t = climbRun ? runLocalTRaw(frame.pos, climbRun, count) : 0
 
-    // Presence: the sky world's share of the frame (the 2D cross-fade), times
-    // the section-ending white-out — the fog swallows the planes exactly as
-    // the 2D frame whites out (heroClimbPunch: fog rises 0.72→0.9 and holds;
-    // chapter 02 then cross-fades in over the white).
+    // Presence: the sky world's share of the frame (the 2D cross-fade),
+    // times the white-out swallow AND the punch-out — the 3D heroes end
+    // INSIDE the white (heroClimbPunch: fog rises 0.63→0.703 through the
+    // amplified zoom); above the deck the restored 2D silhouette story
+    // flies, so this layer owns nothing there.
     const punch = heroClimbPunch(Math.min(Math.max(t, 0), 1))
-    const presence = readyRef.current ? skyPresence(frame.slots, frame.count) * (1 - punch.fog) : 0
+    const presence = readyRef.current
+      ? skyPresence(frame.slots, frame.count) * (1 - punch.fog) * (1 - punch.above)
+      : 0
 
-    // The ceiling steals the light exactly as it does from the 2D world.
-    res.key.intensity = KEY_INTENSITY * (1 - KEY_DIM * punch.approach)
+    // Light follows the world: the ceiling steals the key exactly as it dims
+    // the 2D frame, while the hemisphere lifts a touch — cloud-base light is
+    // flat, not dark. The whole rig is off when the scene is absent, so the
+    // shadow pass never costs another chapter a millisecond.
+    const rigOn = presence > 0.002
+    res.key.visible = rigOn
+    res.hemi.visible = rigOn
+    res.fill.visible = rigOn
+    if (rigOn) {
+      res.key.intensity = KEY_INTENSITY * (1 - KEY_DIM * punch.approach)
+      res.hemi.intensity = HEMI_BASE + HEMI_CLOUD_LIFT * punch.approach
+    }
 
     // The camera pose WITHOUT the pointer micro-parallax — the room glues to
     // the flight rig; the parallax translation over it is the depth read.
@@ -452,6 +425,27 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
     const dH = (LAB_BOX.Y1 - LAB_BOX.Y0) / 2 / tanV
     const dW = (LAB_BOX.X1 - LAB_BOX.X0) / 2 / (camera.aspect * tanV)
     res.room.position.z = -(LAB_BOX.PLANE_Z + Math.max(dH, dW))
+    // Aspect-adaptive lateral spread (Martin: the maneuver spans the screen;
+    // a phone portrait pulls it back in) — position-only, models unskewed.
+    const xs = climbXScale(camera.aspect)
+
+    // The shadow key rides the ACTIVE hero — one continuous flight, so the
+    // frustum follows a single point and stays tight (crisp self-shadows).
+    if (rigOn) {
+      heroPosAt(res.tracks, t, _hero)
+      const hx = _hero.p[0] * xs
+      res.key.position.set(
+        hx + KEY_DIR.x * KEY_DIST,
+        _hero.p[1] + KEY_DIR.y * KEY_DIST,
+        _hero.p[2] + KEY_DIR.z * KEY_DIST,
+      )
+      res.key.target.position.set(hx, _hero.p[1], _hero.p[2])
+      if (import.meta.env.DEV) {
+        probe.hero.x = hx
+        probe.hero.y = _hero.p[1]
+        probe.hero.z = _hero.p[2]
+      }
+    }
 
     for (const r of res.aircraft) {
       const a = r.aircraft
@@ -459,13 +453,7 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
       const visible = alpha > 0.002 && r.model !== null
       r.pivot.visible = visible
 
-      // Name tag: the 2D graduation-tag envelope — a dim constant while the
-      // type flies, pulse-boosted at its unlock (tagAlpha), riding presence.
-      const tagA = r.model === null ? 0 : tagAlpha(a, t) * presence
-      r.tag.visible = tagA > 0.01
-      if (import.meta.env.DEV) probe.tags[a.id] = tagA
-
-      if (!visible && !r.tag.visible) {
+      if (!visible) {
         if (import.meta.env.DEV) {
           const p = (probe.aircraft[a.id] ??= { alpha: 0, x: 0, y: 0, z: 0 })
           p.alpha = 0
@@ -474,17 +462,8 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
       }
 
       poseTrackAt(r.track, t, _pose)
-      r.pivot.position.set(_pose.p[0], _pose.p[1], _pose.p[2])
+      r.pivot.position.set(_pose.p[0] * xs, _pose.p[1], _pose.p[2])
       r.pivot.quaternion.set(_pose.q[0], _pose.q[1], _pose.q[2], _pose.q[3])
-      if (r.tag.visible) {
-        // Below-right of the craft, proportional to its size — the 2D layout.
-        r.tag.position.set(
-          _pose.p[0] + a.size * TAG_DX,
-          _pose.p[1] + a.size * TAG_DY,
-          _pose.p[2],
-        )
-        r.tag.material.opacity = tagA
-      }
 
       if (r.model) {
         for (const rec of r.model.mats) {
@@ -513,27 +492,10 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
       }
     }
 
-    for (let i = 0; i < res.spheres.length; i++) {
-      const e = CLIMB_SEQ.effects[i]
-      const s = res.spheres[i]
-      const st = presence > 0 ? sphereStateAt(e, t) : null
-      if (!st) {
-        s.group.visible = false
-        if (import.meta.env.DEV) probe.spheres[i] = 0
-        continue
-      }
-      const follow = res.aircraft.find((r) => r.aircraft.id === e.follow)
-      if (follow) s.group.position.copy(follow.pivot.position)
-      s.group.scale.setScalar(st.r)
-      s.surf.opacity = st.env * SPHERE_SURF_ALPHA * presence
-      s.grid.opacity = st.env * SPHERE_GRID_ALPHA * presence
-      s.group.visible = true
-      if (import.meta.env.DEV) probe.spheres[i] = st.env
-    }
-
     if (import.meta.env.DEV) {
       probe.presence = presence
       probe.fog = punch.fog
+      probe.above = punch.above
       probe.t = t
       res.aircraft.forEach((r, i) => {
         probe.spinRot[i] = r.model?.spins[0]?.node.rotation[r.model.spins[0].axis] ?? 0
@@ -541,6 +503,7 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
       probe.gl.toneMapping = gl.toneMapping
       probe.gl.exposure = gl.toneMappingExposure
       probe.gl.outputColorSpace = String(gl.outputColorSpace)
+      probe.gl.shadows = gl.shadowMap.enabled
     }
   })
 

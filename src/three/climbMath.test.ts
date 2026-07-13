@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ABOVE,
   CLIMB_SEQ,
   SCROLL_TO_T,
   SEQ_START_T,
   TAG_BASE,
   TAG_PULSE,
+  aboveT,
   buildTrack,
   buildWarp,
   catmullRomAt,
+  climbScreenAt,
+  climbXScale,
   evalWarp,
   heroPosAt,
   lifeAlpha,
@@ -26,17 +30,20 @@ const z142 = CLIMB_SEQ.aircraft[1]
 const l39 = CLIMB_SEQ.aircraft[2]
 
 describe('snapshot timing (window-t of the climb run)', () => {
+  // authored % of scroll → window-t (the converter/runtime convention)
+  const T = (pct: number) => SEQ_START_T + (pct / 100) * SCROLL_TO_T
+
   it('places snapshots at SEQ_START_T + (start + Σ steps) · SCROLL_TO_T', () => {
     const u = snapTimes(ulla)
-    expect(u[0]).toBeCloseTo(0.06, 10)
-    expect(u[1]).toBeCloseTo(0.12, 10)
-    expect(u[2]).toBeCloseTo(0.18, 10)
+    expect(u[0]).toBeCloseTo(T(0), 10)
+    expect(u[1]).toBeCloseTo(T(0.775), 10)
+    expect(u[4]).toBeCloseTo(T(2.6), 10) // Ulla's authored 2.6 % budget
     const z = snapTimes(z142)
-    expect(z[0]).toBeCloseTo(0.18, 10)
-    expect(z[4]).toBeCloseTo(0.42, 10)
+    expect(z[0]).toBeCloseTo(T(2.6), 10)
+    expect(z[4]).toBeCloseTo(T(3.9), 10) // + the Z-142's 1.3 %
     const l = snapTimes(l39)
-    expect(l[0]).toBeCloseTo(0.42, 10)
-    expect(l[l.length - 1]).toBeCloseTo(0.834, 10)
+    expect(l[0]).toBeCloseTo(T(3.9), 10)
+    expect(l[l.length - 1]).toBeCloseTo(T(9.15), 10) // the full scene
   })
 
   it('hands off types at the junctions: same point, touching spans', () => {
@@ -48,42 +55,91 @@ describe('snapshot timing (window-t of the climb run)', () => {
     expect(lifeSpan(z142)[1]).toBeCloseTo(lifeSpan(l39)[0], 10)
   })
 
-  it('unlock spheres fire exactly at the type switches', () => {
-    expect(CLIMB_SEQ.effects[0].at).toBeCloseTo(lifeSpan(z142)[0], 10)
-    expect(CLIMB_SEQ.effects[1].at).toBeCloseTo(lifeSpan(l39)[0], 10)
+  it('unlock spheres announce each type switch (the authored 0.17 % lead)', () => {
+    const lead = 0.0017 * SCROLL_TO_T // physics.mjs SPHERE_LEAD
+    expect(CLIMB_SEQ.effects[0].at).toBeCloseTo(lifeSpan(z142)[0] - lead, 4)
+    expect(CLIMB_SEQ.effects[1].at).toBeCloseTo(lifeSpan(l39)[0] - lead, 4)
   })
 
-  it('the flight tops out below the section-ending white-out peak', () => {
-    // heroClimbPunch fog rises 0.72→0.9 — the L-39's last snap must sit
-    // INSIDE the rise (swallowed while still climbing), before full white.
+  it('the flight tops out right at the section-ending white-out', () => {
+    // heroClimbPunch fog rises 0.63→0.703 — the L-39's last snap must sit
+    // inside the rise or just past its top (fully white right as it ends).
     const end = sceneEnd(CLIMB_SEQ)
-    expect(end).toBeGreaterThan(0.72)
-    expect(end).toBeLessThan(0.9)
+    expect(end).toBeGreaterThan(0.63)
+    expect(end).toBeLessThan(0.72)
   })
 
   it('preserves the authored scroll pacing through SCROLL_TO_T', () => {
-    // Martin authored 12.9 % of scroll; the climb owns 1/6 of it (weight 2
-    // of 12) → 0.129 · 6 of window-t.
-    expect(sceneEnd(CLIMB_SEQ) - SEQ_START_T).toBeCloseTo(0.129 * SCROLL_TO_T, 10)
+    // Martin authored 9.15 % of scroll, played 1:1 in HUD % (the climb owns
+    // scrollWeight 2 of total 13.3 → SCROLL_TO_T = 13.3/2).
+    expect(sceneEnd(CLIMB_SEQ) - SEQ_START_T).toBeCloseTo(0.0915 * SCROLL_TO_T, 10)
+  })
+
+  it('the punch-out beats sit between the white-out and the window end', () => {
+    // ABOVE re-times the 2D above-deck story onto [out, cut] — the affine
+    // map must hit both ends exactly and stay ordered.
+    expect(aboveT(0.6)).toBeCloseTo(ABOVE.out, 10)
+    expect(aboveT(0.84)).toBeCloseTo(ABOVE.cut, 10)
+    expect(aboveT(0.8)).toBeGreaterThan(ABOVE.whiteGone) // unlock after the reveal
+    expect(sceneEnd(CLIMB_SEQ)).toBeLessThan(ABOVE.swap) // 3D flight ends first
+    expect(ABOVE.swap).toBeLessThan(ABOVE.out)
+    expect(ABOVE.out).toBeLessThan(ABOVE.whiteGone)
+    expect(ABOVE.whiteGone).toBeLessThan(ABOVE.cut)
+    expect(ABOVE.cut).toBeLessThan(1)
+  })
+})
+
+describe('stage projection (climbScreenAt)', () => {
+  it('maps the display plane edge-to-edge at the lab 3:2 aspect', () => {
+    // At 3:2 contain = cover: the plane corners ARE the viewport corners.
+    expect(climbScreenAt([0, 0, -3], 1500, 1000).x).toBeCloseTo(0.5, 10)
+    expect(climbScreenAt([0, 0, -3], 1500, 1000).y).toBeCloseTo(0.5, 10)
+    expect(climbScreenAt([6, 4, -3], 1500, 1000).x).toBeCloseTo(1, 6)
+    expect(climbScreenAt([6, 4, -3], 1500, 1000).y).toBeCloseTo(0, 6)
+  })
+
+  it('compresses deeper points toward the centre (perspective)', () => {
+    const near = climbScreenAt([4, 0, -3], 1600, 900)
+    const far = climbScreenAt([4, 0, -15], 1600, 900)
+    expect(Math.abs(far.x - 0.5)).toBeLessThan(Math.abs(near.x - 0.5))
+    expect(far.pxPerUnit).toBeLessThan(near.pxPerUnit)
+  })
+
+  it('climbXScale spans the width on desktop and pulls a portrait back in', () => {
+    const desktop = climbXScale(16 / 9)
+    const portrait = climbXScale(390 / 844)
+    // Never stretches past the bake; narrow screens shrink hard enough that
+    // the widest snap (the parked Ulla) stays inside the frame.
+    expect(desktop).toBeLessThanOrEqual(1)
+    expect(desktop).toBeGreaterThan(0.85)
+    expect(portrait).toBeLessThan(desktop)
+    expect(portrait).toBeGreaterThan(0.5)
+    // The pin itself: widest |x| · scale ≤ 87 % of the half-frustum there.
+    const wideX = 7.5 // physics.mjs X_SPREAD 1.5 × Ulla's authored −5
+    for (const a of [16 / 9, 3 / 2, 390 / 844]) {
+      const s = climbScreenAt([wideX * climbXScale(a), -3.25, -4.5], 1000 * a, 1000)
+      expect(s.x).toBeLessThanOrEqual(0.936)
+    }
   })
 })
 
 describe('life alpha', () => {
   it('is instant at the span edges (clean type handoffs)', () => {
-    expect(lifeAlpha(z142, 0.179)).toBe(0)
-    expect(lifeAlpha(z142, 0.181)).toBe(1)
-    expect(lifeAlpha(z142, 0.419)).toBe(1)
-    expect(lifeAlpha(z142, 0.421)).toBe(0)
+    // Z-142 lives T(2.6)→T(3.9) = window-t ≈ 0.2694→0.3559
+    expect(lifeAlpha(z142, 0.268)).toBe(0)
+    expect(lifeAlpha(z142, 0.271)).toBe(1)
+    expect(lifeAlpha(z142, 0.354)).toBe(1)
+    expect(lifeAlpha(z142, 0.358)).toBe(0)
   })
 
   it('holdBefore keeps the first aircraft parked through the fade-in', () => {
     expect(lifeAlpha(ulla, -0.15)).toBe(1)
-    expect(lifeAlpha(ulla, 0.181)).toBe(0)
+    expect(lifeAlpha(ulla, 0.271)).toBe(0) // handed off at ≈ 0.2694
   })
 
   it('the L-39 lives to its last snap — the white-out does the swallowing', () => {
-    expect(lifeAlpha(l39, 0.833)).toBe(1)
-    expect(lifeAlpha(l39, 0.835)).toBe(0)
+    expect(lifeAlpha(l39, 0.703)).toBe(1) // ends ≈ 0.705
+    expect(lifeAlpha(l39, 0.707)).toBe(0)
   })
 })
 
@@ -208,9 +264,10 @@ describe('pose evaluation', () => {
     heroPosAt(tracks, -0.2, pose)
     expect(pose.p).toEqual([...ulla.snaps[0].p])
     // exactly at a junction both sides give the same point
-    heroPosAt(tracks, 0.18 - 1e-9, pose)
+    const junction = lifeSpan(ulla)[1]
+    heroPosAt(tracks, junction - 1e-9, pose)
     const before = [...pose.p]
-    heroPosAt(tracks, 0.18 + 1e-9, pose)
+    heroPosAt(tracks, junction + 1e-9, pose)
     expect(pose.p[0]).toBeCloseTo(before[0], 4)
     expect(pose.p[1]).toBeCloseTo(before[1], 4)
     expect(pose.p[2]).toBeCloseTo(before[2], 4)
@@ -242,9 +299,9 @@ describe('unlock sphere', () => {
 
 describe('name tags (the 2D graduation-tag envelope)', () => {
   it('holds dim while the type flies, gone outside its life', () => {
-    expect(tagAlpha(z142, 0.17)).toBe(0) // not born yet
-    expect(tagAlpha(z142, 0.3)).toBeCloseTo(TAG_BASE, 6) // pulse long gone
-    expect(tagAlpha(z142, 0.43)).toBe(0) // died at 0.42
+    expect(tagAlpha(z142, 0.17)).toBe(0) // not born yet (birth ≈ 0.2694)
+    expect(tagAlpha(z142, 0.345)).toBeCloseTo(TAG_BASE, 6) // pulse long gone
+    expect(tagAlpha(z142, 0.36)).toBe(0) // died at ≈ 0.3559
   })
 
   it('pulses gold right after each unlock', () => {
@@ -256,8 +313,8 @@ describe('name tags (the 2D graduation-tag envelope)', () => {
 
   it('the first rung has no pulse — just the dim ride (2D graduationAt)', () => {
     expect(tagAlpha(ulla, -0.2)).toBeCloseTo(TAG_BASE, 6) // parked pre-scene
-    expect(tagAlpha(ulla, 0.1)).toBeCloseTo(TAG_BASE, 6)
-    expect(tagAlpha(ulla, 0.19)).toBe(0) // handed over
+    expect(tagAlpha(ulla, 0.11)).toBeCloseTo(TAG_BASE, 6)
+    expect(tagAlpha(ulla, 0.28)).toBe(0) // handed over at ≈ 0.2694
   })
 })
 

@@ -56,6 +56,13 @@ export function Stage3D({ chapters }: { chapters: readonly Chapter[] }) {
       <Canvas
         // No tone mapping: additive star hexes must match the 2D CSS palette.
         flat
+        // Real shadow maps for the hero beats (ballet noon rig, climb
+        // morning key). MUST be the prop, not a scene effect: R3F's
+        // configure() re-asserts `shadowMap.enabled = !!shadows` on every
+        // Canvas re-render, silently switching off anything an effect set.
+        // Costs nothing outside the beats — only their keys cast, and they
+        // are culled/off with the scenes.
+        shadows
         dpr={[1, 2]}
         gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
         camera={{ fov: STAGE_FOV, near: 0.1, far: 130, position: [0, 0, 0] }}

@@ -13,11 +13,12 @@
  * aircraft must — never a scripted pose.
  *
  * Scroll IS the clock. The beat windows are authored in HUD % (Martin
- * directs in the bottom-left readout: the L-159 + its label appear ~23 %,
- * the 3rd step after that starts the fade-in, the ballet flies 6 steps,
- * fade-out at the end of the 6th) and converted ONCE through the live
- * weight map into the cruise run's localT — so a future re-weighting of
- * the chapter moves every beat with it instead of silently breaking it.
+ * directs in the bottom-left readout: the L-159 + its label appear at the
+ * ~25.5 % cut, the ballet pops in at ~27 %, flies to ~33.4 %) and converted
+ * ONCE through the live weight map into the cruise run's localT — so a
+ * future re-weighting of the chapter moves every beat with it instead of
+ * silently breaking it (an UPSTREAM re-weight still needs the HUD numbers
+ * re-based — see the note on BALLET below).
  *
  * Three-free by contract: the 2D `cruise.ts` (main bundle) imports the
  * windows + the cloud-sink curve so both worlds share one timing source.
@@ -51,22 +52,26 @@ function tAtHud(hud: number): number {
 }
 
 /**
- * The beat windows, in cruise-run localT (Martin's direction, HUD %):
- *  - 19 %: the hard cut — the complete 02 scene (solo L-159, HUD, card)
- *    replaces the climb in one instant (the chapter's enterFade)
- *  - 21 %: the ballet POPS IN, full presence, and the solo vanishes the
- *    same frame — Martin: instant swaps, never a half-ghost overlap
- *  - 21→28 %: the one-circle fight (seven percent, 2.5 revolutions)
- *  - 28.0 %: the pair POPS OUT off its final frame — full motion to the
+ * The beat windows, in cruise-run localT (Martin's direction, HUD % — his
+ * original percents were called on the total-12.3 map; the E3b-v2 climb
+ * stretch (×2 → total 13.3) moved every downstream scroll depth, so each
+ * anchor is re-based through `new = (old·12.3 + 1.0)/13.3`, which keeps
+ * its POS — the story moment — bit-identical):
+ *  - ~25.5 %: the hard cut — the complete 02 scene (solo L-159, HUD, card)
+ *    replaces the climb's punch-out finale in one instant (the enterFade)
+ *  - 26.94 % (his 21): the ballet POPS IN, full presence, and the solo
+ *    vanishes the same frame — Martin: instant swaps, never a half-ghost
+ *  - →33.41 % (his 28): the one-circle fight (2.5 revolutions)
+ *  - 33.41 %: the pair POPS OUT off its final frame — full motion to the
  *    last instant — while the COMAO lead is just nosing into the frame
  * `in1`/`out1` bound the maneuver bookkeeping (flow/turns span in0→out0;
  * presence itself is BINARY — see balletPresence).
  */
 export const BALLET = {
-  in0: tAtHud(21),
-  in1: tAtHud(22),
-  out0: tAtHud(28),
-  out1: tAtHud(29),
+  in0: tAtHud(26.9398),
+  in1: tAtHud(27.8647),
+  out0: tAtHud(33.4135),
+  out1: tAtHud(34.3383),
 } as const
 
 /** The instant the pair pops out: exactly the end of the sixth step at
@@ -83,12 +88,12 @@ const BALLET_KILL = BALLET.out0
  *  Martin: every leg of the approach must move equally fast; without the
  *  braking, whatever sliver of motion was left before the marks snapped
  *  through in a blink at the start of a glide). The run starts off-screen
- *  at 27.7, the lead noses into frame right as the ballet pops out at 28.0,
- *  and the package stands on its marks at 29.7 — then it OWNS the frame
- *  before Bagram (sweep from 31.3). */
+ *  at 33.14 (his 27.7), the lead noses into frame right as the ballet pops
+ *  out at 33.41, and the package stands on its marks at 34.99 (his 29.7) —
+ *  then it OWNS the frame before Bagram (sweep from 36.5). */
 export const COMAO = {
-  in0: tAtHud(27.7),
-  in1: tAtHud(29.7),
+  in0: tAtHud(33.1361),
+  in1: tAtHud(34.9857),
 } as const
 
 /** The maneuver — the showcase's locked values (HANDOFF-l159-ballet §3).

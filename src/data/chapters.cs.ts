@@ -71,7 +71,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: 'od 2017',
     num: '07 – Bitcoin',
     title: '<span class="t-late">Bitcoin</span><br>králičí nora',
-    body: 'Bitcoin je multioborový IQ test a&nbsp;svoboda ukrytá pod technologií. Klíče, bloky, uzly, konsensus bez důvěry. <span class="a-btc">Nejtvrdší peníze, které nikdo nenatiskne, nezabaví ani necenzuruje.</span> Přestal jsem o&nbsp;něm číst a&nbsp;začal jej provozovat: full node i&nbsp;Lightning node, solo mining do vlastního poolu.<br><span class="a-btc">Nevěř&nbsp;–&nbsp;ověřuj.</span>',
+    body: 'Svoboda ukrytá pod technologií. <span class="a-btc">Nejtvrdší peníze, jaké existují&nbsp;–&nbsp;prokazatelně vzácné, které nikdo nenatiskne, nezabaví ani necenzuruje.</span> Leží tam, kde se potkávají peníze, kód a&nbsp;důvěra, takže napoprvé to nepochopí skoro nikdo. Já taky ne. Pak jsem přestal číst a&nbsp;začal to provozovat: full node i&nbsp;Lightning node, solo mining do vlastního poolu.<br><span class="a-btc">Nevěř&nbsp;–&nbsp;ověřuj.</span>',
     cta: {
       label: 'Přečtěte si můj úvod do Bitcoinu →',
       href: 'https://medium.seznam.cz/clanek/c-m-poznejte-bitcoin-r-evoluci-ve-svete-penez-49909',
