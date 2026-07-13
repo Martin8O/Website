@@ -28,7 +28,9 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         Claude&nbsp;Code, we&rsquo;ve built a hyper-efficient workshop&nbsp;—&nbsp;five real apps and{' '}
         <span className={styles.highlight}>this site</span>, each one built properly and verified
         end to end. And fast: from an empty folder to a live production deploy{' '}
-        <span className={styles.highlight}>in 4&nbsp;days</span>.
+        <span className={styles.highlight}>in 4&nbsp;days</span>&nbsp;—&nbsp;then a full 3D
+        version, with its own animation studio, in{' '}
+        <span className={styles.highlight}>4&nbsp;more</span>.
       </>
     ),
     p2: (
@@ -51,7 +53,9 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         aplikací a{' '}
         <span className={styles.highlight}>tento web</span>, všechny pořádně a&nbsp;ověřené od
         začátku do konce. A&nbsp;rychle: z&nbsp;prázdné složky až po produkční nasazení{' '}
-        <span className={styles.highlight}>za 4&nbsp;dny</span>.
+        <span className={styles.highlight}>za 4&nbsp;dny</span>&nbsp;–&nbsp;a&nbsp;pak plnohodnotná
+        3D verze, s&nbsp;vlastním animačním studiem, za&nbsp;další{' '}
+        <span className={styles.highlight}>4&nbsp;dny</span>.
       </>
     ),
     p2: (
