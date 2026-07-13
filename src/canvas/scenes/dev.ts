@@ -11,8 +11,8 @@
  * Electricity buzzes across the etched glass grid in flickering arcs.
  *
  * The rooftop billboards are REAL: the amber contribution heatmap and the
- * monthly-momentum bars are baked from `local/ode mne/solodev/
- * github-stats.json` (479 contributions from zero, 530 commits) — the
+ * monthly-momentum bars are baked from `local/Github Stats/github-stats.json`
+ * (599 commits — you + your AI builder — across 11 projects in 88 days) — the
  * city itself advertises the explosion, in the site's amber through-line.
  *
  * From the singularity the five project WINDOWS are born — bursting out in
@@ -129,30 +129,33 @@ function roundRect(
 }
 
 // --- GitHub reality, baked into the city (billboards) -------------------------
-// Real daily contributions from `github-stats.json` (day 0 = 2026-03-26, a
-// Thursday) → a GitHub-style heat matrix for the rooftop billboard.
+// Real daily commits — you + your AI builder — from `local/Github Stats/
+// github-stats.json` (day 0 = 2026-03-26, a Thursday) → a GitHub-style heat
+// matrix for the rooftop billboard. Regenerate with the Github Stats tool.
 const COMMIT_DAYS: ReadonlyArray<readonly [number, number]> = [
-  [0, 1], [25, 3], [26, 15], [27, 11], [28, 20], [33, 5],
-  [41, 22], [42, 12], [43, 35], [65, 32],
-  [68, 5], [69, 4], [70, 1], [71, 4], [74, 6], [75, 2], [76, 1], [77, 1],
-  [81, 1], [82, 4], [83, 13], [84, 9], [85, 24], [86, 3],
-  [87, 2], [88, 31], [89, 16], [90, 8], [91, 30], [92, 24], [93, 3],
-  [94, 1], [95, 24], [96, 18],
-  [97, 19], [98, 11], [99, 16], [100, 16], [101, 5], [102, 13], [103, 8],
+  [22, 35], [23, 7], [25, 11], [26, 14], [27, 12], [28, 20], [33, 5],
+  [41, 22], [42, 37], [43, 12], [65, 31], [68, 4], [69, 4], [70, 1],
+  [71, 4], [74, 6], [75, 2], [76, 1], [77, 8], [78, 12], [79, 7],
+  [80, 3], [81, 12], [82, 11], [83, 14], [84, 12], [85, 6], [86, 2],
+  [87, 6], [88, 23], [89, 17], [90, 17], [91, 26], [92, 20], [93, 3],
+  [94, 2], [95, 12], [96, 11], [97, 12], [98, 5], [99, 17], [100, 10],
+  [101, 6], [102, 13], [103, 14], [104, 29], [105, 11], [106, 9], [107, 6],
+  [108, 5], [109, 10],
 ]
-const HEAT_COLS = 16
+const HEAT_COLS = 17
 const HEAT: number[][] = []
 for (let c = 0; c < HEAT_COLS; c++) HEAT.push(new Array<number>(7).fill(0))
 for (const [d, n] of COMMIT_DAYS) {
   const col = Math.floor((d + 3) / 7)
   if (col < HEAT_COLS) HEAT[col][(d + 3) % 7] = Math.min(1, n / 35)
 }
-/** Monthly momentum from the snapshot: Apr 54 · May 101 · Jun 235 · July on
- *  a ~380 pace (88 in the first 7 days) — bars normalized to that pace. */
-const MOM_VALS = [54, 101, 235, 380] as const
+/** Monthly momentum — REAL monthly commit counts (you + your AI builder):
+ *  Apr 104 · May 102 · Jun 246 · Jul 147 (July still in progress). Bars
+ *  normalized to the peak month. */
+const MOM_VALS = [104, 102, 246, 147] as const
 const MOM_LABELS = ['APR', 'MAY', 'JUN', 'JUL'] as const
-const MOM_TEXT = ['54', '101', '235', '~380'] as const
-const JUL_ACTUAL = 88
+const MOM_TEXT = ['104', '102', '246', '147'] as const
+const MOM_MAX = Math.max(...MOM_VALS)
 
 // --- The Tron city: seven depth rows climbing away from the glass -------------
 type Tower = {
@@ -1916,9 +1919,9 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
     let cxp = x0b + 10 * S
     const CHIPS = [
       ['11', 'projects'],
-      ['103', 'days'],
-      ['530', 'commits'],
-      ['1–22', 'days each'],
+      ['88', 'days'],
+      ['599', 'commits'],
+      ['1–26', 'days each'],
     ] as const
     for (let ci = 0; ci < CHIPS.length; ci++) {
       ctx.font = `700 ${Math.round(10.5 * S)}px "Chakra Petch", ui-monospace, monospace`
@@ -1962,12 +1965,12 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
     ctx.font = `${Math.round(7.5 * S)}px "Chakra Petch", ui-monospace, monospace`
     ctx.fillStyle = rgba(PALE, 0.42 * aB)
     ctx.textAlign = 'center'
-    const monthCols = [3, 7, 12, 14.7] as const
+    const monthCols = [4, 7, 12, 15] as const
     for (let mi = 0; mi < 4; mi++) {
       ctx.fillText(MOM_LABELS[mi], hx0 + monthCols[mi] * cs, py + ph * 0.91)
     }
-    // Monthly momentum (right): muted labels, amber bars, values at the
-    // tips — 54 → 101 → 235 → ~380 pace.
+    // Monthly momentum (right): muted labels, amber bars, real values at the
+    // tips — 104 · 102 · 246 · 147 (July still in progress).
     const mx0 = x0b + pw * 0.56
     const mw2 = pw * 0.44 - 12 * S
     const my0 = py + ph * 0.28
@@ -1980,21 +1983,11 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
       ctx.fillText(MOM_LABELS[m], mx0, yy + rowH * 0.42)
       const bx0 = mx0 + 21 * S
       const bw3 = mw2 - 21 * S - 27 * S
-      const frac2 = MOM_VALS[m] / 380
-      if (m === 3) {
-        ctx.fillStyle = rgba(AMBER, 0.16 * aB)
-        ctx.fillRect(bx0, yy, bw3 * frac2, rowH * 0.6)
-        ctx.fillStyle = rgba(AMBER, 0.85 * aB)
-        ctx.fillRect(bx0, yy, bw3 * (JUL_ACTUAL / 380), rowH * 0.6)
-        const tipA = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(time * 2.2))
-        ctx.fillStyle = rgba(AMBER, tipA * aB)
-        ctx.fillRect(bx0 + bw3 * (JUL_ACTUAL / 380), yy, 3, rowH * 0.6)
-      } else {
-        ctx.fillStyle = rgba(AMBER, 0.12 * aB)
-        ctx.fillRect(bx0, yy, bw3, rowH * 0.6)
-        ctx.fillStyle = rgba(AMBER, 0.8 * aB)
-        ctx.fillRect(bx0, yy, bw3 * frac2, rowH * 0.6)
-      }
+      const frac2 = MOM_VALS[m] / MOM_MAX
+      ctx.fillStyle = rgba(AMBER, 0.12 * aB)
+      ctx.fillRect(bx0, yy, bw3, rowH * 0.6)
+      ctx.fillStyle = rgba(AMBER, 0.8 * aB)
+      ctx.fillRect(bx0, yy, bw3 * frac2, rowH * 0.6)
       ctx.font = `600 ${Math.round(8 * S)}px "Chakra Petch", ui-monospace, monospace`
       ctx.fillStyle = rgba(AMBER, 0.9 * aB)
       ctx.fillText(MOM_TEXT[m], bx0 + bw3 + 4 * S, yy + rowH * 0.42)
