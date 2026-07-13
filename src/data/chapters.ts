@@ -301,7 +301,7 @@ export const CHAPTERS: Chapter[] = [
     // (~pos 6.1–6.4), and clear the frame before the healing lake bleeds
     // in (~6.5).
     cardFull: [0.08, 0.42],
-    body: '<span class="a-hud">Twenty years in the Air Force, ~1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and test pilot. In 2021 I chose to leave the military; since 2022 I’ve been my own boss. Before that I retrained in computer networks and systems. But I had no masterplan&nbsp;—&nbsp;just trust in the open road ahead and the urge to leap into the world. What followed was intense travel: half of every year abroad, volunteering at Buddhist centres and courses. Meditation has been part of my life since 2005&nbsp;—&nbsp;now it has more room to breathe.',
+    body: '<span class="a-hud">Twenty years in the Air Force, ~1,700 hours in the air</span>&nbsp;—&nbsp;the final years as instructor, flight-safety inspector and acceptance test pilot. In 2021 I chose to leave the military; since 2022 I’ve been my own boss. Before that I retrained in computer networks and systems. But I had no masterplan&nbsp;—&nbsp;just trust in the open road ahead and the urge to leap into the world. What followed was intense travel: half of every year abroad, volunteering at Buddhist centres and courses. Meditation has been part of my life since 2005&nbsp;—&nbsp;now it has more room to breathe.',
     align: 'left',
   },
   // The story is THEMATIC here, not strictly chronological: healing (2014–16)
@@ -375,7 +375,7 @@ export const CHAPTERS: Chapter[] = [
     cardFull: [0.545, 0.7],
     cardEase: [0.035, 0.05],
     compact: true,
-    body: 'It began carefully&nbsp;—&nbsp;small apps first. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">five real apps in about a month</span>&nbsp;—&nbsp;floating all around you. During the builds they even wrote the lessons they taught me into the <strong>dev-brain</strong> vault, which <strong>BrainQuest</strong> turns into Duolingo-style learning&nbsp;—&nbsp;so I’m still learning the craft, not just watching. The contribution graph below looks like a steep takeoff; maybe everything above was training for it. <em>(Turns out I love the screen after all.)</em>',
+    body: 'It began carefully&nbsp;—&nbsp;small apps first. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">five real apps in about a month</span>&nbsp;—&nbsp;built properly, not just fast&nbsp;—&nbsp;floating all around you. During the builds they wrote the lessons they taught me into the <strong>dev-brain</strong> vault, which <strong>BrainQuest</strong> turns into Duolingo-style learning&nbsp;—&nbsp;so I’m still learning the craft, not just watching. The contribution graph below looks like a steep takeoff; maybe everything above was training for it. <em>(Turns out I love the screen after all.)</em>',
     // The Work items (the five floating windows) are data-driven from
     // `src/data/projects.ts` → the dev scene + DevWindowLinks read them.
   },

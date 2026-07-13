@@ -55,7 +55,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: '2020–2022',
     num: '05 – Konec služby',
     title: 'Instruktor,<br>zkušební pilot',
-    body: '<span class="a-hud">Dvacet let u&nbsp;vzdušných sil, ~1&nbsp;700 hodin ve vzduchu</span>&nbsp;–&nbsp;poslední roky jako instruktor, inspektor bezpečnosti létání a&nbsp;zkušební pilot. V&nbsp;roce 2021 jsem se sám rozhodl odejít z&nbsp;armády a&nbsp;od roku 2022 jsem svým pánem. Před odchodem jsem získal rekvalifikaci na počítačové sítě a&nbsp;systémy. Neměl jsem ale žádný masterplan, jen důvěru v&nbsp;prostor a&nbsp;touhu skočit do světa. Následovalo intenzivní cestování, půl roku ročně v&nbsp;cizině, dobrovolnictví v&nbsp;buddhistických centrech a&nbsp;na kurzech. Meditace patří k&nbsp;mému životu od roku 2005&nbsp;–&nbsp;teď má víc prostoru.',
+    body: '<span class="a-hud">Dvacet let u&nbsp;vzdušných sil, ~1&nbsp;700 hodin ve vzduchu</span>&nbsp;–&nbsp;poslední roky jako instruktor, inspektor bezpečnosti létání a&nbsp;zaletávací pilot. V&nbsp;roce 2021 jsem se sám rozhodl odejít z&nbsp;armády a&nbsp;od roku 2022 jsem svým pánem. Před odchodem jsem získal rekvalifikaci na počítačové sítě a&nbsp;systémy. Neměl jsem ale žádný masterplan, jen důvěru v&nbsp;prostor a&nbsp;touhu skočit do světa. Následovalo intenzivní cestování, půl roku ročně v&nbsp;cizině, dobrovolnictví v&nbsp;buddhistických centrech a&nbsp;na kurzech. Meditace patří k&nbsp;mému životu od roku 2005&nbsp;–&nbsp;teď má víc prostoru.',
   },
   'calm-healing': {
     era: '2014–2016',
@@ -81,7 +81,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: 'od 2026',
     num: '08 – Exploze',
     title: 'Sólo<br>vývojář',
-    body: 'Začalo to opatrně&nbsp;–&nbsp;nejdřív malé aplikace. Pak jsem objevil <span class="a-cyan">Claude Code</span> a&nbsp;opatrnost skončila: <span class="a-mag">pět skutečných aplikací za zhruba měsíc</span>&nbsp;–&nbsp;vznášejí se tady okolo. Dokonce během vývoje zapisovaly do trezoru <strong>dev-brain</strong> tematické lekce, které <strong>BrainQuest</strong> mění ve výuku ve stylu Duolinga&nbsp;–&nbsp;takže se pořád učím, ne jen přihlížím. Graf příspěvků níže vypadá jako strmý vzlet; všechno předtím mohl být trénink na tohle. <em>(Nakonec mě ta obrazovka přece jen baví.)</em>',
+    body: 'Začalo to opatrně&nbsp;–&nbsp;nejdřív malé aplikace. Pak jsem objevil <span class="a-cyan">Claude Code</span> a&nbsp;opatrnost skončila: <span class="a-mag">pět skutečných aplikací za zhruba měsíc</span>&nbsp;–&nbsp;postavených pořádně, ne jen rychle&nbsp;–&nbsp;vznášejí se tady okolo. Během vývoje zapisovaly do trezoru <strong>dev-brain</strong> tematické lekce, které <strong>BrainQuest</strong> mění ve výuku ve stylu Duolinga&nbsp;–&nbsp;takže se pořád učím, ne jen přihlížím. Graf příspěvků níže vypadá jako strmý vzlet; všechno předtím mohl být trénink na tohle. <em>(Nakonec mě ta obrazovka přece jen baví.)</em>',
   },
   'offer-mission': {
     num: '09 – Vaše mise',
