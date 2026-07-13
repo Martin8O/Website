@@ -23,7 +23,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
     p1: (
       <>
         Twenty years in the Air Force&nbsp;—&nbsp;military jet pilot, instructor, display pilot,
-        test pilot. Mid-career, a self-healing that rebuilt how I live and a Bitcoin rabbit hole
+        acceptance test pilot. Mid-career, a self-healing that rebuilt how I live and a Bitcoin rabbit hole
         that rebuilt what I trust: technical understanding over promises. And now, with
         Claude&nbsp;Code, we&rsquo;ve built a hyper-efficient workshop&nbsp;—&nbsp;five real apps and{' '}
         <span className={styles.highlight}>this site</span>, each one built properly and verified
@@ -45,7 +45,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
     p1: (
       <>
         Dvacet let u letectva&nbsp;–&nbsp;pilot proudových letounů, instruktor, display pilot,
-        zkušební pilot. Uprostřed toho sebeuzdravení, které přestavělo, jak žiju, a&nbsp;bitcoinová
+        zaletávací pilot. Uprostřed toho sebeuzdravení, které přestavělo, jak žiju, a&nbsp;bitcoinová
         králičí nora, po&nbsp;které věřím spíš technickému porozumění než slibům. A&nbsp;teď
         jsme s&nbsp;Claude&nbsp;Code postavili super efektivní dílnu&nbsp;–&nbsp;pět skutečných
         aplikací a{' '}
