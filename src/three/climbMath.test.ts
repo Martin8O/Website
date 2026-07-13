@@ -36,7 +36,7 @@ describe('snapshot timing (window-t of the climb run)', () => {
   it('places snapshots at SEQ_START_T + (start + Σ steps) · SCROLL_TO_T', () => {
     const u = snapTimes(ulla)
     expect(u[0]).toBeCloseTo(T(0), 10)
-    expect(u[1]).toBeCloseTo(T(0.775), 10)
+    expect(u[1]).toBeCloseTo(T(0.7366), 10)
     expect(u[4]).toBeCloseTo(T(2.6), 10) // Ulla's authored 2.6 % budget
     const z = snapTimes(z142)
     expect(z[0]).toBeCloseTo(T(2.6), 10)
@@ -109,16 +109,23 @@ describe('stage projection (climbScreenAt)', () => {
     const desktop = climbXScale(16 / 9)
     const portrait = climbXScale(390 / 844)
     // Never stretches past the bake; narrow screens shrink hard enough that
-    // the widest snap (the parked Ulla) stays inside the frame.
+    // the binding snap (the parked Ulla, near the plane) stays inside the
+    // frame. Desktop ≈ 0.845 — the Ulla cap at her own shallow depth.
     expect(desktop).toBeLessThanOrEqual(1)
-    expect(desktop).toBeGreaterThan(0.85)
+    expect(desktop).toBeGreaterThan(0.8)
     expect(portrait).toBeLessThan(desktop)
     expect(portrait).toBeGreaterThan(0.5)
-    // The pin itself: widest |x| · scale ≤ 87 % of the half-frustum there.
-    const wideX = 7.5 // physics.mjs X_SPREAD 1.5 × Ulla's authored −5
+    // The guard itself: EVERY snap · scale ≤ 87 % of the half-frustum at its
+    // own depth — the right-stretched bake (X_RIGHT) puts the widest |x|
+    // DEEP, so a single widest-point check would miss the near ones.
     for (const a of [16 / 9, 3 / 2, 390 / 844]) {
-      const s = climbScreenAt([wideX * climbXScale(a), -3.25, -4.5], 1000 * a, 1000)
-      expect(s.x).toBeLessThanOrEqual(0.936)
+      const s = climbXScale(a)
+      for (const ac of CLIMB_SEQ.aircraft)
+        for (const snap of ac.snaps) {
+          const scr = climbScreenAt([snap.p[0] * s, snap.p[1], snap.p[2]], 1000 * a, 1000)
+          expect(scr.x).toBeGreaterThanOrEqual(0.064)
+          expect(scr.x).toBeLessThanOrEqual(0.936)
+        }
     }
   })
 })

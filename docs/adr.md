@@ -4,6 +4,44 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-046 — Chapter-01 climb depth/width reshape + smooth handoff; chapter-00 sun single-arc (2026-07-13)
+Review-driven tuning pass over the ADR-045 climb, all through the same `physics.mjs` → `convert.mjs` tool chain
+(attitudes always re-derived from the reshaped flight path — never scaled in runtime, or the noses would point
+wrong). Plus an unrelated fix to the chapter-00 sun's trajectory. Chapter 01 declared perfect by Martin.
+
+1. **Depth grown ×3, both stretches anchored on the parked Ulla.** `K_DEPTH` 1.0 → 3.0 over three rounds, pivoting
+   the Z-scale on `Z_ANCHOR` = the parked Ulla's authored z (−4.5), so the bottom-left start never moves and the
+   near craft sits CLOSE while depth grows away from it (the L-39's zoom now recedes to z ≈ −54, camera-distance
+   ~60–75, well inside Stage3D far=130). Perspective pulled the mid-flight toward centre, so a new `X_RIGHT` (1.1)
+   right-stretch about the Ulla's x (`X_LEFT`) carries the L-39's apex out to ~the centre of the text column
+   without leaving frame — while the start stays put. `X_SPREAD` 1.5 → 1.75.
+2. **Frame guard now checks EVERY snap, not the widest.** The right-stretch puts the widest-|x| snap DEEP (a
+   generous frustum there) while the truly binding point is a NEAR one (the parked Ulla) — a single widest-point
+   pin misfired and parked Ulla off-frame. `climbMath.climbXScale` now caps every snap at ~87 % of the
+   half-frustum at its OWN depth.
+3. **Smooth type handoff = outgoing finishes INTO the incoming's departure attitude.** The old direction (newborn
+   inherits the outgoing attitude) parked the newborn off its own spline's tangent frame, which it then snapped
+   toward over the short first leg — the z142→l39 "škubnutí". Reversed: the outgoing type rolls into where the
+   next type naturally departs, and each type flies its own coordinated frame from birth.
+4. **z142.glb diet + label + tag.** The Z-142 flies the deepest of its type (~a few dozen px on screen), so it
+   took the hardest bake decimation (ratio 0.3 → 0.05, tex 1024 → 512, error 0.0025 → 0.02): 1.59 → 1.15 MB, no
+   visible loss at that distance. Label "L-39C" → **"L-39"** everywhere (converter ROSTER + 2D `GRADUATION`). The
+   name-tag offset is CAPPED (`min(sizePx, unit·0.11)`) so the near-camera Ulla's tag hugs the wing instead of
+   being flung out by its huge projected length; deep types untouched. Env-drift `hz` weights re-derived for the
+   new scales (they compensate the reshape so the approved world response is per-pixel identical).
+5. **Chapter-00 sun = ONE smooth arc to the scene's end.** The origin sun's post-dawn march used to accelerate
+   ×3 and slide off the right edge past the run's end (read as unnatural sideways motion), then a first fix parked
+   it early, then a two-phase rise waved (two chained smoothsteps, flat-to-zero then re-rising). Final:
+   x marches linearly to a resting spot reached only as the 00→01 cross-fade finishes (tRaw/1.1); y follows the
+   approved sunrise shape to t=0.7, then a quadratic Hermite tail continues with the SAME slope, decaying
+   monotonically — the sun keeps climbing ever more gently, no level walk, no wave, no standstill while scrolling.
+   Palette/disc-rise stay on the original `elevation` (sky look unchanged). `origin.ts` only.
+
+**Unchanged (deliberately):** timeline/scrollWeight (13.3), GLB roster (same three files; only z142 re-baked),
+chapter 01 choreography envelope. **Verify:** `cdp-climb2-verify.mjs` desktop+mobile ALL PASS, console clean;
+sun trajectory read off the live site (monotonic-slope climb, no wave). Gate green (324). Model-fit: 🔥 Fable 5
+(reshape/build/iteration) + Opus 4.8 (wrap-up).
+
 ### ADR-045 — Chapter-01 climb heroes ported to 3D (real Ulla/Z-142/L-39 GLBs) + 2D/3D visitor toggle (2026-07-13)
 Martin's re-authored Part-1 climb (Piper "Ulla" → Z-142/PA-28 → L-39) ported into the live site as the
 **chapter-01 hero beat**, flying the real baked GLBs below the deck of a stretched chapter 01, ending with the

@@ -78,12 +78,12 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
     const hx = HERO_POSE.p[0] - HERO_P0[0]
     const hy = HERO_POSE.p[1] - HERO_P0[1]
     const hz = HERO_POSE.p[2] - HERO_P0[2] // negative = deeper into the sky
-    // Weights compensated for the data reshape (x ×1.5, z authored —
-    // physics.mjs full-width spread) so the WORLD response Martin approved
-    // stays visually identical per unit of screen motion.
-    driftX = t * 0.22 + hx * 0.0567
-    driftY = t * 0.3 + hy * 0.15 - hz * 0.055
-    groundShift = t * 0.1 + hy * 0.075 - hz * 0.02
+    // Weights compensated for the data reshape (x ×1.925 = X_SPREAD·X_RIGHT,
+    // z ×3 about the parked Ulla — physics.mjs) so the WORLD response
+    // Martin approved stays visually identical per unit of screen motion.
+    driftX = t * 0.22 + hx * 0.0442
+    driftY = t * 0.3 + hy * 0.15 - hz * 0.0183
+    groundShift = t * 0.1 + hy * 0.075 - hz * 0.0067
   }
 
   // ==== BELOW THE DECK ======================================================
@@ -192,8 +192,11 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
           ctx.fillStyle = rgba(GOLD, nameA)
           // Tight to the airframe (Martin) — the projected LENGTH overshoots
           // the foreshortened silhouette, so the 2D's 0.62/0.52 offsets read
-          // far out here; ~half of that hugs the wing.
-          ctx.fillText(craft.name, rx + sizePx * 0.34, ry + sizePx * 0.3)
+          // far out here; ~half of that hugs the wing. The offset base is
+          // CAPPED so a near-camera craft (the parked Ulla, ~200 px long)
+          // doesn't throw its name far out — deep types stay untouched.
+          const off = Math.min(sizePx, unit * 0.11)
+          ctx.fillText(craft.name, rx + off * 0.34, ry + off * 0.3)
           ctx.restore()
         }
       }

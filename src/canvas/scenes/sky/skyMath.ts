@@ -22,7 +22,7 @@ export type Craft = 'ultralight' | 'z142' | 'l39' | 'l159'
 export const GRADUATION: ReadonlyArray<{ craft: Craft; label: string; at: number }> = [
   { craft: 'ultralight', label: 'ULTRALIGHT', at: 0 },
   { craft: 'z142', label: 'Z-142', at: 0.14 },
-  { craft: 'l39', label: 'L-39C', at: 0.28 },
+  { craft: 'l39', label: 'L-39', at: 0.28 },
 ]
 
 export type GraduationState = {

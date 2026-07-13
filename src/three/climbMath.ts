@@ -144,24 +144,32 @@ function stageD(aspect: number): number {
   )
 }
 
-// The widest authored point (the parked Ulla) — the aspect-adaptive lateral
-// scale below pins IT just inside the frame on every viewport.
-const WIDE = CLIMB_SEQ.aircraft
-  .flatMap((a) => a.snaps)
-  .reduce((m, s) => (Math.abs(s.p[0]) > Math.abs(m.p[0]) ? s : m))
+// Every authored snap — the frame guard below checks them ALL: with the
+// right-stretched reshape (physics.mjs X_RIGHT) the widest-|x| snap can sit
+// DEEP (a generous frustum there) while the truly binding point is a NEAR
+// one (usually the parked Ulla), so a single widest-point pin misfires.
+const ALL_SNAPS = CLIMB_SEQ.aircraft.flatMap((a) => a.snaps)
 
 /**
  * Aspect-adaptive lateral scale for the climb choreography (Martin: the
  * maneuver must span the screen). The DATA is baked WIDE (physics.mjs
- * X_SPREAD, attitudes derived for it = exact on desktop); this runtime
- * factor maps the widest snap to ~87 % of the half-frustum at its own depth
- * — full width on a desktop, automatically pulled in on a phone portrait so
- * nothing parks off-frame. Applied to every rendered x (ClimbHeroes pivots,
- * the 2D ring/name projections); never above 1 (the bake IS the maximum).
+ * X_SPREAD/X_RIGHT, attitudes derived for it = exact on desktop); this
+ * runtime factor caps EVERY snap at ~87 % of the half-frustum at its own
+ * depth — full width on a desktop, automatically pulled in on a phone
+ * portrait so nothing parks off-frame. Applied to every rendered x
+ * (ClimbHeroes pivots, the 2D ring/name projections); never above 1 (the
+ * bake IS the maximum).
  */
 export function climbXScale(aspect: number): number {
-  const dist = stageD(aspect) + (LAB_BOX.PLANE_Z - WIDE.p[2])
-  return Math.min(1, (0.87 * dist * STAGE_FOV_TAN * aspect) / Math.abs(WIDE.p[0]))
+  const d0 = stageD(aspect)
+  let s = 1
+  for (const { p } of ALL_SNAPS) {
+    const ax = Math.abs(p[0])
+    if (ax < 1e-3) continue
+    const cap = (0.87 * (d0 + (LAB_BOX.PLANE_Z - p[2])) * STAGE_FOV_TAN * aspect) / ax
+    if (cap < s) s = cap
+  }
+  return s
 }
 
 export type ClimbScreen = { x: number; y: number; pxPerUnit: number }

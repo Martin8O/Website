@@ -106,12 +106,36 @@ export const renderOrigin: Renderer = (ctx, alpha, t, time, cfg) => {
   // red dawn gives way to a radiant golden-yellow morning (Martin: červená
   // patří úsvitu, výš už záře).
   const morning = smoothstep(0.35, 0.75, elevation)
-  // Past the run's edge (continuous tRaw) the sun accelerates on along its
-  // arc and slides off the right edge — clearing the sky for the next
-  // scene's new day instead of ghosting through the cross-fade.
+  // Martin: the sun crosses the post-dawn sky in SMALLER steps — one
+  // constant, slower rate that keeps it moving on EVERY scroll step for as
+  // long as the scene is visible, landing on its resting spot only as the
+  // 00→01 cross-fade finishes (tRaw ≈ 1.1 ≈ 13 % HUD — the run continues
+  // past 1 through the fade). No standstill while scrolling, no end-run:
+  // an early-resting ease-out and the original ×3 exit slide were both
+  // retired. Chapter 01's weak morning glow sits far left — never ghosts.
   const tExit = cfg.tRaw ?? t
-  const sunX = lerp(0.16, 0.84, tExit + Math.max(0, tExit - 1) * 3) * w
-  const sunY = lerp(horizonY + h * 0.05, h * 0.2, elevation / 0.8)
+  const sunX = lerp(0.16, 0.78, clamp01(tExit / 1.1)) * w
+  // …and its climb is ONE smooth arc, never level and never wavy: up to the
+  // join it is the approved sunrise shape (palette + horizon crossing stay
+  // in sync), past the join a quadratic Hermite tail continues with the SAME
+  // slope and lets it decay monotonically — the sun keeps climbing, ever
+  // more gently, to its final height right as the 00→01 fade finishes.
+  // (Two chained smoothsteps flattened to zero slope at 0.9 and re-rose —
+  // Martin saw the wave. Palette/discUp stay on `elevation`.)
+  const riseP1 = (x: number) => Math.pow(smoothstep(0.16, 0.9, x), 1.3)
+  const T_JOIN = 0.7
+  const T_END = 1.1 // the 00 scene's last visible moment (cross-fade done)
+  const SPAN1 = 0.53 / 0.63 // phase-1 share of the full horizon→top climb
+  let rise: number
+  if (tExit <= T_JOIN) {
+    rise = riseP1(tExit) * SPAN1
+  } else {
+    const v = Math.min((tExit - T_JOIN) / (T_END - T_JOIN), 1)
+    const r0 = riseP1(T_JOIN) * SPAN1
+    const d0 = ((riseP1(T_JOIN + 1e-3) - riseP1(T_JOIN - 1e-3)) / 2e-3) * SPAN1 * (T_END - T_JOIN)
+    rise = r0 + d0 * v + (1 - r0 - d0) * v * v
+  }
+  const sunY = lerp(horizonY + h * 0.05, h * 0.1, rise)
   const discUp = smoothstep(0.015, 0.09, elevation) // disc above the horizon
 
   // --- Sky -----------------------------------------------------------------
