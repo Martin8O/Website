@@ -140,8 +140,8 @@ export const OFFER_QUALITY: OfferQuality = {
       htmlMobile: '<strong>200 automated tests</strong> · WCAG',
     },
     {
-      html: '<strong>No cookies</strong>&nbsp;—&nbsp;tracks nothing personal, just anonymous page counts',
-      htmlMobile: '<strong>No cookies</strong>&nbsp;—&nbsp;nothing personal, just counts',
+      html: '<strong>No cookies</strong>&nbsp;—&nbsp;anonymous visitor stats, nothing that identifies you',
+      htmlMobile: '<strong>No cookies</strong>&nbsp;—&nbsp;anonymous stats only',
     },
     {
       html: '<strong>Open source</strong>&nbsp;—&nbsp;',

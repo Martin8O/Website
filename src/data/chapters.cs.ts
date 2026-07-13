@@ -54,7 +54,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
   'sky-sunset': {
     era: '2020–2022',
     num: '05 – Konec služby',
-    title: 'Instruktor,<br>zkušební pilot',
+    title: 'Instruktor,<br>zalétávací pilot',
     body: '<span class="a-hud">Dvacet let u&nbsp;vzdušných sil, ~1&nbsp;700 hodin ve vzduchu</span>&nbsp;–&nbsp;poslední roky jako instruktor, inspektor bezpečnosti létání a&nbsp;zalétávací pilot. V&nbsp;roce 2021 jsem se sám rozhodl odejít z&nbsp;armády a&nbsp;od roku 2022 jsem svým pánem. Před odchodem jsem získal rekvalifikaci na počítačové sítě a&nbsp;systémy. Neměl jsem ale žádný masterplan, jen důvěru v&nbsp;prostor a&nbsp;touhu skočit do světa. Následovalo intenzivní cestování, půl roku ročně v&nbsp;cizině, dobrovolnictví v&nbsp;buddhistických centrech a&nbsp;na kurzech. Meditace patří k&nbsp;mému životu od roku 2005&nbsp;–&nbsp;teď má víc prostoru.',
   },
   'calm-healing': {

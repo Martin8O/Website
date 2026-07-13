@@ -74,8 +74,8 @@ export const OFFER_QUALITY_CS: Partial<OfferQuality> = {
       htmlMobile: '<strong>200 automatických testů</strong> · WCAG',
     },
     {
-      html: '<strong>Žádné cookies</strong>&nbsp;–&nbsp;nesleduje nic osobního, jen anonymní počty návštěv',
-      htmlMobile: '<strong>Žádné cookies</strong>&nbsp;–&nbsp;nic osobního, jen počty',
+      html: '<strong>Žádné cookies</strong>&nbsp;–&nbsp;anonymní statistiky návštěv, nic, co by vás identifikovalo',
+      htmlMobile: '<strong>Žádné cookies</strong>&nbsp;–&nbsp;jen anonymní statistiky',
     },
     {
       html: '<strong>Otevřený kód</strong>&nbsp;–&nbsp;',
