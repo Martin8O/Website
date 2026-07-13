@@ -21,7 +21,7 @@ export const OFFER_COPY_CS: Record<OfferPanelId, OfferPanelCopy> = {
       { html: 'Automatizace, které převezmou opakující se práci.' },
       { html: 'Interní nástroje, které váš tým bude opravdu používat.' },
     ],
-    foot: 'Malé až střední projekty, postavené pořádně, od začátku do konce.',
+    foot: 'Malé až střední projekty&nbsp;–&nbsp;postavené pořádně a&nbsp;ověřené od začátku do konce, rychle s&nbsp;AI.',
   },
   process: {
     eyebrow: '02 · Jak to probíhá',

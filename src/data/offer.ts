@@ -50,7 +50,7 @@ export const OFFER_PANELS: OfferPanel[] = [
       { html: 'Automations that take over repetitive work.' },
       { html: 'Internal tools your team will actually use.' },
     ],
-    foot: 'Small to medium, built properly, end to end.',
+    foot: 'Small to medium&nbsp;—&nbsp;built properly and verified end to end, fast with AI.',
   },
   {
     id: 'process',
