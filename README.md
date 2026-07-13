@@ -19,7 +19,7 @@ Live: **https://svobodamartin.dev**
 - **Vitest** for the pure‑logic unit tests.
 - Deployed as a static SPA on **Vercel** (GitHub → Vercel auto‑deploy).
 
-No backend, no data collection, no analytics. Contact is a `mailto:` only.
+No backend, no cookies, no personal data — just privacy-friendly anonymous page counts (Vercel Web Analytics). Contact is a `mailto:` only.
 
 ## Architecture (the mental model)
 

@@ -25,10 +25,10 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         Twenty years in the Air Force&nbsp;—&nbsp;military jet pilot, instructor, display pilot,
         test pilot. Mid-career, a self-healing that rebuilt how I live and a Bitcoin rabbit hole
         that rebuilt what I trust: technical understanding over promises. And now, with
-        Claude&nbsp;Code, we&rsquo;ve built a hyper-efficient workshop&nbsp;—&nbsp;five real apps in
-        about a month, and{' '}
-        <span className={styles.highlight}>this site</span>&nbsp;—&nbsp;from an empty folder to a
-        live production deploy <span className={styles.highlight}>in 4&nbsp;days</span>.
+        Claude&nbsp;Code, we&rsquo;ve built a hyper-efficient workshop&nbsp;—&nbsp;five real apps and{' '}
+        <span className={styles.highlight}>this site</span>, each one built properly and verified
+        end to end. And fast: from an empty folder to a live production deploy{' '}
+        <span className={styles.highlight}>in 4&nbsp;days</span>.
       </>
     ),
     p2: (
@@ -48,9 +48,10 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         zkušební pilot. Uprostřed toho sebeuzdravení, které přestavělo, jak žiju, a&nbsp;bitcoinová
         králičí nora, po&nbsp;které věřím spíš technickému porozumění než slibům. A&nbsp;teď
         jsme s&nbsp;Claude&nbsp;Code postavili super efektivní dílnu&nbsp;–&nbsp;pět skutečných
-        aplikací za zhruba měsíc a{' '}
-        <span className={styles.highlight}>tento web</span>&nbsp;–&nbsp;kompletně z prázdné složky
-        až po produkční nasazení <span className={styles.highlight}>za 4&nbsp;dny</span>.
+        aplikací a{' '}
+        <span className={styles.highlight}>tento web</span>, všechny pořádně a&nbsp;ověřené od
+        začátku do konce. A&nbsp;rychle: z&nbsp;prázdné složky až po produkční nasazení{' '}
+        <span className={styles.highlight}>za 4&nbsp;dny</span>.
       </>
     ),
     p2: (
