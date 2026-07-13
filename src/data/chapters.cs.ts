@@ -91,7 +91,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: 'teď',
     num: '10 – Teď',
     title: 'Zadejte<br>svůj cíl.',
-    body: 'Váš cíl může mít jakoukoli formu&nbsp;–&nbsp;web, aplikace, nástroj, automatizace. Beru si ty malé až střední projekty a&nbsp;stavím je pořádně, od začátku do konce. Pokud to dokážete popsat, dá se to postavit.<br><br>Co přináším: soustředění vojenského pilota, přesnost, smysl pro detail a&nbsp;odpovědnost pilota zkušebního, klid pravidelné meditace a&nbsp;tempo stavby měřené ve dnech.<br><br>Pokud máte něco, co stojí za postavení, rád se o&nbsp;tom dozvím víc.',
+    body: 'Váš cíl může mít jakoukoli formu&nbsp;–&nbsp;web, aplikace, nástroj, automatizace. Beru si ty malé až střední projekty a&nbsp;stavím je pořádně, od začátku do konce. Pokud to dokážete popsat, dá se to postavit.<br><br>Co přináším: soustředění vojenského pilota, přesnost, smysl pro detail a&nbsp;odpovědnost pilota zalétávacího, klid pravidelné meditace a&nbsp;tempo stavby měřené ve dnech.<br><br>Pokud máte něco, co stojí za postavení, rád se o&nbsp;tom dozvím víc.',
     ctaEyebrow: '+ Ozvěte se',
     cta: {
       label: 'martin@svobodamartin.dev',
