@@ -26,7 +26,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import type { Slot3D } from '../frame3d'
 import {
   BREAK,
@@ -48,7 +47,7 @@ import { BagramActors } from './BagramActors'
 import { ClimbHeroes } from './ClimbHeroes'
 import { CruiseBallet } from './CruiseBallet'
 import { JET_SCALE, REST_Y, TIP_X, loadL159 } from './l159'
-import { normalFromMap } from './surface'
+import { getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
 
 /** The registry's 'sky' entry: the two flypast beats, the chapter-02
  *  one-circle fight (CruiseBallet — the ballet showcase, ported), the
@@ -317,7 +316,8 @@ function makeInstance(
       } else if (std.map) {
         std.metalness = 0.35
         std.roughness = 0.42
-        if (!sharedNormal.tex) sharedNormal.tex = normalFromMap(std.map)
+        // The shared skin normal is PRE-baked (sliced, off the interaction
+        // path) in kickLoad before any instance is built — cache read only.
         if (sharedNormal.tex && !std.normalMap) {
           std.normalMap = sharedNormal.tex
           std.normalScale = new THREE.Vector2(0.6, 0.6)
@@ -603,7 +603,6 @@ export function SkyPatrols({ frame }: Scene3DProps) {
   // [2..3] armed break pair.
   const jetsRef = useRef<JetInstance[] | null>(null)
   const loadKicked = useRef(false)
-  const envRef = useRef<{ env: THREE.Texture; pmrem: THREE.PMREMGenerator } | null>(null)
   const normalRef = useRef<{ tex: THREE.Texture | null }>({ tex: null })
   const aspectRef = useRef(0)
 
@@ -633,26 +632,67 @@ export function SkyPatrols({ frame }: Scene3DProps) {
     if (loadKicked.current) return
     loadKicked.current = true
     let alive = true
-    const pmrem = new THREE.PMREMGenerator(gl)
-    const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-    envRef.current = { env, pmrem }
-    loadL159().then(
-      (base) => {
+    loadL159()
+      .then(async (base) => {
         if (!alive) return
-        const jets = [
-          makeInstance(base, false, env, normalRef.current, GRADE_PASS, true),
-          makeInstance(base, false, env, normalRef.current, GRADE_PASS, true),
-          makeInstance(base, true, env, normalRef.current, GRADE_DUSK, false),
-          makeInstance(base, true, env, normalRef.current, GRADE_DUSK, false),
+        // The session-shared RoomEnvironment bake (surface.ts) — was a
+        // duplicate synchronous GPU pass per scene on its load-kick frame.
+        const env = await getRoomEnv(gl, 0.04)
+        if (!alive) return
+        // Pre-bake the shared skin normal (sliced across idle time) so the
+        // instance builds below are pure cache reads — the bake used to run
+        // synchronously inside the first makeInstance.
+        if (!normalRef.current.tex) {
+          let skin: THREE.Texture | null = null
+          base.traverse((n) => {
+            if (skin) return
+            const mesh = n as THREE.Mesh
+            if (!mesh.isMesh || SPECIAL_MESH.test(n.name)) return
+            for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+              const std = m as THREE.MeshStandardMaterial
+              if ('metalness' in std && std.map) {
+                skin = std.map
+                break
+              }
+            }
+          })
+          const nrm = skin ? await normalFromMap(skin) : null
+          if (!alive) {
+            nrm?.dispose()
+            return
+          }
+          normalRef.current.tex = nrm
+        }
+        // One idle slice between clones — four clone+grade passes in one
+        // tick was a main-thread block of its own.
+        const specs = [
+          { armed: false, grade: GRADE_PASS, stars: true },
+          { armed: false, grade: GRADE_PASS, stars: true },
+          { armed: true, grade: GRADE_DUSK, stars: false },
+          { armed: true, grade: GRADE_DUSK, stars: false },
         ]
+        const jets: JetInstance[] = []
+        for (const s of specs) {
+          await idleSlice()
+          if (!alive) {
+            for (const j of jets) {
+              for (const rec of j.mats) rec.mat.dispose()
+              for (const st of j.stars) st.material.dispose()
+            }
+            return
+          }
+          jets.push(makeInstance(base, s.armed, env, normalRef.current, s.grade, s.stars))
+        }
         for (const j of jets) res.stage.add(j.pivot)
         jetsRef.current = jets
+        // GPU warm-up while the jets are still invisible — a beat's first
+        // frame must never pay the texture upload mid-scroll.
+        await warmTextures(gl, res.stage)
         if (import.meta.env.DEV) probe.ready = true
-      },
-      (err) => {
+      })
+      .catch((err) => {
         if (import.meta.env.DEV) console.warn('sky patrols: model load failed —', err)
-      },
-    )
+      })
     cleanupRef.current = () => {
       alive = false
     }
@@ -672,11 +712,7 @@ export function SkyPatrols({ frame }: Scene3DProps) {
       }
       normalRef.current.tex?.dispose()
       normalRef.current.tex = null
-      if (envRef.current) {
-        envRef.current.env.dispose()
-        envRef.current.pmrem.dispose()
-        envRef.current = null
-      }
+      // The env texture is the session-shared getRoomEnv bake — not disposed.
       for (const s of res.smoke) {
         s.points.geometry.dispose()
         s.mat.dispose()

@@ -256,6 +256,17 @@
   border-bottom-color: var(--accent, var(--amber));
 }
 
+/* Visually-hidden live region — screen readers announce the copy
+   confirmation without anything appearing on screen. */
+.srStatus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* The Copy-to-clipboard affordance beside the mailto address — quiet outline
    button in the chapter accent; flips to a confirmed state for ~1.8 s. */
 .copyBtn {

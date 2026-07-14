@@ -25,7 +25,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import type { Slot3D } from '../frame3d'
 import { FOV_TAN, screenOf } from '../patrolMath'
 import type { Scene3DProps } from '../registry3d'
@@ -41,6 +40,7 @@ import {
   cruiseHud,
 } from './balletMath'
 import { JET_SCALE, REST_Y, TIP_X, loadL159 } from './l159'
+import { getRoomEnv, idleSlice, warmTextures } from './surface'
 import { buildAIM9 } from './aim9'
 import { buildDropTank } from './droptank'
 
@@ -492,7 +492,6 @@ export function CruiseBallet({ frame }: Scene3DProps) {
 
   const jetsRef = useRef<JetInstance[] | null>(null)
   const loadKicked = useRef(false)
-  const envRef = useRef<{ env: THREE.Texture; pmrem: THREE.PMREMGenerator } | null>(null)
   const lastEmit = useRef(-1e9)
   /** Last story position the HUD billboard texture was rendered for —
    *  parked frames upload nothing. */
@@ -537,24 +536,37 @@ export function CruiseBallet({ frame }: Scene3DProps) {
     if (loadKicked.current) return
     loadKicked.current = true
     let alive = true
-    const pmrem = new THREE.PMREMGenerator(gl)
-    const env = pmrem.fromScene(new RoomEnvironment(), 0.045).texture
-    envRef.current = { env, pmrem }
-    loadL159().then(
-      (base) => {
+    loadL159()
+      .then(async (base) => {
         if (!alive) return
-        const jets = [makeInstance(base, env), makeInstance(base, env)]
+        // The session-shared RoomEnvironment bake (surface.ts) — this beat
+        // keeps its own slightly brighter sigma (0.045), cached by value.
+        const env = await getRoomEnv(gl, 0.045)
+        if (!alive) return
+        // One idle slice between the clone+grade passes, and a GPU texture
+        // warm-up while the pair is still invisible — the hard cut into the
+        // ballet must never pay upload/clone work mid-scroll.
+        const jets: JetInstance[] = []
+        for (let i = 0; i < 2; i++) {
+          await idleSlice()
+          if (!alive) {
+            for (const j of jets) for (const rec of j.mats) rec.mat.dispose()
+            return
+          }
+          jets.push(makeInstance(base, env))
+        }
         for (const j of jets) res.group.add(j.pivot)
         jetsRef.current = jets
+        await warmTextures(gl, res.group)
+        if (!alive) return
         // The 2D cruise scene may now hand its corkscrew over (it keeps
         // painting until this flips — the story never shows a hole).
         setHero3DReady('cruise', true)
         if (import.meta.env.DEV) probe.ready = true
-      },
-      (err) => {
+      })
+      .catch((err) => {
         if (import.meta.env.DEV) console.warn('cruise ballet: model load failed —', err)
-      },
-    )
+      })
     cleanupRef.current = () => {
       alive = false
     }
@@ -572,11 +584,7 @@ export function CruiseBallet({ frame }: Scene3DProps) {
         }
         jetsRef.current = null
       }
-      if (envRef.current) {
-        envRef.current.env.dispose()
-        envRef.current.pmrem.dispose()
-        envRef.current = null
-      }
+      // The env texture is the session-shared getRoomEnv bake — not disposed.
       for (const tr of res.trails) {
         tr.points.geometry.dispose()
         tr.mat.dispose()

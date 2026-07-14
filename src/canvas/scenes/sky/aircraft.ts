@@ -235,7 +235,7 @@ function paintMi17(ctx: CanvasRenderingContext2D, o: AircraftOptions, time: numb
   canopyGlint(ctx, o, 0.42, -0.05, 0.35, -0.085)
 }
 
-function paintApache(ctx: CanvasRenderingContext2D, o: AircraftOptions, time: number): void {
+function paintApache(ctx: CanvasRenderingContext2D, _o: AircraftOptions, time: number): void {
   fillSilhouette(ctx, SILHOUETTES.apache)
   // Both rotors fully procedural over the traced mast + sensor dome / fin
   // hub — the B2.3a re-traces erased the static blades (under the spinning

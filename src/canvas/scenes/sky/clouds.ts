@@ -83,6 +83,22 @@ export function drawPuff(
   ctx.drawImage(puffSprite(color), x - r * sx, y - r, r * 2 * sx, r * 2)
 }
 
+/** drawPuff with the sprite already resolved — the sea's hot loop resolves
+ *  each row's few colours ONCE and blits, instead of re-mixing/parsing a
+ *  colour string per puff (~550 passes per sea per frame saved). */
+function drawPuffSprite(
+  ctx: CanvasRenderingContext2D,
+  sprite: HTMLCanvasElement,
+  x: number,
+  y: number,
+  r: number,
+  alpha: number,
+): void {
+  if (alpha <= 0.004 || r <= 0.5) return
+  ctx.globalAlpha = alpha
+  ctx.drawImage(sprite, x - r, y - r, r * 2, r * 2)
+}
+
 // ---------------------------------------------------------------------------
 // The cumulus sea — rows of sheep-backed puffs in perspective
 // ---------------------------------------------------------------------------
@@ -150,19 +166,31 @@ export function drawCloudSea(ctx: CanvasRenderingContext2D, o: CloudSeaOptions):
     // Far rows dissolve into the haze.
     const hazeMix = Math.pow(1 - d, 1.6) * 0.72
     const span = o.w + spacing * 2
+    // Row-constant colours resolved to sprites ONCE: the shadow tone varies
+    // only with hazeMix, and the lit tone only with the sun proximity —
+    // quantized to 16 buckets (puffSprite itself quantizes channels to
+    // 8 steps, so bucketed inputs collapse to essentially the same sprites).
+    const shSprite = puffSprite(mixHex(o.shade, o.haze, hazeMix))
+    const topSprites: (HTMLCanvasElement | undefined)[] = new Array(17)
     for (let k = 0; k < count; k++) {
       const u = (((k / count + drift + hash1(rowSeed + k * 7.7) * 0.5) % 1) + 1) % 1
       const x = u * span - spacing
       const jy = (hash1(rowSeed + k * 3.1) - 0.5) * r * 0.5
       const js = 0.72 + hash1(rowSeed + k * 11.7) * 0.55
       const sunProx = Math.exp(-Math.pow((x - o.sunX) / (o.w * 0.45), 2))
-      const top = mixHex(mixHex(o.shade, o.lit, 0.45 + 0.55 * sunProx), o.haze, hazeMix)
-      const sh = mixHex(o.shade, o.haze, hazeMix)
+      const bucket = Math.round(sunProx * 16)
+      let topSprite = topSprites[bucket]
+      if (!topSprite) {
+        topSprite = puffSprite(
+          mixHex(mixHex(o.shade, o.lit, 0.45 + 0.55 * (bucket / 16)), o.haze, hazeMix),
+        )
+        topSprites[bucket] = topSprite
+      }
       // Shadowed base first, then the lit sheep-back lobes.
-      drawPuff(ctx, x, y + jy + r * 0.35 * js, r * 1.05 * js, sh, o.alpha * 0.5)
-      drawPuff(ctx, x - r * 0.5 * js, y + jy + r * 0.12, r * 0.6 * js, top, o.alpha * 0.85)
-      drawPuff(ctx, x + r * 0.45 * js, y + jy + r * 0.15, r * 0.55 * js, top, o.alpha * 0.8)
-      drawPuff(ctx, x, y + jy, r * 0.72 * js, top, o.alpha * 0.95)
+      drawPuffSprite(ctx, shSprite, x, y + jy + r * 0.35 * js, r * 1.05 * js, o.alpha * 0.5)
+      drawPuffSprite(ctx, topSprite, x - r * 0.5 * js, y + jy + r * 0.12, r * 0.6 * js, o.alpha * 0.85)
+      drawPuffSprite(ctx, topSprite, x + r * 0.45 * js, y + jy + r * 0.15, r * 0.55 * js, o.alpha * 0.8)
+      drawPuffSprite(ctx, topSprite, x, y + jy, r * 0.72 * js, o.alpha * 0.95)
     }
   }
   ctx.restore()

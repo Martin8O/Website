@@ -4,6 +4,51 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-049 — Internals pass: performance + security hardening, build-time test-list popup (2026-07-14)
+A full adversarial code/security/perf review (multi-agent, every finding verified) drove a round of hardening
+with a hard constraint: **change nothing the visitor sees or how the site behaves** — only the internals. The
+load-bearing decisions:
+
+1. **Baked base64 images → real Vite assets.** `devAnims.ts` / `devShots.ts` / `calmSprites.ts` shipped ~290 KB
+   of base64 JPEG/PNG *inside the JS*, parsed by the engine on every load. Decoded to real files in
+   `src/canvas/scenes/img/` (byte-identical — verified against the git payloads) and imported as hashed,
+   immutable-cached assets. **CanvasStage chunk 523 → 233 KB raw.** *Why:* base64 in a JS module is the worst of
+   both worlds — no image cache, and it counts as script the main thread must parse/evaluate.
+2. **`assetsInlineLimit: 0`.** Vite's default inlines assets < 4 KB as `data:` URIs, which the hardened CSP
+   (`font-src 'self'`, no `data:`) silently BLOCKED — three small woff2 subsets never loaded and every page logged
+   a CSP violation. Turning inlining off (real files satisfy `'self'`) is the fix that keeps the CSP untouched
+   (the alternative, adding `data:` to `font-src`, weakens it — rejected).
+3. **Font subsets trimmed to latin + latin-ext.** `@fontsource/*/NNN.css` pulls every world subset (Vietnamese,
+   Thai, Greek, Cyrillic…); the site draws only Latin + Czech diacritics. Switched to the per-subset CSS.
+   **Index CSS 60 → 34 KB.** No rendering change (both languages covered).
+4. **3D load work moved off the interaction path.** The Sobel normal-map bake and material clones ran
+   synchronously inside the GLB `onLoad` callback — hundreds of ms of main-thread block right when a model
+   finished downloading (the fast-scroll hitch + a big INP contributor). Now sliced across `requestIdleCallback`
+   with a GPU texture warm-up (`gl.initTexture` per idle slice) before the scene turns visible, and **one shared
+   `getRoomEnv` PMREM bake** replaces four duplicate synchronous environment bakes. The scene reports readiness
+   only after all of it lands, and the 2D hero keeps flying until then (the existing fallback contract), so the
+   result is invisible — it just no longer blocks. `GLTFLoader` became a dynamic import (its own lazy chunk).
+5. **HUD + cloud-sea per-frame cost.** The cockpit HUD re-rasterized a multi-megapixel `shadowBlur` sprite every
+   frame (twice during the climb→cruise cross-fade); now memoized at display granularity in a 2-slot cache (blit
+   still every frame; pixels identical). The cloud sea hoisted ~550 colour-string parses/frame into per-row
+   sprite resolution (16-bucket sun proximity). *Why:* these run through the whole chapter-02/03 scroll — the
+   biggest steady main-thread tax on mobile.
+6. **Caching + HSTS.** `/models/*.glb` (14 MB), `/shots/*`, `/contact-nebula.mp4` shipped `max-age=0` (re-fetched
+   every visit) → 1-day + week SWR. HSTS gained `includeSubDomains; preload`.
+7. **`tsc --noEmit` was a no-op** (a solution-style root tsconfig with `files: []` type-checks nothing). The gate
+   now runs `tsc -b`, which caught two latent errors already on `main` (and, mid-pass, one runtime-only missing
+   import a CDP harness then confirmed). Sourcemaps switched to `'hidden'` (served JS bytes unchanged).
+8. **Build-time test-list popup.** The proof panel's test count is now a quiet button opening a Credits-style
+   modal that lists every vitest case, from a manifest baked by `scripts/gen-test-manifest.mjs` (`vitest list`
+   → `src/data/testManifest.ts`) at the head of `npm run check`. Zero runtime cost (own lazy chunk, no test
+   runner shipped); the count in the copy is guarded by `testManifest.test.ts` (the "truth numbers" rule). Count
+   moved 354 → **357** because the three guard tests were added. *Why here:* the popup was Martin's deferred
+   ADR-048 item ("once the site is final"); this pass is that moment.
+
+Verify: gate green (357); all four CDP 3D harnesses (climb / ballet / patrol / bagram) PASS desktop **and** mobile,
+console clean; prod `vite preview` build decodes all 8 GLBs; popup driven in EN + CZ. Model-fit: 🔥 Fable 5
+(build/verification) + Opus 4.8 (wrap-up). **⚠️ still run `cdp-prod-check.mjs` against the LIVE deploy after push.**
+
 ### ADR-048 — Copy-polish pass: micro-edits across story / offer / About / projects, self-reported numbers truthed, dashes reduced (2026-07-14)
 A text-only review pass with Martin (EN + CZ, no choreography touched). Ten source files, all copy/CSS. The
 decisions worth recording:

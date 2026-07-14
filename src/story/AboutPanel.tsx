@@ -81,17 +81,23 @@ export function AboutPanel({
   onCredits: () => void
   /** True when About REPLACES the Credits popup (the return leg of the
    *  swap): the dark backdrop must stand instantly — a fade-from-zero
-   *  would flash the story scene at full strength between the dialogs. */
+   *  would flash the story scene at full strength between the dialogs.
+   *  The return leg also puts focus back on the Credits toggle (the
+   *  control that opened the popup), not the panel's close button. */
   instant?: boolean
 }) {
   const lang = useLang()
   const t = STRINGS[lang]
   const copy = COPY[lang]
   const closeRef = useRef<HTMLButtonElement>(null)
+  const creditsRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    closeRef.current?.focus()
+    ;((instant ? creditsRef.current : closeRef.current) ?? closeRef.current)?.focus()
+    // Mount-only: `instant` is fixed for a given open (About remounts on
+    // every open — SiteNav conditional-renders it).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   // Escape closes, Tab stays inside, the story behind stops scrolling.
   useModalA11y(panelRef, onClose)
@@ -150,6 +156,7 @@ export function AboutPanel({
         <footer className={styles.foot}>
           <div className={styles.footRow}>
             <button
+              ref={creditsRef}
               type="button"
               className={styles.creditsToggle}
               onClick={onCredits}

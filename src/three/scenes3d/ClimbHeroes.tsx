@@ -35,8 +35,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { runLocalTRaw } from '../../canvas/sceneTimeline'
 import { heroClimbPunch } from '../../canvas/scenes/sky/skyMath'
 import { setHero3DReady } from '../owned3d'
@@ -54,7 +52,7 @@ import {
   type ClimbAircraft,
 } from '../climbMath'
 import type { Scene3DProps } from '../registry3d'
-import { normalFromMap } from './surface'
+import { getRoomEnv, normalFromMap, warmTextures } from './surface'
 
 const MODEL_URLS: Record<ClimbAircraft['id'], string> = {
   ulla: '/models/ulla.glb',
@@ -107,8 +105,10 @@ function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
   // No meshopt decoder: the GLBs are baked with quantize only (KHR_mesh_
   // quantization, read natively) — EXT_meshopt_compression's WASM+blob
   // decoder is blocked by the site's hardened CSP (bake.mjs bakes it out).
+  // GLTFLoader is a DYNAMIC import — kept out of the page-load parse/eval.
+  modelsPromise = import('three/examples/jsm/loaders/GLTFLoader.js').then(({ GLTFLoader }) => {
   const loader = new GLTFLoader()
-  modelsPromise = Promise.all(
+  return Promise.all(
     (Object.keys(MODEL_URLS) as ClimbAircraft['id'][]).map(
       (id) =>
         new Promise<[ClimbAircraft['id'], LoadedModel]>((resolve, reject) => {
@@ -119,8 +119,13 @@ function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
               const mats: MatRec[] = []
               const spins: SpinRec[] = []
               const seen = new Set<THREE.Material>()
-              // Per-model normal-map cache — one Sobel bake per base texture.
-              const normals = new Map<THREE.Texture, THREE.Texture | null>()
+              // Per-model normal-map cache — one Sobel bake per base texture,
+              // sliced across idle time (surface.ts) so the bake never blocks
+              // an interaction; the model resolves only once every lift has
+              // landed, so the first shader compile already sees the final
+              // material (no visible re-compile later).
+              const normals = new Map<THREE.Texture, Promise<THREE.Texture | null>>()
+              const lifts: Promise<void>[] = []
               root.traverse((n) => {
                 const spin = (n.userData as { spin?: SpinRec }).spin
                 if (spin && spin.axis) spins.push({ node: n, axis: spin.axis, speed: spin.speed })
@@ -146,11 +151,15 @@ function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
                     std.metalness = 0.32
                     std.roughness = 0.5
                     if (!normals.has(std.map)) normals.set(std.map, normalFromMap(std.map))
-                    const nrm = normals.get(std.map)
-                    if (nrm && !std.normalMap) {
-                      std.normalMap = nrm
-                      std.normalScale = new THREE.Vector2(0.55, 0.55)
-                    }
+                    lifts.push(
+                      normals.get(std.map)!.then((nrm) => {
+                        if (nrm && !std.normalMap) {
+                          std.normalMap = nrm
+                          std.normalScale = new THREE.Vector2(0.55, 0.55)
+                          std.needsUpdate = true
+                        }
+                      }),
+                    )
                   } else {
                     std.metalness = 0.42
                     std.roughness = 0.5
@@ -159,7 +168,7 @@ function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
                   std.needsUpdate = true
                 }
               })
-              resolve([id, { root, mats, spins }])
+              Promise.all(lifts).then(() => resolve([id, { root, mats, spins }]), reject)
             },
             undefined,
             reject,
@@ -167,6 +176,7 @@ function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
         }),
     ),
   ).then((pairs) => Object.fromEntries(pairs) as Record<ClimbAircraft['id'], LoadedModel>)
+  })
   // A failed fetch keeps the 2D hero flying (readiness never reported) and
   // lets a later mount retry instead of caching the rejection.
   modelsPromise.catch(() => {
@@ -291,7 +301,7 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
 
   const readyRef = useRef(false)
   const loadKicked = useRef(false)
-  const envRef = useRef<{ env: THREE.Texture; pmrem: THREE.PMREMGenerator } | null>(null)
+  const envRef = useRef<{ env: THREE.Texture } | null>(null)
   const aliveRef = useRef(true)
 
   const gl = useThree((s) => s.gl)
@@ -312,10 +322,6 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
   const kickLoad = () => {
     if (loadKicked.current) return
     loadKicked.current = true
-    if (!envRef.current) {
-      const pmrem = new THREE.PMREMGenerator(gl)
-      envRef.current = { env: pmrem.fromScene(new RoomEnvironment(), 0.04).texture, pmrem }
-    }
     const applyEnv = () => {
       const env = envRef.current?.env
       if (!env) return
@@ -333,22 +339,33 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
         }
       }
     }
-    loadModels().then(
-      (models) => {
+    loadModels()
+      .then(async (models) => {
         if (!aliveRef.current) return
+        // The session-shared RoomEnvironment bake (surface.ts) — was a
+        // duplicate synchronous GPU pass per scene on its load-kick frame.
+        const env = await getRoomEnv(gl, 0.04)
+        if (!aliveRef.current) return
+        envRef.current = { env }
         for (const r of res.aircraft) {
           r.model = models[r.aircraft.id]
           r.pivot.add(r.model.root)
         }
         applyEnv()
+        // Push every texture to the GPU while the scene is still invisible
+        // (one per idle slice) — the hero flip must never pay the whole
+        // upload on its first visible frame (the fast-scroll hitch).
+        for (const r of res.aircraft) {
+          if (r.model) await warmTextures(gl, r.model.root)
+        }
+        if (!aliveRef.current) return
         readyRef.current = true
         setHero3DReady('climb', true)
         if (import.meta.env.DEV) probe.ready = true
-      },
-      (err) => {
+      })
+      .catch((err) => {
         if (import.meta.env.DEV) console.warn('climb heroes: model load failed —', err)
-      },
-    )
+      })
   }
 
   useEffect(() => {
@@ -364,11 +381,9 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
         }
       }
       loadKicked.current = false
-      if (envRef.current) {
-        envRef.current.env?.dispose()
-        envRef.current.pmrem.dispose()
-        envRef.current = null
-      }
+      // The env texture is the session-shared getRoomEnv bake — NOT disposed
+      // here (other scenes and a later remount keep using it).
+      envRef.current = null
     }
   }, [res])
 

@@ -1,0 +1,136 @@
+/* The test-suite mini window — the Credits popup's sibling, sized for a long
+   list. The overlay never fades (instant dark): the story scene must not
+   flash under the window (same reasoning as CreditsPopup). */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 3vw, 2.5rem);
+  background: color-mix(in srgb, #04050a 80%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.panel {
+  width: min(560px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1rem, 3vw, 1.4rem) clamp(1.1rem, 3vw, 1.6rem) clamp(1.1rem, 3vw, 1.4rem);
+  background: linear-gradient(180deg, #0b0d16 0%, #08090f 100%);
+  border: 1px solid color-mix(in srgb, var(--amber) 22%, transparent);
+  border-radius: 14px;
+  box-shadow: 0 40px 120px -30px #000, 0 0 60px -20px color-mix(in srgb, var(--amber) 26%, transparent);
+  animation: rise 200ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  scrollbar-width: thin;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.close {
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+.close:hover,
+.close:focus-visible {
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+  border-color: color-mix(in srgb, var(--amber) 55%, transparent);
+  outline: none;
+}
+
+.intro {
+  margin: 0 0 0.9rem;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.group {
+  margin: 0;
+}
+
+.file {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--amber);
+}
+.fileCount {
+  color: color-mix(in srgb, var(--fg) 45%, transparent);
+}
+
+.cases {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+}
+
+.case {
+  position: relative;
+  padding-left: 0.85rem;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--fg) 74%, transparent);
+}
+/* A quiet check tick — the "verified" voice without shipping an icon set. */
+.case::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 0.66rem;
+  color: color-mix(in srgb, var(--amber) 55%, transparent);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .panel {
+    animation: none;
+  }
+}

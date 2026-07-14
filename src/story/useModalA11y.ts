@@ -20,7 +20,7 @@ export function useModalA11y(panelRef: RefObject<HTMLElement | null>, onClose: (
       const panel = panelRef.current
       if (!panel) return
       const focusables = panel.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
       )
       if (!focusables.length) return
       const first = focusables[0]

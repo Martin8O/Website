@@ -14,6 +14,7 @@ dist/
 dist-ssr/
 build/
 *.local
+*.tsbuildinfo
 
 # Env / secrets
 .env

@@ -119,8 +119,17 @@ export type OfferQuality = {
    *  `linkText` is set, `html` is a plain bold lead and only `linkText` is the
    *  outbound anchor (Martin: link just "here", not the whole line).
    *  `htmlMobile`, when present, is a shorter phrasing used ≤719px to save the
-   *  vertical lines the tall proof card can't spare on a phone. */
-  selfItems: { html: string; href?: string; linkText?: string; htmlMobile?: string }[]
+   *  vertical lines the tall proof card can't spare on a phone. `testsLead`
+   *  renders BEFORE `html` as the quiet button that opens the test-suite
+   *  popup (the build-time manifest — see src/data/testManifest.ts); its
+   *  number must match TEST_COUNT (guarded by testManifest.test.ts). */
+  selfItems: {
+    html: string
+    href?: string
+    linkText?: string
+    htmlMobile?: string
+    testsLead?: string
+  }[]
   /** Centred sub-label over the gauges — the tool that measured. */
   gaugesLabel: string
   gauges: { label: string; value: number }[]
@@ -136,8 +145,9 @@ export const OFFER_QUALITY: OfferQuality = {
   heading: 'This website',
   selfItems: [
     {
-      html: '<strong>354 automated tests</strong> · WCAG accessibility',
-      htmlMobile: '<strong>354 automated tests</strong> · WCAG',
+      testsLead: '<strong>357 automated tests</strong>',
+      html: ' · WCAG accessibility',
+      htmlMobile: ' · WCAG',
     },
     {
       html: '<strong>No cookies</strong>&nbsp;—&nbsp;anonymous visitor stats, nothing that identifies you',

@@ -273,6 +273,30 @@
   color: #ffffff;
 }
 
+/* The tests count is a quiet in-line button — same voice as the line it sits
+   in (the bold white lead), a dashed underline as the only affordance; hover/
+   focus turns it amber like every other verify hook on this panel. */
+.testsBtn {
+  padding: 0 0 1px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+  border-bottom: 1px dashed color-mix(in srgb, var(--fg) 38%, transparent);
+  transition: border-color 140ms ease;
+}
+.testsBtn:hover,
+.testsBtn:focus-visible {
+  border-bottom-color: var(--amber);
+  outline: none;
+}
+.testsBtn:hover strong,
+.testsBtn:focus-visible strong {
+  color: var(--amber);
+}
+
 /* Proof lines are real outbound links — quiet amber underline, the visitor
    can verify every claim in one click ("Don't trust — verify"). */
 .link {

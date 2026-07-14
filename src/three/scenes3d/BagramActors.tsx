@@ -34,8 +34,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { runLocalTRaw } from '../../canvas/sceneTimeline'
 import { setHero3DReady } from '../owned3d'
 import {
@@ -52,7 +50,7 @@ import {
   type BagramPose,
 } from '../bagramMath'
 import type { Scene3DProps } from '../registry3d'
-import { normalFromMap } from './surface'
+import { getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
 
 type ActorId = 'c17' | 'apache' | 'f16' | 'mi17'
 
@@ -157,16 +155,19 @@ let modelsPromise: Promise<Record<ActorId, LoadedModel>> | null = null
 function loadModels(): Promise<Record<ActorId, LoadedModel>> {
   if (modelsPromise) return modelsPromise
   // Quantize-only GLBs (KHR_mesh_quantization) — no meshopt/WASM decoder,
-  // the hardened CSP stays untouched (ADR-042).
-  const loader = new GLTFLoader()
-  modelsPromise = Promise.all(
-    (Object.keys(MODEL_URLS) as ActorId[]).map(
-      (id) =>
-        new Promise<[ActorId, LoadedModel]>((resolve, reject) => {
-          loader.load(MODEL_URLS[id], (gltf) => resolve([id, { root: gltf.scene }]), undefined, reject)
-        }),
-    ),
-  ).then((pairs) => Object.fromEntries(pairs) as Record<ActorId, LoadedModel>)
+  // the hardened CSP stays untouched (ADR-042). GLTFLoader is a DYNAMIC
+  // import — kept out of the page-load parse/eval.
+  modelsPromise = import('three/examples/jsm/loaders/GLTFLoader.js').then(({ GLTFLoader }) => {
+    const loader = new GLTFLoader()
+    return Promise.all(
+      (Object.keys(MODEL_URLS) as ActorId[]).map(
+        (id) =>
+          new Promise<[ActorId, LoadedModel]>((resolve, reject) => {
+            loader.load(MODEL_URLS[id], (gltf) => resolve([id, { root: gltf.scene }]), undefined, reject)
+          }),
+      ),
+    ).then((pairs) => Object.fromEntries(pairs) as Record<ActorId, LoadedModel>)
+  })
   // A failed fetch keeps the 2D actors flying (readiness never reported)
   // and lets a later mount retry instead of caching the rejection.
   modelsPromise.catch(() => {
@@ -216,7 +217,9 @@ function makeInstance(
             std.metalness = 0.25
             std.roughness = 0.55
             if (lift) {
-              if (!normals.has(std.map)) normals.set(std.map, normalFromMap(std.map))
+              // The bakes are PRE-computed (sliced, off the interaction
+              // path) in kickLoad before any instance is built — this is a
+              // pure cache read now.
               const nrm = normals.get(std.map)
               if (nrm && !std.normalMap) {
                 std.normalMap = nrm
@@ -412,7 +415,6 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
    *  actors render and the 2D ones step aside. */
   const flippedRef = useRef(false)
   const loadKicked = useRef(false)
-  const envRef = useRef<{ env: THREE.Texture; pmrem: THREE.PMREMGenerator } | null>(null)
   const aliveRef = useRef(true)
 
   const gl = useThree((s) => s.gl)
@@ -426,36 +428,63 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
   const kickLoad = () => {
     if (loadKicked.current) return
     loadKicked.current = true
-    if (!envRef.current) {
-      const pmrem = new THREE.PMREMGenerator(gl)
-      envRef.current = { env: pmrem.fromScene(new RoomEnvironment(), 0.04).texture, pmrem }
-    }
-    loadModels().then(
-      (models) => {
-        if (!aliveRef.current || !envRef.current) return
-        const env = envRef.current.env
+    loadModels()
+      .then(async (models) => {
+        if (!aliveRef.current) return
+        // The session-shared RoomEnvironment bake (surface.ts) — was a
+        // duplicate synchronous GPU pass per scene on its load-kick frame.
+        const env = await getRoomEnv(gl, 0.04)
+        if (!aliveRef.current) return
+        // Pre-bake the panel-line normal maps for the two lift models
+        // (sliced across idle time — never a long task); makeInstance then
+        // only reads the cache. One idle slice between instances too: seven
+        // clone+grade passes in one tick was its own main-thread block.
         const normals = new Map<THREE.Texture, THREE.Texture | null>()
+        for (const id of ['c17', 'apache'] as const) {
+          const maps: THREE.Texture[] = []
+          models[id].root.traverse((n) => {
+            const mesh = n as THREE.Mesh
+            if (!mesh.isMesh) return
+            for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+              const std = m as THREE.MeshStandardMaterial
+              if ('metalness' in std && std.map && !maps.includes(std.map)) maps.push(std.map)
+            }
+          })
+          for (const map of maps) {
+            if (!normals.has(map)) normals.set(map, await normalFromMap(map))
+          }
+        }
+        if (!aliveRef.current) return
+        const build = async <T,>(make: () => T): Promise<T> => {
+          await idleSlice()
+          return make()
+        }
         const instances = {
-          c17: makeInstance('c17', models.c17.root, env, normals, true),
+          c17: await build(() => makeInstance('c17', models.c17.root, env, normals, true)),
           mi17: [
-            makeInstance('mi17', models.mi17.root, env, normals, true),
-            makeInstance('mi17', models.mi17.root, env, normals, true),
+            await build(() => makeInstance('mi17', models.mi17.root, env, normals, true)),
+            await build(() => makeInstance('mi17', models.mi17.root, env, normals, true)),
           ],
           apache: [
-            makeInstance('apache', models.apache.root, env, normals, true),
-            makeInstance('apache', models.apache.root, env, normals, true),
+            await build(() => makeInstance('apache', models.apache.root, env, normals, true)),
+            await build(() => makeInstance('apache', models.apache.root, env, normals, true)),
           ],
           f16: [
             // The far speck pair casts nothing — not worth a shadow pass.
-            makeInstance('f16', models.f16.root, env, normals, false),
-            makeInstance('f16', models.f16.root, env, normals, false),
+            await build(() => makeInstance('f16', models.f16.root, env, normals, false)),
+            await build(() => makeInstance('f16', models.f16.root, env, normals, false)),
           ],
         }
+        if (!aliveRef.current) return
         res.stage.add(instances.c17.pivot)
         for (const m of instances.mi17) res.stage.add(m.pivot)
         for (const a of instances.apache) res.stage.add(a.pivot)
         for (const f of instances.f16) res.stage.add(f.pivot)
         res.instances = instances
+        // Push the textures to the GPU while the actors are still invisible
+        // — entering the desert must never pay the upload mid-scroll.
+        await warmTextures(gl, res.stage)
+        if (!aliveRef.current) return
         readyRef.current = true
         // The hero flip is DEFERRED to the frame loop: it only fires while
         // the desert is OFF-frame, so a slow fetch can never swap the 2D
@@ -463,11 +492,10 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
         // Mi-17s vanish and a parked 3D one "land" when the download won
         // the race against his scroll).
         if (import.meta.env.DEV) probe.ready = true
-      },
-      (err) => {
+      })
+      .catch((err) => {
         if (import.meta.env.DEV) console.warn('bagram actors: model load failed —', err)
-      },
-    )
+      })
   }
 
   useEffect(() => {
@@ -489,11 +517,7 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
       loadKicked.current = false
       res.catcher.geometry.dispose()
       res.catcherMat.dispose()
-      if (envRef.current) {
-        envRef.current.env?.dispose()
-        envRef.current.pmrem.dispose()
-        envRef.current = null
-      }
+      // The env texture is the session-shared getRoomEnv bake — not disposed.
     }
   }, [res])
 

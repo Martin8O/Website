@@ -54,8 +54,14 @@ export function ScrollProvider({ children }: { children: ReactNode }) {
     registerScrollLock((locked) => {
       if (locked) {
         lenis.stop()
+        // Lenis owns wheel/touch, but NOT the keyboard (PageDown/space/arrows
+        // scroll natively) — gate that path too while a dialog stands. The
+        // native scrollbar is hidden site-wide, so this changes nothing
+        // visually; nothing else writes inline overflow on <html>.
+        document.documentElement.style.setProperty('overflow', 'hidden')
       } else {
         lenis.start()
+        document.documentElement.style.removeProperty('overflow')
       }
     })
 

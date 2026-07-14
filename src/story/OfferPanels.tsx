@@ -1,11 +1,23 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { CHAPTERS } from '../data/chapters'
 import { offerPanelsFor, offerQualityFor } from '../data/offer'
 import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
 import { cardOpacityWindowed } from '../timeline'
 import { panelWindows } from '../canvas/scenes/offerMath'
+import { ChunkBoundary } from './ChunkBoundary'
 import styles from './OfferPanels.module.css'
+
+// The test-suite popup carries the whole baked manifest (354+ case names) —
+// its own lazy chunk, fetched only on interest, so the list costs the
+// initial bundle nothing (the "zero runtime cost" of the build-time design).
+const TestsPopup = lazy(() => import('./TestsPopup').then((m) => ({ default: m.TestsPopup })))
+
+/** Warm the popup chunk the moment the visitor shows interest (hover /
+ *  focus) — the click then opens it without a network beat. */
+const warmTestsPopup = () => {
+  void import('./TestsPopup')
+}
 
 /**
  * The DOM of the flight-plan chapter (09 — Your flight plan): the four
@@ -25,6 +37,10 @@ export function OfferPanels({ pos }: { pos: number }) {
   const panels = offerPanelsFor(lang)
   const quality = offerQualityFor(lang)
   const [mobile, setMobile] = useState(false)
+  // The test-suite popup (opened from the proof card's tests line). Focus
+  // returns to the trigger on close — the SiteNav dialog manners.
+  const [testsOpen, setTestsOpen] = useState(false)
+  const testsBtnRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 719px)')
     const update = () => setMobile(mq.matches)
@@ -98,7 +114,25 @@ export function OfferPanels({ pos }: { pos: number }) {
                 const html = mobile && item.htmlMobile ? item.htmlMobile : item.html
                 return (
                   <li key={j} className={styles.item}>
-                    {item.linkText && item.href ? (
+                    {item.testsLead ? (
+                      // The tests line: the bold count is a quiet button that
+                      // opens the baked test-suite list (build-time manifest,
+                      // zero runtime cost); the rest of the line stays plain.
+                      <span>
+                        <button
+                          ref={testsBtnRef}
+                          type="button"
+                          className={styles.testsBtn}
+                          onClick={() => setTestsOpen(true)}
+                          onPointerEnter={warmTestsPopup}
+                          onFocus={warmTestsPopup}
+                          aria-haspopup="dialog"
+                          aria-expanded={testsOpen}
+                          dangerouslySetInnerHTML={{ __html: item.testsLead }}
+                        />
+                        <span dangerouslySetInnerHTML={{ __html: html }} />
+                      </span>
+                    ) : item.linkText && item.href ? (
                       // Bold lead stays plain text; only the trailing phrase is
                       // the link (Martin: link just "here").
                       <span>
@@ -173,6 +207,19 @@ export function OfferPanels({ pos }: { pos: number }) {
         {renderPanel(2)}
         {renderPanel(3)}
       </div>
+      {testsOpen && (
+        // Deploy skew can 404 the lazy chunk — fail quietly, the story stands.
+        <ChunkBoundary>
+          <Suspense fallback={null}>
+            <TestsPopup
+              onClose={() => {
+                setTestsOpen(false)
+                testsBtnRef.current?.focus()
+              }}
+            />
+          </Suspense>
+        </ChunkBoundary>
+      )}
     </section>
   )
 }

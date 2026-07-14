@@ -59,8 +59,13 @@ export type CockpitHudOptions = {
  *  billboard texture, so the symbology reads IDENTICALLY everywhere. */
 export const HUD_TEX_W = 1408
 
-// Off-screen sprite for drawCockpitHudSoft — module-level, reused.
-let hudSprite: HTMLCanvasElement | null = null
+// Off-screen sprites for drawCockpitHudSoft — module-level, reused. TWO
+// slots: through the climb→cruise crossfade both scenes draw the shared HUD
+// with slightly different pictures in the same frame (differing pos base),
+// and a single cached sprite would thrash between them every frame.
+type HudSpriteEntry = { canvas: HTMLCanvasElement; key: string; last: number }
+const hudSprites: HudSpriteEntry[] = []
+let hudSpriteTick = 0
 
 /**
  * The cockpit HUD with the ballet billboard's exact raster character: the
@@ -69,35 +74,63 @@ let hudSprite: HTMLCanvasElement | null = null
  * that look during the ballet: "temer identicky vjem jako z realneho
  * letadla"), now THE look before, during and after it. Brightness, weight
  * and layout are untouched — everything scales off w/h.
+ *
+ * The sprite render is MEMOIZED at display granularity: every input is
+ * quantized at (or below) the step at which a rendered glyph, box or needle
+ * could actually move (rangeNm 0.1 = its toFixed(1) step, altFt/hdg 1 =
+ * their integer readouts, mach/attack 1e-3 = imperceptible needle/alpha
+ * steps, targets 0.5 sprite px), so parked or slow frames skip the whole
+ * shadowBlur vector pass — this used to re-rasterize a multi-megapixel
+ * sprite EVERY frame through chapters 02–03. The stretch blit still runs
+ * every frame (CanvasStage wipes the glass each frame) and alpha is applied
+ * at blit time, so cross-fades never invalidate the cache.
  */
 export function drawCockpitHudSoft(ctx: CanvasRenderingContext2D, o: CockpitHudOptions): void {
   if (o.alpha <= 0.01) return
   const W = HUD_TEX_W
   const H = Math.max(256, Math.round((W * o.h) / o.w))
-  if (!hudSprite) hudSprite = document.createElement('canvas')
-  if (hudSprite.width !== W || hudSprite.height !== H) {
-    hudSprite.width = W
-    hudSprite.height = H
-  }
-  const g = hudSprite.getContext('2d')
-  if (!g) {
-    drawCockpitHud(ctx, o)
-    return
-  }
   const kx = W / o.w
   const ky = H / o.h
-  g.clearRect(0, 0, W, H)
-  drawCockpitHud(g, {
-    ...o,
-    w: W,
-    h: H,
-    alpha: 1,
-    target: { x: o.target.x * kx, y: o.target.y * ky },
-    target2: o.target2 ? { x: o.target2.x * kx, y: o.target2.y * ky } : undefined,
-  })
+  const key =
+    `${W}:${H}:${Math.round(o.attack * 1000)}:${Math.round(o.rangeNm * 10)}:` +
+    `${Math.round(o.mach * 1000)}:${Math.round(o.altFt)}:${Math.round(o.hdg)}:` +
+    `${Math.round(o.target.x * kx * 2)}:${Math.round(o.target.y * ky * 2)}:` +
+    (o.target2 ? `${Math.round(o.target2.x * kx * 2)}:${Math.round(o.target2.y * ky * 2)}` : 'n')
+
+  let entry = hudSprites.find((e) => e.key === key)
+  if (!entry) {
+    if (hudSprites.length < 2) {
+      entry = { canvas: document.createElement('canvas'), key: '', last: 0 }
+      hudSprites.push(entry)
+    } else {
+      // Evict the least-recently-used slot.
+      entry = hudSprites[0].last <= hudSprites[1].last ? hudSprites[0] : hudSprites[1]
+    }
+    const c = entry.canvas
+    if (c.width !== W || c.height !== H) {
+      c.width = W
+      c.height = H
+    }
+    const g = c.getContext('2d')
+    if (!g) {
+      drawCockpitHud(ctx, o)
+      return
+    }
+    g.clearRect(0, 0, W, H)
+    drawCockpitHud(g, {
+      ...o,
+      w: W,
+      h: H,
+      alpha: 1,
+      target: { x: o.target.x * kx, y: o.target.y * ky },
+      target2: o.target2 ? { x: o.target2.x * kx, y: o.target2.y * ky } : undefined,
+    })
+    entry.key = key
+  }
+  entry.last = ++hudSpriteTick
   ctx.save()
   ctx.globalAlpha = o.alpha
-  ctx.drawImage(hudSprite, 0, 0, o.w, o.h)
+  ctx.drawImage(entry.canvas, 0, 0, o.w, o.h)
   ctx.restore()
 }
 

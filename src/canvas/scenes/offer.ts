@@ -54,6 +54,7 @@ const TRAF = '#5fce97' // live ATC traffic (radar green)
 const TRAF_INK = '#dff3e8' // traffic tag registration
 
 let grain: HTMLCanvasElement | null = null
+let grainPattern: CanvasPattern | null = null
 
 /** Chart-style bearing (° from north, screen-up = N) of a route leg. */
 function legBearing(i: number): number {
@@ -198,12 +199,14 @@ export const renderOffer: Renderer = (ctx, alpha, t, time, cfg) => {
   const Y = (fy: number) => h * fy
   const A = alpha
 
-  // Paper tooth.
+  // Paper tooth. Pattern created once — patterns are canvas-independent,
+  // re-creating one per frame was a per-frame allocation for nothing.
   grain ??= makeGrainTile()
   if (grain) {
+    grainPattern ??= ctx.createPattern(grain, 'repeat')
     ctx.save()
     ctx.globalAlpha = A * plate * 0.05
-    ctx.fillStyle = ctx.createPattern(grain, 'repeat') ?? '#0c1120'
+    ctx.fillStyle = grainPattern ?? '#0c1120'
     ctx.fillRect(-20, -20, w + 40, h + 40)
     ctx.restore()
   }

@@ -6,7 +6,6 @@
  */
 
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 export const MODEL_URL = '/models/l159.glb'
 
@@ -31,10 +30,14 @@ export function loadL159(): Promise<THREE.Group> {
   // quantization, read natively) — EXT_meshopt_compression's WASM+blob
   // decoder is blocked by the site's hardened CSP, so the model is meshopt-
   // free by design (bake.mjs). Keep this loader WASM-free.
-  const loader = new GLTFLoader()
-  l159Promise = new Promise<THREE.Group>((resolve, reject) => {
-    loader.load(MODEL_URL, (gltf) => resolve(gltf.scene), undefined, reject)
-  })
+  // GLTFLoader itself is a DYNAMIC import: nothing needs it before the first
+  // load kick, so it stays out of the Stage3D chunk's page-load parse/eval.
+  l159Promise = import('three/examples/jsm/loaders/GLTFLoader.js').then(
+    ({ GLTFLoader }) =>
+      new Promise<THREE.Group>((resolve, reject) => {
+        new GLTFLoader().load(MODEL_URL, (gltf) => resolve(gltf.scene), undefined, reject)
+      }),
+  )
   // A failed fetch lets a later mount retry instead of caching the rejection.
   l159Promise.catch(() => {
     l159Promise = null

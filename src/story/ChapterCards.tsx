@@ -56,6 +56,13 @@ function Cta({ cta }: { cta: NonNullable<Chapter['cta']> }) {
           {copied ? ui.emailCopied : ui.copyEmail}
         </button>
       )}
+      {isMail && (
+        // Screen readers don't announce the button's own label change —
+        // an always-mounted status region carries the "Copied ✓".
+        <span className={styles.srStatus} role="status">
+          {copied ? ui.emailCopied : ''}
+        </span>
+      )}
     </span>
   )
 }
