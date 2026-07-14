@@ -4,6 +4,32 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-054 — Dperf-3: contact finale bloom — bake per-frame invariants, cull off-canvas, gate the heartbeat (2026-07-15)
+The `contact` finale (chapter 09) paints its breathing spiral galaxy with ~20 000 `fillRect`/frame — the last big
+steady per-frame cost ADR-049/050 deliberately left alone (it *can* change the look, so it needed its own careful
+A/B). Reduced it three ways, all in `contact.ts`, with **zero change to what is drawn**: (1) **bake every per-frame
+invariant** — the frame loop recomputed per-filament angle/petal/arm-gain/core + ~1140 `mixHex` colour-string
+allocs and every per-dot glow/radial-position/alpha every frame though none depend on time or scroll; now baked
+once in `ensureBake` (renamed from `ensureRnd`) into `Float64Array`s + colour-string arrays, inner loop is pure
+arithmetic + `fillRect`. (2) **cull fully off-canvas dots** — the bloom overspills the frame; a dot whose whole
+footprint (incl. the ±3·size haze and sparkle-cross extents, covered by an 8 px margin) lands off-screen is
+skipped — the culled rects had zero pixel coverage, so the paint is unchanged. (3) **gate the heartbeat `Math.exp`**
+— the pulse Gaussian is numerically zero past |u−front| = 0.4 (e⁻³²·⁶ ≈ 7e-15 « one 8-bit quantum), so the ~20k
+exp/frame only run inside the travelling band. *Byte-identical, not "close":* the deterministic A/B harness
+(`cdp-ab-sweep` + `ab-diff`, 262 frames each) is **262/262 desktop + 262/262 mobile** over the whole story, plus a
+new contact-specific grid (`cdp-contact-ab.mjs`, 10 positions × 7 times incl. heartbeat-on + reduced-motion t=0) at
+**70/70 + 70/70**. A 1-ulp self-inflicted bug was caught + fixed en route (the spiral twist must use the *unrounded*
+f64 `s`, matching the pre-bake code where f32 rounding only hit the Float32Array store, not the twist input).
+*Result* (`cdp-contact-count.mjs`): at the parked finale (where the visitor sits and reads) fillRect/frame drops
+~25 200 → 17 400–20 500 on mobile (−19 to −31 %), 21 400–24 300 on desktop (−4 to −15 %, breath-phase dependent);
+mid-scroll bloom (bloom still growing, nothing overspills yet) is unchanged by design. Live-driven finale: mean
+6.4 ms/frame desktop, 5.5 ms mobile viewport, console clean, reduced-motion + mailto intact. *Rejected (Martin's
+call, against the brief):* a 30 Hz bloom redraw (≈ −50 % more) — a sub-pixel temporal compromise; 40 Hz would be
+worse (1.5× cadence judder on 60 Hz for less saving). Gate green (357). Harness artifact fixed (local-only): the
+calm meditator PNG decodes async → pre-touch added to `cdp-ab-sweep`.
+
+---
+
 ### ADR-053 — Dperf-2: landscape-phone chapter-card top clip (2026-07-15)
 Pre-existing bug (present on the untouched baseline, found while verifying ADR-050's offer breakpoint): on a
 landscape phone (`max-height: 480px`) the chapter cards are centre-anchored (`top: 50%` − 50%), so a card taller

@@ -18,8 +18,9 @@
  *
  * Back to front: indigo-violet space + nebula clouds + film-static speckle
  * (lazy noise tile) + two star layers; the constellation web + memory suns;
- * the bloom (~16k dots — per-dot randoms pre-baked into Float32Arrays so
- * the frame cost stays pure arithmetic + fillRect); coloured spores; the
+ * the bloom (~16k dots — every per-dot random AND per-frame invariant is
+ * pre-baked, so the frame cost stays pure arithmetic + fillRect, with
+ * fully off-canvas dots culled); coloured spores; the
  * warm nucleus; the visitor's light + node links under the cursor.
  *
  * The bloom is a SPIRAL GALAXY — every strand is a streamline curved by a
@@ -134,41 +135,82 @@ function ensureSpeckle(ctx: CanvasRenderingContext2D): CanvasPattern | null {
   return specklePattern
 }
 
-// --- Pre-baked randomness --------------------------------------------------
+// --- Pre-baked randomness + per-frame invariants ---------------------------
 // ~16k dots × several hash lookups per frame would burn the budget on
-// Math.sin. Bake every per-filament / per-dot random ONCE (deterministic,
-// so the field never flickers); the inner loop is then pure arithmetic.
-const FIL_STRIDE = 4 // bright, jitter, inkPick, coreScale
-// s (position along strand), cos/sin of the pre-baked spiral rotation
-// (twist + wobble — real trig at bake time, lookups in the loop), radial
-// jit, alpha var.
-const DOT_STRIDE = 5
-let filRnd: Float32Array | null = null
-let dotRnd: Float32Array | null = null
+// Math.sin. Bake every per-filament / per-dot value that does not depend on
+// time or scroll ONCE (deterministic, so the field never flickers); the
+// inner loop is then pure arithmetic + fillRect. The historical Float32Array
+// rounding of the base randoms is kept (Math.fround) and every derived value
+// is computed with the exact same expressions/operation order the frame loop
+// used, so the painted pixels stay byte-identical to the pre-bake code.
+const FIL_STRIDE = 8 // baseAng, bright, jitter, petal, armW, armGain, core, switchJ
+// cos/sin of the pre-baked spiral rotation, u (radial position incl. the
+// filament's ragged core), radial jitter factor, glow g(s), alpha variance.
+const DOT_STRIDE = 6
+let filBake: Float64Array | null = null
+let dotBake: Float64Array | null = null
+/** 1 where the dot carries a cross sparkle (its alpha-var random > .991). */
+let sparkleBake: Uint8Array | null = null
+/** Per-filament colours (strings baked once — no per-frame mixHex allocs). */
+let inkBake: string[] | null = null
+let rimBake: string[] | null = null
 
-function ensureRnd(): void {
-  if (filRnd && dotRnd) return
+function ensureBake(): void {
+  if (filBake && dotBake && sparkleBake && inkBake && rimBake) return
   const n = CONTACT.filaments
   const m = CONTACT.dots
-  filRnd = new Float32Array(n * FIL_STRIDE)
-  dotRnd = new Float32Array(n * m * DOT_STRIDE)
+  filBake = new Float64Array(n * FIL_STRIDE)
+  dotBake = new Float64Array(n * m * DOT_STRIDE)
+  sparkleBake = new Uint8Array(n * m)
+  inkBake = new Array(n)
+  rimBake = new Array(n)
   for (let i = 0; i < n; i++) {
-    filRnd[i * FIL_STRIDE] = hash1(i * 3.3 + 0.9)
-    filRnd[i * FIL_STRIDE + 1] = hash1(i * 6.1 + 4.2)
-    filRnd[i * FIL_STRIDE + 2] = hash1(i * 9.7 + 6.6)
-    filRnd[i * FIL_STRIDE + 3] = hash1(i * 12.7 + 8.8)
+    // Base randoms, f32-rounded exactly like the old Float32Array store.
+    const r0 = Math.fround(hash1(i * 3.3 + 0.9))
+    const r1 = Math.fround(hash1(i * 6.1 + 4.2))
+    const r2 = Math.fround(hash1(i * 9.7 + 6.6))
+    const r3 = Math.fround(hash1(i * 12.7 + 8.8))
+    const baseAng = filamentAngle(i, n)
+    const armW = Math.pow(0.5 + 0.5 * Math.cos(ARMS * (baseAng + ARM_PHASE)), 1.5)
+    const core = CONTACT.core * (0.82 + r3 * 0.36)
+    const fi = i * FIL_STRIDE
+    filBake[fi] = baseAng
+    filBake[fi + 1] = 0.5 + r0 * 0.5 // bright
+    filBake[fi + 2] = 0.86 + r1 * 0.28 // jitter
+    filBake[fi + 3] = 0.7 + 0.3 * petalReach(baseAng, PETAL_SEED)
+    filBake[fi + 4] = armW
+    filBake[fi + 5] = 0.4 + 1.0 * armW // armGain
+    filBake[fi + 6] = core
+    // The story wheel colours (see the frame loop's old comments).
+    const { seg, t: segT } = storyMix(baseAng)
+    const base = mixHex(STORY_COLORS[seg], STORY_COLORS[(seg + 1) % STORY_SEGMENTS], segT)
+    inkBake[i] =
+      r2 < 0.2 ? mixHex(base, '#ffffff', 0.45) : r2 > 0.9 ? mixHex(base, '#10162a', 0.35) : base
+    rimBake[i] = mixHex(base, '#ffffff', 0.55)
+    // First dot past the heart→ink handover (s > 0.22); m = never.
+    let switchJ: number = m
     for (let j = 0; j < m; j++) {
       const k = (i * m + j) * DOT_STRIDE
-      const s = clamp01((j + hash1(i * 17.3 + j * 7.7)) / m)
+      // The spiral twist historically used the UNROUNDED f64 s (the f32
+      // rounding only happened on the Float32Array store the frame loop
+      // read from) — keep both precisions so the dots land bit-identically.
+      const s64 = clamp01((j + hash1(i * 17.3 + j * 7.7)) / m)
+      const s = Math.fround(s64)
+      if (switchJ === m && s > 0.22) switchJ = j
       const d =
         (hash1(i * 29.1 + j * 11.3 + 1.7) - 0.5) * 0.03 +
-        SPIRAL_TWIST * Math.pow(s, SPIRAL_PITCH)
-      dotRnd[k] = s
-      dotRnd[k + 1] = Math.cos(d)
-      dotRnd[k + 2] = Math.sin(d)
-      dotRnd[k + 3] = hash1(i * 41.7 + j * 5.9)
-      dotRnd[k + 4] = hash1(i * 53.9 + j * 3.1)
+        SPIRAL_TWIST * Math.pow(s64, SPIRAL_PITCH)
+      const dj = Math.fround(hash1(i * 41.7 + j * 5.9))
+      const dv = Math.fround(hash1(i * 53.9 + j * 3.1))
+      dotBake[k] = Math.fround(Math.cos(d))
+      dotBake[k + 1] = Math.fround(Math.sin(d))
+      dotBake[k + 2] = core + (1 - core) * s
+      dotBake[k + 3] = 1 + (dj - 0.5) * 0.05
+      dotBake[k + 4] = filamentGlow(s)
+      dotBake[k + 5] = 0.65 + 0.35 * dv
+      sparkleBake[i * m + j] = dv > 0.991 ? 1 : 0
     }
+    filBake[fi + 7] = switchJ
   }
 }
 
@@ -340,77 +382,83 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   const beatOn = pl.a > 0.004
 
   // --- The bloom: ~16k dots of coloured fur, alive to the centre -----------
-  ensureRnd()
-  const fr = filRnd
-  const dr = dotRnd
-  if (!fr || !dr) return
+  ensureBake()
+  const fbk = filBake
+  const dbk = dotBake
+  const spk = sparkleBake
+  const inks = inkBake
+  const rims = rimBake
+  if (!fbk || !dbk || !spk || !inks || !rims) return
   const rot = time * 0.012
   const n = CONTACT.filaments
   const m = CONTACT.dots
+  // Off-canvas cull bounds: a dot's widest footprint is the sparkle cross,
+  // ±3·size around (x, y) with size ≤ 2.1 → an 8 px margin means every
+  // culled rect had zero pixel coverage (the paint stays byte-identical).
+  const cullR = w + 8
+  const cullB = h + 8
+  // The heartbeat's Gaussian is numerically zero past |u−front| = 0.4
+  // (e⁻³²·⁶ ≈ 7e-15, far below one 8-bit quantum) — skip Math.exp outside.
+  const beatLo = pulseFront - 0.4
+  const beatHi = pulseFront + 0.4
+  const beatGain = 1.7 * pl.a
+  const AF = alpha * bloomA
   ctx.save()
   for (let i = 0; i < n; i++) {
     const fi = i * FIL_STRIDE
-    const baseAng = filamentAngle(i, n)
+    const baseAng = fbk[fi]
     const ang = baseAng + rot
-    // Per-filament personality.
-    const bright = 0.5 + fr[fi] * 0.5
-    const jitter = 0.86 + fr[fi + 1] * 0.28
+    // Per-filament personality (randoms + profile baked in ensureBake).
+    const bright = fbk[fi + 1]
+    const jitter = fbk[fi + 2]
     // Breath: mostly the shared tide, part traveling wave around the ring.
     const br = 0.62 * B + 0.38 * breathWave(time, baseAng)
     // Two-arm density pattern: strands near an arm's base angle are strong
     // and long; after the shared twist the pattern winds into spiral arms.
-    const armW = Math.pow(0.5 + 0.5 * Math.cos(ARMS * (baseAng + ARM_PHASE)), 1.5)
-    const armGain = 0.4 + 1.0 * armW
+    const armW = fbk[fi + 4]
+    const armGain = fbk[fi + 5]
     // The petal profile softens to gentle variance — the arms carry the
     // large-scale structure now.
-    const petal = 0.7 + 0.3 * petalReach(baseAng, PETAL_SEED)
+    const petal = fbk[fi + 3]
     const reach =
       R * petal * jitter * (0.74 + 0.32 * br) * bloomR * (0.85 + 0.25 * armW)
     const cosA = Math.cos(ang)
     const sinA = Math.sin(ang)
-    // The story wheel: colour from the strand's base angle, blended toward
-    // its neighbour so the ring is a continuous journey, not five slices.
-    const { seg, t: segT } = storyMix(baseAng)
-    const base = mixHex(STORY_COLORS[seg], STORY_COLORS[(seg + 1) % STORY_SEGMENTS], segT)
-    const pick = fr[fi + 2]
-    const ink =
-      pick < 0.2 ? mixHex(base, '#ffffff', 0.45) : pick > 0.9 ? mixHex(base, '#10162a', 0.35) : base
-    const rim = mixHex(base, '#ffffff', 0.55)
     // Per-filament shimmer keeps the mass alive without per-dot trig; the
     // arm pattern rides the same channel (inter-arm strands stay faint).
     const shimmer = 0.85 + 0.15 * Math.sin(time * 0.9 + i * 1.7)
     const breathGlow = (0.7 + 0.4 * br) * shimmer * armGain
-    // Ragged nucleus: each strand starts a hair off dead centre.
-    const core = CONTACT.core * (0.82 + fr[fi + 3] * 0.36)
+    const AFB = AF * bright
+    const sparkleFil = bright > 0.78
+    const switchJ = fbk[fi + 7]
     // (Rev7: NO rays — nothing line-like survives; texture comes from the
     // dots alone.)
     // A gently lifted heart first; switch to the strand's ink further out.
-    ctx.fillStyle = rim
-    let switched = false
-    for (let j = 0; j < m; j++) {
-      const k = (i * m + j) * DOT_STRIDE
-      const s = dr[k]
-      if (!switched && s > 0.22) {
-        ctx.fillStyle = ink
-        switched = true
-      }
-      const g = filamentGlow(s)
+    ctx.fillStyle = rims[i]
+    let k = i * m * DOT_STRIDE
+    for (let j = 0; j < m; j++, k += DOT_STRIDE) {
+      if (j === switchJ) ctx.fillStyle = inks[i]
+      const g = dbk[k + 4]
       if (g <= 0.01) continue
-      const u = core + (1 - core) * s
+      const u = dbk[k + 2]
       // The spiral: each dot's twist is pre-baked (cos/sin lookups) — the
       // strand curves like a galaxy-arm streamline, no trig in the loop.
-      const cd = dr[k + 1]
-      const sd = dr[k + 2]
+      const cd = dbk[k]
+      const sd = dbk[k + 1]
       const ca = cosA * cd - sinA * sd
       const sa = sinA * cd + cosA * sd
-      const rr = u * reach * (1 + (dr[k + 3] - 0.5) * 0.05)
+      const rr = u * reach * dbk[k + 3]
       const x = cx + ca * rr * KX
       const y = cy + sa * rr * KY
+      if (x < -8 || x > cullR || y < -8 || y > cullB) continue
       // The heartbeat rolls through the fur as a brightening front.
-      const beat = beatOn ? 1 + 1.7 * pl.a * Math.exp(-(((u - pulseFront) / 0.07) ** 2)) : 1
-      const a = alpha * bloomA * bright * g * breathGlow * beat * (0.65 + 0.35 * dr[k + 4])
-      const size = 0.8 + g * 1.3
+      const beat =
+        beatOn && u > beatLo && u < beatHi
+          ? 1 + beatGain * Math.exp(-(((u - pulseFront) / 0.07) ** 2))
+          : 1
+      const a = AFB * g * breathGlow * beat * dbk[k + 5]
       if (a <= 0.006) continue
+      const size = 0.8 + g * 1.3
       ctx.globalAlpha = Math.min(1, a)
       ctx.fillRect(x, y, size, size)
       // Soft haze double for a sparse subset — the fur's blur.
@@ -419,7 +467,7 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
         ctx.fillRect(x - size, y - size, size * 3, size * 3)
       }
       // Rare cross-shaped sparkles on bright strands — small magic.
-      if (dr[k + 4] > 0.991 && bright > 0.78) {
+      if (sparkleFil && spk[i * m + j] === 1) {
         ctx.globalAlpha = Math.min(1, a * 0.85)
         ctx.fillRect(x - size * 2, y + size * 0.15, size * 5, size * 0.7)
         ctx.fillRect(x + size * 0.15, y - size * 2, size * 0.7, size * 5)
