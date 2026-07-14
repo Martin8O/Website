@@ -31,7 +31,7 @@ export const OFFER_COPY_CS: Record<OfferPanelId, OfferPanelCopy> = {
       { html: 'Stavím; skutečný pokrok vidíte ve dnech a&nbsp;každé kolo směrujete.' },
       { html: 'Předání: kód, dokumentace a&nbsp;know-how k&nbsp;provozu. Všechno vaše.' },
     ],
-    foot: 'Jak rychle? Záleží na nás obou – já stavím rychle a rychlé odpovědi to tak udrží.',
+    foot: 'Jak rychle? Záleží na nás obou – já stavím rychle a rychlá komunikace to tak udrží.',
   },
   proof: {
     eyebrow: '04 · Nevěř – ověřuj',
@@ -57,7 +57,7 @@ export const OFFER_COPY_CS: Record<OfferPanelId, OfferPanelCopy> = {
     eyebrow: '03 · Dobré vědět',
     items: [
       { html: 'Kód je váš&nbsp;–&nbsp;nejste na mně závislí.' },
-      { html: 'Stavím v&nbsp;češtině i&nbsp;angličtině&nbsp;–&nbsp;vaše aplikace může mluvit oběma.' },
+      { html: 'Stavím v&nbsp;češtině i&nbsp;angličtině&nbsp;–&nbsp;vaše aplikace může mluvit oběma jazyky.' },
       { html: 'Plně na dálku&nbsp;–&nbsp;spolupracovat můžeme odkudkoli.' },
     ],
   },
@@ -70,8 +70,8 @@ export const OFFER_QUALITY_CS: Partial<OfferQuality> = {
   heading: 'Tento web',
   selfItems: [
     {
-      html: '<strong>200 automatických testů</strong> · přístupnost WCAG',
-      htmlMobile: '<strong>200 automatických testů</strong> · WCAG',
+      html: '<strong>354 automatických testů</strong> · přístupnost WCAG',
+      htmlMobile: '<strong>354 automatických testů</strong> · WCAG',
     },
     {
       html: '<strong>Žádné cookies</strong>&nbsp;–&nbsp;anonymní statistiky návštěv, nic, co by vás identifikovalo',
@@ -85,7 +85,7 @@ export const OFFER_QUALITY_CS: Partial<OfferQuality> = {
   ],
   gaugesLabel: 'Lighthouse',
   gauges: [
-    { label: 'Výkon', value: 99 },
+    { label: 'Výkon', value: 98 },
     { label: 'Přístupnost', value: 100 },
     { label: 'Best Practices', value: 92 },
     { label: 'SEO', value: 100 },

@@ -62,7 +62,7 @@ export const OFFER_PANELS: OfferPanel[] = [
       { html: 'I build; you see real progress in days and steer every round.' },
       { html: 'Handover: code, docs and the know-how to run it. All yours.' },
     ],
-    foot: 'How fast? That depends on us both — I build quickly, and quick answers keep it that way.',
+    foot: 'How fast? That depends on us both — I build quickly, and quick communication keeps it that way.',
   },
   // Broad heading (Martin): the items are reassurances — ownership, privacy,
   // language, reach — so "Good to know" covers them where "Trust" didn't.
@@ -107,7 +107,7 @@ export const OFFER_PANELS: OfferPanel[] = [
  * under its "Open source" line (Martin's brief): the Lighthouse gauges by
  * name + the security grades, every grade a live re-scan link — the
  * "Don't trust — verify" motto made clickable. Numbers from Martin's own
- * measurements (2026-07): Lighthouse 99/100/92/100, MDN Observatory A+
+ * measurements (2026-07): Lighthouse 98/100/92/100, MDN Observatory A+
  * 125/100, securityheaders.com A+, Hardenize all green (MTA-STS consciously
  * left out — DANE covers SMTP).
  */
@@ -136,8 +136,8 @@ export const OFFER_QUALITY: OfferQuality = {
   heading: 'This website',
   selfItems: [
     {
-      html: '<strong>200 automated tests</strong> · WCAG accessibility',
-      htmlMobile: '<strong>200 automated tests</strong> · WCAG',
+      html: '<strong>354 automated tests</strong> · WCAG accessibility',
+      htmlMobile: '<strong>354 automated tests</strong> · WCAG',
     },
     {
       html: '<strong>No cookies</strong>&nbsp;—&nbsp;anonymous visitor stats, nothing that identifies you',
@@ -151,7 +151,7 @@ export const OFFER_QUALITY: OfferQuality = {
   ],
   gaugesLabel: 'Lighthouse',
   gauges: [
-    { label: 'Performance', value: 99 },
+    { label: 'Performance', value: 98 },
     { label: 'Accessibility', value: 100 },
     { label: 'Best Practices', value: 92 },
     { label: 'SEO', value: 100 },
@@ -166,7 +166,7 @@ export const OFFER_QUALITY: OfferQuality = {
       href: 'https://securityheaders.com/?q=svobodamartin.dev&followRedirects=on',
     },
     {
-      html: 'Hardenize <strong>all green</strong>',
+      html: 'Hardenize <strong>green</strong>',
       href: 'https://www.hardenize.com/report/svobodamartin.dev/1783538721',
     },
   ],

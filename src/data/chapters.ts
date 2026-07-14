@@ -149,7 +149,7 @@ export const CHAPTERS: Chapter[] = [
     // Copy FINAL v2.5 (local/ode mne/texty/texty-v2.md) from here on.
     // Em-dashes ride non-breaking spaces on BOTH sides everywhere, so a
     // dash never strands at a line start or end in the justified bodies.
-    body: '<span class="lead">Graduated in maths and programming.</span>Several years with Pascal culminated in my final project&nbsp;—&nbsp;<span class="a-gold">chess for two players</span> that enforced every rule of the game.',
+    body: '<span class="lead">Graduated in maths and programming.</span>Several years with Pascal culminated in my final project&nbsp;—&nbsp;<span class="a-gold">chess for two players</span> that enforced every rule of the game. A life in IT looked like the obvious path back then.',
   },
   {
     id: 'sky-climb',
@@ -188,7 +188,7 @@ export const CHAPTERS: Chapter[] = [
     cardEase3d: [0.0665, 0.073],
     // The faculty was electrical engineering; the FIELD was informatics —
     // that is what makes "a life in front of a computer screen" land.
-    body: 'Two years into computer science at the faculty of electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen&nbsp;—&nbsp;<em>remember that</em>&nbsp;—&nbsp;and there was a boyhood dream waiting: <span class="a-hud">flying military jets</span>. The Z‑142, then the L‑39C&nbsp;—&nbsp;a hundred hours in the air and a totally different life.',
+    body: 'But after two years of computer science at the faculty of electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen&nbsp;—&nbsp;<em>remember that</em>&nbsp;—&nbsp;and there was a boyhood dream waiting: <span class="a-hud">flying military jets</span>. The Z‑142, then the L‑39C&nbsp;—&nbsp;a hundred hours in the air, still during my years at the University of Defence, and a totally different life.',
     align: 'right',
   },
   {
@@ -323,7 +323,7 @@ export const CHAPTERS: Chapter[] = [
     era: '2014–2016',
     num: '06 — The Test',
     title: 'Self-healing',
-    body: 'Ulcerative colitis&nbsp;—&nbsp;“lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle</span>: eighteen months of rebuilding everything&nbsp;—&nbsp;food, gut, mind, lifestyle. In remission ever since&nbsp;—&nbsp;<span class="a-cyan">off all medication</span>. I came out healthier, knowing myself from the inside.',
+    body: 'Ulcerative colitis&nbsp;—&nbsp;“lifelong, no known cause, no cure.” I went at it from <span class="a-cyan">every angle</span>: eighteen months of rebuilding everything: food, gut, mind, lifestyle. In remission ever since and <span class="a-cyan">off all medication</span>. I came out healthier, knowing myself from the inside, literally.',
     cta: {
       label: 'Read the whole journey →',
       href: 'https://mojecestakezdravi.cz/',
@@ -428,7 +428,7 @@ export const CHAPTERS: Chapter[] = [
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Your destination can take any form&nbsp;—&nbsp;a website, an app, a tool, an automation. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built.<br><br>What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of regular meditation, and a build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Your destination can take any form&nbsp;—&nbsp;a website, an app, a tool, an automation. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built.<br><br>What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of regular meditation, and a quality build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
     // Plain address, no decorative brackets — they wrapped onto their own
     // lines on phones and guard nothing (the address is plaintext in the

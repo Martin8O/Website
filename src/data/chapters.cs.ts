@@ -25,13 +25,13 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: '1991–1998 · Škola',
     num: '00 – Počátek',
     title: 'Škola<br>a Pascal',
-    body: '<span class="lead">Maturita z&nbsp;matematiky a&nbsp;programování.</span>Několik let s&nbsp;Pascalem vyvrcholilo maturitním programem: <span class="a-gold">šachy pro dva hráče</span>, který hlídal pravidla hry.',
+    body: '<span class="lead">Maturita z&nbsp;matematiky a&nbsp;programování.</span>Několik let s&nbsp;Pascalem vyvrcholilo maturitním programem: <span class="a-gold">šachy pro dva hráče</span>, který hlídal pravidla hry. Život v&nbsp;IT tehdy vypadal jako jasná volba.',
   },
   'sky-climb': {
     era: '1999–2005 · ČVUT → Brno',
     num: '01 – Rozhodnutí',
     title: 'Vzhůru',
-    body: 'Po dvou letech informatiky na elektrotechnické fakultě jsem odešel. Nedokázal jsem si představit život strávený před obrazovkou počítače&nbsp;–&nbsp;<em>to si zapamatujte</em>&nbsp;–&nbsp;čekal na mě totiž klukovský sen: <span class="a-hud">létat na proudových letounech</span>. Z‑142, pak <span class="nw">L‑39C&nbsp;–&nbsp;sto</span> hodin ve vzduchu a&nbsp;úplně jiný život.',
+    body: 'Ale po dvou letech informatiky na elektrotechnické fakultě jsem odešel. Nedokázal jsem si tenkrát představit život strávený před obrazovkou počítače&nbsp;–&nbsp;<em>to si zapamatujte</em>&nbsp;–&nbsp;čekal na mě totiž klukovský sen: <span class="a-hud">létat na proudových letounech</span>. Z‑142, pak <span class="nw">L‑39C&nbsp;–&nbsp;sto</span> hodin ve vzduchu, ještě během studia na Univerzitě obrany, a&nbsp;úplně jiný život.',
   },
   'sky-cruise': {
     era: '2012–2022 · L-159',
@@ -61,7 +61,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: '2014–2016',
     num: '06 – Zkouška',
     title: 'Sebeuzdravení',
-    body: 'Ulcerózní kolitida&nbsp;–&nbsp;„na celý život, příčina neznámá, léčba neexistuje.“ Šel jsem na ni ze <span class="a-cyan">všech stran</span>: osmnáct měsíců přestavby všeho&nbsp;–&nbsp;strava, střevo, mysl, životní styl. Od té doby v&nbsp;remisi&nbsp;–&nbsp;<span class="a-cyan">bez léků</span>. Vyšel jsem z&nbsp;toho zdravější a&nbsp;s&nbsp;hlubší znalostí sebe sama.',
+    body: 'Ulcerózní kolitida&nbsp;–&nbsp;„na celý život, příčina neznámá, léčba neexistuje.“ Šel jsem na ni ze <span class="a-cyan">všech stran</span>: osmnáct měsíců přestavby všeho: strava, střevo, mysl, životní styl. Od té doby v&nbsp;remisi a&nbsp;<span class="a-cyan">bez léků</span>. Vyšel jsem z&nbsp;toho zdravější a&nbsp;s&nbsp;hlubší znalostí sebe sama, doslova.',
     cta: {
       label: 'Přečtěte si celou cestu →',
       href: 'https://mojecestakezdravi.cz/',
@@ -91,7 +91,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: 'teď',
     num: '10 – Teď',
     title: 'Zadejte<br>svůj cíl.',
-    body: 'Váš cíl může mít jakoukoli formu&nbsp;–&nbsp;web, aplikace, nástroj, automatizace. Beru si ty malé až střední projekty a&nbsp;stavím je pořádně, od začátku do konce. Pokud to dokážete popsat, dá se to postavit.<br><br>Co přináším: soustředění vojenského pilota, přesnost, smysl pro detail a&nbsp;odpovědnost pilota zalétávacího, klid pravidelné meditace a&nbsp;tempo stavby měřené ve dnech.<br><br>Pokud máte něco, co stojí za postavení, rád se o&nbsp;tom dozvím víc.',
+    body: 'Váš cíl může mít jakoukoli formu&nbsp;–&nbsp;web, aplikace, nástroj, automatizace. Beru si malé až střední projekty a&nbsp;stavím je pořádně, od začátku do konce. Pokud to dokážete popsat, dá se to postavit.<br><br>Co přináším: soustředění vojenského pilota, přesnost, smysl pro detail a&nbsp;odpovědnost pilota zalétávacího, klid pravidelné meditace a&nbsp;tempo kvalitní stavby měřené ve dnech.<br><br>Pokud máte něco, co stojí za postavení, rád se o&nbsp;tom dozvím víc.',
     ctaEyebrow: '+ Ozvěte se',
     cta: {
       label: 'martin@svobodamartin.dev',

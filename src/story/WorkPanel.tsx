@@ -190,7 +190,19 @@ export function WorkPanel({ onClose }: { onClose: () => void }) {
                   </>
                 )
               })()}{' '}
-              <span>{t.workClaudeSub}</span>
+              <span className={styles.claudeSub}>
+                {/* [[…]] marks the build-fact to lift out of the sub line —
+                    "this site in 4 days" (Martin). */}
+                {t.workClaudeSub.split(/\[\[|\]\]/).map((seg, i) =>
+                  i % 2 === 1 ? (
+                    <span key={i} className={styles.subHi}>
+                      {seg}
+                    </span>
+                  ) : (
+                    seg
+                  ),
+                )}
+              </span>
             </h3>
             <ul className={styles.grid}>
               {claude.map((p) => (

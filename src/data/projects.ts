@@ -96,7 +96,7 @@ export const PROJECTS: Project[] = [
     id: 'moje-cesta',
     name: 'My Healing Journey',
     tagline:
-      'The site documenting how I healed myself from ulcerative colitis — my first real web build.',
+      'The site documenting how I healed myself from ulcerative colitis — my first real web build. Created in 2015.',
     stack: ['Web'],
     era: 'pre-claude',
     link: { href: 'https://mojecestakezdravi.cz/', display: 'mojecestakezdravi.cz' },
@@ -106,7 +106,8 @@ export const PROJECTS: Project[] = [
   {
     id: 'rrcentrum',
     name: 'RR Centrum Polabí',
-    tagline: 'A website for a regeneration & rehabilitation centre run by two physiotherapists.',
+    tagline:
+      'A website for a regeneration & rehabilitation centre run by two physiotherapists. Created in 2022.',
     stack: ['Web'],
     era: 'pre-claude',
     link: { href: 'https://rrcentrumpolabi.cz', display: 'rrcentrumpolabi.cz' },
@@ -131,7 +132,7 @@ export const PROJECTS: Project[] = [
     id: 'due-deck',
     name: 'Due-Deck',
     tagline:
-      "A warranties, insurance-renewal, contract & appointment tracker that runs fully in-browser.",
+      "A warranties, insurance-renewal, contract & appointment tracker that runs fully in your browser; your data never leaves your device.",
     stack: ['Lovable', 'Web', 'localStorage'],
     era: 'pre-claude',
     link: { href: 'https://duedeck.lovable.app', display: 'duedeck.lovable.app' },
@@ -144,7 +145,7 @@ export const PROJECTS: Project[] = [
     id: 'wealth-deck',
     name: 'Wealth-Deck',
     tagline:
-      'A personal finance & portfolio dashboard — investments, allocation and performance in one view.',
+      'A suite of personal-finance calculators (mortgage, savings, pension, investment growth and yield) with instant charts to model any money decision. Runs fully in your browser; your data never leaves your device.',
     stack: ['Lovable', 'Web'],
     era: 'pre-claude',
     link: { href: 'https://wealthdeck.lovable.app', display: 'wealthdeck.lovable.app' },
@@ -169,7 +170,7 @@ export const PROJECTS: Project[] = [
     id: 'strc-check',
     name: 'STRC Risk Monitor',
     tagline:
-      "An experimental risk dashboard for Strategy's STRC “Stretch” variable-rate preferred — tracks price vs. par, dividend yield and amplification.",
+      "An experimental risk dashboard for Strategy's STRC “Stretch” variable-rate preferred: tracks price vs. par, dividend yield and amplification.",
     stack: ['Lovable', 'Web', 'Finnhub'],
     era: 'pre-claude',
     link: { href: 'https://strc-check.lovable.app', display: 'strc-check.lovable.app' },
@@ -185,7 +186,7 @@ export const PROJECTS: Project[] = [
     id: 'clearfeed',
     name: 'ClearFeed',
     tagline:
-      "A Chrome extension (MV3) that quietly mutes the topics you'd rather not see — politics, gossip, spoilers, sports, crypto — across news sites and feeds. 16 languages, 100% local, zero tracking.",
+      "A Chrome extension (MV3) that quietly mutes the topics you'd rather not see: politics, gossip, spoilers, sports, crypto, across news sites and feeds. 16 languages, 100% local, zero tracking.",
     stack: ['JavaScript', 'Chrome MV3'],
     era: 'claude',
     link: { href: 'https://github.com/Martin8O/ClearFeed', display: 'github.com/Martin8O/ClearFeed' },
@@ -216,7 +217,7 @@ export const PROJECTS: Project[] = [
     id: 'registrace',
     name: 'Registrace',
     tagline:
-      'A bilingual (CZ/EN) event-registration platform for 25 Buddhist centres — self-service sign-up, server-side pricing, emailed confirmations and a role-scoped admin.',
+      'A bilingual (CZ/EN) event-registration platform for 25 Buddhist centres: server-side pricing, self-service sign-up, emailed confirmations and a role-scoped admin.',
     stack: ['Next.js 16', 'React 19', 'TypeScript', 'Prisma 7', 'Supabase', 'Tailwind v4'],
     era: 'claude',
     link: { href: 'https://registrace.online', display: 'registrace.online' },
@@ -231,7 +232,7 @@ export const PROJECTS: Project[] = [
     name: 'RL Lab + Data Lab',
     // Counts from the repo's own hero (9 algorithms, 100+ environments).
     tagline:
-      'Train, watch & play against AI — from CartPole to Atari, physics, Doom and board games. 9 algorithms across 100+ environments; Data Lab adds research-grade metrics, seed sweeps and one-click exports.',
+      'Train, watch & play against AI: from CartPole to Atari, physics, Doom and board games. 9 algorithms across 100+ environments; Data Lab adds research-grade metrics, seed sweeps and one-click exports.',
     stack: ['Python', 'FastAPI', 'PyTorch', 'React 19', 'TypeScript', 'Vite'],
     era: 'claude',
     link: { href: 'https://github.com/Martin8O/RL-Lab', display: 'github.com/Martin8O/RL-Lab' },
@@ -245,7 +246,7 @@ export const PROJECTS: Project[] = [
     id: 'brainquest',
     name: 'BrainQuest + dev-brain',
     tagline:
-      'Turns an Obsidian knowledge vault into a learning game — spaced repetition (FSRS), a skill-tree of concepts and an AI tutor.',
+      'Turns an Obsidian knowledge vault into a Duolingo-style learning game: spaced repetition (FSRS), a skill-tree of concepts and an AI tutor.',
     stack: ['Next.js', 'Capacitor', 'FSRS', 'LLM'],
     era: 'claude',
     link: { href: 'https://github.com/Martin8O/BrainQuest', display: 'github.com/Martin8O/BrainQuest' },

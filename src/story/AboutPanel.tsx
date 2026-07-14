@@ -27,10 +27,11 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         that rebuilt what I trust: technical understanding over promises. And now, with
         Claude&nbsp;Code, we&rsquo;ve built a hyper-efficient workshop&nbsp;—&nbsp;five real apps and{' '}
         <span className={styles.highlight}>this site</span>, each one built properly and verified
-        end to end. And fast: from an empty folder to a live production deploy{' '}
-        <span className={styles.highlight}>in 4&nbsp;days</span>&nbsp;—&nbsp;then extended into a 3D
-        version, with its own animation studio, in{' '}
-        <span className={styles.highlight}>4&nbsp;more</span>.
+        end to end.
+        <br /> And fast&nbsp;—&nbsp;the site itself went from an empty folder to a live production
+        deploy <span className={styles.highlight}>in 4&nbsp;days</span>, then extended into{' '}
+        <span className={styles.highlight}>a 3D version</span>, with its own animation studio,{' '}
+        <span className={styles.highlight}>in 4&nbsp;more</span>.
       </>
     ),
     p2: (
@@ -39,7 +40,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         <strong>I can build you almost anything, well and fast.</strong> A website, an app, a tool,
         an automation. I take on the small-to-medium ones and carry them start to finish.
         If you can describe it, it can be built. I bring a pilot&rsquo;s precision, a
-        meditator&rsquo;s calm, and a build pace measured in days.
+        meditator&rsquo;s calm, and a quality build pace measured in days.
       </>
     ),
   },
@@ -52,19 +53,20 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         jsme s&nbsp;Claude&nbsp;Code postavili super efektivní dílnu&nbsp;–&nbsp;pět skutečných
         aplikací a{' '}
         <span className={styles.highlight}>tento web</span>, všechny pořádně a&nbsp;ověřené od
-        začátku do konce. A&nbsp;rychle: z&nbsp;prázdné složky až po produkční nasazení{' '}
+        začátku do konce.
+        <br /> A&nbsp;rychle: z&nbsp;prázdné složky až po produkční nasazení{' '}
         <span className={styles.highlight}>za 4&nbsp;dny</span>&nbsp;–&nbsp;a&nbsp;pak rozšíření
-        o&nbsp;3D verzi, s&nbsp;vlastním animačním studiem, za&nbsp;další{' '}
-        <span className={styles.highlight}>4&nbsp;dny</span>.
+        o&nbsp;<span className={styles.highlight}>3D verzi</span>, s&nbsp;vlastním animačním studiem,{' '}
+        <span className={styles.highlight}>za&nbsp;další 4&nbsp;dny</span>.
       </>
     ),
     p2: (
       <>
         Co to znamená pro vás, je jednoduché:{' '}
         <strong>Mohu vám postavit téměř cokoli, kvalitně a rychle.</strong> Web, aplikaci, nástroj,
-        automatizaci. Beru si ty malé až střední projekty a&nbsp;dovedu je až do cíle.
+        automatizaci. Beru si malé až střední projekty a&nbsp;dovedu je až do cíle.
         Pokud to dokážete popsat, dá se to postavit. Přináším přesnost pilota, klid
-        meditujícího a&nbsp;tempo stavby měřené ve dnech.
+        meditujícího a&nbsp;tempo kvalitní stavby měřené ve dnech.
       </>
     ),
   },

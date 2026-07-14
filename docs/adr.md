@@ -4,6 +4,44 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-048 — Copy-polish pass: micro-edits across story / offer / About / projects, self-reported numbers truthed, dashes reduced (2026-07-14)
+A text-only review pass with Martin (EN + CZ, no choreography touched). Ten source files, all copy/CSS. The
+decisions worth recording:
+
+1. **Self-reported numbers made honest.** The "This website" proof panel claimed **200 automated tests** → set to
+   the real **354** (the live vitest count) because the panel links a live re-scan of every other metric, so it
+   must not overclaim. **Hardenize "all green" → "green"** (one MTA-STS box is a conscious grey — DANE covers
+   SMTP, ADR context). **Lighthouse Performance gauge 99 → 98** (the current real score; Martin will re-optimise
+   and bump it back rather than leave a stale 99).
+2. **Dashes reduced so none strand at a card line-end.** The Work-panel taglines render as PLAIN text (no
+   `&nbsp;` protection possible), so an em/en-dash could wrap to the end of a line. Rather than protect them,
+   Martin's call was "use fewer dashes": the CZ taglines for Těnovice, This-Site, Due-Deck, Wealth-Deck, RL Lab,
+   Registrace, BrainQuest, ClearFeed and STRC (and the EN mirrors he flagged) had their mid-sentence dashes
+   rewritten to colon / comma / period / parentheses. Chapter-06 lost two of its three em-dashes the same way
+   (`: ` for the list, ` a / and ` before "bez léků / off all medication"); the opener dash stayed.
+3. **Wealth-Deck retagged to what it is.** The repo is a client-side **finance-calculator suite** (mortgage,
+   savings, pension, investment, yield), not a live "portfolio dashboard" — tagline rewritten to match. Verified
+   it runs fully client-side (`usePersistentState` → localStorage `wd:`, no backend / API / env), so both it and
+   Due-Deck now say **"runs fully in your browser; your data never leaves your device."**
+4. **Highlights lifted where the achievement lives.** The Work-panel Claude-era sub line was muted grey → lifted
+   to `--fg`, with the build-fact **"this site in 4 days"** lifted further to amber via a `[[…]]` split-token
+   parsed in `WorkPanel.tsx` (same idea as the `{m}` month token). About's speed sentence gained highlights on
+   **"a 3D version"** and **"in 4 more / za další 4 dny"**, and a `<br>` before "And fast / A rychle:" so it
+   starts its own line. Copy also: 00 sets up "a life in IT" (pays off in 01's "couldn't picture a life in front
+   of a screen"); 01 opens "But after two years…" and pins the ~100 hours to the University-of-Defence years; 06
+   ends on a dry "literally / doslova"; process-panel foot "quick communication keeps it that way"; trust panel
+   "oběma jazyky"; About/contact "quality build pace / tempo kvalitní stavby", CZ drops the redundant "ty";
+   BrainQuest "Duolingo-style / ve stylu Duolinga" + "spaced repetition → rozložené opakování"; My Healing Journey
+   "Created 2015", RR Centrum "Created 2022".
+
+**Deferred (Martin's call):** making the test number a clickable popup of the test list (Credits-style) — feasible
+as a **build-time** manifest generator (vitest JSON reporter → a baked static list, zero runtime cost, no shipped
+dependency), to be done once the site is fully finalised. Verify: full gate green (tsc · eslint · build · 354
+tests). Model-fit: Opus 4.8 · low (pure copy/review). **NEXT (Martin's call):** the Lighthouse-perf re-optimise
+pass (bump 98 → 99+), then optionally the test-list popup + the remaining two CZ dashes.
+
+---
+
 ### ADR-047 — Chapter-03 Bagram base-ops beat: 4 flying actors ported to 3D over the panning 2D desert (2026-07-14)
 The chapter-03 "sky/desert" (Afghanistan, 2010) gets the climb-style **hybrid** 3D treatment: the 2D desert keeps
 painting + panning the whole base while only its four FLYING aircraft — a C-17 departure, an Apache pair arrival,

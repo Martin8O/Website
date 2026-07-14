@@ -132,6 +132,17 @@
   letter-spacing: inherit;
   text-transform: inherit;
 }
+/* The Claude-era sub sentence — lifted out of the muted grey so the
+   "five real apps · this site · 3D version" line reads as a real highlight
+   (Martin: it was too faint). Full-strength foreground, kept the same weight. */
+.groupHead .claudeSub {
+  color: var(--fg);
+}
+/* The build-fact inside the sub line ("this site in 4 days") lifted amber so
+   it pops out of the already-bright sub (Martin). */
+.groupHead .claudeSub .subHi {
+  color: #ffb066;
+}
 
 .grid {
   list-style: none;
