@@ -130,6 +130,18 @@
   }
 }
 
+/* Landscape phones (short viewports): a centre-anchored card can stand taller
+   than the ~390 px viewport, clipping its top off-screen (pre-existing —
+   found while verifying the offer breakpoint). Cap every card to the viewport
+   and let it scroll natively when it overflows — the OfferPanels process/proof
+   idiom (data-lenis-prevent rides in the TSX). No effect when a card fits. */
+@media (max-height: 480px) {
+  .card {
+    max-height: 88dvh;
+    overflow-y: auto;
+  }
+}
+
 /* 09 — the mission: eyebrow + title + one-line lede are TOP-anchored on every
    width, so the canvas reticle and the four HUD panels own the frame below. */
 :global(#offer-mission) {

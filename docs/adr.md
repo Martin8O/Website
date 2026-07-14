@@ -4,6 +4,22 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-053 — Dperf-2: landscape-phone chapter-card top clip (2026-07-15)
+Pre-existing bug (present on the untouched baseline, found while verifying ADR-050's offer breakpoint): on a
+landscape phone (`max-height: 480px`) the chapter cards are centre-anchored (`top: 50%` − 50%), so a card taller
+than the ~390 px viewport pushes its top edge — the eyebrow + start of the title — off-screen. Portrait mobile and
+desktop were always correct. Fix reuses the exact idiom the offer proof/process cards adopted in ADR-050: a
+`@media (max-height: 480px)` rule caps every `.card` to `max-height: 88dvh; overflow-y: auto` so it stays centred
+but its overflow scrolls natively inside the card, and `ChapterCards.tsx` mirrors OfferPanels' `matchMedia`
+(`(max-height: 480px)`) to add `data-lenis-prevent` on short viewports so the wheel/touch reaches the card's
+internal scroll instead of the page. Zero change on portrait + desktop (no card is capped there). *Verify:* new
+`local/tmp/cdp-cards-landscape.mjs` sweeps the whole story, tracks each of the 12 cards' peak-visibility beat and
+asserts the whole card box sits inside the viewport + that any scrollable card carries `data-lenis-prevent`:
+landscape 826×294 all 12 PASS (tops at 18 px, console clean), portrait 504×748 + desktop 1262×704 A/B all PASS
+(no card capped/scrollable → unchanged). Gate green (357).
+
+---
+
 ### ADR-052 — Defer Vercel Analytics + Speed Insights until after `window.load` (2026-07-15)
 Follow-up to Dperf-1, from Martin's live pagespeed traces. `<Analytics/>` + `<SpeedInsights/>` (in `main.tsx`)
 each inject a same-origin Vercel script (`/_vercel/insights/*`, `/_vercel/speed-insights/*`) the instant they

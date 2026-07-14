@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { cardOpacity, cardOpacityWindowed } from '../timeline'
 import { heroLive } from '../three/owned3d'
@@ -86,6 +86,18 @@ export function ChapterCards({
   chapters: Chapter[]
   worldMode?: WorldMode
 }) {
+  // Landscape phones (short viewports): cards taller than the viewport cap to
+  // it and scroll natively (ChapterCards.module.css) — keep in lockstep with
+  // that media query so the wheel can reach them there (the OfferPanels
+  // process/proof pattern). Desktop/portrait never scroll internally.
+  const [short, setShort] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-height: 480px)')
+    const update = () => setShort(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
   return (
     <main className={styles.cards}>
       {chapters.map((ch, i) => {
@@ -122,6 +134,7 @@ export function ChapterCards({
             // #contact-now and focuses its email CTA).
             id={ch.id}
             className={`${styles.card} ${alignClass} ${compactClass} ${centerClass}`}
+            {...(short ? { 'data-lenis-prevent': '' } : {})}
             style={{
               opacity: o,
               // `--ty` (default -50%, the vertical centre anchor) is overridable
