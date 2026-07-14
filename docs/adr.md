@@ -4,6 +4,21 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-052 — Defer Vercel Analytics + Speed Insights until after `window.load` (2026-07-15)
+Follow-up to Dperf-1, from Martin's live pagespeed traces. `<Analytics/>` + `<SpeedInsights/>` (in `main.tsx`)
+each inject a same-origin Vercel script (`/_vercel/insights/*`, `/_vercel/speed-insights/*`) the instant they
+mount — with the app, so their two fetches + execution compete during the boot the visitor waits on. New
+`DeferredInsights` component holds the mount until the `load` event (immediate if the doc is already `complete`).
+*No data lost:* both libraries read Core Web Vitals via `PerformanceObserver { buffered: true }`, so metrics from
+before the mount are still delivered from the browser buffer — only *when* the scripts arrive moves. *Honest
+scope:* a small, zero-risk cleanup, **not** the big lever — the two scripts never appeared in the critical-path /
+render-blocking / long-task lists of the traces, so the score won't move much; the real mobile cost is boot-time
+main-thread work (~3–4 s) + the 906 KB 3D chunk loading on capable phones (a future item). Martin explicitly
+wanted a smooth boot over perfect analytics timing, so the deferral is pure upside. *Verify:*
+`cdp-defer-insights.mjs` (prod build, CDP) — both scripts fire after `load` (desktop +133 ms, mobile +228 ms),
+app boots; gate green (357). *Live re-check after deploy:* the scripts 200 on the platform (404 under
+`vite preview`), still fire late.
+
 ### ADR-051 — Critical-path: preload the reveal-gating fonts (Dperf-1) (2026-07-15)
 The first real network-critical-path pass since D2.1. Verifying the drafted lever list against a real build + the
 **live** deploy showed two of the four hoped-for wins were already in place — `/assets/*` is

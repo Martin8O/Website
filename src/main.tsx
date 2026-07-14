@@ -1,17 +1,16 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from '@vercel/speed-insights/react'
 import './fonts' // self-hosted brand fonts — before index.css so faces are registered first
 import App from './App.tsx'
+import { DeferredInsights } from './DeferredInsights.tsx'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
-    {/* Vercel Web Analytics — cookieless, same-origin (/_vercel/insights/*), passes the strict CSP. */}
-    <Analytics />
-    {/* Vercel Speed Insights — real-world Core Web Vitals; cookieless, same-origin (/_vercel/speed-insights/*), same CSP posture as Analytics. */}
-    <SpeedInsights />
+    {/* Vercel Web Analytics + Speed Insights — cookieless, same-origin
+        (/_vercel/*), strict-CSP-safe. Held until after `window.load` so their
+        two script fetches never compete during boot (DeferredInsights). */}
+    <DeferredInsights />
   </StrictMode>,
 )
