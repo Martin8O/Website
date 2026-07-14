@@ -21,6 +21,7 @@ export type UiStrings = {
   skipToContact: string
   scrollHint: string
   loading: string
+  bestOnDesktop: string
   workEyebrow: string
   workTitle: string
   workClaudeHead: string
@@ -76,6 +77,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     skipToContact: 'Skip to contact',
     scrollHint: 'Scroll',
     loading: 'Loading',
+    bestOnDesktop: 'For the best experience, use a desktop',
     workEyebrow: 'Projects',
     workTitle: 'Everything I’ve built',
     workClaudeHead: 'The Claude-Code {m}',
@@ -113,6 +115,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     skipToContact: 'Přeskočit na kontakt',
     scrollHint: 'Skrolujte',
     loading: 'Načítání',
+    bestOnDesktop: 'Nejlepší zážitek na počítači',
     workEyebrow: 'Projekty',
     workTitle: 'Všechno, co jsem postavil',
     workClaudeHead: '{m} s Claude Code',

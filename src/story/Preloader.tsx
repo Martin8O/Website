@@ -155,6 +155,14 @@ export function Preloader() {
             0 %
           </span>
         </p>
+        <p className={styles.desktopHint}>
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+            <rect x="2" y="3.5" width="20" height="13" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M9 20.5h6M12 16.5v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            <path d="M7.4 10l2.2 2.2 4.9-4.9" fill="none" stroke="#3ddc84" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span>{t.bestOnDesktop}</span>
+        </p>
       </div>
     </div>
   )

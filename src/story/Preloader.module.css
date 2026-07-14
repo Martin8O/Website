@@ -71,6 +71,24 @@
   color: var(--amber);
 }
 
+/* A quiet aside under the bar — best viewed on a desktop. */
+.desktopHint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: -0.45rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--amber) 52%, transparent);
+}
+
+.desktopHint svg {
+  flex: none;
+  color: color-mix(in srgb, var(--amber) 78%, #fff);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .leave {
     transition: none;
