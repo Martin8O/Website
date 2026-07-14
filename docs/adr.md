@@ -4,6 +4,28 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-051 — Critical-path: preload the reveal-gating fonts (Dperf-1) (2026-07-15)
+The first real network-critical-path pass since D2.1. Verifying the drafted lever list against a real build + the
+**live** deploy showed two of the four hoped-for wins were already in place — `/assets/*` is
+`max-age=31536000, immutable` in prod (`X-Vercel-Cache: HIT`, so the pagespeed "cache-lifetime 180 KB" finding is
+stale or points at Vercel's own `/_vercel/*` scripts), and the 906 KB `Stage3D` 3D chunk is already off the 2D
+`modulepreload` set. The 34 KB (6.75 KB gzip) index CSS is too small to justify the visual-risk of manual
+critical-CSS inlining. **The one genuine remaining lever:** the boot gate (`Preloader.tsx`) holds the site reveal
+on `document.fonts.load` of three faces (`600 Space Grotesk`, `400 Inter`, `500 Chakra Petch`, latin), but those
+woff2 are referenced *only* from inside the CSS → discovered a full round-trip late, and the font fetch is the long
+pole on a cold mobile link. New Vite plugin `preloadCriticalFonts` injects `<link rel="preload" as="font">` for
+**exactly** those three gate faces (hashed names resolved from the bundle, same pattern as `preloadWorldChunks`);
+preload-set === gate-set → zero speculative bytes, the three latin-ext faces stay CSS-discovered. `as="font"` maps
+to `font-src 'self'` → no CSP/header change; `crossorigin` mandatory (font fetches are CORS-mode). *Why this and
+nothing else:* the prompt said verify each move against a real waterfall, not apply blind — most of the list was
+already done, so the honest scope is this single surgical hint. *Constraint held:* zero visual/behavioural change
+(font-display:swap unchanged; only *when* the identical faces arrive moves). *Verify:* prod build over CDP
+(`cdp-fontpreload-check.mjs`), desktop + mobile — 3 faces preloaded, fonts resolve, boot gate lifts, **no
+double-fetch, no "preloaded but not used" warning**; gate green (357). *Honest expectation:* removes one round-trip
+→ real but modest FCP/LCP gain; the big "78→90" hoped-for jump leaned on the cache finding that was already fixed,
+so whether fonts alone reach 90 needs a post-deploy pagespeed run. *Deferred (own prompt, behavioural):* lazy-mount
+`<Analytics/>` + `<SpeedInsights/>` after `window.load` so the two `/_vercel/*` scripts stop competing during boot.
+
 ### ADR-050 — Deferred canvas micro-opts, round A+B: dead-code removal + per-frame allocation/cache wins (2026-07-14)
 The follow-up to ADR-049's deferred list — the same hard constraint (**the visitor sees nothing change**), verified
 this time with a **deterministic pixel A/B** (seeded `Math.random`, killed rAF, hand-driven `__paintFrame`, canvas
