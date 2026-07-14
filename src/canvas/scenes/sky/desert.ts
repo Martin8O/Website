@@ -36,6 +36,11 @@ import {
   rgba,
   smoothstep,
 } from '../../toolkit'
+// The helo stands share ONE source of truth with the 3D actors (three-free
+// by contract): the stands the 2D draws are the stands the 3D rotorcraft
+// sit on and land on — they cannot desync. (Their shadows are REAL now — a
+// shadow-catcher plane in the 3D layer.)
+import { APACHE, MARK_HALF_R, MI17, PAD_APACHE, PAD_MI17, padScreen, type PadScreen } from '../../../three/bagramMath'
 import { drawAircraft } from './aircraft'
 import { drawPuff } from './clouds'
 import { sunArc } from './skyMath'
@@ -49,6 +54,86 @@ const CONCRETE = '#cfc3a4'
 function wrapN(v: number, m: number): number {
   return ((v % m) + m) % m
 }
+
+// Scratch for the bagramMath queries (allocation-free frames).
+const PAD_SCR: PadScreen = { sx: 0, sy: 0, rx: 0, squash: 0 }
+
+/** One rotary-wing PARKING STAND holding a PAIR (Martin: both ships fit, and
+ *  each one's wheels touch a marked spot): a rectangular concrete pour in
+ *  ground perspective with a painted border and TWO touchdown circles at the
+ *  pair's marks (`MARK_HALF_R`, a fraction of the slab so they stay inside
+ *  the concrete on any aspect), each with a foreshortened cross so it reads
+ *  as a real spot the 3D helo sets down on. */
+function drawHeloStand(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  pad: PadScreen,
+  alpha: number,
+): void {
+  const cx = pad.sx * w
+  const cy = pad.sy * h
+  const rx = pad.rx * h // half-width on screen
+  const ry = rx * pad.squash * 1.6 // half-depth (foreshortened)
+  if (cx < -rx * 1.6 || cx > w + rx * 1.6) return
+  const spread = 1.12 // near edge wider — the perspective trapezoid
+  ctx.save()
+  // The slab: its own concrete pour, lighter than the dirt band around it.
+  ctx.fillStyle = mixHex(CONCRETE, HAZE, 0.3)
+  ctx.globalAlpha = alpha * 0.85
+  ctx.beginPath()
+  ctx.moveTo(cx - rx, cy - ry)
+  ctx.lineTo(cx + rx, cy - ry)
+  ctx.lineTo(cx + rx * spread, cy + ry)
+  ctx.lineTo(cx - rx * spread, cy + ry)
+  ctx.closePath()
+  ctx.fill()
+  // Painted border.
+  ctx.globalAlpha = alpha
+  ctx.strokeStyle = rgba('#f4eedd', 0.55)
+  ctx.lineWidth = Math.max(1, h * 0.0015)
+  ctx.beginPath()
+  ctx.moveTo(cx - rx * 0.94, cy - ry * 0.82)
+  ctx.lineTo(cx + rx * 0.94, cy - ry * 0.82)
+  ctx.lineTo(cx + rx * spread * 0.96, cy + ry * 0.82)
+  ctx.lineTo(cx - rx * spread * 0.96, cy + ry * 0.82)
+  ctx.closePath()
+  ctx.stroke()
+  // The TWO touchdown spots (the pair's marks). Half-spacing = MARK_HALF_R of
+  // the slab's own screen half-width (the same the 3D helos park on, so the
+  // marks stay the same distance inside the concrete at any aspect); a ring +
+  // a foreshortened cross each.
+  const markDx = MARK_HALF_R * rx
+  const spotR = rx * 0.34
+  for (const mx of [cx - markDx, cx + markDx]) {
+    ctx.strokeStyle = rgba('#f4eedd', 0.72)
+    ctx.lineWidth = Math.max(1, h * 0.0018)
+    ctx.beginPath()
+    ctx.ellipse(mx, cy, spotR, Math.max(spotR * pad.squash * 1.6, 1), 0, 0, TAU)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(mx - spotR * 0.7, cy)
+    ctx.lineTo(mx + spotR * 0.7, cy)
+    ctx.moveTo(mx, cy - spotR * pad.squash * 1.6 * 0.7)
+    ctx.lineTo(mx, cy + spotR * pad.squash * 1.6 * 0.7)
+    ctx.stroke()
+  }
+  // Corner tie-down points — one in each of the slab's FOUR corners (Martin
+  // R7), the near/bottom pair widened by the perspective `spread`.
+  ctx.fillStyle = rgba('#3a3226', 0.6)
+  for (const [dx, dy] of [
+    [cx - rx * 0.88, cy - ry * 0.86],
+    [cx + rx * 0.88, cy - ry * 0.86],
+    [cx - rx * spread * 0.88, cy + ry * 0.86],
+    [cx + rx * spread * 0.88, cy + ry * 0.86],
+  ] as const) {
+    ctx.beginPath()
+    ctx.ellipse(dx, dy, Math.max(rx * 0.03, 1), Math.max(ry * 0.06, 1), 0, 0, TAU)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
 
 /** One distant row of the tent city — barrel-vaulted tents (vertical walls +
  *  arched roof, bagram tents 2.jpg; NOT gable triangles) with the occasional
@@ -149,13 +234,18 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   )
   // The section-wide sun arc, continuous through both of this scene's seams.
   // Painted BEFORE the range so the snow peaks cut into the glare (bagram 3).
+  // E4 (Martin's light spec): YELLOW, high, ~1 o'clock — the key the 3D
+  // actors are lit by (BagramActors KEY_DIR), so it must READ in the sky:
+  // a wide warm bloom, a yellow corona and a hot near-white core.
   const sun = sunArc(3.5 + tr)
   const sunX = w * sun.x
   const sunY = h * sun.y
-  drawGlow(ctx, sunX, sunY, unit * 0.5, '#fdf6e3', alpha * 0.5)
-  drawGlow(ctx, sunX, sunY, unit * 0.12, '#ffffff', alpha * 0.85)
+  drawGlow(ctx, sunX, sunY, unit * 0.55, '#f9e9b8', alpha * 0.55)
+  drawGlow(ctx, sunX, sunY, unit * 0.2, '#ffdf8a', alpha * 0.6)
+  drawGlow(ctx, sunX, sunY, unit * 0.085, '#ffe9a8', alpha * 0.95)
+  drawGlow(ctx, sunX, sunY, unit * 0.05, '#fffbe9', alpha * 0.95)
   ctx.save()
-  ctx.strokeStyle = rgba('#fdf3d8', alpha * 0.12)
+  ctx.strokeStyle = rgba('#ffe9a8', alpha * 0.16)
   ctx.lineWidth = 2
   ctx.beginPath()
   ctx.arc(sunX, sunY, unit * 0.17, 0, TAU)
@@ -242,7 +332,9 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   )
 
   // --- An F-16 pair holding in the overhead pattern — others fly them here --
-  {
+  // Skipped while the 3D layer owns the flying actors (E4 BagramActors —
+  // the real F-16 two-ship races its time-driven track up there instead).
+  if (!cfg.hero3d) {
     const cx = w * 0.52
     const cy = h * 0.155
     const rx = w * 0.27
@@ -303,7 +395,9 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   // sweep's own lead (enterFade completes at tRaw ≈ −0.026, starts −0.156),
   // so the jet is ALREADY rolling while the desert fades in — a frozen
   // aircraft snapping into motion at full blend read as a glitch (Martin).
-  {
+  // In hero3d mode the REAL baked C-17 flies Martin's departure instead
+  // (small near the tower → grows → banks out the right edge).
+  if (!cfg.hero3d) {
     const p = clamp01(((cfg.tRaw ?? t) + 0.16) / 0.44)
     if (p < 0.999) {
       const run = (p * p + p) / 2 // still accelerating
@@ -369,9 +463,10 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
     ctx.closePath()
     ctx.fill()
   }
-  // The control tower.
+  // The control tower — moved LEFT (Martin R10: left of the hangar) so it is
+  // clear of the C-17's central take-off + climb-out, not in front of it.
   {
-    const x = wrapX(span * 0.55, midOff)
+    const x = wrapX(span * 0.375, midOff)
     const tw = w * 0.013
     ctx.fillRect(x - tw / 2, midBase - h * 0.115, tw, h * 0.115)
     ctx.fillRect(x - tw * 1.6, midBase - h * 0.143, tw * 3.2, h * 0.032)
@@ -428,6 +523,13 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   }
   ctx.stroke()
   ctx.restore()
+
+  // --- Ground-ops helo stands (E4) — drawn in BOTH modes: the rotary line
+  // right of the tower (the Mi-17 pair's stand + the Apache arrival stand).
+  // Geometry comes from bagramMath (the same functions the 3D rotorcraft
+  // land by) and drifts at the tower band's pan rate — glued to the world.
+  drawHeloStand(ctx, w, h, padScreen(PAD_MI17, tr, PAD_SCR), condense)
+  drawHeloStand(ctx, w, h, padScreen(PAD_APACHE, tr, PAD_SCR), condense)
 
   // --- Aprons FULL of parked aircraft ----------------------------------------
   // Four C-17s parked among the fighters, one row deeper (c-17 front.png) —
@@ -491,11 +593,37 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   }
   ctx.restore()
 
+  // --- Hero-3D ground coupling: rotor wash ----------------------------------
+  // While the REAL rotorcraft fly above (BagramActors — their shadows are
+  // true 3D projections onto the catcher plane now), the stands kick up
+  // dust through the Apache flare and the Mi-17 pair's lift.
+  if (cfg.hero3d) {
+    // drawPuff leaves its alpha on the context — fence it (the leak that
+    // ghosted the perimeter fence, the sun and the airshow flares).
+    ctx.save()
+    const washApache =
+      smoothstep(APACHE.flare - 0.03, APACHE.flare + 0.04, t) *
+      (1 - smoothstep(APACHE.touch + APACHE.wingDelay + 0.03, APACHE.touch + APACHE.wingDelay + 0.16, t))
+    if (washApache > 0.01) {
+      padScreen(PAD_APACHE, tr, PAD_SCR)
+      drawPuff(ctx, PAD_SCR.sx * w, PAD_SCR.sy * h, PAD_SCR.rx * h * 2.1, '#d8c49a', condense * washApache * 0.34, 3.4)
+    }
+    const washMi =
+      smoothstep(MI17.lift - 0.02, MI17.lift + 0.05, t) *
+      (1 - smoothstep(MI17.noseOver + MI17.wingDelay + 0.04, MI17.noseOver + MI17.wingDelay + 0.16, t))
+    if (washMi > 0.01) {
+      padScreen(PAD_MI17, tr, PAD_SCR)
+      drawPuff(ctx, PAD_SCR.sx * w, PAD_SCR.sy * h, PAD_SCR.rx * h * 1.9, '#d8c49a', condense * washMi * 0.3, 3.4)
+    }
+    ctx.restore()
+  }
+
   // --- The Mi-17 transport beat — TWO ships in trail (the ride out). Timed
   // to Martin's scroll steps: they enter right as the Apache pair nears the
-  // tower and are OVER the tower one step later (42%), passing the Apaches --
+  // tower and are OVER the tower one step later (42%), passing the Apaches.
+  // In hero3d mode the REAL Mi-17 departs its tower-side heliport instead. --
   const heliIn = smoothstep(0.12, 0.46, t)
-  if (heliIn > 0.001 && heliIn < 0.999) {
+  if (!cfg.hero3d && heliIn > 0.001 && heliIn < 0.999) {
     const hx = lerp(w * 1.12, -w * 0.12, heliIn)
     for (const i of [0, 1]) {
       const bob = Math.sin(time * 1.3 + i * 2.1) * h * 0.006
@@ -508,8 +636,10 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   }
 
   // --- An Apache pair transits low as the C-17 departs -----------------------
+  // In hero3d mode the REAL pair sweeps in through the left and lands on
+  // the apron heliport instead.
   const apIn = smoothstep(0.02, 0.5, t)
-  if (apIn > 0.001 && apIn < 0.999) {
+  if (!cfg.hero3d && apIn > 0.001 && apIn < 0.999) {
     const lead = lerp(-w * 0.15, w * 1.15, apIn)
     for (const i of [0, 1]) {
       const bob = Math.sin(time * 1.5 + i * 1.7) * h * 0.005
@@ -641,27 +771,69 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
     }
   }
 
-  // --- Jersey barriers in the near foreground (bagram ochrana.jpg) ----------
+  // --- Checkpoint ROADBLOCKS in the near foreground (Martin: zátarasy, not
+  // gun slits) — a low concrete barrier block with hazard stripes painted
+  // across the face, an end post with a reflector, and a ground shadow. The
+  // stripes are what make it read as a vehicle barrier at a glance.
   {
     const jOff = tr * w * 0.6
     const jGap = w * 0.3
     const first = -wrapN(jOff, jGap) - jGap
     ctx.save()
-    ctx.globalAlpha = condense * 0.55
-    ctx.fillStyle = mixHex(WIRE, HAZE, 0.05)
     for (let x = first; x < w + jGap; x += jGap) {
       const cell = Math.round((x + jOff) / jGap)
       const j = hash1(970 + cell * 3.9)
       if (j > 0.55) continue
       const bx = x + (j - 0.5) * jGap * 0.4
-      const bw = w * 0.052
+      const bw = w * 0.064
+      const yBase = h * 0.964
+      const yTop = h * 0.93
+      const bh = yBase - yTop
+      // Ground contact shadow (sun upper right → shade spills left).
+      ctx.globalAlpha = condense * 0.3
+      ctx.fillStyle = '#241c12'
       ctx.beginPath()
-      ctx.moveTo(bx - bw * 0.5, h * 0.968)
-      ctx.lineTo(bx - bw * 0.34, h * 0.925)
-      ctx.lineTo(bx + bw * 0.34, h * 0.925)
-      ctx.lineTo(bx + bw * 0.5, h * 0.968)
+      ctx.ellipse(bx - bw * 0.08, yBase, bw * 0.66, h * 0.005, 0, 0, TAU)
+      ctx.fill()
+      // The block: slightly battered concrete, a touch narrower at the top.
+      ctx.globalAlpha = condense * 0.94
+      ctx.fillStyle = mixHex('#8f8168', HAZE, 0.16)
+      ctx.beginPath()
+      ctx.moveTo(bx - bw * 0.5, yBase)
+      ctx.lineTo(bx - bw * 0.44, yTop)
+      ctx.lineTo(bx + bw * 0.44, yTop)
+      ctx.lineTo(bx + bw * 0.5, yBase)
       ctx.closePath()
       ctx.fill()
+      // Sunlit top face.
+      ctx.fillStyle = mixHex('#c3b491', HAZE, 0.28)
+      ctx.fillRect(bx - bw * 0.44, yTop, bw * 0.88, h * 0.005)
+      // Hazard stripes across the face — the roadblock signature.
+      ctx.save()
+      ctx.beginPath()
+      ctx.moveTo(bx - bw * 0.49, yBase - bh * 0.12)
+      ctx.lineTo(bx - bw * 0.445, yTop + h * 0.006)
+      ctx.lineTo(bx + bw * 0.445, yTop + h * 0.006)
+      ctx.lineTo(bx + bw * 0.49, yBase - bh * 0.12)
+      ctx.closePath()
+      ctx.clip()
+      const stripeW = bw * 0.13
+      for (let sxp = -0.55; sxp < 0.6; sxp += 0.26) {
+        ctx.fillStyle = rgba('#e8dbb4', 0.85)
+        ctx.beginPath()
+        ctx.moveTo(bx + sxp * bw, yBase)
+        ctx.lineTo(bx + sxp * bw + stripeW, yBase)
+        ctx.lineTo(bx + sxp * bw + stripeW + bh * 0.55, yTop)
+        ctx.lineTo(bx + sxp * bw + bh * 0.55, yTop)
+        ctx.closePath()
+        ctx.fill()
+      }
+      ctx.restore()
+      // End post with a pale reflector head.
+      ctx.fillStyle = mixHex('#4a4132', HAZE, 0.08)
+      ctx.fillRect(bx + bw * 0.46, yTop - h * 0.018, Math.max(1.5, w * 0.0022), bh + h * 0.018)
+      ctx.fillStyle = rgba('#f0e6c8', 0.9)
+      ctx.fillRect(bx + bw * 0.455, yTop - h * 0.018, Math.max(2, w * 0.003), h * 0.006)
     }
     ctx.restore()
   }

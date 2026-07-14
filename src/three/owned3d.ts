@@ -42,9 +42,12 @@ export function paints2D(theme: Theme, mode: WorldMode, owned: ReadonlySet<Theme
  * COMAO package stay 2D in both modes. For 'climb' it covers the whole
  * graduation story — the real Ulla → Z-142 → L-39 fly Martin's authored
  * sequence (ClimbHeroes, E3b-v2) while the 2D paints the environment; the
- * 2D silhouette ladder returns whenever the models are not live.
+ * 2D silhouette ladder returns whenever the models are not live. For
+ * 'desert' it covers the four FLYING aircraft of the Bagram base-ops beat
+ * (departing C-17, Apache pair, holding F-16s, Mi-17 — BagramActors); the
+ * parked apron rows, heliports and the whole base stay 2D in both modes.
  */
-export const HERO_3D: ReadonlySet<Sky> = new Set<Sky>(['climb', 'cruise'])
+export const HERO_3D: ReadonlySet<Sky> = new Set<Sky>(['climb', 'cruise', 'desert'])
 
 /**
  * Live readiness of each 3D hero scene — the chunk-failure caveat above,

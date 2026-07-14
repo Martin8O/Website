@@ -39,8 +39,8 @@ describe('paintsHero2D (the hero-level flip, E3b)', () => {
     for (const sky of ALL_SKIES) setHero3DReady(sky, false)
   })
 
-  it('ships with the climb + cruise flipped (cruise = the ballet corkscrew)', () => {
-    expect([...HERO_3D].sort()).toEqual(['climb', 'cruise'])
+  it('ships with the climb + cruise + desert flipped (cruise = the ballet corkscrew, desert = the Bagram flying actors)', () => {
+    expect([...HERO_3D].sort()).toEqual(['climb', 'cruise', 'desert'])
   })
 
   it('keeps the 2D hero until the 3D scene reports READY', () => {

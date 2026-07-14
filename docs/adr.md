@@ -4,6 +4,46 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-047 — Chapter-03 Bagram base-ops beat: 4 flying actors ported to 3D over the panning 2D desert (2026-07-14)
+The chapter-03 "sky/desert" (Afghanistan, 2010) gets the climb-style **hybrid** 3D treatment: the 2D desert keeps
+painting + panning the whole base while only its four FLYING aircraft — a C-17 departure, an Apache pair arrival,
+a Mi-17 pair departure, an F-16 two-ship holding pattern — step to real baked GLBs over a FIXED 55° contain
+camera. NOT `OWNED_3D` (the 2D scene is never replaced); `HERO_3D` 'desert' gates off the 2D scene's OWN four
+flying aircraft while the 3D layer is live, everything else (mountains, tents, stands, parked rows, perimeter)
+stays 2D. New pure `bagramMath.ts` (three-free, unit-tested) + `BagramActors.tsx` (R3F runtime). Iterated over
+~11 screenshot rounds with Martin (a real Bagram liaison officer + pilot).
+
+1. **Screen-anchored authoring over one flat ground model.** Poses are viewport-fraction anchors (`anchorPoint`
+   back-projects sx/sy + camera distance through `FOV_TAN`) so "on the runway / over the stand / off the top"
+   holds on every aspect by construction. ONE ground plane `groundY(d) = GROUND_SLOPE·(−d) − CAM_H` agrees with
+   the 2D desert's bands; ground-locked actors inherit the 2D pan drift `PAN_K/d`. The **camera-glued stage**
+   copies the flight camera's transform EXACTLY so 3D wheels register to the 2D-drawn heliport marks to the pixel;
+   `wheelLift` (per-instance `Box3` at load) drops each rotorcraft's skids onto its mark.
+2. **Four baked GLBs, quantize-only (CSP-safe, ADR-042), decimation unlocked by `weldRounded`.** c17 2.02 /
+   apache 1.72 / f16 0.47 / mi17 0.27 MB. Engine fans / rotors extracted into spin pivots; the C-17 fans then left
+   STATIC at runtime (Martin R6). F-16 control surfaces reset to neutral in the bake.
+3. **Real 3D shadows via a FIXED large frustum.** A `ShadowMaterial` catcher plane laid in the ground plane + one
+   directional key (the 2D sun) whose ortho box is FIXED and wide (`SHADOW_*`) enough to hold the far C-17, the
+   close Apache and the stands AT ONCE — the earlier moving-midpoint frustum popped shadows in/out as an actor
+   crossed its edge (Martin R7: shadows correct everywhere, no popping).
+4. **2D desert coupling.** `drawHeloStand` = a real two-spot stand with **aspect-proof touchdown marks**
+   (`MARK_HALF_R` = a fraction of the SLAB radius, not of viewport width — the old width-fraction poked the marks
+   past the concrete on wide/mobile viewports) + four corner tie-downs; roadblock barriers; a `drawPuff` alpha
+   leak fenced. The control tower moved LEFT (Martin R10) clear of the C-17's path.
+5. **The C-17 departure = the hard-won beat.** Final: takes off SMALL on the FAR runway strip by the horizon
+   (`runwayD 450`), one airframe-height clear of the tents, then banks right and **CLIMBS OUT the top** of the
+   frame (Martin R10/R11: up into the centre-top, NOT the old dive-to-the-bottom). The far runway needs a raised
+   **Stage3D camera far plane 130 → 480** — verified safe: every other 3D scene's geometry sits inside ~130 (star
+   clouds bottom out at depth ~80), so the extra range is unused there.
+
+**Also this session (copy):** About gains "well / kvalitně" ("almost anything, well and fast") and reframes the
+3D line ("extended into a 3D version" / "rozšíření o 3D verzi"); the preloader gains a localized "For the best
+experience, use a desktop" aside with a desktop-icon-with-green-check. **Unchanged (deliberately):** climb chain
+(chapters 00–02), timeline/scrollWeight, the 2D desert environment. **Verify:** `cdp-bagram-verify.mjs`
+desktop+mobile ALL PASS, console clean; 30 `bagramMath` unit tests; DoD screenshots (roll on the far runway,
+climb-out over the top) confirmed. Gate green (354). Model-fit: 🔥 Fable 5 (build/choreography/iteration) +
+Opus 4.8 (wrap-up).
+
 ### ADR-046 — Chapter-01 climb depth/width reshape + smooth handoff; chapter-00 sun single-arc (2026-07-13)
 Review-driven tuning pass over the ADR-045 climb, all through the same `physics.mjs` → `convert.mjs` tool chain
 (attitudes always re-derived from the reshaped flight path — never scaled in runtime, or the noses would point

@@ -65,7 +65,12 @@ export function Stage3D({ chapters }: { chapters: readonly Chapter[] }) {
         shadows
         dpr={[1, 2]}
         gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
-        camera={{ fov: STAGE_FOV, near: 0.1, far: 130, position: [0, 0, 0] }}
+        // far 480 (was 130): the Bagram C-17 takes off from the FAR runway
+        // strip (z ≈ −450) and would be frustum-clipped nearer. Every other
+        // scene's geometry sits well inside 130 (star clouds bottom out at
+        // depth ~80), so the extra range is unused there — no visual change,
+        // only the desert transport gains its far runway.
+        camera={{ fov: STAGE_FOV, near: 0.1, far: 480, position: [0, 0, 0] }}
       >
         <FrameController flight={flight} frame={frame} />
         {themes.map((theme) => {

@@ -44,22 +44,26 @@ import { buildAIM9 } from './aim9'
 // The remodelled 500 l tank (pointed ogive, matte grey, ventral fin) — the
 // same store the cruise ballet hangs; the landing-break pair flies it too.
 import { buildDropTank } from './droptank'
+import { BagramActors } from './BagramActors'
 import { ClimbHeroes } from './ClimbHeroes'
 import { CruiseBallet } from './CruiseBallet'
 import { JET_SCALE, REST_Y, TIP_X, loadL159 } from './l159'
 import { normalFromMap } from './surface'
 
 /** The registry's 'sky' entry: the two flypast beats, the chapter-02
- *  one-circle fight (CruiseBallet — the ballet showcase, ported) and the
+ *  one-circle fight (CruiseBallet — the ballet showcase, ported), the
  *  E3b-v2 climb heroes (Martin's re-authored Ulla → Z-142 → L-39 sequence,
- *  physics-polished). While the climb models load, `cfg.hero3d` stays false
- *  and the 2D silhouette hero keeps flying — the fallback contract. */
+ *  physics-polished) and the chapter-03 Bagram base-ops actors
+ *  (BagramActors — C-17 / Apache pair / F-16 holding / Mi-17). While a hero
+ *  scene's models load, `cfg.hero3d` stays false for its mood and the 2D
+ *  version keeps flying — the fallback contract. */
 export function SkyScenes(props: Scene3DProps) {
   return (
     <>
       <SkyPatrols {...props} />
       <CruiseBallet {...props} />
       <ClimbHeroes {...props} />
+      <BagramActors {...props} />
     </>
   )
 }

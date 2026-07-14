@@ -32,11 +32,12 @@ export type Scene3DProps = {
  * E1 registers the two space scenes: the origin dawn and the contact finale
  * both gain a true-depth starfield. `SkyScenes` carries the L-159 patrols
  * (SkyPatrols.tsx: the airshow head-on pass and the sunset landing break),
- * the chapter-02 one-circle fight (CruiseBallet.tsx) and the E3b-v2 climb
+ * the chapter-02 one-circle fight (CruiseBallet.tsx), the E3b-v2 climb
  * heroes (ClimbHeroes.tsx — Martin's re-authored Part-1 sequence; its 2D
  * silhouette story remains the in-scene fallback until the models are
- * live). Only the parametric fly-bys (Jets.tsx) stay unmounted, kept as
- * reference.
+ * live) and the chapter-03 Bagram base-ops actors (BagramActors.tsx —
+ * C-17 / Apache pair / F-16 holding / Mi-17 over the panning 2D base).
+ * Only the parametric fly-bys (Jets.tsx) stay unmounted, kept as reference.
  */
 export const RENDERERS_3D: Record<Theme, ComponentType<Scene3DProps> | null> = {
   origin: Starfield,
