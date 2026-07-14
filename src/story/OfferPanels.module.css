@@ -155,7 +155,10 @@
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.95);
 }
 
-@media (max-width: 719px) {
+/* Landscape phones (max-height 480) take the mobile one-slot layout too —
+   two desktop columns can't stand on a ~375 px-tall viewport. Must stay in
+   lockstep with the matchMedia in OfferPanels.tsx. */
+@media (max-width: 719px), (max-height: 480px) {
   /* One central slot: the panels take turns (offerMath's mobile windows),
      cross-fading exactly like chapter cards. The desktop columns dissolve.
      Each panel takes its turn at its OWN vertical spot (Martin): the anchor
@@ -178,11 +181,17 @@
   }
 
   /* 02 & 04: top edge just under the flight-plan title (top-anchored, so their
-     height grows downward, never up over the title). */
+     height grows downward, never up over the title). The tall proof card
+     cannot stand on a ~390px-tall landscape phone — cap both to the viewport
+     and let them scroll natively when they overflow (the WorkPanel/About
+     overlay pattern; data-lenis-prevent rides in the TSX). No effect when
+     the card fits. */
   .process,
   .proof {
     top: 21%;
     --ty: 0%;
+    max-height: 80dvh;
+    overflow-y: auto;
   }
 
   /* 03: centred around the upper third. */

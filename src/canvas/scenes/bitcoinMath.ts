@@ -126,12 +126,18 @@ function clamp(n: number, lo: number, hi: number): number {
   return n < lo ? lo : n > hi ? hi : n
 }
 
+/** A projected point — screen offsets from the projection centre in
+ *  normalized units + the perspective factor `s`. */
+export type Projected = { nx: number; ny: number; s: number }
+
 /**
  * Perspective projection through the camera rig. Returns screen offsets from
  * the projection centre in normalized units (multiply by the renderer's
- * scale) and the perspective factor `s` (world size → screen size).
+ * scale) and the perspective factor `s` (world size → screen size). Pass
+ * `out` to reuse a scratch object — the renderer projects thousands of
+ * vertices per frame, and per-call result objects were pure GC churn.
  */
-export function project(p: Vec3, cam: Cam): { nx: number; ny: number; s: number } {
+export function project(p: Vec3, cam: Cam, out?: Projected): Projected {
   const cy = Math.cos(cam.yaw)
   const sy = Math.sin(cam.yaw)
   const x1 = p.x * cy - (p.z - CAM.orbitZ) * sy
@@ -142,6 +148,12 @@ export function project(p: Vec3, cam: Cam): { nx: number; ny: number; s: number 
   const y2 = y1 * cp + z1 * sp
   const z2 = -y1 * sp + z1 * cp
   const s = CAM.fov / Math.max(z2 + CAM.dist, 0.12)
+  if (out) {
+    out.nx = x1 * s
+    out.ny = -y2 * s
+    out.s = s
+    return out
+  }
   return { nx: x1 * s, ny: -y2 * s, s }
 }
 

@@ -42,7 +42,9 @@ export function OfferPanels({ pos }: { pos: number }) {
   const [testsOpen, setTestsOpen] = useState(false)
   const testsBtnRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 719px)')
+    // Landscape phones (short viewports) take the mobile one-slot layout
+    // too — keep in lockstep with OfferPanels.module.css.
+    const mq = window.matchMedia('(max-width: 719px), (max-height: 480px)')
     const update = () => setMobile(mq.matches)
     update()
     mq.addEventListener('change', update)
@@ -57,6 +59,12 @@ export function OfferPanels({ pos }: { pos: number }) {
       <article
         key={p.id}
         className={`${styles.panel} ${styles[p.id]}`}
+        // In the one-slot (mobile/landscape) layout the tall cards cap to the
+        // viewport and scroll internally — let the wheel reach them there.
+        // Desktop columns never scroll internally; Lenis keeps the wheel.
+        {...(mobile && (p.id === 'process' || p.id === 'proof')
+          ? { 'data-lenis-prevent': '' }
+          : {})}
         style={{
           opacity: o,
           transform: `translate(var(--tx, 0px), calc(var(--ty, 0px) + ${(1 - o) * 10}px))`,

@@ -41,7 +41,7 @@ export const DEV = {
    *  across the 96→100 % stretch. Card i launches at step i and spends
    *  (5−i) steps in flight — at 96 % card 1 is 1/5 of the way out, at 97 %
    *  card 1 is at 2/5 and card 2 at 1/4, … and at 100 % all five touch
-   *  down TOGETHER (each landing firing its gravitational wave). */
+   *  down TOGETHER. */
   spawnT0: 0.1, // scene-t of step 0 = 96 % global
   stepT: 0.18, // one scroll-step (1 % global) in scene-t
   /** The city + floor + core assemble over this opening stretch. */

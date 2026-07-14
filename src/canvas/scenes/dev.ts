@@ -655,6 +655,19 @@ function getCityLayers(w: number, unit: number) {
   return cityCache
 }
 
+/** Pre-bake this viewport's static caches (7 city rows + nebula layers +
+ *  core sprite) — the heaviest cache build in the 2D world. CanvasStage
+ *  calls this from idle time after mount/resize, so entering the chapter
+ *  never pays the bake inside a scroll frame. Same keys as render time —
+ *  a pure cache warm, no visual effect. */
+export function warmDevScene(w: number, h: number): void {
+  if (typeof document === 'undefined' || w <= 0 || h <= 0) return
+  const unit = Math.min(w, h)
+  getCityLayers(w, unit)
+  getNebulaLayers(w, h, h * DEV.horizon, unit)
+  getCoreSprite(unit)
+}
+
 /** Light-ships crossing the sky: lane height above the horizon (fraction
  *  of h), speed, direction, colour. */
 const SHIPS = [
@@ -1720,44 +1733,6 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
       }
     }
 
-    // Touchdown: an INVISIBLE gravitational wave rolls out from the landing
-    // point — no drawn colour, pure spacetime: the already-painted
-    // background inside the expanding annulus is re-blitted radially
-    // outward (the old screensaver pixel-ripple), so the city, glass and
-    // grid visibly BEND away from the card and relax. Rev9: FULL strength,
-    // fired strictly AFTER touchdown — all five land at once, so the waves
-    // ride the unclamped scene clock (`tRaw`) just past the landing instant,
-    // in a quick left-to-right salvo.
-    // The whole salvo lives inside the "95 %" HUD readout: last wave dies
-    // at progress ≈ 0.955, exactly when the HUD flips to 96 and the card
-    // copy reaches full strength — one beat per readout.
-    const twv = cfg.tRaw ?? t
-    const landA = clamp01((twv - 1 - i * 0.006) / 0.03)
-    if (landA > 0.01 && landA < 1) {
-      const cnv3 = ctx.canvas
-      // Gentle and local: a soft breath around the card, not a far blast —
-      // the whole salvo is over by ~95.8 %.
-      const R = landA * Wpx * 1.2
-      const bandW = Wpx * (0.3 - 0.1 * landA)
-      const amp = 0.06 * (1 - landA)
-      const SUB = 5
-      for (let j = 0; j < SUB; j++) {
-        const r0 = Math.max(0.5, R - bandW + (bandW * 2 * j) / SUB)
-        const r1 = Math.max(r0 + 1, R - bandW + (bandW * 2 * (j + 1)) / SUB)
-        // The wave profile: strongest displacement mid-band.
-        const s6 = 1 + amp * Math.sin(((j + 0.5) / SUB) * Math.PI)
-        ctx.save()
-        ctx.beginPath()
-        ctx.ellipse(gx, gy, r1, r1 * 0.85, 0, 0, TAU)
-        ctx.ellipse(gx, gy, r0, r0 * 0.85, 0, 0, TAU)
-        ctx.clip('evenodd')
-        ctx.translate(gx, gy)
-        ctx.scale(s6, s6)
-        ctx.translate(-gx, -gy)
-        ctx.drawImage(cnv3, 0, 0, cnv3.width, cnv3.height, 0, 0, w, h)
-        ctx.restore()
-      }
-    }
     // In flight the card CARTWHEELS home: one half-turn around its vertical
     // axis PER SCROLL STEP (rotateY via cos foreshortening, SIGN KEPT — at
     // every whole step the card faces you exactly mirrored or upright), and
@@ -1794,7 +1769,10 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
       if (scr.height < shp) scr.height = shp
       const sg = scr.getContext('2d')
       if (sg) {
-        sg.clearRect(0, 0, scr.width, scr.height)
+        // Clear/fade only the blitted region (0,0,swp,shp) — the shared
+        // scratch can be far larger after a bigger window used it, and the
+        // mirror blit below never reads outside this rect.
+        sg.clearRect(0, 0, swp, shp)
         drawProjectWindow(sg, 12, 12, Wpx, Hpx, meta, 1, time, i, unit)
         sg.save()
         sg.globalCompositeOperation = 'destination-out'
@@ -1803,7 +1781,7 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
         fg.addColorStop(0.55, 'rgba(0,0,0,0.85)')
         fg.addColorStop(1, 'rgba(0,0,0,0.2)')
         sg.fillStyle = fg
-        sg.fillRect(0, 0, scr.width, scr.height)
+        sg.fillRect(0, 0, swp, shp)
         sg.restore()
         ctx.save()
         ctx.globalAlpha = winA * 0.62

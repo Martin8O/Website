@@ -7,6 +7,7 @@ import { paints2D, paintsHero2D } from '../three/owned3d'
 import type { WorldMode } from '../three/worldMode'
 import { getGlassCanvas } from './glass'
 import { RENDERERS } from './registry'
+import { warmDevScene } from './scenes/dev'
 import { landingShake } from './scenes/sky/skyMath'
 import { buildRuns, resolveSceneFrame, type SceneSlot } from './sceneTimeline'
 import { makeGrainTile } from './toolkit'
@@ -131,6 +132,25 @@ export function CanvasStage({
       needsPaint = true
     }
 
+    // Warm the dev chapter's static bakes (the heaviest 2D cache build) off
+    // the interaction path: debounced past the resize stream, then run in
+    // idle time — entering the chapter never pays the bake in a scroll
+    // frame. Pure cache fill; the render path is unchanged.
+    let warmTimer = 0
+    const scheduleWarm = () => {
+      window.clearTimeout(warmTimer)
+      warmTimer = window.setTimeout(() => {
+        const win = window as {
+          requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
+        }
+        if (typeof win.requestIdleCallback === 'function') {
+          win.requestIdleCallback(() => warmDevScene(w, h), { timeout: 4000 })
+        } else {
+          window.setTimeout(() => warmDevScene(w, h), 300)
+        }
+      }, 200)
+    }
+
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
       // Floor at 1px: a 0-sized viewport (hidden embed, minimized restore)
@@ -143,6 +163,7 @@ export function CanvasStage({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       glassW = 0 // re-size the glass on the next frame (DPR may have changed)
       needsPaint = true
+      scheduleWarm()
     }
 
     const drawSlot = (
@@ -334,6 +355,7 @@ export function CanvasStage({
 
     return () => {
       stop()
+      window.clearTimeout(warmTimer)
       if (import.meta.env.DEV) delete hookHost.__paintFrame
       document.documentElement.style.removeProperty('--cam-shake-x')
       document.documentElement.style.removeProperty('--cam-shake-y')

@@ -88,7 +88,8 @@ const KEY_INTENSITY = 2.4
  *  actor fell outside it and its shadow popped in and out). One ortho box
  *  covers the far take-off roll (z ≈ −140), the arriving/departing rotorcraft
  *  and the diving transport, so every silhouette always lands on the catcher.
- *  4096 map over the ±95 box keeps the silhouettes as crisp as the old ±55. */
+ *  2048 map over the ±110 box (perf pass: was 4096/64 MB — PCFSoft's blur
+ *  hides the halved texel density; verified A/B on the stands + landing). */
 const SHADOW_CENTER = new THREE.Vector3(5, -5, -95)
 const SHADOW_DIST = 185
 const SHADOW_HALF = 110
@@ -330,7 +331,7 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
     const key = new THREE.DirectionalLight(0xffe3a1, KEY_INTENSITY)
     key.castShadow = true
     const small = Math.min(window.innerWidth, window.innerHeight) < 720
-    key.shadow.mapSize.set(small ? 2048 : 4096, small ? 2048 : 4096)
+    key.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048)
     key.shadow.camera.near = SHADOW_DIST - SHADOW_HALF - 20
     key.shadow.camera.far = SHADOW_DIST + SHADOW_HALF + 30
     key.shadow.camera.left = -SHADOW_HALF

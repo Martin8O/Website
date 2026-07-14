@@ -65,6 +65,7 @@ import {
   traceReveal,
   waveBand,
   type Cam,
+  type Projected,
   type Vec3,
 } from './bitcoinMath'
 import { WORLD_COLS, WORLD_ROWS, worldCell, worldLand } from './worldMap'
@@ -243,6 +244,14 @@ function wallDip(xa: number, xb: number): number {
 }
 const CITY_XS = [wallDip(-1.35, -0.2), wallDip(0.2, 1.35)]
 
+// Allocation-free projection scratch: the frame projects thousands of
+// points, so the wrappers below reuse one Vec3 + two output slots (the
+// terrain/node loops project a second, cursor-bumped point while the first
+// result must stay readable — see NSS).
+const PV: Vec3 = { x: 0, y: 0, z: 0 }
+const POUT_A: Projected = { nx: 0, ny: 0, s: 0 }
+const POUT_B: Projected = { nx: 0, ny: 0, s: 0 }
+
 // Per-frame scratch (reused buffers, not cross-frame state).
 const SXa = new Float64Array(NV)
 const SYa = new Float64Array(NV)
@@ -361,7 +370,20 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
   const cy = h * 0.44
   const toX = (p: { nx: number }) => cx + p.nx * scale
   const toY = (p: { ny: number }) => cy + p.ny * scale
-  const proj = (v: Vec3) => project(v, cam)
+  // Two projection slots: `proj` for the primary point, `projB` for the
+  // cursor-bumped re-projection taken while the primary must stay readable.
+  const proj = (x: number, y: number, z: number) => {
+    PV.x = x
+    PV.y = y
+    PV.z = z
+    return project(PV, cam, POUT_A)
+  }
+  const projB = (x: number, y: number, z: number) => {
+    PV.x = x
+    PV.y = y
+    PV.z = z
+    return project(PV, cam, POUT_B)
+  }
 
   const beat = heartbeat(time)
   // The epicentre energy (ground glow, circuit traces, backbone) breathes
@@ -404,7 +426,7 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
     twinkle: 0.45,
   })
 
-  const horizon = proj({ x: 0, y: 0, z: 1 })
+  const horizon = proj(0, 0, 1)
   const horizonY = toY(horizon)
   // The far glow of the network's light behind the terrain wall.
   drawGlow(ctx, cx, horizonY, unit * 0.55, accent, alpha * 0.055 * glow)
@@ -579,7 +601,7 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
     ctx.save()
     for (let ci = 0; ci < CITY_XS.length; ci++) {
       const cxw = CITY_XS[ci]
-      const base = proj({ x: cxw, y: terrainHeight(cxw, 0.985), z: 0.985 })
+      const base = proj(cxw, terrainHeight(cxw, 0.985), 0.985)
       const bX = toX(base)
       const bY = toY(base)
       const ss = base.s * scale
@@ -651,13 +673,13 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
         boost += crest * storyK * 1.3 * storyEnd
       }
     }
-    const p = proj({ x: GXa[i], y, z: GZa[i] })
+    const p = proj(GXa[i], y, GZa[i])
     let sx = toX(p)
     let sy = toY(p)
     if (pa > 0.02) {
       const bump = cursorBoost(Math.hypot(sx - px, sy - py), bumpR) * pa
       if (bump > 0.015) {
-        const p2 = proj({ x: GXa[i], y: y + bump * 0.065, z: GZa[i] })
+        const p2 = projB(GXa[i], y + bump * 0.065, GZa[i])
         sx = toX(p2)
         sy = toY(p2)
         boost += bump
@@ -744,7 +766,7 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
   ctx.restore()
 
   // --- The pad: the chip's light pooling on the ground -------------------------
-  const padGround = proj({ x: PAD.x, y: terrainHeight(PAD.x, PAD.z), z: PAD.z })
+  const padGround = proj(PAD.x, terrainHeight(PAD.x, PAD.z), PAD.z)
   const padX = toX(padGround)
   const padY = toY(padGround)
   // The epicentre breathes — the heartbeat lives in the ground itself.
@@ -767,7 +789,7 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
         }
         const gx = PAD.x + rw * Math.cos(th)
         const gz = PAD.z + rw * Math.sin(th) * 0.75
-        const p = proj({ x: gx, y: terrainHeight(gx, gz) + 0.006, z: gz })
+        const p = proj(gx, terrainHeight(gx, gz) + 0.006, gz)
         if (!open) {
           ctx.moveTo(toX(p), toY(p))
           open = true
@@ -795,7 +817,7 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
       pts.forEach(([r, a2], k) => {
         const gx = PAD.x + r * Math.cos(a2)
         const gz = PAD.z + r * Math.sin(a2) * 0.75
-        const p = proj({ x: gx, y: terrainHeight(gx, gz) + 0.006, z: gz })
+        const p = proj(gx, terrainHeight(gx, gz) + 0.006, gz)
         lastX = toX(p)
         lastY = toY(p)
         if (k === 0) ctx.moveTo(lastX, lastY)
@@ -814,7 +836,7 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
         const a2 = r < rMid ? th : th + jog
         const gx = PAD.x + r * Math.cos(a2)
         const gz = PAD.z + r * Math.sin(a2) * 0.75
-        const p = proj({ x: gx, y: terrainHeight(gx, gz) + 0.008, z: gz })
+        const p = proj(gx, terrainHeight(gx, gz) + 0.008, gz)
         ctx.fillStyle = rgba(GOLD, (1 - ph) * 0.5 * epi * alpha * glow)
         const rr = 1.6 * p.s
         ctx.fillRect(toX(p) - rr / 2, toY(p) - rr / 2, rr, rr)
@@ -842,13 +864,15 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
         boost += band * storyK * storyEnd
       }
     }
-    const p = proj({ x: n.x, y, z: n.z })
+    // `p` stays in slot A while the bump re-projects into slot B — NSS below
+    // reads the UN-bumped perspective factor, exactly as before.
+    const p = proj(n.x, y, n.z)
     let sx = toX(p)
     let sy = toY(p)
     if (pa > 0.02) {
       const bump = cursorBoost(Math.hypot(sx - px, sy - py), bumpR) * pa
       if (bump > 0.015) {
-        const p2 = proj({ x: n.x, y: y + bump * 0.05, z: n.z })
+        const p2 = projB(n.x, y + bump * 0.05, n.z)
         sx = toX(p2)
         sy = toY(p2)
         boost += bump
@@ -999,7 +1023,7 @@ export const renderBitcoin: Renderer = (ctx, alpha, t, time, cfg) => {
           open = false
           continue
         }
-        const p = proj({ x: gx, y: terrainHeight(gx, gz) + 0.012, z: gz })
+        const p = proj(gx, terrainHeight(gx, gz) + 0.012, gz)
         if (!open) {
           ctx.moveTo(toX(p), toY(p))
           open = true

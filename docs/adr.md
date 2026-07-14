@@ -4,6 +4,48 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-050 — Deferred canvas micro-opts, round A+B: dead-code removal + per-frame allocation/cache wins (2026-07-14)
+The follow-up to ADR-049's deferred list — the same hard constraint (**the visitor sees nothing change**), verified
+this time with a **deterministic pixel A/B** (seeded `Math.random`, killed rAF, hand-driven `__paintFrame`, canvas
+`toDataURL`): two baseline runs came back byte-identical, so every post-change pixel delta is real. The decisions:
+
+1. **The dev scene's "gravitational waves" were deleted outright.** Each of the five project cards, on touchdown,
+   re-blitted the whole canvas radially outward five times (an evenodd-clipped scale-blit per sub-band) — a
+   full-frame read-back ×25 in a quick salvo, for a warp Martin judged *"zbytečně náročné a téměř nepostřehnutelné."*
+   Removed the block, its `tRaw`/`landA` locals and the stale devMath comment. *Why:* the only per-frame cost in
+   this pass that bought nothing — the honest fix is deletion, not optimisation.
+2. **`drawGlow` gradient cache.** The busiest scenes call it ~150×/frame (sunset), each building a fresh
+   `RadialGradient` + three rgba stop strings. Now one *unit* gradient per colour, drawn through a translate/scale
+   transform with the caller's alpha folded into `globalAlpha` — mathematically identical for the α < 1 case (the
+   overwhelming majority); the rare α ≥ 1 over-driven case (where the 0.45 mid-stop saturates independently) keeps
+   the per-call build. *Why:* gradient construction, not fill, was the hot allocation.
+3. **Dev-scene idle prewarm.** The seven cached city rows + nebula layers + core sprite (the heaviest 2D bake) built
+   lazily inside the first paint of the chapter — a scroll-frame stall on arrival. New `warmDevScene(w, h)` runs it
+   from CanvasStage on a debounced `requestIdleCallback` after mount/resize. First dev paint **14.1 → 3.8 ms**; pure
+   cache fill, same keys as render time.
+4. **Allocation-free `project()`.** The bitcoin world projects thousands of vertices/frame, each returning a fresh
+   `{nx,ny,s}`. Added an optional `out` param + two module scratch slots (a second slot because the terrain/node
+   loops project a cursor-bumped point while the first result must stay readable — `NSS` reads the un-bumped
+   perspective factor). `calm.stonePath` (a 240-step arc-length solve) memoised per aspect.
+5. **Bagram shadow map 4096 → 2048** (desktop) / 2048 → 1024 (small). ~48 MB VRAM + ¾ of the shadow pass's fill
+   back; PCFSoft's blur hides the halved texel density — A/B crops at 4× on the pad shadows are indistinguishable.
+   A real render change (not byte-identical), but below perception.
+6. **Landscape-phone offer layout.** Deferred item — the offer chapter's two desktop columns can't stand on a
+   ~300 px-tall landscape viewport. Extended the mobile one-slot breakpoint with `(max-height: 480px)` (CSS +
+   the matchMedia in lockstep). Verifying it surfaced a *baseline* bug the desktop layout hid: the proof card
+   (~500 px) overflowed **both** edges and half its content (the Lighthouse gauges) was unreachable — capped
+   `.process`/`.proof` to `max-height: 80dvh; overflow-y: auto` with a conditional `data-lenis-prevent` (the
+   WorkPanel/About overlay pattern) so the wheel scrolls the card in that layout. Desktop columns never scroll
+   internally — untouched.
+7. **About "Credits" contrast 34 % → 50 %** of `--fg` (a11y bump; still the intended whisper, now clears AA).
+
+*Rejected:* group C (skip the repaint on a parked frame) — it would freeze the ambient motion, and *"web musí
+dýchat."* *Still deferred (its own future prompt):* the contact finale's ~20k `fillRect` bloom. Gate green (357);
+all four 3D CDP harnesses (bagram/climb/ballet/patrol) desktop + mobile ALL PASS, console clean. Model-fit: 🔥
+Fable 5 (build/verify) + Opus 4.8 (wrap-up). Detail: `local/memory/project_perf_pass_2026-07-14.md`.
+
+---
+
 ### ADR-049 — Internals pass: performance + security hardening, build-time test-list popup (2026-07-14)
 A full adversarial code/security/perf review (multi-agent, every finding verified) drove a round of hardening
 with a hard constraint: **change nothing the visitor sees or how the site behaves** — only the internals. The

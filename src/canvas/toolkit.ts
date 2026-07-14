@@ -109,6 +109,16 @@ export function fillVerticalGradient(
   ctx.restore()
 }
 
+/** Unit radial glow gradients, one per colour — creating a gradient (plus
+ *  three rgba stop strings) per call was the busiest scenes' hottest
+ *  allocation (~150 glows/frame in the sunset alone). The cached gradient is
+ *  drawn through a translate/scale transform (gradients evaluate through the
+ *  CTM, so the pixels match the per-call construction exactly) and the alpha
+ *  rides `globalAlpha` MULTIPLIED over the caller's own value — the same
+ *  linear scaling the per-call colour stops applied. Capped like the rgb
+ *  cache: mixHex-composed colours churn keys. */
+const glowGradCache = new Map<string, CanvasGradient>()
+
 /** A soft radial glow (light bloom) centred on (x, y). */
 export function drawGlow(
   ctx: CanvasRenderingContext2D,
@@ -119,6 +129,28 @@ export function drawGlow(
   alpha: number,
 ): void {
   if (alpha <= 0 || r <= 0) return
+  if (alpha < 1) {
+    let g = glowGradCache.get(hex)
+    if (!g) {
+      g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1)
+      g.addColorStop(0, rgba(hex, 1))
+      g.addColorStop(0.4, rgba(hex, 0.45))
+      g.addColorStop(1, rgba(hex, 0))
+      if (glowGradCache.size >= 512) glowGradCache.clear()
+      glowGradCache.set(hex, g)
+    }
+    ctx.save()
+    ctx.globalAlpha *= alpha
+    ctx.translate(x, y)
+    ctx.scale(r, r)
+    ctx.fillStyle = g
+    ctx.fillRect(-1, -1, 2, 2)
+    ctx.restore()
+    return
+  }
+  // alpha ≥ 1: the stops saturate INDEPENDENTLY (0.45·alpha may stay < 1) —
+  // not a scalar multiple of the unit gradient — so keep the per-call build
+  // for this rare over-driven case.
   const g = ctx.createRadialGradient(x, y, 0, x, y, r)
   g.addColorStop(0, rgba(hex, alpha))
   g.addColorStop(0.4, rgba(hex, alpha * 0.45))

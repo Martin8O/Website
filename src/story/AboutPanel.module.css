@@ -180,7 +180,8 @@
 }
 
 /* Deliberately understated — a whisper, not a heading (Martin: "ne moc
-   křiklavé, spíš nenápadně"). */
+   křiklavé, spíš nenápadně") — lifted 34 % → 50 % so the whisper still
+   clears readable contrast (a11y bump, perf/a11y pass). */
 .creditsToggle {
   padding: 0;
   border: 0;
@@ -189,7 +190,7 @@
   font-size: 0.68rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--fg) 34%, transparent);
+  color: color-mix(in srgb, var(--fg) 50%, transparent);
   cursor: pointer;
   transition: color 140ms ease;
 }

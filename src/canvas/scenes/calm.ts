@@ -89,6 +89,17 @@ const TREE_TIPS = TREE.filter((b) => b.leaf)
 const quadAt = (a: number, c: number, b: number, s: number): number =>
   (1 - s) * (1 - s) * a + 2 * (1 - s) * s * c + s * s * b
 
+// stonePath solves a 240-step arc-length re-parametrization — pure in the
+// aspect, so one memo slot carries it across frames (it re-solved every
+// frame; a resize just re-keys it).
+let stonePathMemo: { aspect: number; path: Array<{ x: number; d: number }> } | null = null
+const stonePathFor = (aspect: number) => {
+  if (!stonePathMemo || stonePathMemo.aspect !== aspect) {
+    stonePathMemo = { aspect, path: stonePath(aspect) }
+  }
+  return stonePathMemo.path
+}
+
 /** Martin's meditator photos, decoded lazily on first paint (browser only —
  *  this module must stay importable in Node for the math tests). Until a
  *  sprite has decoded, its draw is skipped for a frame or two. */
@@ -622,7 +633,7 @@ export const renderCalm: Renderer = (ctx, alpha, t, time, cfg) => {
   // --- The stepping stones: krok za krokem, island to island ----------------
   // Positions solved per-aspect for a constant slant stride (calmMath.
   // stonePath); far stones first so nearer ones paint over their ripples.
-  const path = stonePath(w / h)
+  const path = stonePathFor(w / h)
   for (let i = CALM.stones - 1; i >= 0; i--) {
     const reveal = stoneReveal(i, t)
     const train = rippleTrain(i, t)
