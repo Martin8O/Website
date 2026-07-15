@@ -439,16 +439,22 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   ctx.save()
   ctx.globalAlpha = condense
   ctx.fillStyle = mixHex(STRUCT, HAZE, 0.18)
-  // Clamshell hangars (arched, bagram tents.jpg).
-  for (let i = 0; i < 4; i++) {
-    const x = wrapX(hash1(500 + i * 37) * span, midOff)
-    const hw = w * (0.055 + hash1(510 + i * 13) * 0.03)
-    const hh = h * (0.048 + hash1(520 + i * 7) * 0.026)
-    ctx.beginPath()
-    ctx.moveTo(x - hw, midBase)
-    ctx.ellipse(x, midBase, hw, hh, 0, Math.PI, 0)
-    ctx.closePath()
-    ctx.fill()
+  // Clamshell hangars (arched, bagram tents.jpg). SKIPPED on a portrait phone:
+  // there the helo stands spread apart + drift left (bagramMath padCenter) to
+  // avoid collapsing, and at that aspect the wider Mi-17 stand rode over a
+  // hangar (Martin's catch). The tent city + tower still carry the mid-band.
+  const portrait = w / h < 0.9
+  if (!portrait) {
+    for (let i = 0; i < 4; i++) {
+      const x = wrapX(hash1(500 + i * 37) * span, midOff)
+      const hw = w * (0.055 + hash1(510 + i * 13) * 0.03)
+      const hh = h * (0.048 + hash1(520 + i * 7) * 0.026)
+      ctx.beginPath()
+      ctx.moveTo(x - hw, midBase)
+      ctx.ellipse(x, midBase, hw, hh, 0, Math.PI, 0)
+      ctx.closePath()
+      ctx.fill()
+    }
   }
   // Giant barrel tents: low walls + a vaulted roof (bagram tents 2.jpg).
   for (let i = 0; i < 6; i++) {
@@ -528,8 +534,8 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   // right of the tower (the Mi-17 pair's stand + the Apache arrival stand).
   // Geometry comes from bagramMath (the same functions the 3D rotorcraft
   // land by) and drifts at the tower band's pan rate — glued to the world.
-  drawHeloStand(ctx, w, h, padScreen(PAD_MI17, tr, PAD_SCR), condense)
-  drawHeloStand(ctx, w, h, padScreen(PAD_APACHE, tr, PAD_SCR), condense)
+  drawHeloStand(ctx, w, h, padScreen(PAD_MI17, tr, PAD_SCR, w / h), condense)
+  drawHeloStand(ctx, w, h, padScreen(PAD_APACHE, tr, PAD_SCR, w / h), condense)
 
   // --- Aprons FULL of parked aircraft ----------------------------------------
   // Four C-17s parked among the fighters, one row deeper (c-17 front.png) —
@@ -605,14 +611,14 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
       smoothstep(APACHE.flare - 0.03, APACHE.flare + 0.04, t) *
       (1 - smoothstep(APACHE.touch + APACHE.wingDelay + 0.03, APACHE.touch + APACHE.wingDelay + 0.16, t))
     if (washApache > 0.01) {
-      padScreen(PAD_APACHE, tr, PAD_SCR)
+      padScreen(PAD_APACHE, tr, PAD_SCR, w / h)
       drawPuff(ctx, PAD_SCR.sx * w, PAD_SCR.sy * h, PAD_SCR.rx * h * 2.1, '#d8c49a', condense * washApache * 0.34, 3.4)
     }
     const washMi =
       smoothstep(MI17.lift - 0.02, MI17.lift + 0.05, t) *
       (1 - smoothstep(MI17.noseOver + MI17.wingDelay + 0.04, MI17.noseOver + MI17.wingDelay + 0.16, t))
     if (washMi > 0.01) {
-      padScreen(PAD_MI17, tr, PAD_SCR)
+      padScreen(PAD_MI17, tr, PAD_SCR, w / h)
       drawPuff(ctx, PAD_SCR.sx * w, PAD_SCR.sy * h, PAD_SCR.rx * h * 1.9, '#d8c49a', condense * washMi * 0.3, 3.4)
     }
     ctx.restore()

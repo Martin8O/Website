@@ -34,6 +34,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { clamp01 } from '../../canvas/toolkit'
 import { runLocalTRaw } from '../../canvas/sceneTimeline'
 import { setHero3DReady } from '../owned3d'
 import {
@@ -68,12 +69,14 @@ const MODEL_URLS: Record<ActorId, string> = {
  *  (1.6) kicks so the fetches don't fight. */
 const LOAD_AT_POS = 2.0
 
-/** Fire the 2D→3D hero flip while the scene is at or below this presence — the
- *  band in which both layers' presence³ fade keeps the hero invisible (≈3e-3
- *  at 0.15), so the swap is never seen. Wide enough that a slow scroll-in on a
- *  slow phone catches the flip during the fade-in creep, not only at the
- *  razor-thin off-frame instant (which a late idle-sliced build kept missing). */
-const FLIP_MAX_PRESENCE = 0.15
+/** Seconds the 3D actors dissolve IN over when the hero first flips live. The
+ *  flip now fires the instant the models are ready — IN PLACE, at whatever
+ *  presence the visitor is at (Martin: when the 3D finishes while you're still
+ *  in the scene it must APPEAR, never wait for you to leave and come back).
+ *  The 2D hero hard-cuts off (its own `paintsHero2D` gate) while these fade in
+ *  over this window, so the swap reads as a soft materialise, not a pop — the
+ *  in-place replacement for the old "flip only while off-frame" guard. */
+const FLIP_FADE_SEC = 0.45
 
 /** GLB→canonical (nose −z, up +y) rest rotations — the lab's verified
  *  values (ROSTER): C-17/F-16 nose +z, Apache nose +x, Mi-17 canonical. */
@@ -419,9 +422,11 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
   }, [probe])
 
   const readyRef = useRef(false)
-  /** Models ready AND the flip fired (off-frame) — only then do the 3D
-   *  actors render and the 2D ones step aside. */
+  /** Models ready AND the flip fired — only then do the 3D actors render and
+   *  the 2D ones step aside. Fires in place the instant readiness lands. */
   const flippedRef = useRef(false)
+  /** Wall-clock time the flip fired (−1 = not yet), for the dissolve-in. */
+  const flipAtRef = useRef(-1)
   const loadKicked = useRef(false)
   const aliveRef = useRef(true)
 
@@ -512,6 +517,7 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
       aliveRef.current = false
       readyRef.current = false
       flippedRef.current = false
+      flipAtRef.current = -1
       setHero3DReady('desert', false)
       const inst = res.instances
       if (inst) {
@@ -534,28 +540,30 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
 
     const t = desertRun ? runLocalTRaw(frame.pos, desertRun, flight.count) : 0
     const rawPresence = desertPresence(frame.slots, frame.count)
-    // The 2D→3D hand-over only ever happens while the hero is INVISIBLE, so
-    // the swap (2D and 3D fly DIFFERENT paths — a mid-scene flip pops) is
-    // never seen. Both layers fade as presence³ (2D `condense`, 3D
-    // `actorFade`), so any presence below FLIP_MAX gives condense/fade < ~3e-3
-    // — imperceptible — not just the razor-thin off-frame instant. That width
-    // matters on a SLOW scroll into the scene on a slow phone (Pixel 9a): the
-    // idle-sliced GLB build can finish just AFTER presence has crept past a
-    // hair-thin threshold, so the flip would miss its window and stay 2D for
-    // the whole first visit — only firing once you scrolled away (off-frame)
-    // and back. A wider invisible band catches the flip during the fade-in
-    // creep instead, so the 3D heroes show on the first approach. (If the user
-    // rushes in before the build is ready they still get 2D until they leave —
-    // unavoidable without a visible pop, but no longer the slow-scroll case.)
-    if (readyRef.current && !flippedRef.current && rawPresence < FLIP_MAX_PRESENCE) {
+    // Flip 2D→3D the INSTANT the models are ready — in place, at whatever
+    // presence the visitor is at (Martin: when the 3D finishes while you're
+    // still in the scene it must APPEAR, not wait for you to scroll away and
+    // back). The old off-frame guard stranded the beat in 2D for the whole
+    // first visit whenever the idle-sliced build finished mid-scene (slow
+    // phone, slow scroll) — and again after a world-mode toggle remount. The
+    // swap (2D and 3D fly different paths) is hidden by a short fade-IN
+    // (`flipFade`) rather than by catching an off-frame instant. No
+    // auto-restart: the actors pick up at the live `t`.
+    if (readyRef.current && !flippedRef.current) {
       flippedRef.current = true
+      flipAtRef.current = frame.time
       setHero3DReady('desert', true)
     }
+    // One-time dissolve-in envelope (smoothstepped), so the in-place hand-over
+    // reads as a soft materialise instead of a hard pop; completes once and
+    // stays 1 (re-armed only on a remount).
+    const fLin = flipAtRef.current < 0 ? 0 : clamp01((frame.time - flipAtRef.current) / FLIP_FADE_SEC)
+    const flipFade = fLin * fLin * (3 - 2 * fLin)
     const presence = flippedRef.current ? rawPresence : 0
-    // The actors fade like the 2D world CONDENSES (alpha³ — desert.ts):
-    // during the sweep-in/out they must sink into the haze with the scene,
-    // never shine at full strength over a half-faded base (Martin's catch).
-    const actorFade = presence * presence * presence
+    // The actors fade like the 2D world CONDENSES (alpha³ — desert.ts) × the
+    // one-time flip dissolve: during the sweep-in/out they sink into the haze
+    // with the scene, never shining at full strength over a half-faded base.
+    const actorFade = presence * presence * presence * flipFade
 
     // Track the RENDER camera EXACTLY (position + orientation, including the
     // roll and the pointer micro-parallax it carries). A room-space actor is

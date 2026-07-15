@@ -1,5 +1,5 @@
 import { useEffect, type RefObject } from 'react'
-import { setScrollLocked } from '../scroll/scrollStore'
+import { setScrollLocked, setStoryCovered } from '../scroll/scrollStore'
 
 /**
  * Shared modal manners for WorkPanel + AboutPanel: Escape closes, Tab cycles
@@ -11,6 +11,8 @@ import { setScrollLocked } from '../scroll/scrollStore'
 export function useModalA11y(panelRef: RefObject<HTMLElement | null>, onClose: () => void) {
   useEffect(() => {
     setScrollLocked(true)
+    // Pause the 2D + 3D render loops while this dialog covers the world.
+    setStoryCovered(true)
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
@@ -37,6 +39,7 @@ export function useModalA11y(panelRef: RefObject<HTMLElement | null>, onClose: (
     return () => {
       document.removeEventListener('keydown', onKey)
       setScrollLocked(false)
+      setStoryCovered(false)
     }
   }, [panelRef, onClose])
 }

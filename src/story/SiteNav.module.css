@@ -64,6 +64,32 @@
   color: color-mix(in srgb, var(--amber) 72%, #fff);
 }
 
+/* Phone widths: the right-anchored pill grows leftward with no max-width, so on
+   a narrow screen the whole item run (Home · Work · Contact · About · | · CZ ·
+   3D) overflows the left edge and clips the Home icon (the first item). Tighten
+   padding / letter-spacing / gap below phone width so the entire nav — Home
+   included — fits within the viewport. */
+@media (max-width: 560px) {
+  .nav {
+    gap: 0.04rem;
+  }
+  .item {
+    padding: 0.34rem 0.52rem;
+    letter-spacing: 0.075em;
+    font-size: 0.7rem;
+  }
+  .home {
+    padding: 0.34rem 0.4rem;
+  }
+  .lang {
+    padding: 0.34rem 0.44rem;
+    letter-spacing: 0.06em;
+  }
+  .divider {
+    margin: 0 0.08rem;
+  }
+}
+
 /* Shown if the lazy Work-panel chunk fails to load (ChunkBoundary fallback). */
 .loadError {
   position: fixed;

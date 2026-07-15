@@ -72,14 +72,33 @@ describe('heliports', () => {
       for (const tr of [0, 0.5, 1]) {
         for (const aspect of ASPECTS) {
           const off = (MARK_HALF_R * pad.r) / (2 * pad.d * FOV_TAN * aspect)
-          expect(padMarkSx(pad, tr, 0, aspect)).toBeCloseTo(padSx(pad, tr) - off, 9)
-          expect(padMarkSx(pad, tr, 1, aspect)).toBeCloseTo(padSx(pad, tr) + off, 9)
+          // The mark is the aspect-aware pad centre ± the room-space offset —
+          // both the 2D draw and the 3D helo read the SAME centre at this aspect.
+          expect(padMarkSx(pad, tr, 0, aspect)).toBeCloseTo(padSx(pad, tr, aspect) - off, 9)
+          expect(padMarkSx(pad, tr, 1, aspect)).toBeCloseTo(padSx(pad, tr, aspect) + off, 9)
         }
         // Mark centre + its ring (0.34·r) sit inside the slab radius on ANY
         // aspect — the fraction-of-slab definition guarantees it.
         expect(MARK_HALF_R + 0.34).toBeLessThan(0.95)
       }
     }
+  })
+
+  it('spreads the two stands apart on a narrow portrait so they never collapse', () => {
+    // Desktop: the authored composition is byte-for-byte unchanged.
+    expect(padSx(PAD_MI17, 0, DESKTOP)).toBeCloseTo(PAD_MI17.sx0, 9)
+    expect(padSx(PAD_APACHE, 0, DESKTOP)).toBeCloseTo(PAD_APACHE.sx0, 9)
+    // A wide aspect at/above the reference behaves exactly like desktop.
+    expect(padSx(PAD_MI17, 0, 1.6)).toBeCloseTo(PAD_MI17.sx0, 9)
+    // Portrait: the gap between the two stand centres widens (their screen SIZE
+    // scales with height, so a fixed width-gap would collapse them together).
+    const gapDesktop = padSx(PAD_APACHE, 0, DESKTOP) - padSx(PAD_MI17, 0, DESKTOP)
+    const gapMobile = padSx(PAD_APACHE, 0, MOBILE) - padSx(PAD_MI17, 0, MOBILE)
+    expect(gapMobile).toBeGreaterThan(gapDesktop * 1.5)
+    // Order preserved (Apache still right of Mi-17) and both stay on-screen-ish.
+    expect(padSx(PAD_APACHE, 0, MOBILE)).toBeGreaterThan(padSx(PAD_MI17, 0, MOBILE))
+    expect(padSx(PAD_MI17, 0, MOBILE)).toBeGreaterThan(0.3)
+    expect(padSx(PAD_APACHE, 0, MOBILE)).toBeLessThan(1.0)
   })
 
   it('the rotary line sits RIGHT of the tower on its band (the blue zone)', () => {

@@ -52,6 +52,17 @@ describe('resolveWorldMode', () => {
     expect(resolveWorldMode({ ...capable, weakClient: true, choice: '3d' })).toBe('3d')
     expect(resolveWorldMode({ ...capable, weakClient: false })).toBe('3d')
   })
+
+  it('the runtime FPS watchdog drops to 2D — but the visitor can still force 3D', () => {
+    // A device that LOOKED capable (cleared the static weak-client gate) but
+    // crawled in 3D at runtime.
+    expect(resolveWorldMode({ ...capable, autoDowngraded: true })).toBe('2d')
+    // An explicit 3D choice (or ?world=3d) always beats the auto-downgrade.
+    expect(resolveWorldMode({ ...capable, autoDowngraded: true, choice: '3d' })).toBe('3d')
+    expect(resolveWorldMode({ ...capable, autoDowngraded: true, override: '3d' })).toBe('3d')
+    // …but the hard gates still win over the auto-downgrade either way.
+    expect(resolveWorldMode({ ...capable, autoDowngraded: true, reducedMotion: true })).toBe('2d')
+  })
 })
 
 describe('isWeakClient', () => {

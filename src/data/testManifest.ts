@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 357
+export const TEST_COUNT = 359
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -260,6 +260,7 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "ground model > groundY round-trips through the projection at any depth",
       "heliports > drift left with the pan at their band rate (ground-locked at their depth)",
       "heliports > gives each stand two symmetric touchdown marks that sit inside the slab",
+      "heliports > spreads the two stands apart on a narrow portrait so they never collapse",
       "heliports > the rotary line sits RIGHT of the tower on its band (the blue zone)",
       "C-17 departure > lives from the fade-in roll to the exit, gone after",
       "C-17 departure > starts on the UPPER runway under the mountains, HIGH + clearly readable",
@@ -441,6 +442,7 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "resolveWorldMode > ?world=2d is a kill-switch on an otherwise capable client",
       "resolveWorldMode > the visitor toggle decides when no URL override is present",
       "resolveWorldMode > a weak client auto-falls back to 2D — unless the visitor chose 3D",
+      "resolveWorldMode > the runtime FPS watchdog drops to 2D — but the visitor can still force 3D",
       "isWeakClient > reads little memory, few cores, data-saver or a slow link as weak",
       "isWeakClient > reads absent signals as capable (Firefox/Safari expose none)",
     ],

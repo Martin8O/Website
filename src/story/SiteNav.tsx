@@ -1,5 +1,7 @@
 import { Suspense, lazy, useCallback, useRef, useState } from 'react'
-import { scrollToProgress } from '../scroll/scrollStore'
+import { getScrollProgress, scrollToProgress } from '../scroll/scrollStore'
+import { CHAPTERS, CHAPTER_WEIGHTS } from '../data/chapters'
+import { chapterPosition, progressFromPos } from '../timeline'
 import { useLang } from '../i18n/useLang'
 import { setLang } from '../i18n/langStore'
 import { STRINGS } from '../i18n/strings'
@@ -49,6 +51,19 @@ export function SiteNav() {
     setOpen(null)
     aboutRef.current?.focus()
   }, [])
+
+  // Flip 2D↔3D, then TELEPORT to the start of the current chapter so scrolling
+  // down replays the beat in the new mode (Martin: a manual jump on toggle —
+  // NOT an auto-restart when the 3D finishes loading). The visitor's choice
+  // persists (localStorage) and beats the weak-client / FPS auto-fallback —
+  // their word is final. Same immediate-teleport idiom as Home/Contact.
+  const toggleWorld = useCallback(() => {
+    setWorldChoice(worldMode === '3d' ? '2d' : '3d')
+    const count = CHAPTERS.length
+    const pos = chapterPosition(getScrollProgress(), count, CHAPTER_WEIGHTS)
+    const idx = Math.max(0, Math.min(count - 1, Math.round(pos)))
+    scrollToProgress(progressFromPos(Math.max(idx - 0.5, 0), CHAPTER_WEIGHTS), { immediate: true })
+  }, [worldMode])
 
   return (
     <nav className={styles.nav} aria-label={t.navLandmark}>
@@ -105,9 +120,7 @@ export function SiteNav() {
       {world3dAvailable && (
         <button
           className={`${styles.item} ${styles.lang}`}
-          // An explicit choice persists (localStorage) and beats the
-          // weak-client auto-fallback — the visitor's word is final.
-          onClick={() => setWorldChoice(worldMode === '3d' ? '2d' : '3d')}
+          onClick={toggleWorld}
           aria-label={worldMode === '3d' ? t.worldTo2dLabel : t.worldTo3dLabel}
           title={worldMode === '3d' ? t.worldTo2dLabel : t.worldTo3dLabel}
           aria-pressed={worldMode === '3d'}

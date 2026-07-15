@@ -1,7 +1,8 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { useScrollProgress } from '../scroll/useScrollProgress'
 import { useIdleAfterLoad } from '../useIdleAfterLoad'
 import { useWorldMode } from '../three/worldMode'
+import { warmFirstHero } from '../three/prefetchHeroes'
 import { CHAPTERS, CHAPTER_WEIGHTS, chaptersFor, EXTRA_ERAS } from '../data/chapters'
 import { useLang } from '../i18n/useLang'
 import { activeEra, chapterPosition } from '../timeline'
@@ -56,6 +57,13 @@ export function Story() {
   // The 2D world paints the complete scene meanwhile (the 3D starfield/heroes
   // are additive and fade in), so this only moves WHEN 3D arrives.
   const stage3dReady = useIdleAfterLoad()
+  // Warm the first hero's GLBs (climb) in parallel with everything else the
+  // moment we know 3D will run, so the models are cached before the deferred
+  // Stage3D chunk even mounts — the fix for "ch-01 shows 2D on the first pass"
+  // on a phone (mobile audit §3). Low-priority, post-load, cache-only.
+  useEffect(() => {
+    if (worldMode === '3d') warmFirstHero()
+  }, [worldMode])
   // Localized copy for the DOM layers; the canvas keeps the static EN array
   // (it reads only theme/timing fields, and a stable identity means the
   // language toggle never re-initializes the render loop).

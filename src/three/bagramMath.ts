@@ -133,8 +133,39 @@ export const PAD_MI17: Pad = { d: 74, sx0: 0.74, rate: 0.17, r: 6.8 }
 
 export const PAD_APACHE: Pad = { d: 74, sx0: 0.92, rate: 0.17, r: 6.8 }
 
-export function padSx(pad: Pad, tRaw: number): number {
-  return pad.sx0 - pad.rate * tRaw
+// --- aspect-aware pair spread (mobile audit — the Bagram 2D overlap fix) -----
+// A stand's screen SIZE scales with viewport HEIGHT (`rx·h`), but its authored
+// centre (`sx0`) is a viewport-WIDTH fraction — so on a narrow portrait phone
+// the two stands are drawn wide yet placed close, and collapse onto each other
+// ("Mi-17 and Apache on the SAME pad"). The fix spreads the pair apart and
+// nudges it left as the aspect narrows, so the two stands never coincide.
+// Because the SAME `padSx` feeds the 2D drawing AND the 3D helo touchdown marks
+// (`padMarkSx` → `markPoint`), both move together — the 2D/3D contract
+// (ADR-047: helo wheels sit on the drawn marks) can never desync.
+/** Pair midpoint of the two stands at the reference aspect (½·(0.74+0.92)). */
+const PAD_PAIR_MID = 0.83
+/** At/above this viewport aspect the stands sit at their authored `sx0` — the
+ *  shipped desktop composition is byte-for-byte unchanged. */
+const PAD_REF_ASPECT = 1.5
+/** Clamp the narrowness factor so extreme aspects don't over-spread. */
+const PAD_MAX_NARROW = 2.6
+/** How hard the pair's gap widens per unit of narrowness. */
+const PAD_SPREAD_GAIN = 0.7
+/** How far the pair centre drifts LEFT per unit narrowness (keeps the right
+ *  stand from running further off the edge as the gap grows). */
+const PAD_MID_SHIFT = 0.055
+
+/** The stand's screen-x centre at this aspect: the authored `sx0` on wide
+ *  screens, spread apart + nudged left on narrow ones. */
+function padCenter(pad: Pad, aspect: number): number {
+  const narrow = Math.min(Math.max(PAD_REF_ASPECT / Math.max(aspect, 0.2), 1), PAD_MAX_NARROW) - 1
+  const grow = 1 + narrow * PAD_SPREAD_GAIN
+  const mid = PAD_PAIR_MID - narrow * PAD_MID_SHIFT
+  return mid + (pad.sx0 - PAD_PAIR_MID) * grow
+}
+
+export function padSx(pad: Pad, tRaw: number, aspect: number = PAD_REF_ASPECT): number {
+  return padCenter(pad, aspect) - pad.rate * tRaw
 }
 
 export function padSy(pad: Pad): number {
@@ -157,7 +188,7 @@ export const MARK_HALF_R = 0.5
  *  the pad depth (so it is the same fraction of the slab at any aspect). */
 export function padMarkSx(pad: Pad, tRaw: number, ship: 0 | 1, aspect: number): number {
   const off = (MARK_HALF_R * pad.r) / (2 * pad.d * FOV_TAN * aspect)
-  return padSx(pad, tRaw) + (ship === 0 ? -off : off)
+  return padSx(pad, tRaw, aspect) + (ship === 0 ? -off : off)
 }
 
 /** Room-space touchdown mark (on the ground plane) for a ship — the ONE
@@ -176,9 +207,11 @@ export type PadScreen = {
   squash: number
 }
 
-/** The pad as the 2D layer draws it. */
-export function padScreen(pad: Pad, tRaw: number, out: PadScreen): PadScreen {
-  out.sx = padSx(pad, tRaw)
+/** The pad as the 2D layer draws it. `aspect` (w/h) spreads the pair apart on
+ *  narrow screens so the two stands never collapse together — the 3D helo
+ *  marks read the same aspect-aware centre, so the two layers stay locked. */
+export function padScreen(pad: Pad, tRaw: number, out: PadScreen, aspect: number = PAD_REF_ASPECT): PadScreen {
+  out.sx = padSx(pad, tRaw, aspect)
   out.sy = padSy(pad)
   out.rx = pad.r / (2 * pad.d * FOV_TAN)
   out.squash = CAM_H / pad.d

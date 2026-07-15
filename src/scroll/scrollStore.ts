@@ -74,3 +74,33 @@ export function setScrollLocked(next: boolean): void {
   const is = locks > 0
   if (was !== is) lockDriver?.(is)
 }
+
+/**
+ * Story-cover signal (Tier-1 mobile perf): a full-screen modal (About / Work /
+ * Credits / Tests — all via `useModalA11y`) fully covers the canvas world, so
+ * the 2D `CanvasStage` and the 3D `Stage3D` pause their render loops while one
+ * stands — no point animating a world nobody can see (measured: an open panel
+ * dropped a phone to ~13 fps still rendering a hidden galaxy). Counts, like the
+ * scroll lock, so overlapping holders balance. Deliberately NOT the scroll lock:
+ * the preloader holds that too, and the canvas must keep painting behind the
+ * preloader for a live reveal.
+ */
+type CoverListener = () => void
+let covers = 0
+const coverListeners = new Set<CoverListener>()
+
+export function isStoryCovered(): boolean {
+  return covers > 0
+}
+
+export function setStoryCovered(next: boolean): void {
+  const was = covers > 0
+  covers = Math.max(0, covers + (next ? 1 : -1))
+  const is = covers > 0
+  if (was !== is) for (const listener of coverListeners) listener()
+}
+
+export function subscribeStoryCover(listener: CoverListener): () => void {
+  coverListeners.add(listener)
+  return () => coverListeners.delete(listener)
+}

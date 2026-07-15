@@ -12,12 +12,13 @@
  * `?world=2d` never even fetch this chunk.
  */
 
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { CHAPTER_WEIGHTS, type Chapter, type Theme } from '../data/chapters'
 import { chapterPosition } from '../timeline'
-import { getScrollProgress } from '../scroll/scrollStore'
+import { getScrollProgress, isStoryCovered, subscribeStoryCover } from '../scroll/scrollStore'
+import { tickRuntimeFpsGuard } from './worldMode'
 import { buildRuns, resolveSceneFrame } from '../canvas/sceneTimeline'
 import { RENDERERS_3D, type FlightRig } from './registry3d'
 import { buildFlightPath, flightPoseAt, createPose } from './flightMath'
@@ -51,9 +52,16 @@ export function Stage3D({ chapters }: { chapters: readonly Chapter[] }) {
     return seen
   }, [runs])
 
+  // Pause the whole R3F loop while a full-screen dialog covers the world
+  // (Tier-1 mobile perf) — the transparent canvas keeps its last frame frozen
+  // behind the panel; resumes the instant the dialog closes.
+  const covered = useSyncExternalStore(subscribeStoryCover, isStoryCovered, isStoryCovered)
+
   return (
     <div className={styles.stage} aria-hidden="true">
       <Canvas
+        // Freeze the loop when a dialog covers the world; 'always' otherwise.
+        frameloop={covered ? 'never' : 'always'}
         // No tone mapping: additive star hexes must match the 2D CSS palette.
         flat
         // Real shadow maps for the hero beats (ballet noon rig, climb
@@ -148,7 +156,11 @@ function FrameController({ flight, frame }: { flight: FlightRig; frame: Frame3D 
     }
   }, [ptr])
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
+    // Near-zero-cost runtime FPS watchdog (mobile audit §5): a weak phone that
+    // cleared the static gate but crawls in 3D gets dropped to 2D. Piggybacks
+    // on this loop's own delta; disarms itself early (see worldMode).
+    tickRuntimeFpsGuard(delta * 1000)
     const pos = chapterPosition(getScrollProgress(), count, CHAPTER_WEIGHTS)
     const resolved = resolveSceneFrame(pos, runs, count)
     frame.pos = pos

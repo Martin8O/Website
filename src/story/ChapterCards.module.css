@@ -216,6 +216,16 @@
   text-align: center;
 }
 
+/* On phones the column is narrow enough that justify opens ugly word-gaps
+   (rivers) — the "solve by wording" trick can't hold at ~30ch. Left-align the
+   body below phone width; the centered intro/lede (higher specificity) still
+   wins, and text-align-last on lead cards is unaffected. */
+@media (max-width: 600px) {
+  .body {
+    text-align: left;
+  }
+}
+
 /* Mono eyebrow right above the CTA — the contact finale's `+ Get in touch`
    caption over the breathing field (data-driven; most chapters omit it). */
 .ctaEyebrow {

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { chapterPosition } from '../timeline'
 import { CHAPTER_WEIGHTS } from '../data/chapters'
-import { getScrollProgress, setScrollProgress } from '../scroll/scrollStore'
+import { getScrollProgress, setScrollProgress, subscribeStoryCover, isStoryCovered } from '../scroll/scrollStore'
 import { paints2D, paintsHero2D } from '../three/owned3d'
 import type { WorldMode } from '../three/worldMode'
 import { getGlassCanvas } from './glass'
@@ -124,6 +124,10 @@ export function CanvasStage({
     const onPointerUp = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') ptrTA = 0
     }
+
+    // Paused while a full-screen dialog covers the world (Tier-1 mobile perf) —
+    // combined with the tab-hidden gate below to decide whether the loop runs.
+    let storyCovered = isStoryCovered()
 
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
     let reducedMotion = media.matches
@@ -336,13 +340,19 @@ export function CanvasStage({
       cancelAnimationFrame(rafId)
       rafId = 0
     }
-    const onVisibility = () => {
-      if (document.hidden) {
+    // Run only when the tab is visible AND no dialog covers the world.
+    const sync = () => {
+      if (document.hidden || storyCovered) {
         stop()
       } else {
         needsPaint = true
         start()
       }
+    }
+    const onVisibility = () => sync()
+    const onCover = () => {
+      storyCovered = isStoryCovered()
+      sync()
     }
 
     resize()
@@ -354,6 +364,7 @@ export function CanvasStage({
     document.documentElement.addEventListener('pointerleave', onPointerGone)
     document.addEventListener('visibilitychange', onVisibility)
     media.addEventListener('change', onMedia)
+    const unsubCover = subscribeStoryCover(onCover)
     start()
 
     // Dev-only headless-verification hook: hidden tabs never fire rAF (and
@@ -392,6 +403,7 @@ export function CanvasStage({
       document.documentElement.removeEventListener('pointerleave', onPointerGone)
       document.removeEventListener('visibilitychange', onVisibility)
       media.removeEventListener('change', onMedia)
+      unsubCover()
     }
   }, [chapters])
 
