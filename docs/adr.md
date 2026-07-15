@@ -4,6 +4,53 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-062 — 2D/3D toggle retired; runtime downgrade decays; Safari card-mask default-none (M-DEBUG) (2026-07-16)
+A friend on a MacBook Air M3 / Safari reported the live site (production `main`): `?world=3d` showed the 3D but ate
+**2–3 GB RAM / 60–80 % CPU**; the default showed "no 3D at all"; the nav 2D/3D pill "didn't work"; and the Contact
+finale painted the galaxy but dropped its heading + copy + email CTA. Three of these are one story: the OLD watchdog
+(pre build-guard) had downgraded him to 2D and **persisted it forever** (`site-world-auto='2d'`), so the default was
+2D; and with `?world=` in the URL the pill is out-ranked, so it appeared dead. Decisions: **(1) retire the visitor
+2D/3D pill** (Martin — it confused people; a manual world switch invites exactly the stuck/contradictory states
+above). The world is now **pure capability detection** — reduced-motion / WebGL2 / weak-client heuristic / the
+runtime FPS watchdog — with `?world=2d|3d` as the only (debug/support) lever. The persisted `site-world` choice key
+is actively removed on read so no returning tester is steered by a dead preference. **(2) the FPS-watchdog downgrade
+now DECAYS** — it stores a timestamp and expires after `AUTO_TTL_MS` (24 h); a device that had one bad session
+(thermal throttle, battery-saver, a background-load moment) can never be branded 2D forever now that there is no UI
+to undo it, while a genuinely weak device simply re-trips next visit. Legacy plain-`'2d'` values (v1 + v2 pre-TTL
+format) read as expired → one clean retry under the build-aware watchdog. Pure `autoDowngradeActive()` is
+unit-tested (fresh/expired/legacy/clock-jump). **(3) Safari card-mask** — `ChapterCards` carried an always-on
+`mask-image: radial-gradient(circle 0px …)` on the whole text layer (the ballet's near-jet occlusion hole, radius 0
+at rest); a degenerate zero-radius gradient composited every frame through Core Animation is a plausible cause of the
+whole text layer vanishing under memory pressure, and a standing cost even when correct. The mask now defaults to
+**none** (`var(--ballet-mask, none)`) — CruiseBallet publishes the full gradient only during the one beat the hole is
+needed. Rationale: fewer manual levers = fewer contradictory states; a self-healing downgrade respects the "never
+stick a capable device in 2D" requirement; the mask default removes a per-frame WebKit hazard on every scene.
+*Verify:* gate green (378, +21 net over 357 — new watchdog-TTL cases, pill-removed manifest); `cdp-climb2-verify`
+asserts the pill is gone; `cdp-watchdog-load` 4× no false downgrade; real WebKit (Playwright) shows the Contact card
++ title + mailto present in 2D and 3D and parses the ballet mask hole. Real-Mac Contact confirmation is post-deploy.
+
+### ADR-061 — GPU parking: hero scenes release GPU resources far off-screen (the 2–3 GB fix) (M-DEBUG) (2026-07-16)
+The reported 2–3 GB Safari tab is **not a JS leak** (measured JS heap holds ~19→42 MB across the whole story and
+plateaus over unmount/remount cycles) — it is **GPU memory that was never released**. `Stage3D` mounts one scene per
+registered theme for the whole session, so once a visitor had scrolled through a hero beat, that scene's GLB textures
++ geometry VBOs + **2048² shadow-map render targets** stayed GPU-resident to the end; the four heroes (climb ladder,
+ballet pair, the 5 MB Bagram quartet, the patrol pairs) summed to ~370 MB of texture bytes alone plus shadow RTs — on
+Safari, where GPU allocations count into the tab's RSS, that is most of the blowup. Fix — **GPU parking** (`surface.ts`
+`createGpuParker` / `releaseSceneGpu` / `markSharedTextures`, wired into all four hero scenes): a scene whose models
+are built and whose story window is **> 2.0 chapters** away releases its texture uploads, geometry buffers and the
+directional key's shadow map; the CPU-side sources (image bitmaps, attribute arrays, canvases) stay, so three
+re-uploads automatically on the next bind, and the parker **re-warms** via `warmTextures` when the story returns
+within 1.6 chapters — off the interaction path, so a normal scroll never pays the upload inside the beat. Materials
+are **not** disposed (compiled programs stay cached → no shader recompile on un-park); the session `getRoomEnv` PMREM
+env is never touched (render-target-backed, unrebuildable, session-lived by design); the l159 skin shared between the
+ballet and the patrols is marked shared and exempt from parking so neither scene can delete the other's live copy.
+Rationale: the heroes must stay MOUNTED (the 2D→3D flip is per-scroll, an unmount would re-pay the whole build), so
+the only lever is releasing the GPU copy of a scene nobody is looking at — a pure resource move, zero change to what
+renders on any client. *Verify:* new `cdp-park-verify.mjs` — GL textures 236 → **6** and geometries 109 → **3** at
+the contact finale, scroll back to Bagram re-warms (237 tex, actors ready, 171 shadow casters); ALL PASS. Desktop 2D
+byte-identical (climb2/bagram/ballet/patrol harnesses ALL PASS). Real-Mac before/after RSS is the post-deploy
+confirmation. Full session write-up: `local/m-debug-report-2026-07-16.md`.
+
 ### ADR-060 — `llms.txt` added so the Agentic-Browsing / Agent-Accessibility check passes (2026-07-15)
 PageSpeed's new **Agentic Browsing** category flagged "llms.txt does not follow recommendations — missing a required
 H1 header; contains no links" (site scored 2/3). Root cause: the SPA rewrite (`vercel.json` `/(.*)` → `/`) served

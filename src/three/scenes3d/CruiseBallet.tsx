@@ -48,7 +48,7 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { getRoomEnv, idleSlice, warmTextures } from './surface'
+import { createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
 import { buildAIM9 } from './aim9'
 import { buildDropTank } from './droptank'
 
@@ -407,7 +407,7 @@ function poseQuatOf(pose: typeof _pose, q: THREE.Quaternion): void {
 
 const AOA_RAD = (3.2 * Math.PI) / 180
 
-export function CruiseBallet({ frame }: Scene3DProps) {
+export function CruiseBallet({ frame, flight }: Scene3DProps) {
   const res = useMemo(() => {
     // The stage rides the camera pose; `group` inverts the virtual orbit
     // camera so the fight hangs framed in front of the viewer.
@@ -539,6 +539,15 @@ export function CruiseBallet({ frame }: Scene3DProps) {
     gl.shadowMap.type = THREE.PCFSoftShadowMap
   }, [gl])
 
+  // GPU parking (surface.ts): far from ch-02 the built jets' textures,
+  // geometry buffers and the noon key's shadow map leave the GPU; the CPU
+  // sources stay, so a re-approach re-warms them off the interaction path.
+  const cruiseRun = useMemo(
+    () => flight.runs.find((r) => r.theme === 'sky' && r.sky === 'cruise') ?? null,
+    [flight.runs],
+  )
+  const parker = useMemo(() => createGpuParker(gl, res.root), [gl, res])
+
   const cleanupRef = useRef<(() => void) | null>(null)
   const kickLoad = () => {
     if (loadKicked.current) return
@@ -573,6 +582,9 @@ export function CruiseBallet({ frame }: Scene3DProps) {
         }
         for (const j of jets) res.group.add(j.pivot)
         jetsRef.current = jets
+        // The l159 skin is cloned by the patrols too — its maps must never be
+        // parked from under the other scene (surface.ts GPU parking).
+        markSharedTextures(res.group)
         await warmTextures(gl, res.group, (d, n) =>
           reportHeroProgress('cruise', 0.8 + (d / n) * 0.19),
         )
@@ -598,6 +610,7 @@ export function CruiseBallet({ frame }: Scene3DProps) {
     resetHeroLoad('cruise')
     return () => {
       cleanupRef.current?.()
+      parker.dispose()
       setHero3DReady('cruise', false)
       resetHeroLoad('cruise')
       const jets = jetsRef.current
@@ -617,10 +630,7 @@ export function CruiseBallet({ frame }: Scene3DProps) {
       res.hudMesh.geometry.dispose()
       res.hudMat.dispose()
       res.hudTex.dispose()
-      const rs = document.documentElement.style
-      rs.removeProperty('--ballet-hole-r')
-      rs.removeProperty('--ballet-hole-x')
-      rs.removeProperty('--ballet-hole-y')
+      document.documentElement.style.removeProperty('--ballet-mask')
       holeStr.current = ''
       loadKicked.current = false
     }
@@ -631,6 +641,7 @@ export function CruiseBallet({ frame }: Scene3DProps) {
     // Approaching this hero's beat with the build unfinished — let idleSlice
     // run on the short timeout (finish over smoothness).
     if (!jetsRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
+    if (cruiseRun) parker.tick(frame.pos, cruiseRun.start, cruiseRun.end + 1, !!jetsRef.current)
 
     const slot = slotOfCruise(frame.slots, frame.count)
     const t = slot ? slot.tRaw : 0
@@ -648,7 +659,7 @@ export function CruiseBallet({ frame }: Scene3DProps) {
       res.hudMesh.visible = false
       if (holeStr.current !== '') {
         holeStr.current = ''
-        document.documentElement.style.setProperty('--ballet-hole-r', '0px')
+        document.documentElement.style.removeProperty('--ballet-mask')
       }
       return
     }
@@ -779,14 +790,22 @@ export function CruiseBallet({ frame }: Scene3DProps) {
           probe.jets[k] = { sx: s.sx, sy: s.sy, bank: _pose.bank }
         }
       }
-      // Publish the hole (quantised; written only on change).
-      const hs = `${holeR.toFixed(0)}|${holeX.toFixed(0)}|${holeY.toFixed(0)}`
+      // Publish the hole (quantised; written only on change). The mask is
+      // INSTALLED only while a hole is actually live (≥1 px) — the CSS
+      // default is `none`, so the text layer carries no mask at all outside
+      // this beat and a degenerate 0-radius gradient is never composited
+      // (M-DEBUG: Safari suspect + a standing mask cost on every card).
+      const hs = holeR >= 1 ? `${holeR.toFixed(0)}|${holeX.toFixed(0)}|${holeY.toFixed(0)}` : ''
       if (hs !== holeStr.current) {
         holeStr.current = hs
         const rs = document.documentElement.style
-        rs.setProperty('--ballet-hole-r', `${holeR.toFixed(0)}px`)
-        rs.setProperty('--ballet-hole-x', `${holeX.toFixed(0)}px`)
-        rs.setProperty('--ballet-hole-y', `${holeY.toFixed(0)}px`)
+        if (hs === '')
+          rs.removeProperty('--ballet-mask')
+        else
+          rs.setProperty(
+            '--ballet-mask',
+            `radial-gradient(circle ${holeR.toFixed(0)}px at ${holeX.toFixed(0)}px ${holeY.toFixed(0)}px, transparent 52%, #000 100%)`,
+          )
       }
 
       // Wingtip vapour: puffs at FIXED flow-intervals along the true path

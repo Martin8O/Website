@@ -55,7 +55,7 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
+import { createGpuParker, getRoomEnv, idleSlice, markSharedTextures, normalFromMap, warmTextures } from './surface'
 
 /** The registry's 'sky' entry: the two flypast beats, the chapter-02
  *  one-circle fight (CruiseBallet — the ballet showcase, ported), the
@@ -569,7 +569,7 @@ function poseQuat(pose: PatrolPose, q: THREE.Quaternion): void {
   q.copy(_qRoll).multiply(_qLook)
 }
 
-export function SkyPatrols({ frame }: Scene3DProps) {
+export function SkyPatrols({ frame, flight }: Scene3DProps) {
   const res = useMemo(() => {
     // The stage rides the camera pose (no pointer parallax — that translation
     // stays the depth cue); children live in camera space (patrolMath).
@@ -632,6 +632,16 @@ export function SkyPatrols({ frame }: Scene3DProps) {
   }, [probe])
 
   const gl = useThree((s) => s.gl)
+
+  // GPU parking (surface.ts): both flypast pairs live inside the sunset
+  // chapter — far from it their GPU copies are released and re-warmed on
+  // approach. The l159 base maps are marked SHARED (the ballet clones the
+  // same skin), so neither scene can park them from under the other.
+  const sunsetRun = useMemo(
+    () => flight.runs.find((r) => r.theme === 'sky' && r.sky === 'sunset') ?? null,
+    [flight.runs],
+  )
+  const parker = useMemo(() => createGpuParker(gl, res.stage), [gl, res])
 
   // Deferred load: kicked from the frame loop when the story nears the sky
   // section; a failed fetch simply leaves the beats un-flown (2D-complete).
@@ -696,6 +706,9 @@ export function SkyPatrols({ frame }: Scene3DProps) {
         }
         for (const j of jets) res.stage.add(j.pivot)
         jetsRef.current = jets
+        // The l159 skin is cloned by the ballet too — its maps must never be
+        // parked from under the other scene (surface.ts GPU parking).
+        markSharedTextures(res.stage)
         // GPU warm-up while the jets are still invisible — a beat's first
         // frame must never pay the texture upload mid-scroll.
         await warmTextures(gl, res.stage, (d, n) =>
@@ -720,6 +733,7 @@ export function SkyPatrols({ frame }: Scene3DProps) {
     resetHeroLoad('patrol')
     return () => {
       cleanupRef.current?.()
+      parker.dispose()
       resetHeroLoad('patrol')
       const jets = jetsRef.current
       if (jets) {
@@ -749,6 +763,7 @@ export function SkyPatrols({ frame }: Scene3DProps) {
     // Approaching the flypasts with the build unfinished — let idleSlice run
     // on the short timeout (finish over smoothness).
     if (!jetsRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
+    if (sunsetRun) parker.tick(frame.pos, sunsetRun.start, sunsetRun.end + 1, !!jetsRef.current)
 
     // Glue the stage to the flight pose (position + forward + bank, no
     // pointer parallax) — the camera-glued convention.

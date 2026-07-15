@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 375
+export const TEST_COUNT = 378
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -466,9 +466,12 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "resolveWorldMode > reduced motion wins over everything — even an explicit ?world=3d",
       "resolveWorldMode > no WebGL2 wins over an explicit ?world=3d",
       "resolveWorldMode > ?world=2d is a kill-switch on an otherwise capable client",
-      "resolveWorldMode > the visitor toggle decides when no URL override is present",
-      "resolveWorldMode > a weak client auto-falls back to 2D — unless the visitor chose 3D",
-      "resolveWorldMode > the runtime FPS watchdog drops to 2D — but the visitor can still force 3D",
+      "resolveWorldMode > a weak client auto-falls back to 2D — ?world=3d is the only way up",
+      "resolveWorldMode > the runtime FPS watchdog drops to 2D — ?world=3d still wins",
+      "autoDowngradeActive (the decaying FPS-watchdog memory) > no stored value → no downgrade",
+      "autoDowngradeActive (the decaying FPS-watchdog memory) > a fresh trip is honoured for the TTL, then decays (never sticks forever)",
+      "autoDowngradeActive (the decaying FPS-watchdog memory) > legacy/garbage values read as expired — one clean retry",
+      "autoDowngradeActive (the decaying FPS-watchdog memory) > a clock that jumped backwards reads as stale, not a far-future ban",
       "isWeakClient > reads little memory, few cores, data-saver or a slow link as weak",
       "isWeakClient > reads absent signals as capable (Firefox/Safari expose none)",
     ],

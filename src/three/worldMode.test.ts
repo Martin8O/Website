@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { isWeakClient, parseWorldOverride, resolveWorldMode } from './worldMode'
+import {
+  AUTO_TTL_MS,
+  autoDowngradeActive,
+  isWeakClient,
+  parseWorldOverride,
+  resolveWorldMode,
+} from './worldMode'
 
 describe('parseWorldOverride', () => {
   it('reads the two valid values', () => {
@@ -37,31 +43,44 @@ describe('resolveWorldMode', () => {
     expect(resolveWorldMode({ ...capable, override: '2d' })).toBe('2d')
   })
 
-  it('the visitor toggle decides when no URL override is present', () => {
-    expect(resolveWorldMode({ ...capable, choice: '2d' })).toBe('2d')
-    expect(resolveWorldMode({ ...capable, choice: '3d' })).toBe('3d')
-    // …but the URL override (support/debug) still wins over the stored one
-    expect(resolveWorldMode({ ...capable, override: '2d', choice: '3d' })).toBe('2d')
-    expect(resolveWorldMode({ ...capable, override: '3d', choice: '2d' })).toBe('3d')
-    // …and the hard gates win over everything
-    expect(resolveWorldMode({ ...capable, reducedMotion: true, choice: '3d' })).toBe('2d')
-  })
-
-  it('a weak client auto-falls back to 2D — unless the visitor chose 3D', () => {
+  it('a weak client auto-falls back to 2D — ?world=3d is the only way up', () => {
     expect(resolveWorldMode({ ...capable, weakClient: true })).toBe('2d')
-    expect(resolveWorldMode({ ...capable, weakClient: true, choice: '3d' })).toBe('3d')
+    expect(resolveWorldMode({ ...capable, weakClient: true, override: '3d' })).toBe('3d')
     expect(resolveWorldMode({ ...capable, weakClient: false })).toBe('3d')
   })
 
-  it('the runtime FPS watchdog drops to 2D — but the visitor can still force 3D', () => {
+  it('the runtime FPS watchdog drops to 2D — ?world=3d still wins', () => {
     // A device that LOOKED capable (cleared the static weak-client gate) but
     // crawled in 3D at runtime.
     expect(resolveWorldMode({ ...capable, autoDowngraded: true })).toBe('2d')
-    // An explicit 3D choice (or ?world=3d) always beats the auto-downgrade.
-    expect(resolveWorldMode({ ...capable, autoDowngraded: true, choice: '3d' })).toBe('3d')
     expect(resolveWorldMode({ ...capable, autoDowngraded: true, override: '3d' })).toBe('3d')
     // …but the hard gates still win over the auto-downgrade either way.
     expect(resolveWorldMode({ ...capable, autoDowngraded: true, reducedMotion: true })).toBe('2d')
+  })
+})
+
+describe('autoDowngradeActive (the decaying FPS-watchdog memory)', () => {
+  const now = 1_784_000_000_000
+
+  it('no stored value → no downgrade', () => {
+    expect(autoDowngradeActive(null, now)).toBe(false)
+    expect(autoDowngradeActive('', now)).toBe(false)
+  })
+
+  it('a fresh trip is honoured for the TTL, then decays (never sticks forever)', () => {
+    expect(autoDowngradeActive(String(now - 1000), now)).toBe(true)
+    expect(autoDowngradeActive(String(now - AUTO_TTL_MS + 1), now)).toBe(true)
+    expect(autoDowngradeActive(String(now - AUTO_TTL_MS), now)).toBe(false)
+    expect(autoDowngradeActive(String(now - 30 * AUTO_TTL_MS), now)).toBe(false)
+  })
+
+  it('legacy/garbage values read as expired — one clean retry', () => {
+    expect(autoDowngradeActive('2d', now)).toBe(false)
+    expect(autoDowngradeActive('yes', now)).toBe(false)
+  })
+
+  it('a clock that jumped backwards reads as stale, not a far-future ban', () => {
+    expect(autoDowngradeActive(String(now + 60_000), now)).toBe(false)
   })
 })
 

@@ -3,20 +3,24 @@
  * OVER the 2D canvas world. The 2D world always paints and is the fallback by
  * design (the L1→L2 seam, ADR-006): 3D is an enhancement, never a cost.
  *
- * Resolution order (E3b-v2 adds the visitor toggle + the weak-client
- * auto-fallback; 3D is the DEFAULT experience):
+ * Resolution order (M-DEBUG retires the visitor 2D/3D toggle — Martin: the
+ * pill confused people; every visitor gets what their hardware can run, and
+ * the detection must never STICK a capable device in 2D):
  *  - `prefers-reduced-motion` → 2D. The a11y contract: the 2D stage already
  *    paints a complete static frame per scroll position; the 3D layer is
  *    motion by nature, so under reduced motion it never mounts at all (and
- *    its chunk is never fetched). Beats everything, including the toggle.
+ *    its chunk is never fetched). Beats everything.
  *  - no WebGL2 → 2D (one throwaway-context probe, cached per session).
  *  - `?world=2d|3d` — the URL kill-switch / debug override (support,
- *    verification harnesses). Beats the stored preference.
- *  - the visitor's own 2D/3D nav toggle (persisted in localStorage).
- *  - a WEAK CLIENT auto-falls back to 2D unless the visitor explicitly
- *    chose 3D: little device memory / few cores (the 3D chunk + three GLB
- *    heroes are real work), or a data-saver / slow connection (they are
- *    real megabytes).
+ *    verification harnesses). The only manual lever left.
+ *  - a WEAK CLIENT auto-falls back to 2D: little device memory / few cores
+ *    (the 3D chunk + the GLB heroes are real work), or a data-saver / slow
+ *    connection (they are real megabytes). Re-probed every visit — never
+ *    persisted, so it can never stick.
+ *  - the runtime FPS watchdog fired recently (persisted WITH AN EXPIRY —
+ *    a downgrade decays after AUTO_TTL_MS, so one bad session, thermal
+ *    throttle or a background-load moment can never brand a device 2D
+ *    forever; a genuinely weak device simply re-trips next visit).
  *  - otherwise → 3D.
  *
  * Pure decision (`resolveWorldMode`) + a thin live hook (`useWorldMode`).
@@ -29,8 +33,6 @@ import { buildCalm } from './heroLoad'
 
 export type WorldMode = '2d' | '3d'
 export type WorldOverride = WorldMode | null
-/** The visitor's own toggle: an explicit mode, or null = automatic. */
-export type WorldChoice = WorldMode | null
 
 /** `?world=2d|3d` from a location search string; anything else = no override. */
 export function parseWorldOverride(search: string): WorldOverride {
@@ -68,19 +70,15 @@ export function resolveWorldMode(env: {
   webgl2: boolean
   reducedMotion: boolean
   override: WorldOverride
-  /** The visitor's nav toggle (persisted); omitted/null = automatic. */
-  choice?: WorldChoice
-  /** The weak-client heuristic (isWeakClient) — auto-2D unless the visitor
-   *  explicitly chose 3D. */
+  /** The weak-client heuristic (isWeakClient) — auto-2D. */
   weakClient?: boolean
-  /** The runtime FPS watchdog fired (persisted) — a device that LOOKED capable
-   *  but actually crawled in 3D. Ranked BELOW the explicit choice, so a visitor
-   *  who forces 3D still gets it (their word is final). */
+  /** The runtime FPS watchdog fired recently (persisted with an expiry) — a
+   *  device that LOOKED capable but actually crawled in 3D. `?world=3d`
+   *  still beats it (the debug/support lever). */
   autoDowngraded?: boolean
 }): WorldMode {
   if (env.reducedMotion || !env.webgl2) return '2d'
   if (env.override) return env.override
-  if (env.choice) return env.choice
   if (env.weakClient) return '2d'
   if (env.autoDowngraded) return '2d'
   return '3d'
@@ -113,47 +111,13 @@ function probeWeakClient(): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// the visitor's choice — a tiny external store (the langStore pattern), so
-// the nav toggle and the Story gate stay in sync without prop drilling
+// the retired visitor toggle (M-DEBUG): the nav pill is gone — the mode is
+// pure capability detection now. The old persisted choice must not keep
+// steering returning visitors (a tester who once picked 2D would be stuck
+// there with no UI to undo it), so the key is actively removed.
 // ---------------------------------------------------------------------------
 
-const CHOICE_KEY = 'site-world'
-
-function initialChoice(): WorldChoice {
-  try {
-    const stored = localStorage.getItem(CHOICE_KEY)
-    if (stored === '2d' || stored === '3d') return stored
-  } catch {
-    /* storage blocked — run on automatic */
-  }
-  return null
-}
-
-let choice: WorldChoice | undefined
-const choiceListeners = new Set<() => void>()
-
-export function getWorldChoice(): WorldChoice {
-  // Lazy first read — module load must not touch localStorage (tests, SSR).
-  if (choice === undefined) choice = initialChoice()
-  return choice
-}
-
-export function setWorldChoice(next: WorldChoice): void {
-  if (next === getWorldChoice()) return
-  choice = next
-  try {
-    if (next) localStorage.setItem(CHOICE_KEY, next)
-    else localStorage.removeItem(CHOICE_KEY)
-  } catch {
-    /* storage blocked — the choice just won't survive a reload */
-  }
-  for (const listener of choiceListeners) listener()
-}
-
-export function subscribeWorldChoice(listener: () => void): () => void {
-  choiceListeners.add(listener)
-  return () => choiceListeners.delete(listener)
-}
+const CHOICE_KEY_LEGACY = 'site-world'
 
 // ---------------------------------------------------------------------------
 // runtime FPS auto-fallback (mobile audit §5) — a capable-LOOKING phone (the
@@ -171,8 +135,30 @@ export function subscribeWorldChoice(listener: () => void): () => void {
 // capable phones mid-load. Reading v2 removes any v1 value, so every such
 // device gets one clean retry under the fixed (build-aware) watchdog; a
 // genuinely weak device simply re-trips in its first heavy scene.
+//
+// The v2 VALUE is the trip TIMESTAMP (ms) and the downgrade EXPIRES after
+// AUTO_TTL_MS (M-DEBUG, the toggle retirement): with no nav pill left, a
+// forever-persisted '2d' would permanently brand a device that had ONE bad
+// session (thermal throttle, battery saver, background load) with no way
+// back. A decaying downgrade sticks long enough to spare a weak device the
+// re-probe on every reload, and heals on its own. The legacy plain-'2d'
+// value (pre-TTL format) reads as expired — one clean retry, same idiom as
+// the v1→v2 migration.
 const AUTO_KEY = 'site-world-auto2'
 const AUTO_KEY_LEGACY = 'site-world-auto'
+
+/** How long a runtime FPS downgrade is honoured before 3D is retried. */
+export const AUTO_TTL_MS = 24 * 60 * 60 * 1000
+
+/** Pure TTL read (unit-tested): stored value → is a downgrade active NOW?
+ *  Anything unparsable (legacy '2d', garbage) or outside (0, TTL] is stale. */
+export function autoDowngradeActive(stored: string | null, now: number): boolean {
+  if (!stored) return false
+  const at = Number(stored)
+  if (!Number.isFinite(at)) return false
+  const age = now - at
+  return age >= 0 && age < AUTO_TTL_MS
+}
 
 let autoDown: boolean | undefined
 const autoListeners = new Set<() => void>()
@@ -181,7 +167,12 @@ export function getAutoDowngrade(): boolean {
   if (autoDown === undefined) {
     try {
       localStorage.removeItem(AUTO_KEY_LEGACY)
-      autoDown = localStorage.getItem(AUTO_KEY) === '2d'
+      localStorage.removeItem(CHOICE_KEY_LEGACY)
+      const stored = localStorage.getItem(AUTO_KEY)
+      autoDown = autoDowngradeActive(stored, Date.now())
+      // Stale entry (expired TTL / legacy format): drop it so the next
+      // sessions start clean instead of re-parsing a dead value.
+      if (stored && !autoDown) localStorage.removeItem(AUTO_KEY)
     } catch {
       autoDown = false
     }
@@ -198,7 +189,7 @@ function setAutoDowngrade(): void {
   if (getAutoDowngrade()) return
   autoDown = true
   try {
-    localStorage.setItem(AUTO_KEY, '2d')
+    localStorage.setItem(AUTO_KEY, String(Date.now()))
   } catch {
     /* storage blocked — this session still drops to 2D; next won't remember */
   }
@@ -240,8 +231,8 @@ let fpsArmed = true
  */
 export function tickRuntimeFpsGuard(dtMs: number): void {
   if (!fpsArmed) return
-  // Never override an explicit 3D (visitor toggle or ?world=3d / harness).
-  if (getWorldChoice() === '3d' || parseWorldOverride(window.location.search)) {
+  // Never override an explicit ?world= (support/debug + the harnesses).
+  if (parseWorldOverride(window.location.search)) {
     fpsArmed = false
     return
   }
@@ -303,12 +294,11 @@ function useReducedMotion(): boolean {
 /**
  * Live world mode. Re-resolves when the user flips reduced-motion mid-session
  * (the story gate: Story unmounts the whole 3D island the moment this returns
- * '2d') or flips the nav's 2D/3D toggle. The URL override is read once — it
+ * '2d') or when the FPS watchdog trips. The URL override is read once — it
  * cannot change without navigation.
  */
 export function useWorldMode(): WorldMode {
   const reducedMotion = useReducedMotion()
-  const stored = useSyncExternalStore(subscribeWorldChoice, getWorldChoice)
   const auto = useSyncExternalStore(subscribeAutoDowngrade, getAutoDowngrade)
 
   return useMemo(
@@ -317,18 +307,9 @@ export function useWorldMode(): WorldMode {
         webgl2: probeWebGL2(),
         reducedMotion,
         override: parseWorldOverride(window.location.search),
-        choice: stored,
         weakClient: probeWeakClient(),
         autoDowngraded: auto,
       }),
-    [reducedMotion, stored, auto],
+    [reducedMotion, auto],
   )
-}
-
-/** Can the 3D world run here at all (the HARD gates only)? The nav hides
- *  the 2D/3D toggle when it cannot — a switch that can do nothing is worse
- *  than none. Live to reduced-motion flips. */
-export function useWorld3DAvailable(): boolean {
-  const reducedMotion = useReducedMotion()
-  return !reducedMotion && probeWebGL2()
 }

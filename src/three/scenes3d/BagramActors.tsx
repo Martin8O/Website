@@ -59,7 +59,7 @@ import {
   type BagramPose,
 } from '../bagramMath'
 import type { Scene3DProps } from '../registry3d'
-import { getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
+import { createGpuParker, getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
 
 type ActorId = 'c17' | 'apache' | 'f16' | 'mi17'
 
@@ -463,6 +463,11 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
     gl.shadowMap.type = THREE.PCFSoftShadowMap
   }, [gl])
 
+  // GPU parking (surface.ts): the heaviest hero (4 GLBs + a 2048² shadow
+  // map) leaves the GPU when the story is far from ch-03; re-warmed on
+  // approach, off the interaction path.
+  const parker = useMemo(() => createGpuParker(gl, res.stage), [gl, res])
+
   const kickLoad = () => {
     if (loadKicked.current) return
     loadKicked.current = true
@@ -553,6 +558,7 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
       readyRef.current = false
       flippedRef.current = false
       flipAtRef.current = -1
+      parker.dispose()
       setHero3DReady('desert', false)
       resetHeroLoad('desert')
       const inst = res.instances
@@ -576,6 +582,7 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
     // The visitor is inside this hero's approach window and the build is not
     // done — let idleSlice run on the short timeout (finish over smoothness).
     if (!readyRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
+    if (desertRun) parker.tick(frame.pos, desertRun.start, desertRun.end + 1, readyRef.current)
 
     const t = desertRun ? runLocalTRaw(frame.pos, desertRun, flight.count) : 0
     const rawPresence = desertPresence(frame.slots, frame.count)

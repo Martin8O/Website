@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { CHAPTER_WEIGHTS, type Chapter, type Theme } from '../data/chapters'
 import { chapterPosition } from '../timeline'
@@ -124,6 +124,20 @@ function FrameController({ flight, frame }: { flight: FlightRig; frame: Frame3D 
       delete host.__frame3d
     }
   }, [frame])
+
+  // Dev-only GPU accounting hook (M-DEBUG memory probes): renderer.info
+  // texture/geometry counts + the scene root, so a harness can verify the
+  // hero scenes' GPU parking actually releases resources. Stripped from prod.
+  const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const host = window as unknown as { __gl3d?: { gl: THREE.WebGLRenderer; scene: THREE.Scene } }
+    host.__gl3d = { gl, scene }
+    return () => {
+      delete host.__gl3d
+    }
+  }, [gl, scene])
 
   useEffect(() => {
     const onPointerMove = (e: PointerEvent) => {

@@ -13,20 +13,16 @@
   );
   /* Ballet depth (chapter 02): the text visually sits mid-depth of the 3D
      one-circle fight — while the NEAR jet crosses the card, CruiseBallet
-     publishes a soft viewport-space hole (--ballet-hole-*) that masks the
-     text away around the airframe, so the close pass reads IN FRONT of the
-     copy; the far jet stays behind it. Radius 0 (the default, and any time
-     the ballet is not live) = no hole — the mask is fully opaque. */
-  -webkit-mask-image: radial-gradient(
-    circle var(--ballet-hole-r, 0px) at var(--ballet-hole-x, -100px) var(--ballet-hole-y, -100px),
-    transparent 52%,
-    #000 100%
-  );
-  mask-image: radial-gradient(
-    circle var(--ballet-hole-r, 0px) at var(--ballet-hole-x, -100px) var(--ballet-hole-y, -100px),
-    transparent 52%,
-    #000 100%
-  );
+     publishes a soft viewport-space hole (--ballet-mask, the whole
+     radial-gradient) that masks the text away around the airframe, so the
+     close pass reads IN FRONT of the copy; the far jet stays behind it.
+     Default = NO mask at all: outside that one beat the text layer must not
+     pay a per-frame mask composite, and Safari must never meet a degenerate
+     zero-radius gradient (the old always-on `circle 0px` default — M-DEBUG:
+     an all-cards-invisible suspect on macOS Safari, where masks composite
+     through CoreAnimation, and a standing compositing cost everywhere). */
+  -webkit-mask-image: var(--ballet-mask, none);
+  mask-image: var(--ballet-mask, none);
 }
 
 /* Each card cross-fades; JS drives opacity + the translateY settle (the

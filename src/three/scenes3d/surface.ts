@@ -140,6 +140,129 @@ async function bakeNormalFromMap(tex: THREE.Texture): Promise<THREE.Texture | nu
   return nt
 }
 
+// ---------------------------------------------------------------------------
+// GPU parking (M-DEBUG 2026-07-15) — the four hero scenes stay MOUNTED for the
+// whole session (Stage3D renders every registered theme), so once a visitor
+// has scrolled past a beat its GLB textures, geometry buffers and shadow-map
+// render targets sat on the GPU forever. On an 8-GB Apple-Silicon Mac that
+// summed to a 2–3 GB Safari tab (reported on production). A scene far from
+// its own chapter window now RELEASES its GPU copies; the CPU-side sources
+// (image bitmaps, attribute arrays, canvases) stay, so three re-uploads
+// automatically the next time a texture/geometry is bound — and the parker
+// re-warms with `warmTextures` while the scene is still approaching, so a
+// normal scroll never pays the upload inside the beat.
+// ---------------------------------------------------------------------------
+
+/** Textures SHARED between two live scenes (the l159 skin + its Sobel bake —
+ *  the ballet and both patrol pairs clone the same base): parking one scene
+ *  must never delete the other's live GPU copy, so shared maps are exempt —
+ *  they cost ~25 MB and stay for the renderer's life, like the PMREM env. */
+const _sharedGpuTex = new Set<THREE.Texture>()
+
+/** A scene whose model base is cloned by ANOTHER scene calls this once after
+ *  its instances are built (both callers mark the same objects — deduped). */
+export function markSharedTextures(root: THREE.Object3D): void {
+  root.traverse((n) => {
+    const mesh = n as THREE.Mesh
+    if (!mesh.isMesh) return
+    for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+      const std = m as THREE.MeshStandardMaterial
+      for (const t of [
+        std.map,
+        std.normalMap,
+        std.emissiveMap,
+        std.roughnessMap,
+        std.metalnessMap,
+        std.aoMap,
+      ]) {
+        if (t) _sharedGpuTex.add(t)
+      }
+    }
+  })
+}
+
+/** Release every GPU-side resource under `root` that three can rebuild from
+ *  its CPU source on the next bind: texture uploads (NOT the session PMREM
+ *  env — render-target-backed, unrebuildable — and NOT shared maps),
+ *  geometry VBOs (attribute arrays persist in JS), and shadow-map render
+ *  targets (the renderer recreates one on the next shadow pass). Materials
+ *  are NOT disposed — their compiled programs stay cached, so un-parking
+ *  never pays a shader recompile. */
+export function releaseSceneGpu(root: THREE.Object3D): void {
+  root.traverse((n) => {
+    const light = n as THREE.DirectionalLight
+    if (light.isLight && light.shadow?.map) {
+      light.shadow.map.dispose()
+      light.shadow.map = null
+    }
+    const mesh = n as THREE.Mesh
+    if (!mesh.isMesh && !(n as THREE.Points).isPoints && !(n as THREE.Sprite).isSprite) return
+    mesh.geometry?.dispose()
+    const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+    for (const m of mats) {
+      if (!m) continue
+      const std = m as THREE.MeshStandardMaterial
+      for (const t of [
+        std.map,
+        std.normalMap,
+        std.emissiveMap,
+        std.roughnessMap,
+        std.metalnessMap,
+        std.aoMap,
+        (m as unknown as THREE.SpriteMaterial).map,
+      ]) {
+        if (t && !_sharedGpuTex.has(t) && !(t as THREE.Texture & { isRenderTargetTexture?: boolean }).isRenderTargetTexture) {
+          t.dispose()
+        }
+      }
+    }
+  })
+}
+
+/** Park when the story is this many chapters outside the scene's own window
+ *  (pos units); re-warm when it comes back within `PARK_IN`. The gap is the
+ *  hysteresis (no thrash at a boundary), and PARK_IN stays comfortably wider
+ *  than a beat's own fades, so a normal scroll re-uploads while the scene is
+ *  still invisible. Both clear every hero LOAD_AT_POS kick threshold, so a
+ *  fresh build is never parked before its own chapter. */
+const PARK_OUT = 2.0
+const PARK_IN = 1.6
+
+export type GpuParker = {
+  /** Once per frame from the scene's useFrame: `lo..hi` = the scene's run
+   *  window in pos units, `ready` = the scene's models are built. */
+  tick(pos: number, lo: number, hi: number, ready: boolean): void
+  /** True while the GPU copies are released (verification probes). */
+  parked(): boolean
+  /** Unmount hook — stops a re-warm in flight from touching a dead scene. */
+  dispose(): void
+}
+
+export function createGpuParker(gl: THREE.WebGLRenderer, root: THREE.Object3D): GpuParker {
+  let state: 'live' | 'parked' | 'warming' = 'live'
+  let dead = false
+  return {
+    tick(pos, lo, hi, ready) {
+      if (dead || !ready) return
+      if (state === 'live') {
+        if (pos < lo - PARK_OUT || pos > hi + PARK_OUT) {
+          releaseSceneGpu(root)
+          state = 'parked'
+        }
+      } else if (state === 'parked' && pos > lo - PARK_IN && pos < hi + PARK_IN) {
+        state = 'warming'
+        void warmTextures(gl, root).finally(() => {
+          if (!dead) state = 'live'
+        })
+      }
+    },
+    parked: () => state !== 'live',
+    dispose() {
+      dead = true
+    },
+  }
+}
+
 /** Push every texture under `root` to the GPU now (one per idle slice) —
  *  otherwise the first frame a hero turns visible pays the whole upload at
  *  once (the fast-scroll hitch at a beat's entry). Purely a warm-up: no

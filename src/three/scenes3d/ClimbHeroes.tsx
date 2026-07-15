@@ -60,7 +60,7 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
+import { createGpuParker, getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
 
 const MODEL_URLS: Record<ClimbAircraft['id'], string> = {
   ulla: '/models/ulla.glb',
@@ -335,6 +335,11 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
     gl.shadowMap.type = THREE.PCFSoftShadowMap
   }, [gl])
 
+  // GPU parking (surface.ts): the graduation ladder's three GLBs + the
+  // morning key's shadow map leave the GPU once the story is far past ch-01;
+  // re-warmed on approach, off the interaction path.
+  const parker = useMemo(() => createGpuParker(gl, res.stage), [gl, res])
+
   // Deferred load, kicked from the frame loop as the story nears the climb:
   // fetch + parse the GLBs, PMREM a RoomEnvironment for the skins, attach,
   // report readiness — the 2D hero steps aside only then. On any failure the
@@ -403,6 +408,7 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
     return () => {
       aliveRef.current = false
       readyRef.current = false
+      parker.dispose()
       setHero3DReady('climb', false)
       resetHeroLoad('climb')
       for (const r of res.aircraft) {
@@ -424,6 +430,7 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
     // Approaching this hero's beat with the build unfinished — let idleSlice
     // run on the short timeout (finish over smoothness).
     if (!readyRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
+    if (climbRun) parker.tick(frame.pos, climbRun.start, climbRun.end + 1, readyRef.current)
 
     // The scene's clock: the climb run's own (unclamped) localT — the same
     // value the 2D climb environment paints by.
