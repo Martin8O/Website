@@ -36,4 +36,4 @@ fly-through — the *entire* world rebuilt in 3D with a camera flown through 3D 
 `local/Wiki/scrollytelling-cookbook.md` §4/§8.
 
 ## Non-goals
-No backend, no auth, no data collection, no i18n (English-only), no Tailwind. Static build → Vercel.
+No backend, no auth, no data collection, no Tailwind. Static build → Vercel. (Site copy is bilingual EN/CZ — EN canonical + a Czech overlay merged by id, ADR-023.)

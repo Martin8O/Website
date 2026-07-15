@@ -13,7 +13,7 @@ projects = proof, contact = goal. **Read `local/bootstrap.md` first every sessio
 - **The old "L2" (full R3F fly-through — the *whole* world in 3D, camera flown through 3D space) is formally
   RETIRED — never to be built (ADR-056).** It would be a rewrite of every environment for a marginal gain; the
   shipped hybrid already delivers the 3D wow. Treat the current state as the dream target, not a stepping stone.
-- **Site copy = English only.** **Contact = email only.** **No donation button.** (Rationale → `docs/adr.md`.)
+- **Site copy = bilingual EN/CZ** (EN canonical + a Czech overlay merged by id, nav toggle — ADR-023 supersedes the old English-only ADR-003). **Contact = email only.** **No donation button.** (Rationale → `docs/adr.md`.)
 
 ## Architecture (where things go)
 - `src/data/chapters.ts` — the single source of truth: a typed `Chapter[]`; order + content + theme. Adding a
@@ -33,7 +33,7 @@ projects = proof, contact = goal. **Read `local/bootstrap.md` first every sessio
   and the 2D world stays the always-complete fallback).
 - **Accessibility + performance are Done-criteria, not extras:** `prefers-reduced-motion`, keyboard + focus +
   skip-links, DPR-capped canvas, no scroll-blocking loads, no layout shift, Lighthouse ≥ 90 desktop.
-- **English site strings** (no i18n). **No backend / no data collection** (static SPA; `mailto:` — the contact
+- **Bilingual EN/CZ site strings** (EN canonical, CZ overlay merged by id — ADR-023). **No backend / no data collection** (static SPA; `mailto:` — the contact
   address will be on Martin's own domain via forwarding, set at launch).
 - Type/palette DNA: `Space Grotesk` / `Inter` / `Chakra Petch`; amber HUD `#FFB000` as the through-line;
   accents gold / cyan / magenta / bitcoin-orange `#F7931A`.

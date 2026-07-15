@@ -4,8 +4,9 @@
  * chapter is one object here — the timeline (height + card fades) re-derives
  * itself, no render-code edits (see `src/timeline.ts`).
  *
- * Copy is English (site is English-only) and adapted — factually — from the
- * working demo (`local/ode mne/martin-journey.html`). Accent `<span>` hooks
+ * Copy is bilingual — EN canonical here, a Czech overlay merged by id from
+ * `chapters.cs.ts` (ADR-023) — adapted factually from the working demo
+ * (`local/ode mne/martin-journey.html`). Accent `<span>` hooks
  * are preserved; they colour key phrases via the global classes in index.css.
  *
  * Body/title strings are authored HTML (our own content, not user input) and
