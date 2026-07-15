@@ -64,7 +64,7 @@ import { DEV_ANIMS } from './devAnims'
 import { DEV_SHOTS } from './devShots'
 import { DEV_PROJECTS } from '../../data/projects'
 
-// --- Palette: vibecoding neon over Tron steel --------------------------------
+// --- Palette: neon over Tron steel -------------------------------------------
 const NIGHT_TOP = '#04030c'
 const NIGHT_MID = '#0e081e'
 const NIGHT_LOW = '#190e2c'

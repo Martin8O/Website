@@ -4,7 +4,7 @@
  * another. No DOM, no clock, no state — every function is deterministic in
  * its inputs so the scene stays scrubbable and unit-testable.
  *
- * The world is a neon "vibecoding" night: a perspective CIRCUIT-BOARD FLOOR
+ * The world is a neon night: a perspective CIRCUIT-BOARD FLOOR
  * receding to a horizon, a digital city on it, and a CREATIVE CORE at centre
  * from which the five project WINDOWS are born — bursting out one by one and
  * settling into a constellation that frames the title. The story clock is

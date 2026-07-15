@@ -91,7 +91,7 @@ export type Project = {
 }
 
 export const PROJECTS: Project[] = [
-  // --- Era A — pre-Claude: the "before" (first web builds → vibecoding) -------
+  // --- Era A — pre-Claude: the first web builds -------------------------------
   {
     id: 'moje-cesta',
     name: 'My Healing Journey',
