@@ -9,11 +9,8 @@ import {
   finishHeroLoad,
   getHeroLoadSnapshot,
   LOAD_GRACE_MS,
-  nextQueuedHero,
-  registerHeroKick,
   reportHeroProgress,
   resetHeroLoad,
-  startHeroQueue,
   subscribeHeroLoad,
 } from './heroLoad'
 
@@ -99,70 +96,5 @@ describe('build urgency', () => {
     bumpBuildUrgency(1000)
     expect(buildUrgent(1500)).toBe(true)
     expect(buildUrgent(1700)).toBe(false)
-  })
-})
-
-describe('background build queue', () => {
-  it('kicks heroes one at a time in story order', () => {
-    const kicked: string[] = []
-    const arm = (key: 'climb' | 'cruise' | 'desert' | 'patrol') =>
-      registerHeroKick(key, () => {
-        kicked.push(key)
-        beginHeroLoad(key) // scenes begin synchronously inside the kick
-      })
-    arm('patrol')
-    arm('climb')
-    arm('cruise')
-    arm('desert')
-    expect(kicked).toEqual([]) // nothing before the queue starts
-    startHeroQueue()
-    expect(kicked).toEqual(['climb']) // one in flight — queue waits
-    finishHeroLoad('climb')
-    expect(kicked).toEqual(['climb', 'cruise'])
-    failHeroLoad('cruise') // a failure must not stall the queue
-    expect(kicked).toEqual(['climb', 'cruise', 'desert'])
-    finishHeroLoad('desert')
-    expect(kicked).toEqual(['climb', 'cruise', 'desert', 'patrol'])
-  })
-
-  it('skips a hero the scroll threshold already kicked', () => {
-    const kicked: string[] = []
-    registerHeroKick('climb', () => {
-      kicked.push('climb')
-      beginHeroLoad('climb')
-    })
-    registerHeroKick('cruise', () => {
-      kicked.push('cruise')
-      beginHeroLoad('cruise')
-    })
-    // The visitor outran the queue: cruise kicked itself via its threshold.
-    beginHeroLoad('cruise')
-    finishHeroLoad('cruise')
-    startHeroQueue()
-    expect(kicked).toEqual(['climb'])
-    finishHeroLoad('climb')
-    expect(kicked).toEqual(['climb']) // cruise never re-kicked
-  })
-
-  it('a scene registering AFTER the queue started still gets kicked', () => {
-    startHeroQueue()
-    const kicked: string[] = []
-    registerHeroKick('climb', () => {
-      kicked.push('climb')
-      beginHeroLoad('climb')
-    })
-    expect(kicked).toEqual(['climb'])
-  })
-
-  it('nextQueuedHero honours in-flight and unregistered scenes', () => {
-    expect(nextQueuedHero()).toBe(null) // nothing registered
-    const off = registerHeroKick('desert', () => {})
-    expect(nextQueuedHero()).toBe('desert')
-    beginHeroLoad('climb')
-    expect(nextQueuedHero()).toBe(null) // climb in flight
-    finishHeroLoad('climb')
-    expect(nextQueuedHero()).toBe('desert')
-    off()
-    expect(nextQueuedHero()).toBe(null)
   })
 })

@@ -42,7 +42,6 @@ import {
   bumpBuildUrgency,
   failHeroLoad,
   finishHeroLoad,
-  registerHeroKick,
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
@@ -543,18 +542,13 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
         if (import.meta.env.DEV) console.warn('bagram actors: model load failed —', err)
       })
   }
-  const kickRef = useRef(kickLoad)
-  kickRef.current = kickLoad
 
   useEffect(() => {
     aliveRef.current = true
-    // Fresh load channel + a slot in the background build queue (the queue
-    // front-loads this build during the intro's idle time; the scroll
-    // threshold below stays the fast-scroller override).
+    // Fresh load channel for this mount (the scene kicks its own build at
+    // LOAD_AT_POS in the frame loop; a world-toggle remount reports honestly).
     resetHeroLoad('desert')
-    const unregister = registerHeroKick('desert', () => kickRef.current())
     return () => {
-      unregister()
       aliveRef.current = false
       readyRef.current = false
       flippedRef.current = false

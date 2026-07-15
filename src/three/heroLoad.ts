@@ -15,12 +15,16 @@
  *     (story/HeroLoadIndicator.tsx): the visitor sees that the 2D scene they
  *     are reading is NOT the maximum, the 3D is coming.
  *
- *  3. "When should each hero build RUN?" — the background build queue.
- *     Builds used to start only at per-scene scroll thresholds, i.e. exactly
- *     while the visitor was scrolling (the interaction path). The queue
- *     front-loads them in story order during the intro's genuine idle time;
- *     the scenes' own scroll-threshold kicks stay as the fast-scroller
- *     override (kickLoad is idempotent — whoever fires first wins).
+ *  3. "How urgently should a build slice?" — the build-urgency flag. Each
+ *     hero scene builds at its OWN scroll threshold (LOAD_AT_POS); when the
+ *     visitor is approaching that beat, the scene bumps urgency so idleSlice
+ *     runs on the short timeout (finish over smoothness), and a background
+ *     build far from the visitor keeps the long timeout (smoothness first).
+ *
+ * (An earlier revision front-loaded ALL hero builds during the intro via a
+ * queue; it was dropped — it grew peak memory on constrained devices for no
+ * real reliability gain over the threshold kicks, and it made the load chip
+ * dead by having every hero ready before the visitor reached it.)
  *
  * Main-bundle module by design (worldMode + the DOM indicator import it);
  * MUST stay three-free.
@@ -30,9 +34,6 @@ export type HeroKey = 'climb' | 'cruise' | 'desert' | 'patrol'
 export type HeroPhase = 'idle' | 'loading' | 'ready' | 'failed'
 export type HeroLoadState = { readonly phase: HeroPhase; readonly progress: number }
 export type HeroLoadSnapshot = Readonly<Record<HeroKey, HeroLoadState>>
-
-/** Story order — also the background queue's build order. */
-export const HERO_ORDER: readonly HeroKey[] = ['climb', 'cruise', 'desert', 'patrol']
 
 /** After the LAST in-flight build settles, frames stay excused this long —
  *  the first visible frame after a flip still pays shader compiles. */
@@ -95,14 +96,12 @@ export function reportHeroProgress(key: HeroKey, progress: number): void {
 
 export function finishHeroLoad(key: HeroKey): void {
   set(key, 'ready', 1)
-  tryAdvanceQueue()
 }
 
 /** A failed fetch: the 2D hero keeps flying (designed fallback), the
- *  indicator hides this hero, the watchdog un-blocks, the queue moves on. */
+ *  indicator hides this hero, the watchdog un-blocks. */
 export function failHeroLoad(key: HeroKey): void {
   set(key, 'failed', states[key].progress)
-  tryAdvanceQueue()
 }
 
 /** Unmount (world toggle, reduced-motion flip): back to idle so a remount
@@ -146,52 +145,6 @@ export function buildUrgent(at: number = now()): boolean {
   return at < urgentUntil
 }
 
-// ---------------------------------------------------------------------------
-// background build queue
-// ---------------------------------------------------------------------------
-
-const kicks = new Map<HeroKey, () => void>()
-let queueStarted = false
-
-/** Scenes register their (idempotent) kickLoad on mount. */
-export function registerHeroKick(key: HeroKey, kick: () => void): () => void {
-  kicks.set(key, kick)
-  if (queueStarted) tryAdvanceQueue()
-  return () => {
-    if (kicks.get(key) === kick) kicks.delete(key)
-  }
-}
-
-/** The next hero the queue would kick: first in story order that is still
- *  idle and has a registered kick — and only while nothing is in flight
- *  (one build at a time; parallel GLB parses were long-task pile-ups). */
-export function nextQueuedHero(
-  order: readonly HeroKey[] = HERO_ORDER,
-  snap: HeroLoadSnapshot = snapshot,
-  inFlight: number = loading,
-): HeroKey | null {
-  if (inFlight > 0) return null
-  for (const key of order) {
-    if (snap[key].phase === 'idle' && kicks.has(key)) return key
-  }
-  return null
-}
-
-function tryAdvanceQueue(): void {
-  if (!queueStarted) return
-  const key = nextQueuedHero()
-  // The kick calls beginHeroLoad synchronously, so this cannot loop.
-  if (key) kicks.get(key)?.()
-}
-
-/** Stage3D arms this shortly after mount (post window.load + idle by
- *  construction — Story gates the mount). Re-entrant: a world-toggle
- *  remount just advances again over the re-registered scenes. */
-export function startHeroQueue(): void {
-  queueStarted = true
-  tryAdvanceQueue()
-}
-
 /** Test-only: full reset of module state. */
 export function __resetHeroLoadForTest(): void {
   states = { climb: IDLE, cruise: IDLE, desert: IDLE, patrol: IDLE }
@@ -199,6 +152,4 @@ export function __resetHeroLoadForTest(): void {
   loading = 0
   lastLoadEnd = -Infinity
   urgentUntil = -Infinity
-  kicks.clear()
-  queueStarted = false
 }

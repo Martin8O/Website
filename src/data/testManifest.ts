@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 379
+export const TEST_COUNT = 375
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -362,10 +362,6 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "buildCalm (the watchdog gate) > stays excused for the grace window after the last load settles",
       "buildCalm (the watchdog gate) > a failed load also settles the gate (after grace)",
       "build urgency > holds for a short window after a bump",
-      "background build queue > kicks heroes one at a time in story order",
-      "background build queue > skips a hero the scroll threshold already kicked",
-      "background build queue > a scene registering AFTER the queue started still gets kicked",
-      "background build queue > nextQueuedHero honours in-flight and unregistered scenes",
     ],
   },
   {

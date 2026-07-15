@@ -52,7 +52,6 @@ import {
   bumpBuildUrgency,
   failHeroLoad,
   finishHeroLoad,
-  registerHeroKick,
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
@@ -714,17 +713,12 @@ export function SkyPatrols({ frame }: Scene3DProps) {
       alive = false
     }
   }
-  const kickRef = useRef(kickLoad)
-  kickRef.current = kickLoad
 
   useEffect(() => {
-    // Fresh load channel + a slot in the background build queue (the queue
-    // front-loads this build during the intro's idle time; the scroll
-    // threshold in the frame loop stays the fast-scroller override).
+    // Fresh load channel for this mount (the scene kicks its own build at
+    // LOAD_AT_POS in the frame loop; a world-toggle remount reports honestly).
     resetHeroLoad('patrol')
-    const unregister = registerHeroKick('patrol', () => kickRef.current())
     return () => {
-      unregister()
       cleanupRef.current?.()
       resetHeroLoad('patrol')
       const jets = jetsRef.current

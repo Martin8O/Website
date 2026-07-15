@@ -45,7 +45,6 @@ import {
   bumpBuildUrgency,
   failHeroLoad,
   finishHeroLoad,
-  registerHeroKick,
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
@@ -551,7 +550,12 @@ export function CruiseBallet({ frame }: Scene3DProps) {
         if (!alive) return
         // The session-shared RoomEnvironment bake (surface.ts) — this beat
         // keeps its own slightly brighter sigma (0.045), cached by value.
-        const env = await getRoomEnv(gl, 0.045)
+        // sigma 0.04 (was 0.045): 0.045 asked PMREMGenerator for 22 blur
+        // samples vs its MAX_SAMPLES 20 → a "sigmaRadians too large, will
+        // clip" console warning on some GPUs (reported on Safari/Apple
+        // Silicon). 0.04 is within budget and matches the other three heroes;
+        // the reflection-blur difference is imperceptible.
+        const env = await getRoomEnv(gl, 0.04)
         if (!alive) return
         reportHeroProgress('cruise', 0.68)
         // One idle slice between the clone+grade passes, and a GPU texture
@@ -587,17 +591,12 @@ export function CruiseBallet({ frame }: Scene3DProps) {
       alive = false
     }
   }
-  const kickRef = useRef(kickLoad)
-  kickRef.current = kickLoad
 
   useEffect(() => {
-    // Fresh load channel + a slot in the background build queue (the queue
-    // front-loads this build during the intro's idle time; the scroll
-    // threshold in the frame loop stays the fast-scroller override).
+    // Fresh load channel for this mount (the scene kicks its own build at
+    // LOAD_AT_POS in the frame loop; a world-toggle remount reports honestly).
     resetHeroLoad('cruise')
-    const unregister = registerHeroKick('cruise', () => kickRef.current())
     return () => {
-      unregister()
       cleanupRef.current?.()
       setHero3DReady('cruise', false)
       resetHeroLoad('cruise')
