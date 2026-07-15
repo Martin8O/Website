@@ -4,6 +4,20 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-057 — Tab identity reworked: bitcoin stealth-delta favicon + name-first "Portfolio & Story" title (2026-07-15)
+The old favicon (a thin amber `#FFB000` HUD reticle + ascending flight-path marker) blurred into an orange blob
+at 16px — the tab/bookmark size where a favicon actually lives (Martin flagged it as "not representative"). Replaced
+with a bold single-shape **stealth-delta** in bitcoin-orange `#F7931A` (`favicon.svg` + a regenerated 180×180
+`apple-touch-icon.png`: full-bleed dark bg, no rounded corners, since iOS masks corners and ignores alpha) — crisp
+at 16px and it carries the Bitcoin chapter of the story. Tab title reframed from the poetic "Martin — Scroll Through
+a Life" to the self-explanatory, **name-first "Martin Svoboda — Portfolio & Story"** (EN `docTitle`) / "Martin
+Svoboda – portfolio a příběh" (CZ) — matches the site's own "story = hook, projects = proof" framing; the static
+`<title>` + `og:title` + `twitter:title` unified to the EN form. The `og.png` share **image** was left unchanged
+(Martin's call — the jets-over-clouds card stays; only the card's title text changed). Rationale: a favicon must read
+at tiny sizes, and a tab/bookmark/search title should say **who + what** before it gets poetic. No architecture
+impact — a brand/asset decision. *Verify:* gate green (357); live on `:5173` — CZ+EN `docTitle` both correct, the
+favicon serves the bitcoin delta, apple-touch-icon renders clean, no console errors.
+
 ### ADR-056 — "L2" full-3D fly-through formally retired; the shipped hybrid IS the target state (2026-07-15)
 The original plan (ADR-006/007) framed the build as **L1** (a 2D `<canvas>` scrollytelling world + interactive
 globe) now, **L2** (a full R3F "fly-through" — the *entire* world rebuilt in 3D, with a real camera flown through

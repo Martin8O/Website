@@ -64,7 +64,7 @@ export function buildLine(lang: Lang, days: number, commits: number): string {
 
 export const STRINGS: Record<Lang, UiStrings> = {
   en: {
-    docTitle: 'Martin — Scroll Through a Life',
+    docTitle: 'Martin Svoboda — Portfolio & Story',
     navLandmark: 'Site',
     projectsLandmark: 'Projects',
     offerLandmark: 'Working together',
@@ -105,7 +105,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     emailCopied: 'Copied ✓',
   },
   cs: {
-    docTitle: 'Martin – proskrolujte si jeden život',
+    docTitle: 'Martin Svoboda – portfolio a příběh',
     navLandmark: 'Web',
     projectsLandmark: 'Projekty',
     offerLandmark: 'Spolupráce',
