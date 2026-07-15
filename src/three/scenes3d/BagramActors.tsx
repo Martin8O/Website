@@ -68,6 +68,13 @@ const MODEL_URLS: Record<ActorId, string> = {
  *  (1.6) kicks so the fetches don't fight. */
 const LOAD_AT_POS = 2.0
 
+/** Fire the 2D→3D hero flip while the scene is at or below this presence — the
+ *  band in which both layers' presence³ fade keeps the hero invisible (≈3e-3
+ *  at 0.15), so the swap is never seen. Wide enough that a slow scroll-in on a
+ *  slow phone catches the flip during the fade-in creep, not only at the
+ *  razor-thin off-frame instant (which a late idle-sliced build kept missing). */
+const FLIP_MAX_PRESENCE = 0.15
+
 /** GLB→canonical (nose −z, up +y) rest rotations — the lab's verified
  *  values (ROSTER): C-17/F-16 nose +z, Apache nose +x, Mi-17 canonical. */
 const REST_Y: Record<ActorId, number> = {
@@ -527,10 +534,20 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
 
     const t = desertRun ? runLocalTRaw(frame.pos, desertRun, flight.count) : 0
     const rawPresence = desertPresence(frame.slots, frame.count)
-    // The 2D→3D hand-over only ever happens OFF-frame: if the models finish
-    // loading while the visitor is inside the scene, the 2D actors keep the
-    // beat and the flip waits for the next visit.
-    if (readyRef.current && !flippedRef.current && rawPresence < 0.01) {
+    // The 2D→3D hand-over only ever happens while the hero is INVISIBLE, so
+    // the swap (2D and 3D fly DIFFERENT paths — a mid-scene flip pops) is
+    // never seen. Both layers fade as presence³ (2D `condense`, 3D
+    // `actorFade`), so any presence below FLIP_MAX gives condense/fade < ~3e-3
+    // — imperceptible — not just the razor-thin off-frame instant. That width
+    // matters on a SLOW scroll into the scene on a slow phone (Pixel 9a): the
+    // idle-sliced GLB build can finish just AFTER presence has crept past a
+    // hair-thin threshold, so the flip would miss its window and stay 2D for
+    // the whole first visit — only firing once you scrolled away (off-frame)
+    // and back. A wider invisible band catches the flip during the fade-in
+    // creep instead, so the 3D heroes show on the first approach. (If the user
+    // rushes in before the build is ready they still get 2D until they leave —
+    // unavoidable without a visible pop, but no longer the slow-scroll case.)
+    if (readyRef.current && !flippedRef.current && rawPresence < FLIP_MAX_PRESENCE) {
       flippedRef.current = true
       setHero3DReady('desert', true)
     }

@@ -1,0 +1,40 @@
+# Martin Svoboda
+
+> Portfolio and story of Martin Svoboda — twenty years an Air Force fighter and
+> acceptance test pilot, now building software the same way he flew jets: nothing
+> ships until it's verified. svobodamartin.dev is a scrollytelling site where you
+> scroll and a life flies past — school, military aviation (Z-142, L-39, L-159),
+> Afghanistan, airshow display flying, self-healing from ulcerative colitis,
+> Bitcoin, and an explosion of real apps built with AI. The single goal is one
+> email contact.
+
+The site is a static single-page app (React + TypeScript + Vite) with no backend
+and no data collection. Contact is by email only. Content is bilingual English
+(canonical) and Czech.
+
+## Contact
+
+- [Email Martin](mailto:svoboda.m@gmail.com): the one call to action of the whole site.
+
+## Live site
+
+- [svobodamartin.dev](https://svobodamartin.dev): the scrollytelling portfolio itself.
+
+## Work — the Claude-Code month (five real apps in ~a month)
+
+- [RL Lab + Data Lab](https://github.com/Martin8O/RL-Lab): train, watch and play against AI — 9 algorithms across 100+ environments, from CartPole to Atari, Doom and board games (Python, FastAPI, PyTorch, React). Runs locally.
+- [Registrace](https://registrace.online): a bilingual event-registration platform for 25 Buddhist centres — server-side pricing, self-service sign-up, emailed confirmations, role-scoped admin (Next.js, React, Prisma, Supabase). [Source](https://github.com/Martin8O/Registrace).
+- [Těnovice](https://www.one-tenovice.cz): a bilingual fundraising app for the Těnovice retreat centre — live pledge calculator, anonymous public pledges, account-based editing on a serverless AWS stack (CDK, Cognito, DynamoDB). Built as a collaboration. [Source](https://github.com/AnnaRozumova/Tenovice_fund_page).
+- [ClearFeed](https://github.com/Martin8O/ClearFeed): a Chrome extension (MV3) that mutes the topics you'd rather not see — politics, gossip, spoilers, sports, crypto — across news sites and feeds. 16 languages, 100% local, zero tracking.
+- [BrainQuest + dev-brain](https://github.com/Martin8O/BrainQuest): turns an Obsidian knowledge vault into a Duolingo-style learning game with spaced repetition (FSRS), a skill-tree and an AI tutor (Next.js, Capacitor).
+- [This site](https://github.com/Martin8O/Website): the scrollytelling site itself — an empty folder to a live production deploy in 4 days, then a 3D version in 4 more (React, TypeScript, Vite, Canvas 2D, Lenis).
+
+## Work — before Claude
+
+- [My Healing Journey](https://mojecestakezdravi.cz/): the site documenting how Martin healed himself from ulcerative colitis — his first web build (2015).
+- [RR Centrum Polabí](https://rrcentrumpolabi.cz): a site for a regeneration & rehabilitation centre run by two physiotherapists (2022).
+- [Discover Bitcoin](https://medium.com/@shadovv_50954/discover-bitcoin-the-r-evolution-in-the-world-of-money-9de1272b9b13): a detailed introduction to Bitcoin — the (r)evolution in the world of money.
+- [Due-Deck](https://duedeck.lovable.app): a warranties, insurance-renewal, contract and appointment tracker that runs fully in your browser. [Source](https://github.com/Martin8O/Due-Deck).
+- [Wealth-Deck](https://wealthdeck.lovable.app): a suite of personal-finance calculators (mortgage, savings, pension, investment growth and yield) with instant charts. [Source](https://github.com/Martin8O/Wealth-Deck).
+- [Rand-Pulse](https://randpulse.lovable.app): a sleek random generator for quick decisions and inspiration. [Source](https://github.com/Martin8O/Rand-Pulse).
+- [STRC Risk Monitor](https://strc-check.lovable.app): an experimental risk dashboard for Strategy's STRC variable-rate preferred. [Source](https://github.com/Martin8O/strc-check).

@@ -4,6 +4,33 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-060 — `llms.txt` added so the Agentic-Browsing / Agent-Accessibility check passes (2026-07-15)
+PageSpeed's new **Agentic Browsing** category flagged "llms.txt does not follow recommendations — missing a required
+H1 header; contains no links" (site scored 2/3). Root cause: the SPA rewrite (`vercel.json` `/(.*)` → `/`) served
+`index.html` (HTML, not markdown) for `/llms.txt`, which the checker parsed as a markdown file with no H1 and no
+links. Fix: a real `public/llms.txt` (H1 `# Martin Svoboda`, a blockquote summary, and link sections — Contact /
+Live site / Work — built from the real `data/projects.ts` URLs + the `mailto:`). On Vercel a static file in `public/`
+is served **before** the rewrite (same reason `robots.txt`/`sitemap.xml`/`og.png` work under the catch-all), so
+`/llms.txt` now returns the file and the rewrite no longer shadows it. Rationale: the site's own pitch is
+AI-agent-browsable craft; an `llms.txt` describing it is on-brand and closes the check (2/3 → 3/3 after deploy). No
+architecture impact — a static asset. *Verify:* `npm run check` green (build copies `public/` → `dist/`); file has an
+H1 + many markdown links.
+
+### ADR-059 — Bagram 3D hero flip fires across a wider invisible presence band (slow-scroll fix) (2026-07-15)
+On a slow, continuous scroll into the Bagram desert (ch-03) on a mid-range phone (Pixel 9a), the four hero aircraft
+showed only in **2D** for the whole first visit — the real GLB (3D) heroes appeared only after scrolling away to
+ch-02 and back. Root cause: `BagramActors.tsx` defers the 2D→3D hand-over to a moment when the hero is off-frame
+(`rawPresence < 0.01`) so the swap is never seen (2D and 3D fly *different* paths — a mid-scene swap pops, a bug
+Martin caught in E4). But the ~5 MB GLBs build through `idleSlice()` (requestIdleCallback), which is starved of idle
+time during continuous scrolling, so readiness routinely lands *after* the visitor is already inside the scene
+(`presence ≥ 0.01`); the razor-thin off-frame window is then missed until the visitor leaves. Fix: raise the flip
+threshold `0.01 → FLIP_MAX_PRESENCE = 0.15`. Both layers fade as `presence³` (2D `condense`, 3D `actorFade`), so at
+`presence ≤ 0.15` the hero is invisible on **both** sides (0.15³ ≈ 3.4e-3) — the swap stays unseen, but the invisible
+window is ~15× wider, so on a slow fade-in the flip fires during the approach creep instead of only at the off-frame
+instant. The anti-mid-scene-pop guarantee is preserved (a rushed entry at high presence still waits for the next
+low-presence edge — unavoidable without a visible pop). *Verify:* gate green (357); `cdp-bagram-verify.mjs`
+desktop ALL PASS incl. `no-mid-scene-flip` (parks at presence≈1, still no flip) + `flip-after-leaving`, console clean.
+
 ### ADR-058 — Model credits completed: the four Bagram base-ops aircraft added to the Credits popup (2026-07-15)
 The Credits popup (About → "Credits", `data/credits.ts` → `story/CreditsPopup.tsx`) listed only the **four**
 climb/ballet airframes (Piper PA-18, PA-28 Cadet, L-39ZA, L-159A) — it predated the Bagram base-ops beat (ADR-047,
