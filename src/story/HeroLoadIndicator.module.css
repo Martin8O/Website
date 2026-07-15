@@ -1,0 +1,58 @@
+/* The 3D-load chip rides just above the era gauge (Hud.module.css) in the
+   same instrument voice — mono, hairline border, dark glass. It appears and
+   leaves with a soft fade (no layout shift: absolutely positioned). */
+.chip {
+  position: absolute;
+  bottom: calc(4.6rem + env(safe-area-inset-bottom));
+  left: calc(1.6rem + env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--amber)) 45%, transparent);
+  border-radius: 4px;
+  background: rgba(6, 7, 10, 0.55);
+  backdrop-filter: blur(6px);
+  font-family: var(--font-mono);
+  animation: chip-in 0.35s ease-out;
+}
+
+@keyframes chip-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.label {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--fg);
+}
+
+.track {
+  width: 3.4rem;
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent, var(--amber)) 22%, transparent);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent, var(--amber));
+  box-shadow: 0 0 6px var(--accent, var(--amber));
+  transition: width 0.4s ease-out;
+}
+
+.pct {
+  font-size: 0.66rem;
+  color: var(--accent, var(--amber));
+  font-variant-numeric: tabular-nums;
+  min-width: 2.4em;
+  text-align: right;
+}

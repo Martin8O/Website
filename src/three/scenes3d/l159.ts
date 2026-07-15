@@ -24,7 +24,7 @@ export const TIP_X = 3.78 * JET_SCALE
 /** One session-wide fetch+parse; instances clone the cached scene. */
 let l159Promise: Promise<THREE.Group> | null = null
 
-export function loadL159(): Promise<THREE.Group> {
+export function loadL159(onProgress?: (f: number) => void): Promise<THREE.Group> {
   if (l159Promise) return l159Promise
   // No meshopt decoder: the GLB is baked with quantize only (KHR_mesh_
   // quantization, read natively) — EXT_meshopt_compression's WASM+blob
@@ -32,10 +32,19 @@ export function loadL159(): Promise<THREE.Group> {
   // free by design (bake.mjs). Keep this loader WASM-free.
   // GLTFLoader itself is a DYNAMIC import: nothing needs it before the first
   // load kick, so it stays out of the Stage3D chunk's page-load parse/eval.
+  // `onProgress` (0..1, this file's bytes) feeds the HUD loading indicator —
+  // only the FIRST caller's callback sees it (the parse is session-cached).
   l159Promise = import('three/examples/jsm/loaders/GLTFLoader.js').then(
     ({ GLTFLoader }) =>
       new Promise<THREE.Group>((resolve, reject) => {
-        new GLTFLoader().load(MODEL_URL, (gltf) => resolve(gltf.scene), undefined, reject)
+        new GLTFLoader().load(
+          MODEL_URL,
+          (gltf) => resolve(gltf.scene),
+          (ev) => {
+            if (ev.total > 0) onProgress?.(Math.min(ev.loaded / ev.total, 1))
+          },
+          reject,
+        )
       }),
   )
   // A failed fetch lets a later mount retry instead of caching the rejection.

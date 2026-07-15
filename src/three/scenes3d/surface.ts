@@ -15,22 +15,25 @@
 
 import * as THREE from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import { buildUrgent } from '../heroLoad'
 
 /** One cooperative yield: idle callback when the browser offers one (so the
  *  work waits out any active scroll/interaction), with a timeout so it still
- *  progresses under continuous load; setTimeout fallback (Safari). */
+ *  progresses under continuous load; setTimeout fallback (Safari).
+ *
+ *  The timeout is PACED by build urgency (heroLoad): a background build far
+ *  from the visitor yields generously (150 ms — mid-scroll frames stay clean;
+ *  the flat 32 ms of the first mobile pass forced build work into scroll
+ *  frames and traded smoothness for speed), while a build whose beat the
+ *  visitor is approaching drops to 32 ms so it can never stall for a beat
+ *  ("3D never loads"). True idle runs at full speed either way. */
 export function idleSlice(): Promise<void> {
   return new Promise((resolve) => {
     const w = window as {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
     }
     if (typeof w.requestIdleCallback === 'function') {
-      // Short timeout (was 120): during continuous scroll — exactly when the
-      // visitor is heading INTO a hero scene — idle time is starved, so a long
-      // timeout made the sliced GLB build crawl (~15 s on a phone, "3D never
-      // loads"). 32 ms still yields (no single long task) but the build can no
-      // longer stall for a beat, so the 3D hero shows far sooner (mobile audit).
-      w.requestIdleCallback(() => resolve(), { timeout: 32 })
+      w.requestIdleCallback(() => resolve(), { timeout: buildUrgent() ? 32 : 150 })
     } else {
       setTimeout(resolve, 0)
     }
@@ -141,7 +144,11 @@ async function bakeNormalFromMap(tex: THREE.Texture): Promise<THREE.Texture | nu
  *  otherwise the first frame a hero turns visible pays the whole upload at
  *  once (the fast-scroll hitch at a beat's entry). Purely a warm-up: no
  *  visual effect, safe to run while the scene is still invisible. */
-export async function warmTextures(gl: THREE.WebGLRenderer, root: THREE.Object3D): Promise<void> {
+export async function warmTextures(
+  gl: THREE.WebGLRenderer,
+  root: THREE.Object3D,
+  onStep?: (done: number, total: number) => void,
+): Promise<void> {
   const texs: THREE.Texture[] = []
   root.traverse((n) => {
     const mesh = n as THREE.Mesh
@@ -160,8 +167,9 @@ export async function warmTextures(gl: THREE.WebGLRenderer, root: THREE.Object3D
       }
     }
   })
-  for (const t of texs) {
+  for (let i = 0; i < texs.length; i++) {
     await idleSlice()
-    gl.initTexture(t)
+    gl.initTexture(texs[i])
+    onStep?.(i + 1, texs.length)
   }
 }

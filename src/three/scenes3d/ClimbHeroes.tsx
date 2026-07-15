@@ -52,7 +52,16 @@ import {
   type ClimbAircraft,
 } from '../climbMath'
 import type { Scene3DProps } from '../registry3d'
-import { getRoomEnv, normalFromMap, warmTextures } from './surface'
+import {
+  beginHeroLoad,
+  bumpBuildUrgency,
+  failHeroLoad,
+  finishHeroLoad,
+  registerHeroKick,
+  reportHeroProgress,
+  resetHeroLoad,
+} from '../heroLoad'
+import { getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
 
 const MODEL_URLS: Record<ClimbAircraft['id'], string> = {
   ulla: '/models/ulla.glb',
@@ -100,18 +109,26 @@ type LoadedModel = { root: THREE.Group; mats: MatRec[]; spins: SpinRec[] }
 /** One session-wide load; remounts (reduced-motion flips) reuse the parse. */
 let modelsPromise: Promise<Record<ClimbAircraft['id'], LoadedModel>> | null = null
 
-function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
+function loadModels(
+  onProgress?: (f: number) => void,
+): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
   if (modelsPromise) return modelsPromise
   // No meshopt decoder: the GLBs are baked with quantize only (KHR_mesh_
   // quantization, read natively) — EXT_meshopt_compression's WASM+blob
   // decoder is blocked by the site's hardened CSP (bake.mjs bakes it out).
   // GLTFLoader is a DYNAMIC import — kept out of the page-load parse/eval.
-  modelsPromise = import('three/examples/jsm/loaders/GLTFLoader.js').then(({ GLTFLoader }) => {
+  // The three models load SEQUENTIALLY with an idle beat between them: the
+  // post-load prefetch makes every fetch a cache hit, so a parallel load
+  // fired three GLB parses back to back — one long-task pile-up on the
+  // interaction path. `onProgress` feeds the HUD loading indicator.
+  modelsPromise = import('three/examples/jsm/loaders/GLTFLoader.js').then(async ({ GLTFLoader }) => {
   const loader = new GLTFLoader()
-  return Promise.all(
-    (Object.keys(MODEL_URLS) as ClimbAircraft['id'][]).map(
-      (id) =>
-        new Promise<[ClimbAircraft['id'], LoadedModel]>((resolve, reject) => {
+  const ids = Object.keys(MODEL_URLS) as ClimbAircraft['id'][]
+  const out = {} as Record<ClimbAircraft['id'], LoadedModel>
+  let done = 0
+  for (const id of ids) {
+    await idleSlice()
+    out[id] = await new Promise<LoadedModel>((resolve, reject) => {
           loader.load(
             MODEL_URLS[id],
             (gltf) => {
@@ -168,14 +185,19 @@ function loadModels(): Promise<Record<ClimbAircraft['id'], LoadedModel>> {
                   std.needsUpdate = true
                 }
               })
-              Promise.all(lifts).then(() => resolve([id, { root, mats, spins }]), reject)
+              Promise.all(lifts).then(() => resolve({ root, mats, spins }), reject)
             },
-            undefined,
+            (ev) => {
+              const f = ev.total > 0 ? Math.min(ev.loaded / ev.total, 1) : 0
+              onProgress?.((done + f) / ids.length)
+            },
             reject,
           )
-        }),
-    ),
-  ).then((pairs) => Object.fromEntries(pairs) as Record<ClimbAircraft['id'], LoadedModel>)
+    })
+    done++
+    onProgress?.(done / ids.length)
+  }
+  return out
   })
   // A failed fetch keeps the 2D hero flying (readiness never reported) and
   // lets a later mount retry instead of caching the rejection.
@@ -339,13 +361,15 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
         }
       }
     }
-    loadModels()
+    beginHeroLoad('climb')
+    loadModels((f) => reportHeroProgress('climb', f * 0.6))
       .then(async (models) => {
         if (!aliveRef.current) return
         // The session-shared RoomEnvironment bake (surface.ts) — was a
         // duplicate synchronous GPU pass per scene on its load-kick frame.
         const env = await getRoomEnv(gl, 0.04)
         if (!aliveRef.current) return
+        reportHeroProgress('climb', 0.68)
         envRef.current = { env }
         for (const r of res.aircraft) {
           r.model = models[r.aircraft.id]
@@ -355,25 +379,38 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
         // Push every texture to the GPU while the scene is still invisible
         // (one per idle slice) — the hero flip must never pay the whole
         // upload on its first visible frame (the fast-scroll hitch).
+        let warmed = 0
         for (const r of res.aircraft) {
           if (r.model) await warmTextures(gl, r.model.root)
+          reportHeroProgress('climb', 0.68 + (++warmed / res.aircraft.length) * 0.31)
         }
         if (!aliveRef.current) return
         readyRef.current = true
         setHero3DReady('climb', true)
+        finishHeroLoad('climb')
         if (import.meta.env.DEV) probe.ready = true
       })
       .catch((err) => {
+        failHeroLoad('climb')
         if (import.meta.env.DEV) console.warn('climb heroes: model load failed —', err)
       })
   }
+  const kickRef = useRef(kickLoad)
+  kickRef.current = kickLoad
 
   useEffect(() => {
     aliveRef.current = true
+    // Fresh load channel + a slot in the background build queue (the queue
+    // front-loads this build during the intro's idle time; the scroll
+    // threshold below stays the fast-scroller override).
+    resetHeroLoad('climb')
+    const unregister = registerHeroKick('climb', () => kickRef.current())
     return () => {
+      unregister()
       aliveRef.current = false
       readyRef.current = false
       setHero3DReady('climb', false)
+      resetHeroLoad('climb')
       for (const r of res.aircraft) {
         if (r.model) {
           r.pivot.remove(r.model.root)
@@ -390,6 +427,9 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
   useFrame((state, delta) => {
     const count = flight.count
     if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+    // Approaching this hero's beat with the build unfinished — let idleSlice
+    // run on the short timeout (finish over smoothness).
+    if (!readyRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
 
     // The scene's clock: the climb run's own (unclamped) localT — the same
     // value the 2D climb environment paints by.

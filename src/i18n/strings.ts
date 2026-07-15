@@ -44,6 +44,8 @@ export type UiStrings = {
   testsBody: string
   copyEmail: string
   emailCopied: string
+  heroLoading: string
+  heroReady: string
 }
 
 /**
@@ -103,6 +105,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
       'Collected from the codebase at build time — every deploy must pass all of them first:',
     copyEmail: 'Copy',
     emailCopied: 'Copied ✓',
+    heroLoading: 'Loading the 3D scene',
+    heroReady: '3D scene ready',
   },
   cs: {
     docTitle: 'Martin Svoboda – portfolio a příběh',
@@ -144,5 +148,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
       'Sesbírané z kódu při buildu – každé nasazení jimi musí nejdřív projít:',
     copyEmail: 'Kopírovat',
     emailCopied: 'Zkopírováno ✓',
+    heroLoading: 'Načítá se 3D scéna',
+    heroReady: '3D scéna připravena',
   },
 }

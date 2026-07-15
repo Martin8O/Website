@@ -40,6 +40,15 @@ import {
   cruiseHud,
 } from './balletMath'
 import { JET_SCALE, REST_Y, TIP_X, loadL159 } from './l159'
+import {
+  beginHeroLoad,
+  bumpBuildUrgency,
+  failHeroLoad,
+  finishHeroLoad,
+  registerHeroKick,
+  reportHeroProgress,
+  resetHeroLoad,
+} from '../heroLoad'
 import { getRoomEnv, idleSlice, warmTextures } from './surface'
 import { buildAIM9 } from './aim9'
 import { buildDropTank } from './droptank'
@@ -536,13 +545,15 @@ export function CruiseBallet({ frame }: Scene3DProps) {
     if (loadKicked.current) return
     loadKicked.current = true
     let alive = true
-    loadL159()
+    beginHeroLoad('cruise')
+    loadL159((f) => reportHeroProgress('cruise', f * 0.6))
       .then(async (base) => {
         if (!alive) return
         // The session-shared RoomEnvironment bake (surface.ts) — this beat
         // keeps its own slightly brighter sigma (0.045), cached by value.
         const env = await getRoomEnv(gl, 0.045)
         if (!alive) return
+        reportHeroProgress('cruise', 0.68)
         // One idle slice between the clone+grade passes, and a GPU texture
         // warm-up while the pair is still invisible — the hard cut into the
         // ballet must never pay upload/clone work mid-scroll.
@@ -554,28 +565,42 @@ export function CruiseBallet({ frame }: Scene3DProps) {
             return
           }
           jets.push(makeInstance(base, env))
+          reportHeroProgress('cruise', 0.68 + ((i + 1) / 2) * 0.12)
         }
         for (const j of jets) res.group.add(j.pivot)
         jetsRef.current = jets
-        await warmTextures(gl, res.group)
+        await warmTextures(gl, res.group, (d, n) =>
+          reportHeroProgress('cruise', 0.8 + (d / n) * 0.19),
+        )
         if (!alive) return
         // The 2D cruise scene may now hand its corkscrew over (it keeps
         // painting until this flips — the story never shows a hole).
         setHero3DReady('cruise', true)
+        finishHeroLoad('cruise')
         if (import.meta.env.DEV) probe.ready = true
       })
       .catch((err) => {
+        failHeroLoad('cruise')
         if (import.meta.env.DEV) console.warn('cruise ballet: model load failed —', err)
       })
     cleanupRef.current = () => {
       alive = false
     }
   }
+  const kickRef = useRef(kickLoad)
+  kickRef.current = kickLoad
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    // Fresh load channel + a slot in the background build queue (the queue
+    // front-loads this build during the intro's idle time; the scroll
+    // threshold in the frame loop stays the fast-scroller override).
+    resetHeroLoad('cruise')
+    const unregister = registerHeroKick('cruise', () => kickRef.current())
+    return () => {
+      unregister()
       cleanupRef.current?.()
       setHero3DReady('cruise', false)
+      resetHeroLoad('cruise')
       const jets = jetsRef.current
       if (jets) {
         for (const j of jets) {
@@ -599,12 +624,14 @@ export function CruiseBallet({ frame }: Scene3DProps) {
       rs.removeProperty('--ballet-hole-y')
       holeStr.current = ''
       loadKicked.current = false
-    },
-    [res],
-  )
+    }
+  }, [res])
 
   useFrame((state) => {
     if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+    // Approaching this hero's beat with the build unfinished — let idleSlice
+    // run on the short timeout (finish over smoothness).
+    if (!jetsRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
 
     const slot = slotOfCruise(frame.slots, frame.count)
     const t = slot ? slot.tRaw : 0

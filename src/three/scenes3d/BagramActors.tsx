@@ -38,6 +38,15 @@ import { clamp01 } from '../../canvas/toolkit'
 import { runLocalTRaw } from '../../canvas/sceneTimeline'
 import { setHero3DReady } from '../owned3d'
 import {
+  beginHeroLoad,
+  bumpBuildUrgency,
+  failHeroLoad,
+  finishHeroLoad,
+  registerHeroKick,
+  reportHeroProgress,
+  resetHeroLoad,
+} from '../heroLoad'
+import {
   CAM_H,
   GROUND_SLOPE,
   SIZE,
@@ -163,21 +172,38 @@ type LoadedModel = { root: THREE.Group }
 
 let modelsPromise: Promise<Record<ActorId, LoadedModel>> | null = null
 
-function loadModels(): Promise<Record<ActorId, LoadedModel>> {
+function loadModels(onProgress?: (f: number) => void): Promise<Record<ActorId, LoadedModel>> {
   if (modelsPromise) return modelsPromise
   // Quantize-only GLBs (KHR_mesh_quantization) — no meshopt/WASM decoder,
   // the hardened CSP stays untouched (ADR-042). GLTFLoader is a DYNAMIC
-  // import — kept out of the page-load parse/eval.
-  modelsPromise = import('three/examples/jsm/loaders/GLTFLoader.js').then(({ GLTFLoader }) => {
+  // import — kept out of the page-load parse/eval. The four models load
+  // SEQUENTIALLY with an idle beat between them: with the post-load prefetch
+  // (prefetchHeroes) every fetch is a cache hit, so a parallel load fired
+  // four multi-hundred-ms GLB parses back to back — one long-task pile-up
+  // right on the interaction path. `onProgress` feeds the HUD indicator.
+  modelsPromise = import('three/examples/jsm/loaders/GLTFLoader.js').then(async ({ GLTFLoader }) => {
     const loader = new GLTFLoader()
-    return Promise.all(
-      (Object.keys(MODEL_URLS) as ActorId[]).map(
-        (id) =>
-          new Promise<[ActorId, LoadedModel]>((resolve, reject) => {
-            loader.load(MODEL_URLS[id], (gltf) => resolve([id, { root: gltf.scene }]), undefined, reject)
-          }),
-      ),
-    ).then((pairs) => Object.fromEntries(pairs) as Record<ActorId, LoadedModel>)
+    const ids = Object.keys(MODEL_URLS) as ActorId[]
+    const out = {} as Record<ActorId, LoadedModel>
+    let done = 0
+    for (const id of ids) {
+      await idleSlice()
+      const gltf = await new Promise<{ scene: THREE.Group }>((resolve, reject) => {
+        loader.load(
+          MODEL_URLS[id],
+          resolve,
+          (ev) => {
+            const f = ev.total > 0 ? Math.min(ev.loaded / ev.total, 1) : 0
+            onProgress?.((done + f) / ids.length)
+          },
+          reject,
+        )
+      })
+      out[id] = { root: gltf.scene }
+      done++
+      onProgress?.(done / ids.length)
+    }
+    return out
   })
   // A failed fetch keeps the 2D actors flying (readiness never reported)
   // and lets a later mount retry instead of caching the rejection.
@@ -441,13 +467,15 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
   const kickLoad = () => {
     if (loadKicked.current) return
     loadKicked.current = true
-    loadModels()
+    beginHeroLoad('desert')
+    loadModels((f) => reportHeroProgress('desert', f * 0.5))
       .then(async (models) => {
         if (!aliveRef.current) return
         // The session-shared RoomEnvironment bake (surface.ts) — was a
         // duplicate synchronous GPU pass per scene on its load-kick frame.
         const env = await getRoomEnv(gl, 0.04)
         if (!aliveRef.current) return
+        reportHeroProgress('desert', 0.55)
         // Pre-bake the panel-line normal maps for the two lift models
         // (sliced across idle time — never a long task); makeInstance then
         // only reads the cache. One idle slice between instances too: seven
@@ -468,9 +496,13 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
           }
         }
         if (!aliveRef.current) return
+        reportHeroProgress('desert', 0.7)
+        let built = 0
         const build = async <T,>(make: () => T): Promise<T> => {
           await idleSlice()
-          return make()
+          const made = make()
+          reportHeroProgress('desert', 0.7 + (++built / 7) * 0.15)
+          return made
         }
         const instances = {
           c17: await build(() => makeInstance('c17', models.c17.root, env, normals, true)),
@@ -496,29 +528,39 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
         res.instances = instances
         // Push the textures to the GPU while the actors are still invisible
         // — entering the desert must never pay the upload mid-scroll.
-        await warmTextures(gl, res.stage)
+        await warmTextures(gl, res.stage, (d, n) =>
+          reportHeroProgress('desert', 0.85 + (d / n) * 0.14),
+        )
         if (!aliveRef.current) return
         readyRef.current = true
-        // The hero flip is DEFERRED to the frame loop: it only fires while
-        // the desert is OFF-frame, so a slow fetch can never swap the 2D
-        // actors for the 3D ones mid-scene (Martin saw the 2D crossing
-        // Mi-17s vanish and a parked 3D one "land" when the download won
-        // the race against his scroll).
+        // The actual 2D→3D flip fires from the frame loop (in place, with the
+        // FLIP_FADE_SEC dissolve) the moment it sees this readiness.
+        finishHeroLoad('desert')
         if (import.meta.env.DEV) probe.ready = true
       })
       .catch((err) => {
+        failHeroLoad('desert')
         if (import.meta.env.DEV) console.warn('bagram actors: model load failed —', err)
       })
   }
+  const kickRef = useRef(kickLoad)
+  kickRef.current = kickLoad
 
   useEffect(() => {
     aliveRef.current = true
+    // Fresh load channel + a slot in the background build queue (the queue
+    // front-loads this build during the intro's idle time; the scroll
+    // threshold below stays the fast-scroller override).
+    resetHeroLoad('desert')
+    const unregister = registerHeroKick('desert', () => kickRef.current())
     return () => {
+      unregister()
       aliveRef.current = false
       readyRef.current = false
       flippedRef.current = false
       flipAtRef.current = -1
       setHero3DReady('desert', false)
+      resetHeroLoad('desert')
       const inst = res.instances
       if (inst) {
         const all = [inst.c17, ...inst.mi17, ...inst.apache, ...inst.f16]
@@ -537,6 +579,9 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
 
   useFrame((state, delta) => {
     if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+    // The visitor is inside this hero's approach window and the build is not
+    // done — let idleSlice run on the short timeout (finish over smoothness).
+    if (!readyRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
 
     const t = desertRun ? runLocalTRaw(frame.pos, desertRun, flight.count) : 0
     const rawPresence = desertPresence(frame.slots, frame.count)

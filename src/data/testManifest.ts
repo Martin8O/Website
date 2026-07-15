@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 359
+export const TEST_COUNT = 379
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -254,6 +254,18 @@ export const TEST_MANIFEST: TestFileEntry[] = [
     ],
   },
   {
+    file: "src/story/heroIndicatorMath.test.ts",
+    tests: [
+      "buildHeroWindows (real chapters) > yields the four pipelines in story order, flypasts merged",
+      "buildHeroWindows (real chapters) > windows are the runs ownership spans (±0.5 chapter)",
+      "pickHeroIndicator > is quiet when nothing is loading",
+      "pickHeroIndicator > narrates the first hero from the intro while it loads",
+      "pickHeroIndicator > never narrates a beat the visitor already left",
+      "pickHeroIndicator > skips a ready hero and narrates the next loading one in range",
+      "pickHeroIndicator > prefers the nearer of two loading heroes",
+    ],
+  },
+  {
     file: "src/three/bagramMath.test.ts",
     tests: [
       "ground model > projects the ground plane onto the 2D bands: horizon at 0.6, stands ~0.68, apron ~0.76",
@@ -336,6 +348,24 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "flightPoseAt > clamps outside the story",
       "flightPoseAt > is continuous — no jumps across stop boundaries",
       "flightAnchorAt > anchors at the window start, aimed down the window chord",
+    ],
+  },
+  {
+    file: "src/three/heroLoad.test.ts",
+    tests: [
+      "hero load state > walks idle → loading → ready with monotonic progress",
+      "hero load state > ignores progress reports outside a load and repeated begins",
+      "hero load state > reset returns a hero to idle (world-toggle remount)",
+      "hero load state > notifies subscribers on phase changes",
+      "buildCalm (the watchdog gate) > is calm with nothing in flight and no recent load end",
+      "buildCalm (the watchdog gate) > is NOT calm while any hero build is in flight",
+      "buildCalm (the watchdog gate) > stays excused for the grace window after the last load settles",
+      "buildCalm (the watchdog gate) > a failed load also settles the gate (after grace)",
+      "build urgency > holds for a short window after a bump",
+      "background build queue > kicks heroes one at a time in story order",
+      "background build queue > skips a hero the scroll threshold already kicked",
+      "background build queue > a scene registering AFTER the queue started still gets kicked",
+      "background build queue > nextQueuedHero honours in-flight and unregistered scenes",
     ],
   },
   {

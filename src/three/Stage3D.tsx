@@ -19,6 +19,7 @@ import { CHAPTER_WEIGHTS, type Chapter, type Theme } from '../data/chapters'
 import { chapterPosition } from '../timeline'
 import { getScrollProgress, isStoryCovered, subscribeStoryCover } from '../scroll/scrollStore'
 import { tickRuntimeFpsGuard } from './worldMode'
+import { startHeroQueue } from './heroLoad'
 import { buildRuns, resolveSceneFrame } from '../canvas/sceneTimeline'
 import { RENDERERS_3D, type FlightRig } from './registry3d'
 import { buildFlightPath, flightPoseAt, createPose } from './flightMath'
@@ -56,6 +57,16 @@ export function Stage3D({ chapters }: { chapters: readonly Chapter[] }) {
   // (Tier-1 mobile perf) — the transparent canvas keeps its last frame frozen
   // behind the panel; resumes the instant the dialog closes.
   const covered = useSyncExternalStore(subscribeStoryCover, isStoryCovered, isStoryCovered)
+
+  // Arm the background hero-build queue (heroLoad) a beat after mount: the
+  // stage itself mounts post-load + idle (Story's useIdleAfterLoad), so this
+  // lands in the intro's genuine idle time — the hero GLB builds run in story
+  // order long before their beats, off the interaction path. Re-entrant on a
+  // world-toggle remount.
+  useEffect(() => {
+    const t = window.setTimeout(() => startHeroQueue(), 600)
+    return () => window.clearTimeout(t)
+  }, [])
 
   return (
     <div className={styles.stage} aria-hidden="true">

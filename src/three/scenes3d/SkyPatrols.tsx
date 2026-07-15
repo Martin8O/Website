@@ -47,6 +47,15 @@ import { BagramActors } from './BagramActors'
 import { ClimbHeroes } from './ClimbHeroes'
 import { CruiseBallet } from './CruiseBallet'
 import { JET_SCALE, REST_Y, TIP_X, loadL159 } from './l159'
+import {
+  beginHeroLoad,
+  bumpBuildUrgency,
+  failHeroLoad,
+  finishHeroLoad,
+  registerHeroKick,
+  reportHeroProgress,
+  resetHeroLoad,
+} from '../heroLoad'
 import { getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
 
 /** The registry's 'sky' entry: the two flypast beats, the chapter-02
@@ -632,13 +641,15 @@ export function SkyPatrols({ frame }: Scene3DProps) {
     if (loadKicked.current) return
     loadKicked.current = true
     let alive = true
-    loadL159()
+    beginHeroLoad('patrol')
+    loadL159((f) => reportHeroProgress('patrol', f * 0.6))
       .then(async (base) => {
         if (!alive) return
         // The session-shared RoomEnvironment bake (surface.ts) — was a
         // duplicate synchronous GPU pass per scene on its load-kick frame.
         const env = await getRoomEnv(gl, 0.04)
         if (!alive) return
+        reportHeroProgress('patrol', 0.65)
         // Pre-bake the shared skin normal (sliced across idle time) so the
         // instance builds below are pure cache reads — the bake used to run
         // synchronously inside the first makeInstance.
@@ -682,25 +693,40 @@ export function SkyPatrols({ frame }: Scene3DProps) {
             return
           }
           jets.push(makeInstance(base, s.armed, env, normalRef.current, s.grade, s.stars))
+          reportHeroProgress('patrol', 0.7 + (jets.length / specs.length) * 0.12)
         }
         for (const j of jets) res.stage.add(j.pivot)
         jetsRef.current = jets
         // GPU warm-up while the jets are still invisible — a beat's first
         // frame must never pay the texture upload mid-scroll.
-        await warmTextures(gl, res.stage)
+        await warmTextures(gl, res.stage, (d, n) =>
+          reportHeroProgress('patrol', 0.82 + (d / n) * 0.17),
+        )
+        if (!alive) return
+        finishHeroLoad('patrol')
         if (import.meta.env.DEV) probe.ready = true
       })
       .catch((err) => {
+        failHeroLoad('patrol')
         if (import.meta.env.DEV) console.warn('sky patrols: model load failed —', err)
       })
     cleanupRef.current = () => {
       alive = false
     }
   }
+  const kickRef = useRef(kickLoad)
+  kickRef.current = kickLoad
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    // Fresh load channel + a slot in the background build queue (the queue
+    // front-loads this build during the intro's idle time; the scroll
+    // threshold in the frame loop stays the fast-scroller override).
+    resetHeroLoad('patrol')
+    const unregister = registerHeroKick('patrol', () => kickRef.current())
+    return () => {
+      unregister()
       cleanupRef.current?.()
+      resetHeroLoad('patrol')
       const jets = jetsRef.current
       if (jets) {
         for (const j of jets) {
@@ -720,13 +746,15 @@ export function SkyPatrols({ frame }: Scene3DProps) {
       res.vortex.points.geometry.dispose()
       res.vortex.mat.dispose()
       loadKicked.current = false
-    },
-    [res],
-  )
+    }
+  }, [res])
 
   useFrame((state, delta) => {
     void delta
     if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+    // Approaching the flypasts with the build unfinished — let idleSlice run
+    // on the short timeout (finish over smoothness).
+    if (!jetsRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
 
     // Glue the stage to the flight pose (position + forward + bank, no
     // pointer parallax) — the camera-glued convention.

@@ -13,6 +13,7 @@ import { ChunkBoundary } from './ChunkBoundary'
 import { CockpitGlass } from './CockpitGlass'
 import { DevWindowLinks } from './DevWindowLinks'
 import { OfferPanels } from './OfferPanels'
+import { HeroLoadIndicator } from './HeroLoadIndicator'
 import { Hud } from './Hud'
 import { TickScale } from './TickScale'
 import { ScrollHint } from './ScrollHint'
@@ -109,6 +110,10 @@ export function Story() {
       <OfferPanels pos={pos} />
       <Vignette />
       <Hud era={era} progress={progress} />
+      {/* The 3D-load chip narrates the nearest hero build (mobile brief):
+          only in '3d' mode, and only once the deferred stage may mount — in
+          2D worlds the 2D scene IS the maximum and the chip would lie. */}
+      {worldMode === '3d' && stage3dReady && <HeroLoadIndicator pos={pos} />}
       <TickScale progress={progress} count={count} />
       <ScrollHint progress={progress} />
       <SiteFooter progress={progress} />

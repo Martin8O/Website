@@ -25,6 +25,7 @@
  */
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { buildCalm } from './heroLoad'
 
 export type WorldMode = '2d' | '3d'
 export type WorldOverride = WorldMode | null
@@ -164,7 +165,14 @@ export function subscribeWorldChoice(listener: () => void): () => void {
 // and ranked below it (an explicit 3D choice always wins).
 // ---------------------------------------------------------------------------
 
-const AUTO_KEY = 'site-world-auto'
+// v2 key: v1 ('site-world-auto') could be a FALSE POSITIVE — the original
+// watchdog counted the slow frames of the hero BUILD window (GLB parse,
+// Sobel bake, GPU upload) as rendering weakness and permanently downgraded
+// capable phones mid-load. Reading v2 removes any v1 value, so every such
+// device gets one clean retry under the fixed (build-aware) watchdog; a
+// genuinely weak device simply re-trips in its first heavy scene.
+const AUTO_KEY = 'site-world-auto2'
+const AUTO_KEY_LEGACY = 'site-world-auto'
 
 let autoDown: boolean | undefined
 const autoListeners = new Set<() => void>()
@@ -172,6 +180,7 @@ const autoListeners = new Set<() => void>()
 export function getAutoDowngrade(): boolean {
   if (autoDown === undefined) {
     try {
+      localStorage.removeItem(AUTO_KEY_LEGACY)
       autoDown = localStorage.getItem(AUTO_KEY) === '2d'
     } catch {
       autoDown = false
@@ -212,9 +221,16 @@ const FPS_SLOW_MS = 50 // a frame slower than this ≈ under ~20 fps (clearly ba
 const FPS_SUSTAINED_MS = 3000 // 3 s of unbroken sub-20-fps ⇒ downgrade
 const FPS_MAX_DT_MS = 1000 // a gap over 1 s is a pause / tab-away, not a slow frame
 const FPS_DETECT_CAP = 4000 // stop watching after the early window (a backstop)
+/** How much SLOW-frame time a hero build may excuse in total. A capable
+ *  phone's whole build pipeline spends well under this in slow frames (the
+ *  gentle idle slicing keeps most frames clean), so it never runs out; a
+ *  genuinely weak device grinds through it and then meets the normal rules —
+ *  the build guard must delay its protection, never disable it. */
+const FPS_EXCUSE_BUDGET_MS = 15000
 
 let fpsFrames = 0
 let fpsSlowMs = 0
+let fpsExcusedMs = 0
 let fpsArmed = true
 
 /**
@@ -231,6 +247,21 @@ export function tickRuntimeFpsGuard(dtMs: number): void {
   }
   if (dtMs > FPS_MAX_DT_MS) {
     fpsSlowMs = 0 // a real pause (tab-away / paused loop) — not slow rendering
+    return
+  }
+  // A hero BUILD in flight (or just settled — shader-compile tail): these
+  // slow frames are the cost of LOADING the 3D layer, not proof the device
+  // cannot RENDER it. Counting them permanently downgraded capable mid-range
+  // phones inside the very first hero's build window (mobile brief; proven
+  // by cdp-watchdog-load.mjs — 4× throttle died at pos≈0.5, the same device
+  // ran the whole 3D story once the watchdog ignored the build). The frame
+  // counter also holds, so the detection window stays an honest sample.
+  // The excuse is BUDGETED: a weak device that grinds slow through the whole
+  // background build pipeline exhausts it and meets the normal rules — the
+  // guard delays its protection, never disables it.
+  if (!buildCalm() && fpsExcusedMs < FPS_EXCUSE_BUDGET_MS) {
+    if (dtMs > FPS_SLOW_MS) fpsExcusedMs += dtMs
+    fpsSlowMs = 0
     return
   }
   fpsFrames++
