@@ -4,6 +4,23 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-056 — "L2" full-3D fly-through formally retired; the shipped hybrid IS the target state (2026-07-15)
+The original plan (ADR-006/007) framed the build as **L1** (a 2D `<canvas>` scrollytelling world + interactive
+globe) now, **L2** (a full R3F "fly-through" — the *entire* world rebuilt in 3D, with a real camera flown through
+3D space along a Blender-exported path) later, as an additive upgrade. Over phases E1–E3b the site instead grew a
+**hybrid**: real baked GLB aircraft heroes (climb ch-01 · ballet ch-02 · Bagram ch-03 + airshow/landing patrols)
+and depth starfields (origin · contact) fly as an **additive R3F layer OVER the 2D environments**, gated with the
+2D world as the always-complete fallback (worldMode + `owned3d`). The environments themselves (sky, desert, lake,
+blockchain, dev-world, finale) stay 2D-canvas. **Decision (Martin, 2026-07-15): L2-as-scoped is never going to be
+built — the hybrid IS the dream target state, not a stepping stone.** Rationale: a full-3D rewrite would rebuild
+every environment + the camera model for a marginal experiential gain over what the hybrid already delivers, at
+real cost to perf and to the pixel-tuned 2D look now locked byte-identical (ADR-050/054); the "3D wow" the story
+needed is already shipped. *Consequence:* the "L1/L2" vocabulary is retired from the docs (CLAUDE.md, README,
+architecture.md updated to describe the shipped 2D→3D **hybrid**, not a future L2); renderers stay pure/framework-
+free not "so L2 can reuse them" but because the additive 3D layer already rides over them with the 2D fallback
+underneath. No code change — a scope/vocabulary decision. Any *future* 3D work is a new, separately-justified beat
+on the existing additive layer, never a wholesale fly-through.
+
 ### ADR-055 — Dperf-4: defer the 3D stage mount + lazy-split the back-half 2D renderers (boot-time main-thread) (2026-07-15)
 The last perf layer after the per-frame work (ADR-049/050/054) and the critical path (ADR-051/052): the **boot-time
 main thread** — how much download + parse/eval competes with first paint on a throttled phone. A measured throttled
@@ -1468,6 +1485,8 @@ is international clients/peers; bilingual scaffolding would add cost for no gain
 unrelated.) *Cost:* going bilingual later would be a real retrofit — accepted.
 
 ### ADR-002 — Build path: L1 (2D) first → L2 (3D) later (2026-07-05)
+**⤷ Partly superseded by ADR-056 (2026-07-15):** L1 shipped and grew an additive 3D layer (the hybrid); the full
+"L2" fly-through is now formally retired — the hybrid is the target state, not a stepping stone.
 Ship a production-grade 2D scrollytelling site first, then upgrade to an R3F 3D fly-through as an *additive*
 layer. *Why:* the demo already proves L1; going live fast de-risks and gives real feedback; the data-driven +
 single-`scrollProgress` architecture makes L2 an upgrade, not a rewrite. *Alternative rejected:* commit to L2

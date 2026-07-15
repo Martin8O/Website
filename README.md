@@ -31,11 +31,13 @@ smoothed on the Lenis ticker.
   is an overlay by id (`chapters.cs.ts`); timing lives once, in the EN array.
 - **`src/data/projects.ts`** — the Work items (real link · screenshot · one‑liner · stack).
 - **`<CanvasStage>`** — one fixed 2D canvas, one rAF loop. A **theme registry**
-  (`src/canvas/registry.ts`, `Record<Theme, Renderer>`) picks a pure
+  (`src/canvas/registry.ts`, eager core + lazy‑split deep worlds) picks a pure
   `render(ctx, alpha, localT, time, cfg)` per chapter. A new visual *kind* = one
-  registry entry. Renderers are pure and framework‑free (so an L2 3D layer could
-  reuse them as the fallback). The whole canvas world is **code‑split** (`React.lazy`)
-  — it is decorative (`aria-hidden`) and loads during the preloader hold.
+  registry entry. Renderers are pure and framework‑free — an **additive R3F 3D layer**
+  (real baked GLB aircraft heroes + depth starfields) rides *over* them on the hero
+  chapters, with the 2D world always the complete fallback. The whole canvas world is
+  **code‑split** (`React.lazy`) — it is decorative (`aria-hidden`) and loads during the
+  preloader hold.
 - **Text / HUD / scale / vignette / cards** are DOM components — the story text stays
   real HTML for SEO and screen readers.
 

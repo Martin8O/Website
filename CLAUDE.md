@@ -5,9 +5,14 @@ self-healing → Bitcoin → the Claude Code build explosion), ending in a singl
 projects = proof, contact = goal. **Read `local/bootstrap.md` first every session.**
 
 ## What it is / scope
-- **L1 now:** production-grade **2D** scrollytelling (React+TS+Vite), with **original, far-richer-than-the-demo**
-  environments and an **interactive globe** (the demo is a reference, not a ceiling — ADR-006/007). **L2 later:**
-  R3F 3D fly-through, built as an *additive* upgrade, not a rewrite. Ship L1 on Vercel first.
+- **Shipped — and this IS the target state (Martin, 2026-07-15):** a production-grade **2D scrollytelling** world
+  (React+TS+Vite) with **original, far-richer-than-the-demo** environments + an **interactive globe**, PLUS an
+  **additive 3D layer** — real baked GLB aircraft heroes (climb · ballet · Bagram + airshow/landing patrols) and
+  depth starfields flying **over** the 2D scenes, gated so the 2D world is always the complete fallback
+  (ADR-006/007). Live on Vercel.
+- **The old "L2" (full R3F fly-through — the *whole* world in 3D, camera flown through 3D space) is formally
+  RETIRED — never to be built (ADR-056).** It would be a rewrite of every environment for a marginal gain; the
+  shipped hybrid already delivers the 3D wow. Treat the current state as the dream target, not a stepping stone.
 - **Site copy = English only.** **Contact = email only.** **No donation button.** (Rationale → `docs/adr.md`.)
 
 ## Architecture (where things go)
@@ -15,15 +20,17 @@ projects = proof, contact = goal. **Read `local/bootstrap.md` first every sessio
   chapter = one object. `src/data/projects.ts` — the Work items (real link + shot + one-liner + stack).
 - `scrollProgress` (0..1) — one global value (store/context + `useScrollProgress`), smoothed on the **Lenis**
   ticker. Everything visible is *derived* from it. Never drive story progress by a wall clock.
-- `<CanvasStage>` — one fixed 2D canvas, one rAF loop; **theme registry** `Record<Theme, Renderer>` picks a
-  pure `render(ctx, alpha, localT, time, cfg)` per chapter. A new visual *kind* = one registry entry.
+- `<CanvasStage>` — one fixed 2D canvas, one rAF loop; a **theme registry** (eager core + lazy-split deep worlds,
+  ADR-055) picks a pure `render(ctx, alpha, localT, time, cfg)` per chapter. A new visual *kind* = one registry
+  entry (eager, or a lazy loader for a heavy back-half world).
 - Text/HUD/scale/vignette/cards are DOM components (text stays real HTML for SEO/a11y). Full mental model +
   recipes: `local/Wiki/scrollytelling-cookbook.md`.
 
 ## Conventions
 - **Stack:** Vite + React + TypeScript (strict). **Styling = CSS + custom properties (design tokens) / CSS
   Modules — NOT Tailwind.** Smooth scroll = **Lenis**. Tests = **Vitest** on pure logic only.
-- **Data-driven extension** everywhere; keep renderers pure + framework-free (L2 reuses them as the fallback).
+- **Data-driven extension** everywhere; keep renderers pure + framework-free (the additive 3D layer rides over them
+  and the 2D world stays the always-complete fallback).
 - **Accessibility + performance are Done-criteria, not extras:** `prefers-reduced-motion`, keyboard + focus +
   skip-links, DPR-capped canvas, no scroll-blocking loads, no layout shift, Lighthouse ≥ 90 desktop.
 - **English site strings** (no i18n). **No backend / no data collection** (static SPA; `mailto:` — the contact
