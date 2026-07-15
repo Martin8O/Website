@@ -4,6 +4,36 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-055 — Dperf-4: defer the 3D stage mount + lazy-split the back-half 2D renderers (boot-time main-thread) (2026-07-15)
+The last perf layer after the per-frame work (ADR-049/050/054) and the critical path (ADR-051/052): the **boot-time
+main thread** — how much download + parse/eval competes with first paint on a throttled phone. A measured throttled
+prod trace collapsed the original "product decision" framing (2D-only on mobile) — real FCP is ~1.7 s, and the 2D
+world already paints a complete frame on every path (`OWNED_3D` empty, 3D is purely additive) — so this shipped as
+the **SAFE version only**: move *when* work happens, **zero change to what renders on any client**. Two independent
+halves. **(1) Defer the 3D stage mount** — new `useIdleAfterLoad` hook (two-stage gate: `window.load` + a
+`requestIdleCallback` beat, same idiom as ADR-052 DeferredInsights) gates `<Stage3D>` in `Story.tsx`; the 906 KB
+three chunk's fetch moves from **+1340 ms (before FCP — it was competing for pre-paint bandwidth ⚠️) → +1781 ms
+(after first paint ✅)** and its ~150 ms parse/eval lands in idle slack. The 2D world paints the complete scene
+meanwhile (3D fades in), so only the timing moves; reduced-motion / weak-client / `?world=2d` never mount it (gate
+unchanged). **(2) Lazy-split the back-half 2D renderers** — `registry.ts` becomes two tiers: EAGER (origin/sky/calm/
+offer — a reload can park on any) ride the CanvasStage chunk; LAZY (bitcoin ≈ ch-07, dev ≈ ch-08, contact finale —
+the three heaviest, deepest worlds) split into their own chunks, warmed in idle (`prefetchLazyScenes`) and loaded
+on demand (`getRenderer`); until a chunk arrives the caller paints the dark stage (the same appearance as every
+boot's preloader→first-frame gap), and `rendererEpoch` forces a repaint even on a parked reduced-motion frame the
+instant it loads. `warmDevScene` moved from a static import to a dynamic one so `dev.ts` actually leaves the boot
+chunk. A compile guard keeps the theme union total (new theme without a tier = build error). *Result:* CanvasStage
+chunk **233 → 148 KB (78.8 → 55.0 gz)**, boot-critical JS (by FCP) **167 → 144 KB (−23 KB, −14 %)**; FCP unchanged
+(1664 → 1660 ms). *Honest:* the long-task/TBT proxy stayed flat (307 → 300 ms, within noise) — the reorder keeps
+total main-thread work similar, it just schedules it after paint/idle; the real win is the boot-window bytes + the
+906 KB chunk off the pre-FCP contention (prompt itself said don't chase TBT). **Verify:** gate green (357); A/B
+pixel sweep `262/262 byte-identical desktop + 262/262 mobile` (whole 2D story unchanged); new `cdp-lazy-scenes.mjs`
+— all back-half positions render non-floor, all three chunks load, console clean; `cdp-climb2-verify` ALL PASS
+(first 3D beat + 2D/3D toggle intact after the deferral); reduced-motion → 2D unchanged by construction. New
+harnesses (local): `cdp-boot-trace2.mjs` (boot-critical window), `cdp-lazy-scenes.mjs`. **⚠️ desktop Lighthouse ≥ 90
++ a fresh mobile pagespeed are a post-deploy check** (prod headers only show on the live deploy). **Parked (data
+says don't):** 2D-only on mobile — saves the ~245 KB + ~150 ms outright but drops the 3D on the device most visitors
+use, for a modest measured gain. Model-fit: Opus 4.8 · high (perf + honest scoping over a measured trace).
+
 ### ADR-054 — Dperf-3: contact finale bloom — bake per-frame invariants, cull off-canvas, gate the heartbeat (2026-07-15)
 The `contact` finale (chapter 09) paints its breathing spiral galaxy with ~20 000 `fillRect`/frame — the last big
 steady per-frame cost ADR-049/050 deliberately left alone (it *can* change the look, so it needed its own careful

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useScrollProgress } from '../scroll/useScrollProgress'
+import { useIdleAfterLoad } from '../useIdleAfterLoad'
 import { useWorldMode } from '../three/worldMode'
 import { CHAPTERS, CHAPTER_WEIGHTS, chaptersFor, EXTRA_ERAS } from '../data/chapters'
 import { useLang } from '../i18n/useLang'
@@ -50,6 +51,11 @@ export function Story() {
   const progress = useScrollProgress()
   const lang = useLang()
   const worldMode = useWorldMode()
+  // Dperf-4: hold the 3D island until after `window.load` + an idle beat, so
+  // its 906 KB chunk fetch + three parse/eval never competes with first paint.
+  // The 2D world paints the complete scene meanwhile (the 3D starfield/heroes
+  // are additive and fade in), so this only moves WHEN 3D arrives.
+  const stage3dReady = useIdleAfterLoad()
   // Localized copy for the DOM layers; the canvas keeps the static EN array
   // (it reads only theme/timing fields, and a stable identity means the
   // language toggle never re-initializes the render loop).
@@ -75,7 +81,7 @@ export function Story() {
       {/* The 3D layer AUGMENTS the 2D world (which keeps painting either
           way) — if this chunk fails or the gate says '2d', the site is
           simply L1. Static EN chapters for the same reason as above. */}
-      {worldMode === '3d' && (
+      {worldMode === '3d' && stage3dReady && (
         <ChunkBoundary>
           <Suspense fallback={null}>
             <Stage3D chapters={CHAPTERS} />

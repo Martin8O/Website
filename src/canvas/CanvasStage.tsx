@@ -6,8 +6,7 @@ import { getScrollProgress, setScrollProgress } from '../scroll/scrollStore'
 import { paints2D, paintsHero2D } from '../three/owned3d'
 import type { WorldMode } from '../three/worldMode'
 import { getGlassCanvas } from './glass'
-import { RENDERERS } from './registry'
-import { warmDevScene } from './scenes/dev'
+import { getRenderer, prefetchLazyScenes, rendererEpoch } from './registry'
 import { landingShake } from './scenes/sky/skyMath'
 import { buildRuns, resolveSceneFrame, type SceneSlot } from './sceneTimeline'
 import { makeGrainTile } from './toolkit'
@@ -54,6 +53,7 @@ export function CanvasStage({
     let rafId = 0
     let needsPaint = true
     let lastProgress = -1
+    let lastEpoch = rendererEpoch()
     let lastShakeX = 0
     let lastShakeY = 0
     let lastParX = ''
@@ -132,11 +132,21 @@ export function CanvasStage({
       needsPaint = true
     }
 
-    // Warm the dev chapter's static bakes (the heaviest 2D cache build) off
-    // the interaction path: debounced past the resize stream, then run in
-    // idle time — entering the chapter never pays the bake in a scroll
-    // frame. Pure cache fill; the render path is unchanged.
+    // Idle warm-up off the interaction path (debounced past the resize
+    // stream): (1) prefetch the lazy scene chunks (bitcoin/dev/contact —
+    // Dperf-4) so a normal scroll never waits on a round-trip when it reaches
+    // the deep worlds, and (2) warm the dev chapter's static bakes (the
+    // heaviest 2D cache build) for the current size, so entering the chapter
+    // never pays the bake in a scroll frame. The dev import here shares the
+    // dev chunk the prefetch loads. Pure prefetch + cache fill; the render
+    // path is unchanged.
     let warmTimer = 0
+    const warmIdle = () => {
+      prefetchLazyScenes()
+      import('./scenes/dev')
+        .then((m) => m.warmDevScene(w, h))
+        .catch(() => undefined)
+    }
     const scheduleWarm = () => {
       window.clearTimeout(warmTimer)
       warmTimer = window.setTimeout(() => {
@@ -144,9 +154,9 @@ export function CanvasStage({
           requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
         }
         if (typeof win.requestIdleCallback === 'function') {
-          win.requestIdleCallback(() => warmDevScene(w, h), { timeout: 4000 })
+          win.requestIdleCallback(warmIdle, { timeout: 4000 })
         } else {
-          window.setTimeout(() => warmDevScene(w, h), 300)
+          window.setTimeout(warmIdle, 300)
         }
       }, 200)
     }
@@ -175,6 +185,12 @@ export function CanvasStage({
       // A 3D-owned theme's frame belongs to the Stage3D layer (empty set
       // today — the explicit flip mechanism, see owned3d.ts).
       if (!paints2D(slot.run.theme, modeRef.current)) return
+      // A lazy world (bitcoin/dev/contact) whose chunk is still loading has no
+      // renderer yet — skip it this frame (the dark floor shows, exactly like
+      // the boot preloader→first-frame gap); getRenderer has kicked its import
+      // and rendererEpoch will trigger a repaint the instant it arrives.
+      const render = getRenderer(slot.run.theme)
+      if (!render) return
       const cfg: SceneConfig = {
         w,
         h,
@@ -192,13 +208,20 @@ export function CanvasStage({
         cover,
         shakeGate: reducedMotion ? 0 : shakeGate,
       }
-      RENDERERS[slot.run.theme](ctx, slot.alpha, slot.t, time, cfg)
+      render(ctx, slot.alpha, slot.t, time, cfg)
       // The glass carries content only while a sky scene paints its HUD —
       // mark it for a wipe so nothing lingers once the section is left.
       if (glass && slot.run.theme === 'sky') glassDirty = true
     }
 
     const paint = (now: number) => {
+      // A lazy scene chunk that just finished loading must repaint even a
+      // parked reduced-motion frame that was showing the floor for it.
+      const epoch = rendererEpoch()
+      if (epoch !== lastEpoch) {
+        lastEpoch = epoch
+        needsPaint = true
+      }
       const progress = getScrollProgress()
       // Static under reduced motion → repaint only when scroll actually moved.
       if (reducedMotion && !needsPaint && progress === lastProgress) return
