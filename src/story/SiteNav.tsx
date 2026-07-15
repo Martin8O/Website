@@ -62,7 +62,17 @@ export function SiteNav() {
     const count = CHAPTERS.length
     const pos = chapterPosition(getScrollProgress(), count, CHAPTER_WEIGHTS)
     const idx = Math.max(0, Math.min(count - 1, Math.round(pos)))
-    scrollToProgress(progressFromPos(Math.max(idx - 0.5, 0), CHAPTER_WEIGHTS), { immediate: true })
+    // Chapter 0 IS the top of the page (the intro starfield has no aircraft
+    // beat to re-enter), so jumping "to its start" just yanks to scroll 0 —
+    // instead leave the scroll put and only flip the mode. For a real chapter,
+    // land a little INTO it, NOT at the raw span boundary (pos idx−0.5): the
+    // boundary still shows the previous chapter's cross-fade tail, which reads
+    // as "the end of the last chapter" (Martin's catch on ch-01). idx−0.32
+    // clears the fade so the current chapter is unmistakably the one on screen,
+    // and scrolling down replays its beat in the new mode.
+    if (idx >= 1) {
+      scrollToProgress(progressFromPos(idx - 0.32, CHAPTER_WEIGHTS), { immediate: true })
+    }
   }, [worldMode])
 
   return (

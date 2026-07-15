@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { useScrollProgress } from '../scroll/useScrollProgress'
 import { useIdleAfterLoad } from '../useIdleAfterLoad'
 import { useWorldMode } from '../three/worldMode'
-import { warmFirstHero } from '../three/prefetchHeroes'
+import { warmFirstHero, warmStage3DChunk } from '../three/prefetchHeroes'
 import { CHAPTERS, CHAPTER_WEIGHTS, chaptersFor, EXTRA_ERAS } from '../data/chapters'
 import { useLang } from '../i18n/useLang'
 import { activeEra, chapterPosition } from '../timeline'
@@ -62,7 +62,10 @@ export function Story() {
   // Stage3D chunk even mounts — the fix for "ch-01 shows 2D on the first pass"
   // on a phone (mobile audit §3). Low-priority, post-load, cache-only.
   useEffect(() => {
-    if (worldMode === '3d') warmFirstHero()
+    if (worldMode === '3d') {
+      warmStage3DChunk()
+      warmFirstHero()
+    }
   }, [worldMode])
   // Localized copy for the DOM layers; the canvas keeps the static EN array
   // (it reads only theme/timing fields, and a stable identity means the

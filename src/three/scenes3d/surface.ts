@@ -25,7 +25,12 @@ export function idleSlice(): Promise<void> {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
     }
     if (typeof w.requestIdleCallback === 'function') {
-      w.requestIdleCallback(() => resolve(), { timeout: 120 })
+      // Short timeout (was 120): during continuous scroll — exactly when the
+      // visitor is heading INTO a hero scene — idle time is starved, so a long
+      // timeout made the sliced GLB build crawl (~15 s on a phone, "3D never
+      // loads"). 32 ms still yields (no single long task) but the build can no
+      // longer stall for a beat, so the 3D hero shows far sooner (mobile audit).
+      w.requestIdleCallback(() => resolve(), { timeout: 32 })
     } else {
       setTimeout(resolve, 0)
     }
@@ -63,11 +68,26 @@ export function getRoomEnv(gl: THREE.WebGLRenderer, sigma: number): Promise<THRE
 
 /** Sobel a texture's luminance into a subtle tangent-space normal map (the
  *  showcase's surface lift — panel-line relief from the paint's own dark
- *  lines; the sources ship baseColor only). Computed once per texture,
- *  cached by the caller. The pixel loop runs in row slices with idle yields
- *  between them — identical output to the old synchronous bake, just never
- *  a single long main-thread task. */
-export async function normalFromMap(tex: THREE.Texture): Promise<THREE.Texture | null> {
+ *  lines; the sources ship baseColor only). The pixel loop runs in row slices
+ *  with idle yields between them — never a single long main-thread task.
+ *
+ *  Cached MODULE-WIDE by source texture (was caller-local): the parsed GLBs are
+ *  session-cached (loadModels), so a world-mode toggle that unmounts + remounts
+ *  the 3D layer hands back the SAME texture objects — the cache then skips the
+ *  whole Sobel bake on the re-mount, which was the bulk of the ~15 s "toggle to
+ *  2D and back and 3D takes forever to reload" (mobile audit). */
+const _normalCache = new WeakMap<THREE.Texture, Promise<THREE.Texture | null>>()
+
+export function normalFromMap(tex: THREE.Texture): Promise<THREE.Texture | null> {
+  let cached = _normalCache.get(tex)
+  if (!cached) {
+    cached = bakeNormalFromMap(tex)
+    _normalCache.set(tex, cached)
+  }
+  return cached
+}
+
+async function bakeNormalFromMap(tex: THREE.Texture): Promise<THREE.Texture | null> {
   const img = tex.image as { width?: number; height?: number } | undefined
   if (!img || !img.width || !img.height) return null
   const w = Math.min(img.width, 1024)

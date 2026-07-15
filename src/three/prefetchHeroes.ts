@@ -15,25 +15,56 @@
  * it is a pure cache warm — the bytes are discarded, the browser cache keeps
  * them. Idempotent; a failed warm is ignored (the loader fetches normally).
  *
- * URLs mirror `ClimbHeroes.tsx` MODEL_URLS — keep the two in sync (the first
- * hero is the climb ladder; the later Bagram/patrol models have chapters of
- * scroll to load and are not warmed here).
+ * URLs mirror the scenes' MODEL_URLS — keep in sync. The climb ladder is FIRST
+ * (its chapter comes first and it is the flakiest), then the ballet + Bagram
+ * models so ch-02/03 are warm too (Bagram was the worst first-load on a phone —
+ * "thought it never loads"; 5 MB it now downloads in the background while the
+ * visitor reads the earlier chapters). Low priority, so nothing races paint.
  */
-const CLIMB_HERO_URLS = ['/models/ulla.glb', '/models/z142.glb', '/models/l39.glb']
+const CLIMB_HERO_URLS = [
+  '/models/ulla.glb',
+  '/models/z142.glb',
+  '/models/l39.glb',
+  '/models/l159.glb',
+  '/models/c17.glb',
+  '/models/apache.glb',
+  '/models/f16.glb',
+  '/models/mi17.glb',
+]
 
 let warmed = false
+
+function afterLoad(run: () => void): void {
+  if (document.readyState === 'complete') run()
+  else window.addEventListener('load', run, { once: true })
+}
 
 export function warmFirstHero(): void {
   if (warmed || typeof fetch !== 'function') return
   warmed = true
-  const run = () => {
+  afterLoad(() => {
     for (const url of CLIMB_HERO_URLS) {
       // Low priority + a real cache read: populate the browser cache so the
       // GLTFLoader fetch that follows is a hit. Failures are ignored — the
       // loader will fetch normally, and a warm is never load-bearing.
       fetch(url, { priority: 'low', cache: 'force-cache' } as RequestInit).catch(() => {})
     }
-  }
-  if (document.readyState === 'complete') run()
-  else window.addEventListener('load', run, { once: true })
+  })
+}
+
+let chunkWarmed = false
+
+/**
+ * Pre-fetch + parse the 906 KB `Stage3D` chunk right after `load`, IN PARALLEL
+ * with the hero GLBs — so it is cached before `useIdleAfterLoad` mounts the 3D
+ * island (which otherwise fetches it only on mount, one more serial step before
+ * ch-01 can show 3D). Same module the lazy import in Story pulls, so this just
+ * warms its cache; still after `load`, so it never competes with first paint.
+ */
+export function warmStage3DChunk(): void {
+  if (chunkWarmed) return
+  chunkWarmed = true
+  afterLoad(() => {
+    import('./Stage3D').catch(() => {})
+  })
 }

@@ -456,18 +456,23 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
       ctx.fill()
     }
   }
-  // Giant barrel tents: low walls + a vaulted roof (bagram tents 2.jpg).
-  for (let i = 0; i < 6; i++) {
-    const x = wrapX(hash1(810 + i * 17) * span, midOff)
-    const len = w * (0.045 + hash1(815 + i * 11) * 0.04)
-    const ht = h * (0.026 + hash1(820 + i * 5) * 0.014)
-    ctx.beginPath()
-    ctx.moveTo(x - len, midBase)
-    ctx.lineTo(x - len, midBase - ht * 0.55)
-    ctx.ellipse(x, midBase - ht * 0.55, len, ht * 0.45, 0, Math.PI, 0)
-    ctx.lineTo(x + len, midBase)
-    ctx.closePath()
-    ctx.fill()
+  // Giant barrel tents: low walls + a vaulted roof (bagram tents 2.jpg). Also
+  // skipped on a portrait phone (same reason as the hangars): these big
+  // foreground arches drift under the spread helo stands. The distant tent-city
+  // rows below + the tower still fill the mid-band, so it never reads empty.
+  if (!portrait) {
+    for (let i = 0; i < 6; i++) {
+      const x = wrapX(hash1(810 + i * 17) * span, midOff)
+      const len = w * (0.045 + hash1(815 + i * 11) * 0.04)
+      const ht = h * (0.026 + hash1(820 + i * 5) * 0.014)
+      ctx.beginPath()
+      ctx.moveTo(x - len, midBase)
+      ctx.lineTo(x - len, midBase - ht * 0.55)
+      ctx.ellipse(x, midBase - ht * 0.55, len, ht * 0.45, 0, Math.PI, 0)
+      ctx.lineTo(x + len, midBase)
+      ctx.closePath()
+      ctx.fill()
+    }
   }
   // The control tower — moved LEFT (Martin R10: left of the hangar) so it is
   // clear of the C-17's central take-off + climb-out, not in front of it.
