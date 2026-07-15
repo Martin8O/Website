@@ -4,6 +4,20 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-058 — Model credits completed: the four Bagram base-ops aircraft added to the Credits popup (2026-07-15)
+The Credits popup (About → "Credits", `data/credits.ts` → `story/CreditsPopup.tsx`) listed only the **four**
+climb/ballet airframes (Piper PA-18, PA-28 Cadet, L-39ZA, L-159A) — it predated the Bagram base-ops beat (ADR-047,
+E4), which added **four more** deployed GLB heroes with no credit rows: **C-17 Globemaster III** (KOG_THORNS),
+**AH-64E Apache Guardian** (Jeyhun1985), **Mil Mi-17** (42manako), **F-16 Block 70 + Pilot + Animations**
+(CreadorDeMu). All four are CC-BY-4.0 like the rest, so the shared `MODEL_LICENSE` row already covers the licence
+half of TASL; the fix is data-only — four rows appended to `MODEL_CREDITS`, each Title/Author/Source read verbatim
+from the baked GLB's own `asset.extras` metadata (`public/models/*.glb`), never invented, matching the file's
+documented "one row per hero" contract. Docstring updated from "all four deployed heroes" → eight (climb/ballet +
+Bagram). The AIM-9 store stays uncredited by design (our own procedural geometry). Rationale: CC-BY-4.0 legally
+requires attribution for every deployed model; four heroes were shipping uncredited since E4 — a compliance gap, not
+a taste call. No architecture impact. *Verify:* gate green (357); live on `:5173` — About → Credits renders all **8**
+rows with correct authors + Sketchfab links, licence link → CC-BY-4.0, console clean.
+
 ### ADR-057 — Tab identity reworked: bitcoin stealth-delta favicon + name-first "Portfolio & Story" title (2026-07-15)
 The old favicon (a thin amber `#FFB000` HUD reticle + ascending flight-path marker) blurred into an orange blob
 at 16px — the tab/bookmark size where a favicon actually lives (Martin flagged it as "not representative"). Replaced
