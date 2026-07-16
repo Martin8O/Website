@@ -36,10 +36,17 @@
   color: color-mix(in srgb, var(--fg) 55%, transparent);
   border-bottom-color: color-mix(in srgb, var(--fg) 25%, transparent);
 }
-.footer .credits a:hover,
+/* Hover is POINTER-only (see SiteNav.module.css: on touch it latches). */
 .footer .credits a:focus-visible {
   color: var(--amber);
   border-color: var(--amber);
+}
+
+@media (hover: hover) {
+  .footer .credits a:hover {
+    color: var(--amber);
+    border-color: var(--amber);
+  }
 }
 
 .footer a {
@@ -53,11 +60,18 @@
   border-bottom: 1px solid color-mix(in srgb, var(--amber) 50%, transparent);
   transition: color 140ms ease, border-color 140ms ease;
 }
-.footer a:hover,
 .footer a:focus-visible {
   color: var(--amber);
   border-color: var(--amber);
   outline: none;
+}
+
+@media (hover: hover) {
+  .footer a:hover {
+    color: var(--amber);
+    border-color: var(--amber);
+    outline: none;
+  }
 }
 
 /* The ↗ leans into its own direction on hover — a whisper of motion. */
@@ -65,9 +79,14 @@
   display: inline-block;
   transition: transform 140ms ease;
 }
-.footer a:hover span,
 .footer a:focus-visible span {
   transform: translate(2px, -2px);
+}
+
+@media (hover: hover) {
+  .footer a:hover span {
+    transform: translate(2px, -2px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

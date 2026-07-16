@@ -33,10 +33,19 @@
 /* Hover / keyboard focus lights the card up: a brighter frame and a bigger,
    deeper amber GLOW around it — pure symmetric bloom (0 offset), no drop
    shadow. `:focus-within` mirrors it for keyboard + CDP verification. */
-.panel:hover,
+/* Hover is POINTER-only everywhere on the site: on touch `:hover` latches on
+   the tapped element until the next tap elsewhere (SiteNav.module.css carries
+   the full note — it is why Home/Contact stayed lit on a Galaxy A50). */
 .panel:focus-within {
   border-color: color-mix(in srgb, var(--amber) 55%, transparent);
   box-shadow: 0 0 60px 4px color-mix(in srgb, var(--amber) 30%, transparent);
+}
+
+@media (hover: hover) {
+  .panel:hover {
+    border-color: color-mix(in srgb, var(--amber) 55%, transparent);
+    box-shadow: 0 0 60px 4px color-mix(in srgb, var(--amber) 30%, transparent);
+  }
 }
 
 .panel::before,
@@ -296,14 +305,22 @@
   border-bottom: 1px dashed color-mix(in srgb, var(--fg) 38%, transparent);
   transition: border-color 140ms ease;
 }
-.testsBtn:hover,
 .testsBtn:focus-visible {
   border-bottom-color: var(--amber);
   outline: none;
 }
-.testsBtn:hover strong,
 .testsBtn:focus-visible strong {
   color: var(--amber);
+}
+
+@media (hover: hover) {
+  .testsBtn:hover {
+    border-bottom-color: var(--amber);
+    outline: none;
+  }
+  .testsBtn:hover strong {
+    color: var(--amber);
+  }
 }
 
 /* Proof lines are real outbound links — quiet amber underline, the visitor
@@ -337,10 +354,16 @@
   color: color-mix(in srgb, var(--fg) 80%, transparent);
 }
 
-.link:hover,
 .link:focus-visible {
   color: var(--amber);
   border-bottom-color: var(--amber);
+}
+
+@media (hover: hover) {
+  .link:hover {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+  }
 }
 
 .foot {
@@ -433,11 +456,18 @@
   color: color-mix(in srgb, var(--amber) 62%, #000);
 }
 
-.grade:hover,
 .grade:focus-visible {
   color: color-mix(in srgb, var(--amber) 80%, #fff);
   border-color: var(--amber);
   background: color-mix(in srgb, var(--amber) 10%, transparent);
+}
+
+@media (hover: hover) {
+  .grade:hover {
+    color: color-mix(in srgb, var(--amber) 80%, #fff);
+    border-color: var(--amber);
+    background: color-mix(in srgb, var(--amber) 10%, transparent);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

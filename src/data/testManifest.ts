@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 378
+export const TEST_COUNT = 380
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -259,7 +259,9 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "buildHeroWindows (real chapters) > yields the four pipelines in story order, flypasts merged",
       "buildHeroWindows (real chapters) > windows are the runs ownership spans (±0.5 chapter)",
       "pickHeroIndicator > is quiet when nothing is loading",
-      "pickHeroIndicator > narrates the first hero from the intro while it loads",
+      "pickHeroIndicator > narrates the first hero from one scene out, through its whole beat",
+      "pickHeroIndicator > stays quiet about a hero that is still TWO scenes away",
+      "pickHeroIndicator > never narrates a hero two scenes ahead while the nearer beats are ready",
       "pickHeroIndicator > never narrates a beat the visitor already left",
       "pickHeroIndicator > skips a ready hero and narrates the next loading one in range",
       "pickHeroIndicator > prefers the nearer of two loading heroes",

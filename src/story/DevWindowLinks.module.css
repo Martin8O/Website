@@ -16,11 +16,22 @@
   transition: box-shadow 200ms ease;
 }
 
-.hit:hover,
+/* Glow/tip on hover are POINTER-only: on touch `:hover` latches on the tapped
+   plate until the next tap elsewhere, which would strand a lit glow + an open
+   tooltip over the dev scene after the link opened (the sticky-highlight bug
+   the nav hit — see SiteNav.module.css). A tap navigates, so nothing is lost;
+   keyboard :focus-visible still shows both. */
 .hit:focus-visible {
   /* Just a soft glow in the window's own neon — no frame, no lift (Martin). */
   box-shadow: 0 0 46px -4px color-mix(in srgb, var(--tint, #ffb000) 60%, transparent);
   outline: none;
+}
+
+@media (hover: hover) {
+  .hit:hover {
+    box-shadow: 0 0 46px -4px color-mix(in srgb, var(--tint, #ffb000) 60%, transparent);
+    outline: none;
+  }
 }
 
 /* Hover / focus detail: what the app is + its stack. Hidden until the plate
@@ -51,10 +62,16 @@
 .below .tip {
   top: 100%;
 }
-.hit:hover .tip,
 .hit:focus-visible .tip {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+@media (hover: hover) {
+  .hit:hover .tip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .tipName {

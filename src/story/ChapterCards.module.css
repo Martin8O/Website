@@ -268,10 +268,19 @@
     0 2px 14px rgba(0, 0, 0, 0.7);
 }
 
-.cta:hover,
+/* Hover split out under `(hover: hover)` — on touch it LATCHES until the next
+   tap elsewhere (the sticky-highlight class of bug the nav hit; SiteNav.module
+   .css carries the full note). Focus-visible is keyboard-only and unaffected. */
 .cta:focus-visible {
   color: color-mix(in srgb, var(--accent, var(--amber)) 72%, #fff);
   border-bottom-color: var(--accent, var(--amber));
+}
+
+@media (hover: hover) {
+  .cta:hover {
+    color: color-mix(in srgb, var(--accent, var(--amber)) 72%, #fff);
+    border-bottom-color: var(--accent, var(--amber));
+  }
 }
 
 /* Visually-hidden live region — screen readers announce the copy
@@ -301,11 +310,18 @@
   transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
 }
 
-.copyBtn:hover,
 .copyBtn:focus-visible {
   color: #fff;
   border-color: var(--accent, var(--amber));
   background: color-mix(in srgb, var(--accent, #f7931a) 16%, rgba(0, 0, 0, 0.28));
+}
+
+@media (hover: hover) {
+  .copyBtn:hover {
+    color: #fff;
+    border-color: var(--accent, var(--amber));
+    background: color-mix(in srgb, var(--accent, #f7931a) 16%, rgba(0, 0, 0, 0.28));
+  }
 }
 
 .copyBtn.copied {
@@ -358,10 +374,16 @@
     0 0 5px rgba(0, 0, 0, 1),
     0 0 7px rgba(0, 0, 0, 0.9);
 }
-:global(#contact-now) .cta:hover,
 :global(#contact-now) .cta:focus-visible {
   color: var(--amber);
   border-bottom-color: var(--amber);
+}
+
+@media (hover: hover) {
+  :global(#contact-now) .cta:hover {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+  }
 }
 
 /* Nav "Contact" clicked while ALREADY at the finale: nothing scrolls, so the

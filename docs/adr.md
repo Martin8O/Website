@@ -4,6 +4,34 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-064 — Hover is pointer-only site-wide; the load chip promises one scene ahead, never two (2026-07-16)
+Two follow-ups from Martin's second device round. **(1) Sticky highlight — `:hover` latches on touch.** Tapping nav
+Home/Contact on a Galaxy A50 left them lit. ADR-063 blamed focus and called `blur()` on pointer clicks — **that
+diagnosis was wrong**: the culprit is `:hover`, which a touch browser latches onto the tapped element until the next
+tap elsewhere, and no `blur()` can clear it (it is hover, not focus). The site had this bug **everywhere** — every
+`.x:hover, .x:focus-visible { … }` pair (nav, the contact email + Copy button, the dev-window plates *and their
+tooltips*, the offer panels, the footer, and every modal's close/links); only `WorkPanel`'s card hover was already
+guarded. Fix: split each pair so `:hover` lives in `@media (hover: hover)` and `:focus-visible` (keyboard) stays
+unconditional. `(hover: hover)` simply never matches a touch screen, so nothing can latch; desktop is untouched. The
+dev-window tooltip is deliberately pointer-only too — a tap navigates, so nothing is lost, and a stranded glowing
+tooltip over the scene is avoided. Rationale: a hover affordance is a *pointer* affordance; expressing that in the
+media query is the fix, not chasing the symptom per element. (The ADR-063 `blur()` stays — harmless, and it still
+keeps pointer focus out of the a11y tree.) *Verify:* new `cdp-hover-touch.mjs` asserts BOTH sides — under touch
+emulation (`hover: none`) a real `Input.dispatchTouchEvent` tap on Home and Contact leaves them unlit, and on a real
+mouse pointer (`hover: hover`) a hover still lights Home (no desktop regression). The probe was **proven to fail on
+the pre-fix CSS** (a test that cannot fail is worthless). **(2) The chip promised two scenes ahead.** `HERO_HORIZON`
+was 1.6; the real hero windows are climb [1.5, 2.5] · cruise [2.5, 3.5] · desert [3.5, 4.5] · patrol [4.5, 6.5], so
+standing mid-ch-01 (pos ≈ 2) the chip already narrated the **Bagram** build at 55 % — two scenes out — while the
+climb AND the ballet had both already flown in 3D. A progress bar reads as "wait here", so the visitor waits for a
+beat they could have scrolled straight past (Martin's Pixel report). `HERO_HORIZON = 1.0` is exactly "the CURRENT
+scene's hero, or the NEXT one": a hero for chapter N owns [N−0.5, N+0.5], so a visitor anywhere in chapter M reaches
+hero(M+1)'s window start (M+0.5) at exactly 1.0, while hero(M+2) (start M+1.5) stays quiet until they actually enter
+chapter M+1. **Only the indication narrows** — every hero still kicks at its own `LOAD_AT_POS` (climb 0.15 · cruise
+1.6 · desert 2.0 · patrol 3.1), i.e. two-plus scenes ahead: loading early is good, promising early is not (Martin's
+own framing). *Verify:* gate green (**380**, +2 — a regression test reproducing the exact report: climb+cruise ready
+and desert loading ⇒ quiet at mid-climb, speaks up one scene out; plus a two-scenes-away silence case). The
+proof-panel count guard did its job and forced the EN+CZ copy 378 → 380. climb2/bagram/patrol harnesses ALL PASS.
+
 ### ADR-063 — Load-chip honesty (progress in every phase · watched builds run fast) · contact-arrival pulse · text-presentation arrows (2026-07-16)
 Four device reports from Martin's first real post-deploy round (his Pixel 9a, a friend's iPhone 17 Pro and a Galaxy
 A50). **(1) The chip froze mid-load ("stops at 55 %, only moves when I scroll on").** Two independent causes, both

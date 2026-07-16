@@ -17,9 +17,21 @@ import type { HeroKey, HeroLoadSnapshot } from '../three/heroLoad'
 export type HeroWindow = { key: HeroKey; start: number; end: number }
 
 /** How far ahead of a hero window the chip starts narrating, in chapters.
- *  1.6 puts the FIRST hero (climb, window from pos 0.5) on screen right at
- *  the intro — exactly where a phone visitor needs the promise. */
-export const HERO_HORIZON = 1.6
+ *
+ *  1.0 = exactly "the CURRENT scene's hero, or the NEXT one" — never further.
+ *  A hero for chapter N owns the window [N−0.5, N+0.5], so a visitor standing
+ *  anywhere in chapter M (pos ≥ M−0.5) reaches hero(M+1)'s window start
+ *  (M+0.5) at exactly 1.0, while hero(M+2) (window start M+1.5) stays hidden
+ *  until they actually enter chapter M+1.
+ *
+ *  Was 1.6, which narrated TWO scenes ahead: standing mid-ch-01 with the climb
+ *  AND the ballet already flown in 3D, the chip still showed the Bagram build
+ *  at 55 % — the visitor reads a progress bar as "wait here", when in truth
+ *  they could scroll on and the next beat WAS ready (Martin's Pixel report).
+ *  Only the INDICATION narrows: every hero still starts loading at its own
+ *  `LOAD_AT_POS` (climb 0.15 · cruise 1.6 · desert 2.0 · patrol 3.1), i.e.
+ *  two-plus scenes ahead — loading early is good, promising early is not. */
+export const HERO_HORIZON = 1.0
 
 /** Sky mood → load pipeline. The two flypast beats share one pipeline. */
 const SKY_TO_HERO: Partial<Record<Sky, HeroKey>> = {

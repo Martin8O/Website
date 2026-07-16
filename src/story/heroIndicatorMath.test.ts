@@ -39,10 +39,32 @@ describe('pickHeroIndicator', () => {
     expect(pickHeroIndicator(0, WINDOWS, snap({ climb: { phase: 'failed', progress: 0.3 } }))).toBe(null)
   })
 
-  it('narrates the first hero from the intro while it loads', () => {
+  it('narrates the first hero from one scene out, through its whole beat', () => {
     const s = snap({ climb: { phase: 'loading', progress: 0.4 } })
-    expect(pickHeroIndicator(0, WINDOWS, s)).toBe('climb')
+    // The intro promise: on screen a full chapter before the climb owns the frame.
+    expect(pickHeroIndicator(climb.start - HERO_HORIZON + 0.01, WINDOWS, s)).toBe('climb')
     expect(pickHeroIndicator(climb.end - 0.01, WINDOWS, s)).toBe('climb')
+  })
+
+  it('stays quiet about a hero that is still TWO scenes away', () => {
+    const s = snap({ climb: { phase: 'loading', progress: 0.4 } })
+    expect(pickHeroIndicator(climb.start - HERO_HORIZON - 0.2, WINDOWS, s)).toBe(null)
+  })
+
+  // Martin's Pixel report: standing mid-ch-01 with the climb and the ballet
+  // already 3D, the chip still showed the Bagram build at 55 % — a progress
+  // bar two scenes out reads as "wait here" when you could safely scroll on.
+  it('never narrates a hero two scenes ahead while the nearer beats are ready', () => {
+    const s = snap({
+      climb: { phase: 'ready', progress: 1 },
+      cruise: { phase: 'ready', progress: 1 },
+      desert: { phase: 'loading', progress: 0.55 },
+    })
+    const desert = WINDOWS[2]
+    const midClimb = (climb.start + climb.end) / 2
+    expect(pickHeroIndicator(midClimb, WINDOWS, s)).toBe(null)
+    // ...but it speaks up as soon as the visitor is ONE scene away.
+    expect(pickHeroIndicator(desert.start - HERO_HORIZON + 0.01, WINDOWS, s)).toBe('desert')
   })
 
   it('never narrates a beat the visitor already left', () => {

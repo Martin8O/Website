@@ -32,11 +32,22 @@
   cursor: pointer;
   transition: background 150ms ease, box-shadow 150ms ease;
 }
-.item:hover,
 .item:focus-visible {
   background: color-mix(in srgb, var(--amber) 14%, transparent);
   box-shadow: 0 0 22px -6px color-mix(in srgb, var(--amber) 60%, transparent);
   outline: none;
+}
+
+/* Hover is for real pointers ONLY. On a touch screen `:hover` LATCHES on the
+   tapped element until the next tap elsewhere, so Home / Contact stayed lit
+   after every tap (Galaxy A50 report) — and no `blur()` can clear it, since
+   it is hover, not focus. `(hover: hover)` simply never matches there. */
+@media (hover: hover) {
+  .item:hover {
+    background: color-mix(in srgb, var(--amber) 14%, transparent);
+    box-shadow: 0 0 22px -6px color-mix(in srgb, var(--amber) 60%, transparent);
+    outline: none;
+  }
 }
 
 /* The house icon button — square-ish, glyph centered on the text baseline. */
