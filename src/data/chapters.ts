@@ -189,7 +189,7 @@ export const CHAPTERS: Chapter[] = [
     cardEase3d: [0.0665, 0.073],
     // The faculty was electrical engineering; the FIELD was informatics —
     // that is what makes "a life in front of a computer screen" land.
-    body: 'But after two years of computer science at the faculty of electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen&nbsp;—&nbsp;<em>remember that</em>&nbsp;—&nbsp;and there was a boyhood dream waiting: <span class="a-hud">flying military jets</span>. The Z‑142, then the L‑39C&nbsp;—&nbsp;a hundred hours in the air, still during my years at the University of Defence, and a totally different life.',
+    body: 'But after two years of computer science at the faculty of electrical engineering I walked away. I couldn\'t picture a life spent in front of a computer screen&nbsp;—&nbsp;<em>remember that</em>&nbsp;—&nbsp;and there was a boyhood dream waiting: <span class="a-hud">flying</span>. First the Z‑142, then the L‑39C&nbsp;—&nbsp;a hundred hours in the air, still during my years at the University of Defence, and a totally different life.',
     align: 'right',
   },
   {
