@@ -1,5 +1,6 @@
 import { Suspense, lazy, useCallback, useRef, useState } from 'react'
-import { scrollToProgress } from '../scroll/scrollStore'
+import { getScrollProgress, scrollToProgress } from '../scroll/scrollStore'
+import { flashContactCta } from './ChapterCards'
 import { useLang } from '../i18n/useLang'
 import { setLang } from '../i18n/langStore'
 import { STRINGS } from '../i18n/strings'
@@ -50,7 +51,13 @@ export function SiteNav() {
     <nav className={styles.nav} aria-label={t.navLandmark}>
       <button
         className={`${styles.item} ${styles.home}`}
-        onClick={() => scrollToProgress(0, { immediate: true })}
+        onClick={(e) => {
+          scrollToProgress(0, { immediate: true })
+          // A pointer tap must not leave a sticky focus highlight on the nav
+          // (touch keeps :focus until the next tap); keyboard (detail 0)
+          // keeps its focus for a11y.
+          if (e.detail > 0) e.currentTarget.blur()
+        }}
         aria-label={t.navHome}
         title={t.navHome}
       >
@@ -74,7 +81,19 @@ export function SiteNav() {
       >
         {t.navWork}
       </button>
-      <button className={styles.item} onClick={() => scrollToProgress(1, { immediate: true })}>
+      <button
+        className={styles.item}
+        onClick={(e) => {
+          // Already AT the finale: the teleport moves nothing, so the click
+          // looked dead (Martin's Pixel catch) — pulse the email CTA instead:
+          // "you have arrived". 0.985 ≈ the contact card fully risen.
+          const alreadyThere = getScrollProgress() > 0.985
+          scrollToProgress(1, { immediate: true })
+          if (alreadyThere) flashContactCta()
+          // Pointer taps must not leave a sticky focus highlight (see Home).
+          if (e.detail > 0) e.currentTarget.blur()
+        }}
+      >
         {t.navContact}
       </button>
       <button

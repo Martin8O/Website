@@ -317,7 +317,9 @@
 }
 
 .link::after {
-  content: ' ↗';
+  /* \FE0E = text-presentation selector: Samsung/Google fonts otherwise
+     render U+2197 as the blue-square EMOJI arrow (seen on a Galaxy A50). */
+  content: ' \2197\FE0E';
   font-size: 0.85em;
   color: color-mix(in srgb, var(--amber) 75%, transparent);
 }
@@ -425,7 +427,9 @@
 }
 
 .grade::after {
-  content: ' ↗';
+  /* \FE0E = text-presentation selector: Samsung/Google fonts otherwise
+     render U+2197 as the blue-square EMOJI arrow (seen on a Galaxy A50). */
+  content: ' \2197\FE0E';
   color: color-mix(in srgb, var(--amber) 62%, #000);
 }
 

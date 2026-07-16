@@ -1110,7 +1110,9 @@ function drawProjectWindow(
     ctx.stroke()
     ctx.textAlign = 'right'
     ctx.fillStyle = rgba(meta.tint, a * 0.95)
-    ctx.fillText('↗', x0 + Wpx * 0.935, ay + ph * 0.56)
+    // ︎ = text presentation — Samsung/Google fonts otherwise draw the
+    // emoji arrow (blue square) into the canvas panel (Galaxy A50 report).
+    ctx.fillText('↗︎', x0 + Wpx * 0.935, ay + ph * 0.56)
   }
   // Body, clipped to the PANEL's own rounded outline (intersected with the
   // body band) — content can never bleed past the bottom corner curves.

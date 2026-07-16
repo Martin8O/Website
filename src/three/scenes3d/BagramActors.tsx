@@ -484,9 +484,11 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
         // (sliced across idle time — never a long task); makeInstance then
         // only reads the cache. One idle slice between instances too: seven
         // clone+grade passes in one tick was its own main-thread block.
-        const normals = new Map<THREE.Texture, THREE.Texture | null>()
+        // Progress is reported PER MAP: this phase is many sliced seconds on
+        // a mid phone and used to sit silent — the HUD chip froze at exactly
+        // 55 % and read as stuck (Martin's Pixel report).
+        const maps: THREE.Texture[] = []
         for (const id of ['c17', 'apache'] as const) {
-          const maps: THREE.Texture[] = []
           models[id].root.traverse((n) => {
             const mesh = n as THREE.Mesh
             if (!mesh.isMesh) return
@@ -495,11 +497,14 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
               if ('metalness' in std && std.map && !maps.includes(std.map)) maps.push(std.map)
             }
           })
-          for (const map of maps) {
-            if (!normals.has(map)) normals.set(map, await normalFromMap(map))
-          }
         }
-        if (!aliveRef.current) return
+        const normals = new Map<THREE.Texture, THREE.Texture | null>()
+        let baked = 0
+        for (const map of maps) {
+          if (!normals.has(map)) normals.set(map, await normalFromMap(map))
+          if (!aliveRef.current) return
+          reportHeroProgress('desert', 0.55 + (++baked / maps.length) * 0.15)
+        }
         reportHeroProgress('desert', 0.7)
         let built = 0
         const build = async <T,>(make: () => T): Promise<T> => {

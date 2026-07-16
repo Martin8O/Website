@@ -106,7 +106,7 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
         </ul>
         <div className={styles.footer}>
           <a className={styles.link} href={p.link.href} target="_blank" rel="noopener noreferrer">
-            {p.link.display} <span aria-hidden="true">↗</span>
+            {p.link.display} <span aria-hidden="true">{'↗︎'}</span>
           </a>
           {p.repo && (
             <a
@@ -116,7 +116,7 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
               rel="noopener noreferrer"
               aria-label={`${p.name} — ${t.sourceOnGitHub}`}
             >
-              GitHub <span aria-hidden="true">↗</span>
+              GitHub <span aria-hidden="true">{'↗︎'}</span>
             </a>
           )}
           {!p.live && <span className={styles.status}>{p.status}</span>}

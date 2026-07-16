@@ -683,6 +683,9 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
           }
           normalRef.current.tex = nrm
         }
+        // The bake above is sliced seconds on a mid phone — tick the HUD chip
+        // so the bar never sits silent through it (the frozen-bar report).
+        reportHeroProgress('patrol', 0.68)
         // One idle slice between clones — four clone+grade passes in one
         // tick was a main-thread block of its own.
         const specs = [

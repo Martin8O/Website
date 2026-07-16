@@ -167,7 +167,7 @@ export function AboutPanel({
             <div className={styles.links} aria-label={t.profiles}>
               {[PROFILE.github, PROFILE.linkedin].map((p) => (
                 <a key={p.label} href={p.href} target="_blank" rel="noopener noreferrer">
-                  {p.label} <span aria-hidden="true">↗</span>
+                  {p.label} <span aria-hidden="true">{'↗︎'}</span>
                 </a>
               ))}
             </div>

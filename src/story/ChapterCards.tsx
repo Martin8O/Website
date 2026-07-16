@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { cardOpacity, cardOpacityWindowed } from '../timeline'
 import { heroLive } from '../three/owned3d'
@@ -6,6 +6,15 @@ import type { WorldMode } from '../three/worldMode'
 import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
 import styles from './ChapterCards.module.css'
+
+/** Nav "Contact" clicked while the visitor is ALREADY at the finale: nothing
+ *  scrolls, so the click looks dead (Martin's Pixel catch). The nav fires
+ *  this instead and the email CTA pulses briefly — "you have arrived". */
+const CTA_FLASH_EVENT = 'contact-cta-flash'
+
+export function flashContactCta(): void {
+  window.dispatchEvent(new Event(CTA_FLASH_EVENT))
+}
 
 /**
  * A chapter's optional CTA. For an outbound article (http) it's a plain quiet
@@ -23,6 +32,27 @@ function Cta({ cta }: { cta: NonNullable<Chapter['cta']> }) {
   const email = isMail ? cta.href.slice('mailto:'.length).split('?')[0] : ''
   const [copied, setCopied] = useState(false)
 
+  // The "you have arrived" pulse (nav Contact while already at the finale).
+  // A timeout, not animationend — under reduced motion the animation never
+  // runs (the class falls back to a static highlight) yet must still clear.
+  const [flash, setFlash] = useState(false)
+  const flashTimer = useRef(0)
+  useEffect(() => {
+    if (!isMail) return
+    const onFlash = () => {
+      window.clearTimeout(flashTimer.current)
+      setFlash(false)
+      // Next frame, so a repeated click restarts the CSS animation.
+      requestAnimationFrame(() => setFlash(true))
+      flashTimer.current = window.setTimeout(() => setFlash(false), 1400)
+    }
+    window.addEventListener(CTA_FLASH_EVENT, onFlash)
+    return () => {
+      window.removeEventListener(CTA_FLASH_EVENT, onFlash)
+      window.clearTimeout(flashTimer.current)
+    }
+  }, [isMail])
+
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(email)
@@ -37,7 +67,7 @@ function Cta({ cta }: { cta: NonNullable<Chapter['cta']> }) {
   return (
     <span className={styles.ctaRow}>
       <a
-        className={styles.cta}
+        className={`${styles.cta} ${flash ? styles.ctaFlashOn : ''}`}
         href={cta.href}
         // mailto: must open the mail client in place — a blank tab is the
         // classic dead-page annoyance. New tabs are for http.

@@ -62,7 +62,7 @@ export function CreditsPopup({ onClose }: { onClose: () => void }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {MODEL_LICENSE.name} <span aria-hidden="true">↗</span>
+          {MODEL_LICENSE.name} <span aria-hidden="true">{'↗︎'}</span>
         </a>
       </div>
     </div>,

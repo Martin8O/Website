@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { getHeroLoadSnapshot, subscribeHeroLoad, type HeroKey } from '../three/heroLoad'
+import {
+  bumpBuildUrgency,
+  getHeroLoadSnapshot,
+  subscribeHeroLoad,
+  type HeroKey,
+} from '../three/heroLoad'
 import { CHAPTERS } from '../data/chapters'
 import { buildRuns } from '../canvas/sceneTimeline'
 import { useLang } from '../i18n/useLang'
@@ -28,6 +33,20 @@ export function HeroLoadIndicator({ pos }: { pos: number }) {
   const t = STRINGS[lang]
   const snap = useSyncExternalStore(subscribeHeroLoad, getHeroLoadSnapshot)
   const loadingKey = pickHeroIndicator(pos, WINDOWS, snap)
+
+  // While the bar is ON SCREEN the visitor is watching the load — keep the
+  // sliced build on its fast idle timeout even when they stand still before
+  // the beat's own urgency window (a standing viewer has no scroll to keep
+  // smooth). Without this a build whose beat was still a chapter away sliced
+  // at the gentle background pace and the watched bar crawled (Pixel report:
+  // "stops until I scroll on"). An interval, not per-render: the silent
+  // build phases don't re-render the chip.
+  useEffect(() => {
+    if (!loadingKey) return
+    bumpBuildUrgency()
+    const timer = window.setInterval(() => bumpBuildUrgency(), 300)
+    return () => window.clearInterval(timer)
+  }, [loadingKey])
 
   // The ✓ payoff: when the hero the chip was narrating flips to ready, hold
   // the chip for a beat with the check instead of vanishing mid-glance.

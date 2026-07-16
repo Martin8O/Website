@@ -4,6 +4,35 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-063 — Load-chip honesty (progress in every phase · watched builds run fast) · contact-arrival pulse · text-presentation arrows (2026-07-16)
+Four device reports from Martin's first real post-deploy round (his Pixel 9a, a friend's iPhone 17 Pro and a Galaxy
+A50). **(1) The chip froze mid-load ("stops at 55 %, only moves when I scroll on").** Two independent causes, both
+real: (a) the Bagram build's **Sobel normal-map bake phase reported no progress at all** — the pipeline jumped
+`0.55 → 0.70` around a phase that is several sliced seconds on a mid phone, so the bar sat at exactly 55 % while
+work was happening (the patrol bake had the same silent gap); progress is now reported **per baked map**, so no
+phase is ever mute. (b) `idleSlice` pacing (ADR from preview #3) intentionally runs a build at the **gentle 150 ms**
+timeout unless the visitor is inside that hero's own approach window — correct for a scrolling visitor (smooth
+frames win), wrong for a **standing** one who is watching the bar: a build kicked by a threshold the visitor then
+retreated from crawled while its progress bar was on screen. Fix: **while the chip is visible it bumps build
+urgency** (`HeroLoadIndicator` → `bumpBuildUrgency` on a 300 ms interval — an interval, not a render effect: the
+silent phases don't re-render the chip). Rationale: a visible progress bar is a promise; a standing viewer has no
+scroll smoothness left to protect, so finishing beats pacing exactly then. **(2) The chip never shows on an iPhone
+17 Pro — kept as-is, not a bug:** the post-load prefetch + a fast device make every hero ready long before the
+visitor arrives, and the chip narrates only builds *in flight*; showing it on a device with nothing to wait for
+would be noise. **(3) Nav "Contact" while already AT the finale looked dead** (the teleport moves nothing) and left
+the button visibly highlighted on touch. The nav now detects arrival (`getScrollProgress() > 0.985`) and fires a
+`contact-cta-flash` window event; the email CTA pulses amber twice (`ctaFlashOn`, cleared by timeout — not
+`animationend`, which never fires under reduced motion, where the class degrades to a static highlight). Both
+teleport buttons `blur()` on **pointer** clicks only (`e.detail > 0`) — keyboard focus is preserved for a11y.
+**(4) Every `↗` link arrow rendered as a blue-square EMOJI on a Galaxy A50** (Samsung/Google fonts default U+2197
+to emoji presentation). All 8 sites (About/Credits/Work/footer links, the two `OfferPanels` CSS `content` arrows,
+and the canvas-drawn arrow in `dev.ts`) now carry the **text-presentation selector U+FE0E** — a one-codepoint fix,
+no font change, verified present after every arrow in the built bundle. *Verify:* gate green (378); new
+`cdp-contact-flash.mjs` 7/7 PASS (flash on arrival-click, scroll unmoved, no sticky focus, class clears, far click
+teleports without flashing); `cdp-chip-watch.mjs` reproduces the Pixel scenario (kick Bagram → retreat to mid-ch-01
+→ stand, 4× CPU throttle): **before** the bar froze, **after** it runs 13 % → ✓ in ~11 s standing still;
+climb2/bagram/patrol harnesses ALL PASS console clean. A50 emoji-arrow confirmation is a device check.
+
 ### ADR-062 — 2D/3D toggle retired; runtime downgrade decays; Safari card-mask default-none (M-DEBUG) (2026-07-16)
 A friend on a MacBook Air M3 / Safari reported the live site (production `main`): `?world=3d` showed the 3D but ate
 **2–3 GB RAM / 60–80 % CPU**; the default showed "no 3D at all"; the nav 2D/3D pill "didn't work"; and the Contact
