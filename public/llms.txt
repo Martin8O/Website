@@ -27,7 +27,7 @@ and no data collection. Contact is by email only. Content is bilingual English
 - [Těnovice](https://www.one-tenovice.cz): a bilingual fundraising app for the Těnovice retreat centre — live pledge calculator, anonymous public pledges, account-based editing on a serverless AWS stack (CDK, Cognito, DynamoDB). Built as a collaboration. [Source](https://github.com/AnnaRozumova/Tenovice_fund_page).
 - [ClearFeed](https://github.com/Martin8O/ClearFeed): a Chrome extension (MV3) that mutes the topics you'd rather not see — politics, gossip, spoilers, sports, crypto — across news sites and feeds. 16 languages, 100% local, zero tracking.
 - [BrainQuest + dev-brain](https://github.com/Martin8O/BrainQuest): turns an Obsidian knowledge vault into a Duolingo-style learning game with spaced repetition (FSRS), a skill-tree and an AI tutor (Next.js, Capacitor).
-- [This site](https://github.com/Martin8O/Website): the scrollytelling site itself — an empty folder to a live production deploy in 4 days, then a 3D version in 4 more (React, TypeScript, Vite, Canvas 2D, Lenis).
+- [This site](https://github.com/Martin8O/Website): the scrollytelling site itself — an empty folder to a live production deploy in 4 days, then a 3D version in 6 more (React, TypeScript, Vite, Canvas 2D, Lenis).
 
 ## Work — before Claude
 

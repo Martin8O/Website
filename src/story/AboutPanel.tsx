@@ -32,7 +32,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         <br /> And fast&nbsp;—&nbsp;the site itself went from an empty folder to a live production
         deploy <span className={styles.highlight}>in 4&nbsp;days</span>, then extended into{' '}
         <span className={styles.highlight}>a 3D version</span>, with its own animation studio,{' '}
-        <span className={styles.highlight}>in 4&nbsp;more</span>.
+        <span className={styles.highlight}>in 6&nbsp;more</span>.
       </>
     ),
     p2: (
@@ -58,7 +58,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         <br /> A&nbsp;rychle: z&nbsp;prázdné složky až po produkční nasazení{' '}
         <span className={styles.highlight}>za 4&nbsp;dny</span>&nbsp;–&nbsp;a&nbsp;pak rozšíření
         o&nbsp;<span className={styles.highlight}>3D verzi</span>, s&nbsp;vlastním animačním studiem,{' '}
-        <span className={styles.highlight}>za&nbsp;další 4&nbsp;dny</span>.
+        <span className={styles.highlight}>za&nbsp;dalších 6&nbsp;dní</span>.
       </>
     ),
     p2: (
