@@ -145,6 +145,18 @@ export function buildUrgent(at: number = now()): boolean {
   return at < urgentUntil
 }
 
+// Dev-only diagnostic hook (stripped from prod): the CDP probes read the live
+// urgency/calm state to prove the pacing a build actually gets. Module-level
+// so any importer of this channel sees the same instance — which is exactly
+// what the probes verify.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  ;(window as unknown as { __heroLoadDbg?: unknown }).__heroLoadDbg = {
+    urgent: () => buildUrgent(),
+    calm: () => buildCalm(),
+    snapshot: () => getHeroLoadSnapshot(),
+  }
+}
+
 /** Test-only: full reset of module state. */
 export function __resetHeroLoadForTest(): void {
   states = { climb: IDLE, cruise: IDLE, desert: IDLE, patrol: IDLE }

@@ -81,6 +81,34 @@ export function getRoomEnv(gl: THREE.WebGLRenderer, sigma: number): Promise<THRE
  *  2D and back and 3D takes forever to reload" (mobile audit). */
 const _normalCache = new WeakMap<THREE.Texture, Promise<THREE.Texture | null>>()
 
+/** The bake policy + the dev-only A/B override.
+ *
+ *  SMALL SCREENS SKIP THE BAKE ENTIRELY (M-DEBUG, Martin: "mobil bez bake"):
+ *  a 15-crop A/B review (`local/tmp/bake-ab`) found the relief imperceptible
+ *  at phone aircraft sizes — the painted panel lines in the base colour carry
+ *  the detail — while the bake cost ~30 s of the Bagram build's 37 s on a
+ *  throttled mid-phone plus ~64 MB of normal-map memory. Same `small`
+ *  predicate as the shadow-map sizes (BagramActors / CruiseBallet), read per
+ *  bake: a phone stays small in both orientations. Desktop keeps the full
+ *  1024 bake — unchanged by design (Martin's call).
+ *
+ *  Dev override (`?bakeCap=512&bakeRows=256`; `bakeCap=0` = none) beats the
+ *  policy so the A/B tooling can force any variant on any viewport; the
+ *  branch is tree-shaken out of prod builds. */
+function bakeTuning(): { cap: number; rows: number } {
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    const q = new URLSearchParams(window.location.search)
+    const cap = Number(q.get('bakeCap') ?? NaN)
+    const rows = Number(q.get('bakeRows') ?? NaN)
+    if (Number.isFinite(cap)) {
+      return { cap, rows: Number.isFinite(rows) && rows > 0 ? rows : 64 }
+    }
+  }
+  const small =
+    typeof window !== 'undefined' && Math.min(window.innerWidth, window.innerHeight) < 720
+  return { cap: small ? 0 : 1024, rows: 64 }
+}
+
 export function normalFromMap(tex: THREE.Texture): Promise<THREE.Texture | null> {
   let cached = _normalCache.get(tex)
   if (!cached) {
@@ -93,8 +121,10 @@ export function normalFromMap(tex: THREE.Texture): Promise<THREE.Texture | null>
 async function bakeNormalFromMap(tex: THREE.Texture): Promise<THREE.Texture | null> {
   const img = tex.image as { width?: number; height?: number } | undefined
   if (!img || !img.width || !img.height) return null
-  const w = Math.min(img.width, 1024)
-  const h = Math.min(img.height, 1024)
+  const { cap, rows } = bakeTuning()
+  if (cap <= 0) return null
+  const w = Math.min(img.width, cap)
+  const h = Math.min(img.height, cap)
   const c = document.createElement('canvas')
   c.width = w
   c.height = h
@@ -109,7 +139,7 @@ async function bakeNormalFromMap(tex: THREE.Texture): Promise<THREE.Texture | nu
   }
   const S = 2.2
   // ~64 rows per slice ≈ a few ms of work between yields at 1024².
-  const ROWS_PER_SLICE = 64
+  const ROWS_PER_SLICE = rows
   for (let y0 = 0; y0 < h; y0 += ROWS_PER_SLICE) {
     await idleSlice()
     const yEnd = Math.min(y0 + ROWS_PER_SLICE, h)

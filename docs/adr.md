@@ -4,6 +4,27 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-065 — Small screens skip the runtime Sobel normal-map bake entirely (2026-07-16)
+The four hero pipelines bake tangent-space normal maps AT RUNTIME from each model's base-colour texture
+(`surface.ts normalFromMap` — Sobel edge-detect turns the painted panel lines into micro-relief; the baked GLBs
+mostly ship no native normal maps: ulla 0, Z-142 0, L-159 0, F-16 0 — verified with @gltf-transform; the L-39 is
+all-native, Apache/Mi-17/C-17 partially). Measured on a 4×-throttled mid-phone proxy, that bake was **~30 s of the
+Bagram build's 37 s** (12 maps × 16 idle-sliced row passes, each slice paying a frame of wait) plus **~64 MB** of
+1024² canvas textures — for a relief that a **15-crop A/B review** (`local/tmp/bake-ab`: climb Ulla/Z-142/L-39,
+airshow pass, landing break, Bagram Apache+C-17, each at its nearest beat, native-DPR sharpness) could not tell
+from "no bake at all" at phone aircraft sizes — the painted lines in the base colour carry the detail. Decision
+(Martin, from the crops): **small screens skip the bake entirely**; the policy lives in one place
+(`bakeTuning()`: `min(innerWidth, innerHeight) < 720` → no bake), deliberately the SAME `small` predicate the
+shadow-map sizes already use (ADR-050) so the site keeps one device-class line, and a dev-only
+`?bakeCap/?bakeRows` override serves the A/B tooling. Desktop keeps the full 1024 bake — explicitly unchanged
+(Martin; a desktop-no-bake variant goes to a PREVIEW deploy for an eyes-on decision). Native GLB normal maps are
+untouched everywhere (the bake only ever filled the `!material.normalMap` gap). *Verify:* end-to-end probe
+(`cdp-nobake-verify.mjs`, no dev overrides): mobile viewport = **0** baked maps + Bagram build **37.4 → 7.0 s**
+(4×); desktop-size window = **473** materials with baked maps (unchanged). One probe false-alarm worth recording:
+headless "1280×800" actually renders a 1262×**704** viewport → the policy correctly classed it small — real
+desktop windows sit well above the line, and 1366×768 laptops (~650 px viewports) were ALREADY small-class for
+shadows. Gate green (380); climb2/bagram/patrol harnesses ALL PASS console clean.
+
 ### ADR-064 — Hover is pointer-only site-wide; the load chip promises one scene ahead, never two (2026-07-16)
 Two follow-ups from Martin's second device round. **(1) Sticky highlight — `:hover` latches on touch.** Tapping nav
 Home/Contact on a Galaxy A50 left them lit. ADR-063 blamed focus and called `blur()` on pointer clicks — **that
