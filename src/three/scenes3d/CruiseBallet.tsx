@@ -634,6 +634,12 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
       holeStr.current = ''
       loadKicked.current = false
     }
+    // `parker` is memoized on [gl, res]; `gl` is stable for the Canvas
+    // lifetime, so [res] already covers every real change. Listing `parker`
+    // would be a no-op in practice, but this effect tears down + rebuilds
+    // the 3D scene — its dep list stays exactly as verified (ADR-061),
+    // documented instead of obeyed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [res])
 
   useFrame((state) => {

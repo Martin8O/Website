@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { onContactCtaFlash } from './contactFlash'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { cardOpacity, cardOpacityWindowed } from '../timeline'
 import { heroLive } from '../three/owned3d'
@@ -6,15 +7,6 @@ import type { WorldMode } from '../three/worldMode'
 import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
 import styles from './ChapterCards.module.css'
-
-/** Nav "Contact" clicked while the visitor is ALREADY at the finale: nothing
- *  scrolls, so the click looks dead (Martin's Pixel catch). The nav fires
- *  this instead and the email CTA pulses briefly — "you have arrived". */
-const CTA_FLASH_EVENT = 'contact-cta-flash'
-
-export function flashContactCta(): void {
-  window.dispatchEvent(new Event(CTA_FLASH_EVENT))
-}
 
 /**
  * A chapter's optional CTA. For an outbound article (http) it's a plain quiet
@@ -39,16 +31,15 @@ function Cta({ cta }: { cta: NonNullable<Chapter['cta']> }) {
   const flashTimer = useRef(0)
   useEffect(() => {
     if (!isMail) return
-    const onFlash = () => {
+    const off = onContactCtaFlash(() => {
       window.clearTimeout(flashTimer.current)
       setFlash(false)
       // Next frame, so a repeated click restarts the CSS animation.
       requestAnimationFrame(() => setFlash(true))
       flashTimer.current = window.setTimeout(() => setFlash(false), 1400)
-    }
-    window.addEventListener(CTA_FLASH_EVENT, onFlash)
+    })
     return () => {
-      window.removeEventListener(CTA_FLASH_EVENT, onFlash)
+      off()
       window.clearTimeout(flashTimer.current)
     }
   }, [isMail])

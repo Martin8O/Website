@@ -1,6 +1,6 @@
 import { Suspense, lazy, useCallback, useRef, useState } from 'react'
 import { getScrollProgress, scrollToProgress } from '../scroll/scrollStore'
-import { flashContactCta } from './ChapterCards'
+import { flashContactCta } from './contactFlash'
 import { useLang } from '../i18n/useLang'
 import { setLang } from '../i18n/langStore'
 import { STRINGS } from '../i18n/strings'
