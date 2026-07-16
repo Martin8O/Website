@@ -31,7 +31,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     era: '1999–2005 · ČVUT → Brno',
     num: '01 – Rozhodnutí',
     title: 'Vzhůru',
-    body: 'Ale po dvou letech informatiky na elektrotechnické fakultě jsem odešel. Nedokázal jsem si tenkrát představit život strávený před obrazovkou počítače&nbsp;–&nbsp;<em>to si zapamatujte</em>&nbsp;–&nbsp;čekal na mě totiž klukovský sen: <span class="a-hud">létat na proudových letounech</span>. Z‑142, pak <span class="nw">L‑39C&nbsp;–&nbsp;sto</span> hodin ve vzduchu, ještě během studia na Univerzitě obrany, a&nbsp;úplně jiný život.',
+    body: 'Ale po dvou letech informatiky na elektrotechnické fakultě jsem odešel. Nedokázal jsem si tenkrát představit život strávený před obrazovkou počítače&nbsp;–&nbsp;<em>to si zapamatujte</em>&nbsp;–&nbsp;čekal na mě totiž klukovský sen: <span class="a-hud">létání</span>. Napřed Z‑142, pak <span class="nw">L‑39C&nbsp;–&nbsp;sto</span> hodin ve vzduchu, ještě během studia na Univerzitě obrany, a&nbsp;úplně jiný život.',
   },
   'sky-cruise': {
     era: '2012–2022 · L-159',
