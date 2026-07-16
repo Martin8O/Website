@@ -47,11 +47,24 @@ export function SiteNav() {
     aboutRef.current?.focus()
   }, [])
 
+  // Deterministic tap feedback (both-phones report: "no glow on tap").
+  // A quick tap often ends before the browser ever paints `:active`
+  // (Chromium shows it ~100 ms into a press), and the UA's blue flash that
+  // used to mask that gap is deliberately off (ADR-068) — so fast taps read
+  // as dead. A restartable CSS animation guarantees ONE visible amber pulse
+  // per tap on every device; `:active` still covers held presses.
+  const tapFlash = (el: HTMLElement) => {
+    el.classList.remove(styles.tapped)
+    void el.offsetWidth // reflow so a rapid re-tap restarts the animation
+    el.classList.add(styles.tapped)
+  }
+
   return (
     <nav className={styles.nav} aria-label={t.navLandmark}>
       <button
         className={`${styles.item} ${styles.home}`}
         onClick={(e) => {
+          tapFlash(e.currentTarget)
           scrollToProgress(0, { immediate: true })
           // A pointer tap must not leave a sticky focus highlight on the nav
           // (touch keeps :focus until the next tap); keyboard (detail 0)
@@ -75,7 +88,10 @@ export function SiteNav() {
       <button
         ref={workRef}
         className={styles.item}
-        onClick={() => setOpen('work')}
+        onClick={(e) => {
+          tapFlash(e.currentTarget)
+          setOpen('work')
+        }}
         aria-haspopup="dialog"
         aria-expanded={open === 'work'}
       >
@@ -84,6 +100,7 @@ export function SiteNav() {
       <button
         className={styles.item}
         onClick={(e) => {
+          tapFlash(e.currentTarget)
           // Already AT the finale: the teleport moves nothing, so the click
           // looked dead (Martin's Pixel catch) — pulse the email CTA instead:
           // "you have arrived". 0.985 ≈ the contact card fully risen.
@@ -99,7 +116,8 @@ export function SiteNav() {
       <button
         ref={aboutRef}
         className={styles.item}
-        onClick={() => {
+        onClick={(e) => {
+          tapFlash(e.currentTarget)
           returning.current = false
           setOpen('about')
         }}
@@ -111,7 +129,10 @@ export function SiteNav() {
       <span className={styles.divider} aria-hidden="true" />
       <button
         className={`${styles.item} ${styles.lang}`}
-        onClick={() => setLang(lang === 'en' ? 'cs' : 'en')}
+        onClick={(e) => {
+          tapFlash(e.currentTarget)
+          setLang(lang === 'en' ? 'cs' : 'en')
+        }}
         aria-label={t.langSwitchLabel}
         title={t.langSwitchLabel}
       >

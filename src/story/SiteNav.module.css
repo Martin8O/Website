@@ -65,6 +65,33 @@
   display: block;
 }
 
+/* One guaranteed amber pulse per tap (SiteNav's tapFlash): quick taps often
+   end before the browser paints `:active` at all (Chromium waits ~100 ms
+   into a press), so on phones the nav read as dead once the UA's blue flash
+   went off (ADR-068). The class is re-added with a reflow per tap, so the
+   animation restarts even on rapid re-taps; afterwards styles return to
+   normal (no fill). */
+.tapped {
+  animation: navTap 420ms ease-out;
+}
+
+@keyframes navTap {
+  0% {
+    background: color-mix(in srgb, var(--amber) 16%, transparent);
+    box-shadow: 0 0 22px -6px color-mix(in srgb, var(--amber) 70%, transparent);
+  }
+  100% {
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tapped {
+    animation: none;
+  }
+}
+
 /* Quiet separator before the language switch. */
 .divider {
   width: 1px;
