@@ -55,7 +55,7 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
+import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
 
 /** The registry's 'sky' entry: the two flypast beats, the chapter-02
  *  one-circle fight (CruiseBallet — the ballet showcase, ported), the
@@ -731,7 +731,11 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
 
   useFrame((state, delta) => {
     void delta
-    if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+    // Ahead-or-near kick band (see ClimbHeroes — the teleport-past-the-beat
+    // fix): a beat far BEHIND the visitor must not start building.
+    const kickable =
+      frame.pos > LOAD_AT_POS && (!sunsetRun || frame.pos < sunsetRun.end + 1 + PARK_OUT)
+    if (!loadKicked.current && kickable) kickLoad()
     // Approaching the flypasts with the build unfinished — let idleSlice run
     // on the short timeout (finish over smoothness).
     if (!jetsRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()

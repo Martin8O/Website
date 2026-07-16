@@ -60,7 +60,7 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { createGpuParker, getRoomEnv, idleSlice, warmTextures } from './surface'
+import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, warmTextures } from './surface'
 
 const MODEL_URLS: Record<ClimbAircraft['id'], string> = {
   ulla: '/models/ulla.glb',
@@ -417,7 +417,16 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
 
   useFrame((state, delta) => {
     const count = flight.count
-    if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+    // Kick only while the beat is AHEAD-or-near — `pos > LOAD_AT_POS` alone
+    // also fired on a TELEPORT past the beat (nav "Contact" right after
+    // boot kicked ALL FOUR hero builds at once at the heaviest 2D scene;
+    // on a weak phone that burned the watchdog's whole excuse budget and
+    // branded the device 2D — Martin's report, cdp-teleport-2d.mjs). The
+    // behind-bound mirrors the GPU parker: nothing builds where it would
+    // immediately park.
+    const kickable =
+      frame.pos > LOAD_AT_POS && (!climbRun || frame.pos < climbRun.end + 1 + PARK_OUT)
+    if (!loadKicked.current && kickable) kickLoad()
     // Approaching this hero's beat with the build unfinished — let idleSlice
     // run on the short timeout (finish over smoothness).
     if (!readyRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()

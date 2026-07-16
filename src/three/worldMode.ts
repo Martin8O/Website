@@ -144,8 +144,16 @@ const CHOICE_KEY_LEGACY = 'site-world'
 // re-probe on every reload, and heals on its own. The legacy plain-'2d'
 // value (pre-TTL format) reads as expired — one clean retry, same idiom as
 // the v1→v2 migration.
-const AUTO_KEY = 'site-world-auto2'
-const AUTO_KEY_LEGACY = 'site-world-auto'
+//
+// v3: v2 entries could AGAIN be false positives — until the kick band
+// (ADR-070) a nav-"Contact" teleport right after boot started ALL FOUR hero
+// builds at once at the heaviest 2D scene, which on a weak phone burned the
+// watchdog's whole excuse budget and tripped it (Martin's report, reproduced
+// by cdp-teleport-2d.mjs at 12×). Reading v3 removes any v2 value: every
+// wrongly-branded device gets one clean retry under the banded kicks; a
+// genuinely weak device simply re-trips (and now heals in 24 h anyway).
+const AUTO_KEY = 'site-world-auto3'
+const AUTO_KEYS_LEGACY = ['site-world-auto', 'site-world-auto2']
 
 /** How long a runtime FPS downgrade is honoured before 3D is retried. */
 export const AUTO_TTL_MS = 24 * 60 * 60 * 1000
@@ -166,7 +174,7 @@ const autoListeners = new Set<() => void>()
 export function getAutoDowngrade(): boolean {
   if (autoDown === undefined) {
     try {
-      localStorage.removeItem(AUTO_KEY_LEGACY)
+      for (const k of AUTO_KEYS_LEGACY) localStorage.removeItem(k)
       localStorage.removeItem(CHOICE_KEY_LEGACY)
       const stored = localStorage.getItem(AUTO_KEY)
       autoDown = autoDowngradeActive(stored, Date.now())

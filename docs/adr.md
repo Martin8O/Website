@@ -4,6 +4,34 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-070 — Hero builds kick only for beats AHEAD-or-near (a teleport must not build the whole story) · guaranteed tap pulse (2026-07-16)
+**(1) "Tap Contact right after load, then Home, then scroll ⇒ no chip, whole site 2D" (Martin, both phones) — a
+real bug, reproduced at 12× throttle by `cdp-teleport-2d.mjs`.** The kick condition was `pos > LOAD_AT_POS` alone,
+which is true for EVERY threshold once a nav teleport lands the visitor at pos 11 — so one tap on Contact started
+**all four hero builds at once**, on top of the heaviest 2D scene (the contact galaxy). On a weak phone that
+sustained enough slow frames to exhaust the watchdog's 15 s excuse budget (ADR-062), so it tripped and branded the
+device 2D for 24 h — which is why the 3D never returned after Home and the chip (3D-mode only) never showed. Note
+the watchdog itself was blameless and is unchanged: it did exactly what it promises; the TRIGGER was wrong. Fix:
+each scene kicks only inside an **ahead-or-near band** — `pos > LOAD_AT_POS && pos < run.end + 1 + PARK_OUT` —
+mirroring the GPU parker's own bound, i.e. *never build where the parker would immediately park*. A visitor who
+jumps straight to the finale now builds nothing (they also stop paying for heroes they never scroll to), and the
+normal scroll pipeline is untouched. Plus a **v2 → v3 auto-key migration** (`site-world-auto3`): every device this
+bug wrongly branded — including Martin's two phones — gets one clean retry on first load, the same idiom as v1→v2.
+**Verified across EVERY nav path** (`cdp-nav-kicks.mjs`, throttled phone, watchdog armed): Projects and About open
+modals without moving `pos` or kicking anything; About's "Get in touch" CTA and the skip-link teleport (both real
+`scrollToProgress(1)` calls, like the Contact button) kick nothing; and after Home + a real scroll the pipeline
+comes alive normally (climb+cruise ready, desert loading, still 3 canvases, no downgrade). The guard lives in the
+scenes, not on a button, so it covers teleports we have not thought of. **(2) "The amber glow never fires on tap"
+(both phones).** A quick tap routinely ends before the browser paints `:active` (Chromium shows it ~100 ms into a
+press), and the UA's blue flash that used to mask that gap is deliberately off (ADR-068) — so short taps read as
+dead. `SiteNav` now runs a restartable CSS animation on click (`tapFlash` → `.tapped`, re-added after a forced
+reflow so rapid re-taps restart it): **exactly one guaranteed amber pulse per tap on every device**, independent of
+the browser's `:active` timing. `:active` stays for held presses, reduced-motion disables the animation, keyboard
+and desktop are unchanged. *Verify:* gate green (383); lint 0/0; `cdp-nav-kicks` ALL PASS; `cdp-teleport-2d` at 12×
+= no downgrade, no stray kicks (was: downgrade + all four building); `cdp-watchdog-load` 4× clean; tap-flash probe
+confirms the class + running animation + amber background on click; climb2/bagram/patrol + chip-fastscroll +
+contact-flash ALL PASS.
+
 ### ADR-069 — The chip's ✓ payoff self-clears and only fires for beats still ahead; lint is zero-warning (2026-07-16)
 Martin's fast-scroll report ("the 3D indicator hung and rode along to the end of scene 10") reproduced as a real
 bug, worse than it sounded: a **permanently stuck "3D ✓"**. The payoff flash's clear-timer lived in the same effect

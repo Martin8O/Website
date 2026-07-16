@@ -48,7 +48,7 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
+import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
 import { buildAIM9 } from './aim9'
 import { buildDropTank } from './droptank'
 
@@ -643,7 +643,11 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
   }, [res])
 
   useFrame((state) => {
-    if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+    // Ahead-or-near kick band (see ClimbHeroes — the teleport-past-the-beat
+    // fix): a beat far BEHIND the visitor must not start building.
+    const kickable =
+      frame.pos > LOAD_AT_POS && (!cruiseRun || frame.pos < cruiseRun.end + 1 + PARK_OUT)
+    if (!loadKicked.current && kickable) kickLoad()
     // Approaching this hero's beat with the build unfinished — let idleSlice
     // run on the short timeout (finish over smoothness).
     if (!jetsRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()

@@ -59,7 +59,7 @@ import {
   type BagramPose,
 } from '../bagramMath'
 import type { Scene3DProps } from '../registry3d'
-import { createGpuParker, getRoomEnv, idleSlice, warmTextures } from './surface'
+import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, warmTextures } from './surface'
 
 type ActorId = 'c17' | 'apache' | 'f16' | 'mi17'
 
@@ -556,7 +556,11 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
   }, [res])
 
   useFrame((state, delta) => {
-    if (!loadKicked.current && frame.pos > LOAD_AT_POS) kickLoad()
+    // Ahead-or-near kick band (see ClimbHeroes — the teleport-past-the-beat
+    // fix): a beat far BEHIND the visitor must not start building.
+    const kickable =
+      frame.pos > LOAD_AT_POS && (!desertRun || frame.pos < desertRun.end + 1 + PARK_OUT)
+    if (!loadKicked.current && kickable) kickLoad()
     // The visitor is inside this hero's approach window and the build is not
     // done — let idleSlice run on the short timeout (finish over smoothness).
     if (!readyRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()

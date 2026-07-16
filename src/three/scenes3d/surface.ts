@@ -161,7 +161,7 @@ export function releaseSceneGpu(root: THREE.Object3D): void {
  *  than a beat's own fades, so a normal scroll re-uploads while the scene is
  *  still invisible. Both clear every hero LOAD_AT_POS kick threshold, so a
  *  fresh build is never parked before its own chapter. */
-const PARK_OUT = 2.0
+export const PARK_OUT = 2.0
 const PARK_IN = 1.6
 
 export type GpuParker = {
