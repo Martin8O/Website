@@ -4,7 +4,7 @@
  * disagree about the look machinery, and so no scene has to import another
  * scene just for a texture bake).
  *
- * Everything here is ASYNC + sliced across idle time on purpose: the bakes
+ * Everything here is ASYNC + sliced across idle time on purpose: the builds
  * and GPU uploads used to run synchronously inside the GLB onLoad callbacks,
  * blocking the main thread for hundreds of ms right when a model finished
  * downloading — mid-scroll jank and multi-second INP on slower machines. The
@@ -69,106 +69,12 @@ export function getRoomEnv(gl: THREE.WebGLRenderer, sigma: number): Promise<THRE
   return tex
 }
 
-/** Sobel a texture's luminance into a subtle tangent-space normal map (the
- *  showcase's surface lift — panel-line relief from the paint's own dark
- *  lines; the sources ship baseColor only). The pixel loop runs in row slices
- *  with idle yields between them — never a single long main-thread task.
- *
- *  Cached MODULE-WIDE by source texture (was caller-local): the parsed GLBs are
- *  session-cached (loadModels), so a world-mode toggle that unmounts + remounts
- *  the 3D layer hands back the SAME texture objects — the cache then skips the
- *  whole Sobel bake on the re-mount, which was the bulk of the ~15 s "toggle to
- *  2D and back and 3D takes forever to reload" (mobile audit). */
-const _normalCache = new WeakMap<THREE.Texture, Promise<THREE.Texture | null>>()
-
-/** The bake policy + the dev-only A/B override.
- *
- *  SMALL SCREENS SKIP THE BAKE ENTIRELY (M-DEBUG, Martin: "mobil bez bake"):
- *  a 15-crop A/B review (`local/tmp/bake-ab`) found the relief imperceptible
- *  at phone aircraft sizes — the painted panel lines in the base colour carry
- *  the detail — while the bake cost ~30 s of the Bagram build's 37 s on a
- *  throttled mid-phone plus ~64 MB of normal-map memory. Same `small`
- *  predicate as the shadow-map sizes (BagramActors / CruiseBallet), read per
- *  bake: a phone stays small in both orientations. Desktop keeps the full
- *  1024 bake — unchanged by design (Martin's call).
- *
- *  Dev override (`?bakeCap=512&bakeRows=256`; `bakeCap=0` = none) beats the
- *  policy so the A/B tooling can force any variant on any viewport; the
- *  branch is tree-shaken out of prod builds. */
-function bakeTuning(): { cap: number; rows: number } {
-  if (import.meta.env.DEV && typeof window !== 'undefined') {
-    const q = new URLSearchParams(window.location.search)
-    const cap = Number(q.get('bakeCap') ?? NaN)
-    const rows = Number(q.get('bakeRows') ?? NaN)
-    if (Number.isFinite(cap)) {
-      return { cap, rows: Number.isFinite(rows) && rows > 0 ? rows : 64 }
-    }
-  }
-  const small =
-    typeof window !== 'undefined' && Math.min(window.innerWidth, window.innerHeight) < 720
-  return { cap: small ? 0 : 1024, rows: 64 }
-}
-
-export function normalFromMap(tex: THREE.Texture): Promise<THREE.Texture | null> {
-  let cached = _normalCache.get(tex)
-  if (!cached) {
-    cached = bakeNormalFromMap(tex)
-    _normalCache.set(tex, cached)
-  }
-  return cached
-}
-
-async function bakeNormalFromMap(tex: THREE.Texture): Promise<THREE.Texture | null> {
-  const img = tex.image as { width?: number; height?: number } | undefined
-  if (!img || !img.width || !img.height) return null
-  const { cap, rows } = bakeTuning()
-  if (cap <= 0) return null
-  const w = Math.min(img.width, cap)
-  const h = Math.min(img.height, cap)
-  const c = document.createElement('canvas')
-  c.width = w
-  c.height = h
-  const ctx = c.getContext('2d')
-  if (!ctx) return null
-  ctx.drawImage(tex.image as CanvasImageSource, 0, 0, w, h)
-  const src = ctx.getImageData(0, 0, w, h).data
-  const out = ctx.createImageData(w, h)
-  const lum = (x: number, y: number): number => {
-    const i = (y * w + x) * 4
-    return (src[i] * 0.3 + src[i + 1] * 0.59 + src[i + 2] * 0.11) / 255
-  }
-  const S = 2.2
-  // ~64 rows per slice ≈ a few ms of work between yields at 1024².
-  const ROWS_PER_SLICE = rows
-  for (let y0 = 0; y0 < h; y0 += ROWS_PER_SLICE) {
-    await idleSlice()
-    const yEnd = Math.min(y0 + ROWS_PER_SLICE, h)
-    for (let y = y0; y < yEnd; y++) {
-      for (let x = 0; x < w; x++) {
-        const xl = Math.max(x - 1, 0)
-        const xr = Math.min(x + 1, w - 1)
-        const yt = Math.max(y - 1, 0)
-        const yb = Math.min(y + 1, h - 1)
-        const dx = (lum(xl, y) - lum(xr, y)) * S
-        const dy = (lum(x, yt) - lum(x, yb)) * S
-        const nz = 1
-        const len = Math.hypot(dx, dy, nz)
-        const i = (y * w + x) * 4
-        out.data[i] = ((dx / len) * 0.5 + 0.5) * 255
-        out.data[i + 1] = ((dy / len) * 0.5 + 0.5) * 255
-        out.data[i + 2] = (nz / len) * 255
-        out.data[i + 3] = 255
-      }
-    }
-  }
-  ctx.putImageData(out, 0, 0)
-  const nt = new THREE.CanvasTexture(c)
-  nt.wrapS = tex.wrapS
-  nt.wrapT = tex.wrapT
-  nt.flipY = tex.flipY
-  nt.needsUpdate = true
-  return nt
-}
+// (The runtime Sobel normal-map bake that used to live here is RETIRED —
+// ADR-066. It computed panel-line relief from each model's base colour at
+// load time; a 15-crop A/B review could not tell it from the painted lines
+// the base colour already carries, while it cost ~30 s of a throttled
+// mid-phone's 37 s Bagram build and ~96 MB of canvas textures. Models with
+// NATIVE normal maps in their GLBs keep them — those were never touched.)
 
 // ---------------------------------------------------------------------------
 // GPU parking (M-DEBUG 2026-07-15) — the four hero scenes stay MOUNTED for the
@@ -183,10 +89,10 @@ async function bakeNormalFromMap(tex: THREE.Texture): Promise<THREE.Texture | nu
 // normal scroll never pays the upload inside the beat.
 // ---------------------------------------------------------------------------
 
-/** Textures SHARED between two live scenes (the l159 skin + its Sobel bake —
- *  the ballet and both patrol pairs clone the same base): parking one scene
- *  must never delete the other's live GPU copy, so shared maps are exempt —
- *  they cost ~25 MB and stay for the renderer's life, like the PMREM env. */
+/** Textures SHARED between two live scenes (the l159 skin — the ballet and
+ *  both patrol pairs clone the same base): parking one scene must never
+ *  delete the other's live GPU copy, so shared maps are exempt — they cost
+ *  ~25 MB and stay for the renderer's life, like the PMREM env. */
 const _sharedGpuTex = new Set<THREE.Texture>()
 
 /** A scene whose model base is cloned by ANOTHER scene calls this once after

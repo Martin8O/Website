@@ -59,7 +59,7 @@ import {
   type BagramPose,
 } from '../bagramMath'
 import type { Scene3DProps } from '../registry3d'
-import { createGpuParker, getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
+import { createGpuParker, getRoomEnv, idleSlice, warmTextures } from './surface'
 
 type ActorId = 'c17' | 'apache' | 'f16' | 'mi17'
 
@@ -221,16 +221,12 @@ function makeInstance(
   id: ActorId,
   base: THREE.Group,
   env: THREE.Texture,
-  normals: Map<THREE.Texture, THREE.Texture | null>,
   shadows: boolean,
 ): Instance {
   const root = base.clone(true)
   const mats: MatRec[] = []
   const spins: SpinRec[] = []
   const cloned = new Map<THREE.Material, THREE.MeshStandardMaterial>()
-  // The two close-pass models carry the panel-line relief; the far pair
-  // (F-16 speck, deep Mi-17) skips the bake — invisible at their size.
-  const lift = id === 'c17' || id === 'apache'
   root.traverse((n) => {
     const spin = (n.userData as { spin?: SpinRec }).spin
     // C-17 engine fans stay STATIC (Martin R6: the spinning discs read wrong —
@@ -252,16 +248,8 @@ function makeInstance(
             std.map.anisotropy = 8
             std.metalness = 0.25
             std.roughness = 0.55
-            if (lift) {
-              // The bakes are PRE-computed (sliced, off the interaction
-              // path) in kickLoad before any instance is built — this is a
-              // pure cache read now.
-              const nrm = normals.get(std.map)
-              if (nrm && !std.normalMap) {
-                std.normalMap = nrm
-                std.normalScale = new THREE.Vector2(0.5, 0.5)
-              }
-            }
+            // (Runtime Sobel normal bake RETIRED — ADR-066; models with
+            // native normal maps keep them via the clone.)
           } else {
             std.metalness = 0.3
             std.roughness = 0.55
@@ -480,53 +468,32 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
         const env = await getRoomEnv(gl, 0.04)
         if (!aliveRef.current) return
         reportHeroProgress('desert', 0.55)
-        // Pre-bake the panel-line normal maps for the two lift models
-        // (sliced across idle time — never a long task); makeInstance then
-        // only reads the cache. One idle slice between instances too: seven
-        // clone+grade passes in one tick was its own main-thread block.
-        // Progress is reported PER MAP: this phase is many sliced seconds on
-        // a mid phone and used to sit silent — the HUD chip froze at exactly
-        // 55 % and read as stuck (Martin's Pixel report).
-        const maps: THREE.Texture[] = []
-        for (const id of ['c17', 'apache'] as const) {
-          models[id].root.traverse((n) => {
-            const mesh = n as THREE.Mesh
-            if (!mesh.isMesh) return
-            for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
-              const std = m as THREE.MeshStandardMaterial
-              if ('metalness' in std && std.map && !maps.includes(std.map)) maps.push(std.map)
-            }
-          })
-        }
-        const normals = new Map<THREE.Texture, THREE.Texture | null>()
-        let baked = 0
-        for (const map of maps) {
-          if (!normals.has(map)) normals.set(map, await normalFromMap(map))
-          if (!aliveRef.current) return
-          reportHeroProgress('desert', 0.55 + (++baked / maps.length) * 0.15)
-        }
-        reportHeroProgress('desert', 0.7)
+        // One idle slice between instances: seven clone+grade passes in one
+        // tick was its own main-thread block. (The pre-bake of panel-line
+        // normal maps that used to run here is RETIRED — ADR-066: ~30 s of a
+        // throttled mid-phone's 37 s build for a relief a 15-crop A/B could
+        // not tell from the painted lines the base colour already carries.)
         let built = 0
         const build = async <T,>(make: () => T): Promise<T> => {
           await idleSlice()
           const made = make()
-          reportHeroProgress('desert', 0.7 + (++built / 7) * 0.15)
+          reportHeroProgress('desert', 0.55 + (++built / 7) * 0.3)
           return made
         }
         const instances = {
-          c17: await build(() => makeInstance('c17', models.c17.root, env, normals, true)),
+          c17: await build(() => makeInstance('c17', models.c17.root, env, true)),
           mi17: [
-            await build(() => makeInstance('mi17', models.mi17.root, env, normals, true)),
-            await build(() => makeInstance('mi17', models.mi17.root, env, normals, true)),
+            await build(() => makeInstance('mi17', models.mi17.root, env, true)),
+            await build(() => makeInstance('mi17', models.mi17.root, env, true)),
           ],
           apache: [
-            await build(() => makeInstance('apache', models.apache.root, env, normals, true)),
-            await build(() => makeInstance('apache', models.apache.root, env, normals, true)),
+            await build(() => makeInstance('apache', models.apache.root, env, true)),
+            await build(() => makeInstance('apache', models.apache.root, env, true)),
           ],
           f16: [
             // The far speck pair casts nothing — not worth a shadow pass.
-            await build(() => makeInstance('f16', models.f16.root, env, normals, false)),
-            await build(() => makeInstance('f16', models.f16.root, env, normals, false)),
+            await build(() => makeInstance('f16', models.f16.root, env, false)),
+            await build(() => makeInstance('f16', models.f16.root, env, false)),
           ],
         }
         if (!aliveRef.current) return

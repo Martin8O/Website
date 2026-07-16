@@ -5,7 +5,7 @@
  *  1. "Is a hero BUILD in flight right now?" — read by the runtime FPS
  *     watchdog (worldMode.ts). The watchdog exists to catch devices that
  *     cannot RENDER 3D; a device that is merely BUSY LOADING it (GLB parse,
- *     Sobel bake, GPU upload) produces the same slow frames, and counting
+ *     instance builds, GPU upload) produces the same slow frames, and counting
  *     those permanently downgraded capable mid-range phones to 2D right in
  *     the first hero's build window (proven: 4× CPU throttle, watchdog armed
  *     → downgrade at t≈5 s / pos≈0.5, persisted; same throttle with the

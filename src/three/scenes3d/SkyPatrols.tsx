@@ -55,7 +55,7 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { createGpuParker, getRoomEnv, idleSlice, markSharedTextures, normalFromMap, warmTextures } from './surface'
+import { createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
 
 /** The registry's 'sky' entry: the two flypast beats, the chapter-02
  *  one-circle fight (CruiseBallet — the ballet showcase, ported), the
@@ -192,9 +192,6 @@ type JetInstance = {
 // The shared L-159 loader + model conventions live in `l159.ts` — one
 // fetch+parse serves the patrols AND the cruise ballet.
 
-// normalFromMap (the showcase's baseColor→normal surface lift) moved to the
-// shared `surface.ts` — the climb heroes bake the same panel-line relief.
-
 /** Shared wingtip-star texture: a soft warm core with four thin rays — the
  *  "mírný hvězdičkový efekt" on the tip lights. Baked once. */
 let starTex: THREE.CanvasTexture | null = null
@@ -268,7 +265,6 @@ function makeInstance(
   base: THREE.Group,
   armed: boolean,
   env: THREE.Texture,
-  sharedNormal: { tex: THREE.Texture | null },
   grade: { mul: readonly [number, number, number]; envInt: number },
   tipStars: boolean,
 ): JetInstance {
@@ -324,12 +320,8 @@ function makeInstance(
       } else if (std.map) {
         std.metalness = 0.35
         std.roughness = 0.42
-        // The shared skin normal is PRE-baked (sliced, off the interaction
-        // path) in kickLoad before any instance is built — cache read only.
-        if (sharedNormal.tex && !std.normalMap) {
-          std.normalMap = sharedNormal.tex
-          std.normalScale = new THREE.Vector2(0.6, 0.6)
-        }
+        // (Runtime Sobel normal bake RETIRED — ADR-066; the painted panel
+        // lines in the skin's base colour carry the detail.)
       } else {
         std.metalness = 0.5
         std.roughness = 0.4
@@ -611,7 +603,6 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
   // [2..3] armed break pair.
   const jetsRef = useRef<JetInstance[] | null>(null)
   const loadKicked = useRef(false)
-  const normalRef = useRef<{ tex: THREE.Texture | null }>({ tex: null })
   const aspectRef = useRef(0)
 
   const probe = useMemo<PatrolProbe>(
@@ -659,35 +650,9 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
         const env = await getRoomEnv(gl, 0.04)
         if (!alive) return
         reportHeroProgress('patrol', 0.65)
-        // Pre-bake the shared skin normal (sliced across idle time) so the
-        // instance builds below are pure cache reads — the bake used to run
-        // synchronously inside the first makeInstance.
-        if (!normalRef.current.tex) {
-          let skin: THREE.Texture | null = null
-          base.traverse((n) => {
-            if (skin) return
-            const mesh = n as THREE.Mesh
-            if (!mesh.isMesh || SPECIAL_MESH.test(n.name)) return
-            for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
-              const std = m as THREE.MeshStandardMaterial
-              if ('metalness' in std && std.map) {
-                skin = std.map
-                break
-              }
-            }
-          })
-          const nrm = skin ? await normalFromMap(skin) : null
-          if (!alive) {
-            nrm?.dispose()
-            return
-          }
-          normalRef.current.tex = nrm
-        }
-        // The bake above is sliced seconds on a mid phone — tick the HUD chip
-        // so the bar never sits silent through it (the frozen-bar report).
-        reportHeroProgress('patrol', 0.68)
         // One idle slice between clones — four clone+grade passes in one
-        // tick was a main-thread block of its own.
+        // tick was a main-thread block of its own. (The shared-skin Sobel
+        // bake that used to run here is RETIRED — ADR-066.)
         const specs = [
           { armed: false, grade: GRADE_PASS, stars: true },
           { armed: false, grade: GRADE_PASS, stars: true },
@@ -704,8 +669,8 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
             }
             return
           }
-          jets.push(makeInstance(base, s.armed, env, normalRef.current, s.grade, s.stars))
-          reportHeroProgress('patrol', 0.7 + (jets.length / specs.length) * 0.12)
+          jets.push(makeInstance(base, s.armed, env, s.grade, s.stars))
+          reportHeroProgress('patrol', 0.65 + (jets.length / specs.length) * 0.17)
         }
         for (const j of jets) res.stage.add(j.pivot)
         jetsRef.current = jets
@@ -747,8 +712,6 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
         }
         jetsRef.current = null
       }
-      normalRef.current.tex?.dispose()
-      normalRef.current.tex = null
       // The env texture is the session-shared getRoomEnv bake — not disposed.
       for (const s of res.smoke) {
         s.points.geometry.dispose()

@@ -131,7 +131,7 @@ const CHOICE_KEY_LEGACY = 'site-world'
 
 // v2 key: v1 ('site-world-auto') could be a FALSE POSITIVE — the original
 // watchdog counted the slow frames of the hero BUILD window (GLB parse,
-// Sobel bake, GPU upload) as rendering weakness and permanently downgraded
+// instance builds, GPU upload) as rendering weakness and permanently downgraded
 // capable phones mid-load. Reading v2 removes any v1 value, so every such
 // device gets one clean retry under the fixed (build-aware) watchdog; a
 // genuinely weak device simply re-trips in its first heavy scene.

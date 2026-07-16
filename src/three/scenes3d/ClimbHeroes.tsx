@@ -60,7 +60,7 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { createGpuParker, getRoomEnv, idleSlice, normalFromMap, warmTextures } from './surface'
+import { createGpuParker, getRoomEnv, idleSlice, warmTextures } from './surface'
 
 const MODEL_URLS: Record<ClimbAircraft['id'], string> = {
   ulla: '/models/ulla.glb',
@@ -135,13 +135,11 @@ function loadModels(
               const mats: MatRec[] = []
               const spins: SpinRec[] = []
               const seen = new Set<THREE.Material>()
-              // Per-model normal-map cache — one Sobel bake per base texture,
-              // sliced across idle time (surface.ts) so the bake never blocks
-              // an interaction; the model resolves only once every lift has
-              // landed, so the first shader compile already sees the final
-              // material (no visible re-compile later).
-              const normals = new Map<THREE.Texture, Promise<THREE.Texture | null>>()
-              const lifts: Promise<void>[] = []
+              // The showcase PBR lift, graded for the cool morning. (The
+              // runtime Sobel normal-map bake is RETIRED — ADR-066: a 15-crop
+              // A/B could not tell it from the painted panel lines the base
+              // colour already carries; models with NATIVE normal maps keep
+              // them untouched.)
               root.traverse((n) => {
                 const spin = (n.userData as { spin?: SpinRec }).spin
                 if (spin && spin.axis) spins.push({ node: n, axis: spin.axis, speed: spin.speed })
@@ -159,23 +157,10 @@ function loadModels(
                   })
                   const std = m as THREE.MeshStandardMaterial
                   if (!('metalness' in std)) continue
-                  // The showcase PBR lift, graded for the cool morning: the
-                  // paint's own dark panel lines become a subtle relief so
-                  // the skins catch the low sun instead of reading flat.
                   if (std.map) {
                     std.map.anisotropy = 8
                     std.metalness = 0.32
                     std.roughness = 0.5
-                    if (!normals.has(std.map)) normals.set(std.map, normalFromMap(std.map))
-                    lifts.push(
-                      normals.get(std.map)!.then((nrm) => {
-                        if (nrm && !std.normalMap) {
-                          std.normalMap = nrm
-                          std.normalScale = new THREE.Vector2(0.55, 0.55)
-                          std.needsUpdate = true
-                        }
-                      }),
-                    )
                   } else {
                     std.metalness = 0.42
                     std.roughness = 0.5
@@ -184,7 +169,7 @@ function loadModels(
                   std.needsUpdate = true
                 }
               })
-              Promise.all(lifts).then(() => resolve({ root, mats, spins }), reject)
+              resolve({ root, mats, spins })
             },
             (ev) => {
               const f = ev.total > 0 ? Math.min(ev.loaded / ev.total, 1) : 0
