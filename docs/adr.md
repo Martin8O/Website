@@ -4,6 +4,41 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-067 — The external-link arrow is DRAWN, not typed (the U+FE0E fix failed on the A50) (2026-07-16)
+ADR-063 fixed the blue-square emoji arrows on a Galaxy A50 by appending the **text-presentation selector U+FE0E**
+to every `↗` (U+2197). Re-tested on the device after deploy: **still blue squares** — Samsung's emoji font claims
+U+2197 and **ignores the FE0E selector**, a known vendor quirk. The lesson generalises: any glyph a vendor font
+decides is an emoji cannot be forced back to text by a selector, so a *typed* character is the wrong primitive for
+a UI mark that must look the same everywhere. The arrow is now **drawn** at all 8 sites, with one shared geometry:
+DOM links use an inline SVG (`story/ExternalArrow.tsx` — `currentColor`, sized in `em`, `aria-hidden` at every call
+site so the a11y tree is unchanged); the two `OfferPanels` CSS `content` arrows use a `mask` with the same path as
+a `data:` URI (CSP-covered — `img-src data:` was already granted for the inline assets, no header change); the
+dev-scene canvas arrow is stroked with `ctx` paths instead of `fillText`. No font is involved anywhere, so no font
+can hijack it. *Verify:* WebKit over the prod build — the footer/About/Credits/Work arrows render as inline SVG, the
+Offer `::after` masks resolve to the data-URI, and **no literal U+2197 remains anywhere in the DOM text**; visual
+check shows the thin amber arrow. Real-A50 confirmation is the device check (the FE0E attempt is exactly why this
+one is verified by construction — no font path left to fail).
+
+### ADR-066 — The runtime Sobel normal-map bake is RETIRED everywhere (2026-07-16)
+ADR-065 dropped the bake on small screens and kept it on desktop pending an eyes-on call. Martin reviewed a
+**preview deploy with the bake fully off** on a UHD desktop: the only difference he could find was some extra panel
+lines/rivets on the airshow pass and the landing break (the L-159 skin — the one model where the Sobel had real
+edges to work with); everywhere else, nothing. Decision: **retire it entirely**. What the bake bought (a subtle
+specular relief derived from each base colour's painted lines) never justified its price: **~30 s of a throttled
+mid-phone's 37 s Bagram build** and **~96 MB of canvas textures resident for the whole session** (measured, not
+estimated — a controlled A/B with GC before each reading: 86 baked maps ≈ 96 MB CPU, GL textures 240 → 154 in-scene).
+This also answers Martin's "why didn't the preview's memory drop?": the ~96 MB saving is real but sits under
+numbers the bake never touched (183 MB of decoded GLB bitmaps, several DPR-2 canvases), and a preview that builds
+scenes ~3.5 s faster per hero simply had MORE scenes resident at the moment of comparison — a transient that
+inverts the steady-state saving. The whole Sobel path is gone (`normalFromMap`, the pixel loop, the module cache,
+the `bakeTuning` policy + its dev `?bakeCap/?bakeRows` override — nothing left to tune), along with its callers in
+climb / Bagram / patrols and the now-dead `normals` plumbing (`makeInstance` signatures lost a parameter, patrols
+lost `normalRef`). **NATIVE normal maps in the GLBs are untouched** (L-39 all, Apache/Mi-17/C-17 partial — verified
+with @gltf-transform); the bake only ever filled the `!material.normalMap` gap. *Verify:* gate green (380);
+`cdp-nobake-verify.mjs` — 0 baked maps on both viewports, Bagram build **mobile 37.4 → 7.4 s (4× throttle)** and
+**desktop 6.8 → 3.2 s**; `cdp-park-verify` ALL PASS with a lighter re-warm (Bagram returns at **151** textures, was
+237); climb2/bagram/patrol ALL PASS console clean; prod-build smoke in WebKit clean.
+
 ### ADR-065 — Small screens skip the runtime Sobel normal-map bake entirely (2026-07-16)
 The four hero pipelines bake tangent-space normal maps AT RUNTIME from each model's base-colour texture
 (`surface.ts normalFromMap` — Sobel edge-detect turns the painted panel lines into micro-relief; the baked GLBs

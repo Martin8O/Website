@@ -6,6 +6,7 @@ import { useLang } from '../i18n/useLang'
 import { STRINGS, buildLine, type UiStrings } from '../i18n/strings'
 import type { Lang } from '../i18n/langStore'
 import { useModalA11y } from './useModalA11y'
+import { ExternalArrow } from './ExternalArrow'
 import styles from './WorkPanel.module.css'
 
 /**
@@ -106,7 +107,7 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
         </ul>
         <div className={styles.footer}>
           <a className={styles.link} href={p.link.href} target="_blank" rel="noopener noreferrer">
-            {p.link.display} <span aria-hidden="true">{'↗︎'}</span>
+            {p.link.display} <span aria-hidden="true"><ExternalArrow /></span>
           </a>
           {p.repo && (
             <a
@@ -116,7 +117,7 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
               rel="noopener noreferrer"
               aria-label={`${p.name} — ${t.sourceOnGitHub}`}
             >
-              GitHub <span aria-hidden="true">{'↗︎'}</span>
+              GitHub <span aria-hidden="true"><ExternalArrow /></span>
             </a>
           )}
           {!p.live && <span className={styles.status}>{p.status}</span>}

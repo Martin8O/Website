@@ -4,6 +4,7 @@ import { MODEL_CREDITS, MODEL_LICENSE } from '../data/credits'
 import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
 import { useModalA11y } from './useModalA11y'
+import { ExternalArrow } from './ExternalArrow'
 import styles from './CreditsPopup.module.css'
 
 /**
@@ -62,7 +63,7 @@ export function CreditsPopup({ onClose }: { onClose: () => void }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {MODEL_LICENSE.name} <span aria-hidden="true">{'↗︎'}</span>
+          {MODEL_LICENSE.name} <span aria-hidden="true"><ExternalArrow /></span>
         </a>
       </div>
     </div>,

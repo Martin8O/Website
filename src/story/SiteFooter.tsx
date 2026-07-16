@@ -1,4 +1,5 @@
 import { PROFILE } from '../data/profile'
+import { ExternalArrow } from './ExternalArrow'
 import styles from './SiteFooter.module.css'
 
 /**
@@ -24,7 +25,7 @@ export function SiteFooter({ progress }: { progress: number }) {
       <div className={styles.links}>
         {[PROFILE.github, PROFILE.linkedin].map((p) => (
           <a key={p.label} href={p.href} target="_blank" rel="noopener noreferrer">
-            {p.label} <span aria-hidden="true">{'↗︎'}</span>
+            {p.label} <span aria-hidden="true"><ExternalArrow /></span>
           </a>
         ))}
       </div>

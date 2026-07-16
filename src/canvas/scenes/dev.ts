@@ -1108,11 +1108,26 @@ function drawProjectWindow(
     ctx.moveTo(tx0, ay + ph * 0.82)
     ctx.lineTo(tx0 + tw2, ay + ph * 0.82)
     ctx.stroke()
-    ctx.textAlign = 'right'
-    ctx.fillStyle = rgba(meta.tint, a * 0.95)
-    // ︎ = text presentation — Samsung/Google fonts otherwise draw the
-    // emoji arrow (blue square) into the canvas panel (Galaxy A50 report).
-    ctx.fillText('↗︎', x0 + Wpx * 0.935, ay + ph * 0.56)
+    // The ↗ mark DRAWN as strokes, not typed: Samsung's emoji font hijacks
+    // U+2197 even inside canvas text and ignores the \FE0E selector (Galaxy
+    // A50, twice) — a stroked path has no font to hijack. Same geometry as
+    // story/ExternalArrow.tsx; anchored where the right-aligned glyph sat.
+    ctx.save()
+    const as = ph * 0.3
+    const axr = x0 + Wpx * 0.935
+    const ayb = ay + ph * 0.56
+    ctx.strokeStyle = rgba(meta.tint, a * 0.95)
+    ctx.lineWidth = Math.max(1, ph * 0.06)
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.beginPath()
+    ctx.moveTo(axr - as, ayb)
+    ctx.lineTo(axr, ayb - as)
+    ctx.moveTo(axr - as * 0.62, ayb - as)
+    ctx.lineTo(axr, ayb - as)
+    ctx.lineTo(axr, ayb - as * 0.38)
+    ctx.stroke()
+    ctx.restore()
   }
   // Body, clipped to the PANEL's own rounded outline (intersected with the
   // body band) — content can never bleed past the bottom corner curves.

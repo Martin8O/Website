@@ -334,11 +334,18 @@
 }
 
 .link::after {
-  /* \FE0E = text-presentation selector: Samsung/Google fonts otherwise
-     render U+2197 as the blue-square EMOJI arrow (seen on a Galaxy A50). */
-  content: ' \2197\FE0E';
-  font-size: 0.85em;
-  color: color-mix(in srgb, var(--amber) 75%, transparent);
+  /* Drawn, not typed: Samsung's emoji font renders U+2197 as the blue-square
+     EMOJI and IGNORES the \FE0E text selector (Galaxy A50, twice) — a masked
+     box has no font to hijack. Same geometry as story/ExternalArrow.tsx; the
+     data: URI is CSP-covered (img-src data:). */
+  content: '';
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  margin-left: 0.3em;
+  background: color-mix(in srgb, var(--amber) 75%, transparent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 9.5 9.5 2.5M4.2 2.5h5.3v5.3' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 9.5 9.5 2.5M4.2 2.5h5.3v5.3' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 /* Proof panel (Martin, design A): the project name is the only link — bold so
@@ -450,10 +457,15 @@
 }
 
 .grade::after {
-  /* \FE0E = text-presentation selector: Samsung/Google fonts otherwise
-     render U+2197 as the blue-square EMOJI arrow (seen on a Galaxy A50). */
-  content: ' \2197\FE0E';
-  color: color-mix(in srgb, var(--amber) 62%, #000);
+  /* Drawn, not typed — see .link::after (the A50 emoji-arrow fix). */
+  content: '';
+  display: inline-block;
+  width: 0.58em;
+  height: 0.58em;
+  margin-left: 0.3em;
+  background: color-mix(in srgb, var(--amber) 62%, #000);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 9.5 9.5 2.5M4.2 2.5h5.3v5.3' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 9.5 9.5 2.5M4.2 2.5h5.3v5.3' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .grade:focus-visible {

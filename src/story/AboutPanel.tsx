@@ -6,6 +6,7 @@ import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
 import type { Lang } from '../i18n/langStore'
 import { useModalA11y } from './useModalA11y'
+import { ExternalArrow } from './ExternalArrow'
 import styles from './AboutPanel.module.css'
 
 /**
@@ -167,7 +168,7 @@ export function AboutPanel({
             <div className={styles.links} aria-label={t.profiles}>
               {[PROFILE.github, PROFILE.linkedin].map((p) => (
                 <a key={p.label} href={p.href} target="_blank" rel="noopener noreferrer">
-                  {p.label} <span aria-hidden="true">{'↗︎'}</span>
+                  {p.label} <span aria-hidden="true"><ExternalArrow /></span>
                 </a>
               ))}
             </div>
