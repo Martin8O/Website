@@ -21,7 +21,8 @@
    tooltip over the dev scene after the link opened (the sticky-highlight bug
    the nav hit — see SiteNav.module.css). A tap navigates, so nothing is lost;
    keyboard :focus-visible still shows both. */
-.hit:focus-visible {
+.hit:focus-visible,
+.hit:active {
   /* Just a soft glow in the window's own neon — no frame, no lift (Martin). */
   box-shadow: 0 0 46px -4px color-mix(in srgb, var(--tint, #ffb000) 60%, transparent);
   outline: none;

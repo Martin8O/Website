@@ -20,17 +20,8 @@
   flex-direction: column;
   align-items: center;
   gap: 1.1rem;
-  /* A whisper of the HUD amber under the wordmark. */
+  /* A whisper of the HUD amber behind the gate's own type. */
   text-shadow: 0 0 40px color-mix(in srgb, var(--amber) 18%, transparent);
-}
-
-.mark {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
-  letter-spacing: 0.04em;
-  color: #ffffff;
-  margin: 0;
 }
 
 /* Hairline progress track, amber fill driven by JS via scaleX (no layout). */

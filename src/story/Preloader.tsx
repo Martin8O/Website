@@ -145,7 +145,9 @@ export function Preloader() {
       aria-label={t.loading}
     >
       <div className={styles.inner} aria-hidden="true">
-        <p className={styles.mark}>Martin</p>
+        {/* No name mark here (Martin): the boot screen sat one beat ahead of
+            the story's own "Martin" title card, so the name read twice in a
+            row — the gate is just the bar, the % and the desktop hint now. */}
         <div className={styles.track}>
           <div ref={barRef} className={styles.bar} />
         </div>

@@ -4,6 +4,27 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-068 — The UA's blue tap flash is off site-wide; `:active` is the touch feedback · the boot gate drops the name (2026-07-16)
+Two small device-round calls from Martin. **(1) Blue rectangles on tap (both phones).** Android/Chromium paints its
+own **`-webkit-tap-highlight-color`** — a blue rounded-rect flash — over any tapped control. It is a UA colour we
+cannot theme, it ignores our `border-radius`, and it had nothing to do with our `:hover` work; it simply became
+visible as *the only* tap feedback once ADR-064 correctly made hover pointer-only. Switched off globally in
+`index.css` and **replaced with the site's own amber treatment via `:active`**, added beside the existing
+`:focus-visible` on every touch target (nav, the contact email + Copy, the offer panels, the footer, the dev-window
+plates, every modal's close/links). `:active` is the right primitive for touch: it lasts exactly as long as the
+touch and **cannot latch** the way `:hover` does — the two rules are complementary, not duplicates. **(2) The boot
+gate showed a "Martin" wordmark** one beat before the story's own "Martin" title card, so the name read twice in a
+row — removed (the gate is now the bar, the %, and the desktop hint); its orphaned `.mark` style went with it.
+*Verify:* `cdp-tap-verify.mjs` — the gate's text carries no "Martin" while still showing the hint + %,
+`-webkit-tap-highlight-color` computes to transparent, and a real emulated TAP leaves nothing latched;
+`cdp-hover-touch` ALL PASS (desktop hover unchanged); `cdp-contact-flash` 7/7. **Harness honesty:** CDP's synthetic
+`Input.dispatchTouchEvent` never builds the browser's active chain, so the amber glow CANNOT be asserted through
+emulated touch — the first probe run reported a false FAIL. The rule is proven instead with a real mouse press
+(`cdp-active-check.mjs`: idle transparent → pressed amber + shadow) and the CSSOM confirms the selector; Android
+Chrome applies `:active` on a real tap. Recorded so the next session does not re-chase this. (iOS never painted a
+tap flash, so nothing regresses there; if a future report says an iPhone shows no press feedback, the known cause is
+Safari's requirement of a touch listener for `:active` — a separate, tiny call.)
+
 ### ADR-067 — The external-link arrow is DRAWN, not typed (the U+FE0E fix failed on the A50) (2026-07-16)
 ADR-063 fixed the blue-square emoji arrows on a Galaxy A50 by appending the **text-presentation selector U+FE0E**
 to every `↗` (U+2197). Re-tested on the device after deploy: **still blue squares** — Samsung's emoji font claims

@@ -90,7 +90,8 @@
 }
 /* Hover is POINTER-only (see SiteNav.module.css: on touch it latches). The
    .card hover below already rides its own (hover: hover) block. */
-.close:focus-visible {
+.close:focus-visible,
+.close:active {
   background: color-mix(in srgb, var(--fg) 10%, transparent);
   border-color: color-mix(in srgb, var(--amber) 55%, transparent);
   outline: none;
@@ -322,7 +323,8 @@
   transition: color 140ms ease, border-color 140ms ease;
   overflow-wrap: anywhere;
 }
-.link:focus-visible {
+.link:focus-visible,
+.link:active {
   color: color-mix(in srgb, var(--tint) 90%, #fff);
   border-color: var(--tint);
   outline: none;
@@ -345,7 +347,8 @@
   border-bottom: 1px solid color-mix(in srgb, var(--tint) 22%, transparent);
   transition: color 140ms ease, border-color 140ms ease;
 }
-.repoLink:focus-visible {
+.repoLink:focus-visible,
+.repoLink:active {
   color: color-mix(in srgb, var(--tint) 80%, #fff);
   border-color: var(--tint);
   outline: none;

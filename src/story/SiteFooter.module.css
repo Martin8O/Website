@@ -37,7 +37,8 @@
   border-bottom-color: color-mix(in srgb, var(--fg) 25%, transparent);
 }
 /* Hover is POINTER-only (see SiteNav.module.css: on touch it latches). */
-.footer .credits a:focus-visible {
+.footer .credits a:focus-visible,
+.footer .credits a:active {
   color: var(--amber);
   border-color: var(--amber);
 }
@@ -60,7 +61,8 @@
   border-bottom: 1px solid color-mix(in srgb, var(--amber) 50%, transparent);
   transition: color 140ms ease, border-color 140ms ease;
 }
-.footer a:focus-visible {
+.footer a:focus-visible,
+.footer a:active {
   color: var(--amber);
   border-color: var(--amber);
   outline: none;

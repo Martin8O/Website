@@ -36,6 +36,13 @@ html {
      scrollbar is visual noise. Scrolling itself is untouched. */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  /* Android/Chromium paints a BLUE ROUNDED-RECT flash over any tapped
+     control by default (reported on both of Martin's phones — the nav read as
+     a blue box instead of the site's amber glow). It is a UA colour we cannot
+     theme, it ignores our border-radius, and every control here already has
+     its own touch feedback (`:active`), so it is switched off site-wide.
+     Nothing is lost: the amber `:active` treatments below ARE the feedback. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::-webkit-scrollbar {

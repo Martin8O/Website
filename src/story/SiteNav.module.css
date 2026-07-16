@@ -32,7 +32,12 @@
   cursor: pointer;
   transition: background 150ms ease, box-shadow 150ms ease;
 }
-.item:focus-visible {
+/* One lit treatment, three ways in: keyboard focus, a real pointer's hover,
+   and a finger holding the control down. `:active` is the TOUCH answer — it
+   lasts exactly as long as the touch (no latching, unlike :hover) and it is
+   what replaces the UA's blue tap flash we switch off in index.css. */
+.item:focus-visible,
+.item:active {
   background: color-mix(in srgb, var(--amber) 14%, transparent);
   box-shadow: 0 0 22px -6px color-mix(in srgb, var(--amber) 60%, transparent);
   outline: none;

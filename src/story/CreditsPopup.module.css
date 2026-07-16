@@ -60,7 +60,8 @@
   transition: background 140ms ease, border-color 140ms ease;
 }
 /* Hover is POINTER-only (see SiteNav.module.css: on touch it latches). */
-.close:focus-visible {
+.close:focus-visible,
+.close:active {
   background: color-mix(in srgb, var(--fg) 10%, transparent);
   border-color: color-mix(in srgb, var(--amber) 55%, transparent);
   outline: none;
@@ -99,7 +100,8 @@
   border-bottom: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
   transition: color 140ms ease, border-color 140ms ease;
 }
-.list a:focus-visible {
+.list a:focus-visible,
+.list a:active {
   color: var(--amber);
   border-color: var(--amber);
   outline: none;
@@ -127,7 +129,8 @@
   border-bottom: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
   transition: color 140ms ease, border-color 140ms ease;
 }
-.license:focus-visible {
+.license:focus-visible,
+.license:active {
   color: var(--amber);
   border-color: var(--amber);
   outline: none;
