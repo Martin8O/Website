@@ -9,7 +9,7 @@ import { CHAPTERS } from '../data/chapters'
 import { buildRuns } from '../canvas/sceneTimeline'
 import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
-import { buildHeroWindows, pickHeroIndicator } from './heroIndicatorMath'
+import { buildHeroWindows, heroBeatAhead, pickHeroIndicator } from './heroIndicatorMath'
 import styles from './HeroLoadIndicator.module.css'
 
 /**
@@ -49,7 +49,9 @@ export function HeroLoadIndicator({ pos }: { pos: number }) {
   }, [loadingKey])
 
   // The ✓ payoff: when the hero the chip was narrating flips to ready, hold
-  // the chip for a beat with the check instead of vanishing mid-glance.
+  // the chip for a beat with the check instead of vanishing mid-glance —
+  // but ONLY while that beat is still ahead of the visitor (heroBeatAhead):
+  // a payoff at the finale for a build that finished chapters back is noise.
   const [flash, setFlash] = useState<HeroKey | null>(null)
   const narrated = useRef<HeroKey | null>(null)
   useEffect(() => {
@@ -61,11 +63,20 @@ export function HeroLoadIndicator({ pos }: { pos: number }) {
     const last = narrated.current
     if (last && snap[last].phase === 'ready') {
       narrated.current = null
-      setFlash(last)
-      const timer = window.setTimeout(() => setFlash(null), READY_FLASH_MS)
-      return () => window.clearTimeout(timer)
+      if (heroBeatAhead(pos, last, WINDOWS)) setFlash(last)
     }
-  }, [loadingKey, snap])
+  }, [loadingKey, snap, pos])
+
+  // The flash clears itself from its OWN effect. It must NOT share the effect
+  // above: any unrelated snapshot update there (another hero's progress tick)
+  // re-ran the cleanup and killed the pending timer — at the finale, with a
+  // background build still ticking, the ✓ then hung on screen FOREVER
+  // (Martin's fast-scroll report, reproduced by cdp-chip-fastscroll.mjs).
+  useEffect(() => {
+    if (!flash) return
+    const timer = window.setTimeout(() => setFlash(null), READY_FLASH_MS)
+    return () => window.clearTimeout(timer)
+  }, [flash])
 
   if (!loadingKey && !flash) return null
   const ready = !loadingKey

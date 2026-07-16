@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 380
+export const TEST_COUNT = 383
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -265,6 +265,9 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "pickHeroIndicator > never narrates a beat the visitor already left",
       "pickHeroIndicator > skips a ready hero and narrates the next loading one in range",
       "pickHeroIndicator > prefers the nearer of two loading heroes",
+      "heroBeatAhead (the ✓ payoff gate) > allows the flash while the beat is still ahead of (or under) the visitor",
+      "heroBeatAhead (the ✓ payoff gate) > suppresses the flash once the visitor has left the beat",
+      "heroBeatAhead (the ✓ payoff gate) > an unknown key never flashes",
     ],
   },
   {

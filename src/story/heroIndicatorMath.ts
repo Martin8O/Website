@@ -59,6 +59,21 @@ export function buildHeroWindows(runs: readonly SceneRun[]): HeroWindow[] {
 }
 
 /**
+ * May the ✓ payoff still flash for this hero at `pos`? Only while its beat
+ * is NOT behind the visitor — a "3D ready" payoff for a scene the visitor
+ * has already left is noise (Martin's fast-scroll report: the chip flashed
+ * ✓ at the contact finale for builds finishing seven chapters back).
+ */
+export function heroBeatAhead(
+  pos: number,
+  key: HeroKey,
+  windows: readonly HeroWindow[],
+): boolean {
+  const w = windows.find((x) => x.key === key)
+  return !!w && pos < w.end
+}
+
+/**
  * The hero the chip narrates at `pos`, or null (chip hidden): the first
  * window in story order that is still LOADING, not yet left behind, and
  * within the look-ahead horizon.

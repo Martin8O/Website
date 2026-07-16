@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CHAPTERS } from '../data/chapters'
 import { buildRuns } from '../canvas/sceneTimeline'
 import type { HeroLoadSnapshot } from '../three/heroLoad'
-import { HERO_HORIZON, buildHeroWindows, pickHeroIndicator } from './heroIndicatorMath'
+import { HERO_HORIZON, buildHeroWindows, heroBeatAhead, pickHeroIndicator } from './heroIndicatorMath'
 
 const WINDOWS = buildHeroWindows(buildRuns(CHAPTERS))
 
@@ -92,5 +92,25 @@ describe('pickHeroIndicator', () => {
     })
     const cruise = WINDOWS[1]
     expect(pickHeroIndicator(cruise.start + 0.1, WINDOWS, s)).toBe('cruise')
+  })
+})
+
+describe('heroBeatAhead (the ✓ payoff gate)', () => {
+  const desert = WINDOWS[2]
+
+  it('allows the flash while the beat is still ahead of (or under) the visitor', () => {
+    expect(heroBeatAhead(desert.start - 1, 'desert', WINDOWS)).toBe(true)
+    expect(heroBeatAhead(desert.end - 0.01, 'desert', WINDOWS)).toBe(true)
+  })
+
+  // Martin's fast-scroll report: builds finishing chapters behind the visitor
+  // must not flash "3D ✓" at the contact finale.
+  it('suppresses the flash once the visitor has left the beat', () => {
+    expect(heroBeatAhead(desert.end + 0.01, 'desert', WINDOWS)).toBe(false)
+    expect(heroBeatAhead(11, 'patrol', WINDOWS)).toBe(false)
+  })
+
+  it('an unknown key never flashes', () => {
+    expect(heroBeatAhead(0, 'nope' as never, WINDOWS)).toBe(false)
   })
 })

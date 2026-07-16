@@ -4,6 +4,26 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-069 — The chip's ✓ payoff self-clears and only fires for beats still ahead; lint is zero-warning (2026-07-16)
+Martin's fast-scroll report ("the 3D indicator hung and rode along to the end of scene 10") reproduced as a real
+bug, worse than it sounded: a **permanently stuck "3D ✓"**. The payoff flash's clear-timer lived in the same effect
+that reacts to the load snapshot — so every progress tick of an UNRELATED background build (the Bagram hero kept
+reporting 1-% steps after the visitor sped past) re-ran that effect's cleanup and **killed the pending timer**; when
+the ticks stopped, nothing was left to clear the flash, ever. Two changes in `HeroLoadIndicator`: **(1) the flash
+clears itself from its own effect** (keyed on the flash alone — unrelated snapshot updates can no longer cancel it);
+**(2) the payoff only fires while that hero's beat is still AHEAD of the visitor** (pure `heroBeatAhead`, +3 tests —
+a "3D ready!" at the contact finale for a scene seven chapters back is noise, Martin's UX point). Proven by
+`cdp-chip-fastscroll.mjs`: before = ✓ pinned for the whole 25 s watch; after = chip clean at the finale even while
+the background build finishes; the normal path (bar narrates the approaching hero, ✓ flashes and clears) re-verified.
+**Lint is zero-warning now, the safe way:** the 4 `exhaustive-deps` notes on the GPU-parking effects are
+**documented instead of obeyed** — `parker` is memoized on `[gl, res]` and `gl` is renderer-stable, so `[res]`
+already covers every real change; those effects tear down 3D scenes, and their verified dep lists (ADR-061) are not
+worth touching for a linter's satisfaction (each carries the rationale + a scoped disable). The
+`react-refresh/only-export-components` warning was real and fixed properly: `flashContactCta` moved out of
+`ChapterCards` into its own `story/contactFlash.ts` (a component file may only export components, or fast-refresh
+degrades to full reloads). *Verify:* gate green (**383**, +3 — the count guard forced the EN+CZ proof copy again);
+`eslint src` = **0 errors, 0 warnings**; chip-fastscroll + chip-watch + contact-flash + climb2/bagram ALL PASS.
+
 ### ADR-068 — The UA's blue tap flash is off site-wide; `:active` is the touch feedback · the boot gate drops the name (2026-07-16)
 Two small device-round calls from Martin. **(1) Blue rectangles on tap (both phones).** Android/Chromium paints its
 own **`-webkit-tap-highlight-color`** — a blue rounded-rect flash — over any tapped control. It is a UA colour we
