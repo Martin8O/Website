@@ -67,6 +67,6 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   ],
   'rl-lab': [
     { url: '/shots/rl-lab-0.jpg', aspect: 2.857 },
-    { url: '/rl-lab-taxi.gif', aspect: 1.579 },
+    { url: '/rl-lab-taxi.mp4', aspect: 1.579 },
   ],
 }

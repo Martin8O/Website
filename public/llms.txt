@@ -14,7 +14,7 @@ and no data collection. Contact is by email only. Content is bilingual English
 
 ## Contact
 
-- [Email Martin](mailto:svoboda.m@gmail.com): the one call to action of the whole site.
+- [Email Martin](mailto:martin@svobodamartin.dev): the one call to action of the whole site.
 
 ## Live site
 

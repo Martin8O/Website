@@ -1,5 +1,5 @@
 /**
- * SKY PATROLS — the two locked L-159 flypast beats, flying REAL baked GLBs
+ * SKY PATROLS — the two locked L-159 flypast beats, flying REAL GLBs
  * (public/models/l159.glb — the showcase fixes baked: gear legs+wheels gone,
  * pylons + light meshes kept) over the 2D world, camera-glued. Pure additive
  * content: the 2D scenes paint their full environments and know nothing of

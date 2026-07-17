@@ -468,7 +468,7 @@ export const APACHE = {
   enter: { sx: 0.4, sy: 0.0, d: 4 },
   ctrl: { sx: 0.6, sy: 0.42, d: 20 },
   /** Hover gate height above the mark (units). Wheels touch via the runtime
-   *  wheelLift (measured off the baked GLB) — groundOff stays 0 here. */
+   *  wheelLift (measured off the GLB) — groundOff stays 0 here. */
   gateAlt: 3.4,
   groundOff: 0,
   /** Flare pitch pulse (nose-up, rad) and transit nose-down attitude. */
@@ -574,7 +574,7 @@ export const MI17 = {
   run: 80,
   noseDown: -0.16,
   cruisePitch: -0.07,
-  /** Wheels touch via the runtime wheelLift (measured off the baked GLB) —
+  /** Wheels touch via the runtime wheelLift (measured off the GLB) —
    *  groundOff stays 0 (the mark IS the ground). */
   groundOff: 0,
   /** Small left lean while accelerating. */

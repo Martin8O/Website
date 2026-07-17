@@ -46,7 +46,7 @@
       ]
     },
     {
-      "source": "/og.png",
+      "source": "/og.jpg",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }]
     },
     {
@@ -54,7 +54,7 @@
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }]
     },
     {
-      "source": "/rl-lab-taxi.gif",
+      "source": "/rl-lab-taxi.mp4",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }]
     },
     {

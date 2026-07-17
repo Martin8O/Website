@@ -4,6 +4,48 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-071 — Pre-flight for the award submissions: three false claims retired at source, the share card re-cut, the GIF killed, the parametric jets archived (2026-07-17)
+Preparing the competition entries (`local/souteze/`, gitignored) meant writing down what the site *is* — and
+that exercise found **three claims the project had been repeating about itself that were not true**. All three
+came from our own docs/comments, all three were caught by **Martin**, and every one would have gone into a jury
+submission. That is the headline of this ADR: **the codebase is a source of truth about itself, not about the
+world.** (1) **"an interactive globe"** — `CLAUDE.md`'s Shipped paragraph (loaded every session) listed a globe.
+There is none: planned in ADR-006, parked as *"likely unneeded"* in ADR-018, **never built** — `react-globe.gl`
+has 0 hits in `package.json`/`package-lock.json`. **ADR-006 is now marked SUPERSEDED, NEVER BUILT** (history
+kept, not rewritten); the claim is gone from `CLAUDE.md`, the bootstrap head and memory. (2) **"real baked GLB
+aircraft"** — wrong three ways: the thing actually *called* "the bake" (the runtime Sobel normal-map pass) was
+**retired in ADR-066** (`normalFromMap`/`bakeTuning` are gone), "baked" normally implies baked **lighting** while
+ours is **lit in real time** (PMREM `RoomEnvironment` + PCFSoft shadow maps), and it **undersells** — real-time
+is the harder thing. Purged from `CLAUDE.md`, `README.md`, `docs/architecture.md`, six 3D source comments and
+the live GitHub repo description; the *legitimate* sense ("pre-baked lookup table", "baked manifest") stays.
+(3) **the green HUD** — `hud.ts`'s own header said *"The L-159 cockpit HUD … modelled on the real photo"*, so
+six places claimed the L-159's actual instrument. Martin: *"našel jsem jen nějaký nejvíc podobný HUD, nevím
+odkud, není to kopie L-159."* My fix then **over-corrected** to "drawn from scratch" — also false, because he
+*did* supply a reference. **Both extremes were wrong; the truth is the middle:** drawn **procedurally in code**,
+layout **modelled on a reference image of unknown origin** (not an L-159), nothing traced, no image shipped —
+and the real L-159's HUD *was* green, which is why the green appears only in its moments. `hud.ts` now carries a
+`PROVENANCE` block naming **both** wrong versions so it cannot recur. *Lesson recorded: verify the correction,
+not just the claim.* **Also shipped, all verified live, not just built:** `og.png` (a whole-page downscale where
+the jet was a speck, and predating the 3D layer entirely) → **`og.jpg`**, a tight crop of the 3D L-159 ballet
+graded for card size (measured: the airframe sits ~150-215 luma against ~235-255 cloud, so it dissolved at
+240 px; an S-curve holds the highlights and pulls the mid-darks) — **815 KB → 116 KB**, `og:image:alt` rewritten
+(and the aircraft **verified as L-159 via `CruiseBallet.tsx`'s `loadL159`**, not L-39). **`rl-lab-taxi.gif`
+(2.6 MB) → MP4 (195 KB, 13.5×)** — and that was an **a11y bug, not just weight**: `WorkPanel`'s `LoopingClip`
+honours `prefers-reduced-motion` (holds a still frame) and **a GIF cannot**, so it was the one piece of motion
+on the site defying the contract the whole architecture is built on. **`llms.txt` published the wrong contact**
+(a personal Gmail, not `martin@svobodamartin.dev`) — the machine-readable version of a site whose single goal is
+one email address. **The parametric jets** (`Jets.tsx` + `jetMath` + `jetGeometry`, 1,045 lines) — built from
+code because *"no verifiable-licence model of these exact types exists to fetch"*, an assumption disproved when
+the eight CC-BY-4.0 Sketchfab originals were found — are **archived to `local/archive/parametric-jets/`**: they
+cost visitors nothing (tree-shaken) but shipped **19 test names into the proof popup for code the site never
+runs**, and stood as a trap for the next reader. **Tests 383 → 364**, `TestsPopup` 31,939 → 30,383 B; the
+`testManifest.test.ts` guard forced **both EN and CZ** copy to follow. That archive also exposed a real config
+hole: **vitest had no `test:` block and was scanning the whole project including gitignored `local/`** — now
+`exclude: [...configDefaults.exclude, 'local/**']`. *Verify:* gate green (**364**); `cdp-gif2mp4-verify.mjs` —
+taxi renders as a decoded `<video>`, no `<img>`, no `.gif` in `dist/`, `video/mp4` served; `cdp-tests364.mjs` —
+the live proof panel reads *"364 automated tests"* and the popup lists **exactly 364** cases with zero
+`bakeJet`/`jetPoseAt`; `og.jpg` → 200 `image/jpeg` 116,287 B while the old `og.png` falls through to the SPA.
+
 ### ADR-070 — Hero builds kick only for beats AHEAD-or-near (a teleport must not build the whole story) · guaranteed tap pulse (2026-07-16)
 **(1) "Tap Contact right after load, then Home, then scroll ⇒ no chip, whole site 2D" (Martin, both phones) — a
 real bug, reproduced at 12× throttle by `cdp-teleport-2d.mjs`.** The kick condition was `pos > LOAD_AT_POS` alone,
@@ -1745,7 +1787,14 @@ Theme environments are built original and much richer/more beautiful (layered de
 light), iterated live in the browser until they "wow." *Why:* Martin wants far more than the demo's basic
 sketch; the visuals are the product's heart, so the model budget concentrates in Phase B.
 
-### ADR-006 — Globe ships in L1, built alongside the site (2026-07-05)
+### ADR-006 — Globe ships in L1, built alongside the site (2026-07-05) — ⚠️ SUPERSEDED, NEVER BUILT
+> **Reversed by ADR-018 (2026-07-07): "The globe (B4) is parked (Martin: likely unneeded)."** It was never
+> built — `react-globe.gl` was never installed (verified: 0 hits in `package.json` / `package-lock.json`).
+> **There is no globe on the site and there never was.** The Bitcoin scene's flat dot-matrix world map
+> (`canvas/scenes/worldMap.ts`) is a different, unrelated thing. Kept here as the record of a decision we
+> reversed; the paragraph below describes a plan, not the site. *(Flagged 2026-07-17 — the stale claim had
+> survived in `CLAUDE.md` and was about to be repeated in award submissions.)*
+
 The interactive globe (travel arcs grow on scroll, visited countries glow) ships in **L1**, not deferred to L2.
 Implemented as an isolated **`react-globe.gl`** widget (pulls `three` — self-contained, does NOT trigger the
 whole-site R3F rewrite) with a **2D `d3-geo`** fallback for reduced-motion. Data-driven `places.ts` seeded with

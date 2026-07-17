@@ -395,7 +395,7 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   // sweep's own lead (enterFade completes at tRaw ≈ −0.026, starts −0.156),
   // so the jet is ALREADY rolling while the desert fades in — a frozen
   // aircraft snapping into motion at full blend read as a glitch (Martin).
-  // In hero3d mode the REAL baked C-17 flies Martin's departure instead
+  // In hero3d mode the REAL 3D C-17 flies Martin's departure instead
   // (small near the tower → grows → banks out the right edge).
   if (!cfg.hero3d) {
     const p = clamp01(((cfg.tRaw ?? t) + 0.16) / 0.44)

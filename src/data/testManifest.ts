@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 383
+export const TEST_COUNT = 364
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -367,35 +367,6 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "buildCalm (the watchdog gate) > stays excused for the grace window after the last load settles",
       "buildCalm (the watchdog gate) > a failed load also settles the gate (after grace)",
       "build urgency > holds for a short window after a bump",
-    ],
-  },
-  {
-    file: "src/three/jetGeometry.test.ts",
-    tests: [
-      "bakeJet > bakes consistent non-indexed triangle buffers for both variants",
-      "bakeJet > is deterministic",
-      "bakeJet > produces finite geometry, unit normals, and 0..1 colors",
-      "bakeJet > spans length 1 nose-to-tail and stays inside sane bounds",
-      "bakeJet > is mirror-symmetric across the fuselage plane",
-      "bakeJet > gives the two types distinct silhouettes (tanks vs rails, canopy)",
-    ],
-  },
-  {
-    file: "src/three/jetMath.test.ts",
-    tests: [
-      "flightEnvelope / flightProgress > is zero outside the window, full inside, eased at the edges",
-      "flightEnvelope / flightProgress > progress maps the window onto 0..1, clamped",
-      "story hard gates (the choreography table) > climb has no parametric flights — the GLB heroes own that window",
-      "story hard gates (the choreography table) > sunset farewell is gone before the belly sweep blacks the screen",
-      "story hard gates (the choreography table) > airshow passes finish before the 2D farewell flares (tRaw 0.995+)",
-      "story hard gates (the choreography table) > desert has no flights — the empty sky is the story",
-      "story hard gates (the choreography table) > every window is well-formed and fades fit inside it",
-      "jetPoseAt > passes through every stop at its grid parameter",
-      "jetPoseAt > keeps the forward unit-length and the path continuous",
-      "jetPoseAt > clamps outside 0..1",
-      "rollAt > hits keyframes exactly and lerps between them",
-      "rollAt > clamps beyond the keyframe range and defaults to 0 without keys",
-      "bakeRibbon > bakes a well-formed strip: pairs, ascending progress, unit tangents",
     ],
   },
   {

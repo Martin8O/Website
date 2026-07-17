@@ -14,7 +14,7 @@ export const MODEL_URL = '/models/l159.glb'
  *  the lab rule "nose −X → [0, −π/2, 0]". */
 export const REST_Y = -Math.PI / 2
 
-/** World scale — the baked GLB is 10-normalized along its length. */
+/** World scale — the GLB is 10-normalized along its length. */
 export const JET_SCALE = 0.5
 
 /** Wingtip offset in canonical pivot space (native span ±3.78 along Z maps

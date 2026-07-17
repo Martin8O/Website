@@ -37,7 +37,16 @@ export type Scene3DProps = {
  * silhouette story remains the in-scene fallback until the models are
  * live) and the chapter-03 Bagram base-ops actors (BagramActors.tsx —
  * C-17 / Apache pair / F-16 holding / Mi-17 over the panning 2D base).
- * Only the parametric fly-bys (Jets.tsx) stay unmounted, kept as reference.
+ *
+ * The parametric fly-bys (Jets.tsx + jetMath + jetGeometry) are GONE from the
+ * tree as of 2026-07-17 — archived to `local/archive/parametric-jets/`. They
+ * built the L-39/L-159 from code because "no verifiable-licence model of these
+ * exact types exists to fetch"; then the CC-BY-4.0 Sketchfab originals were
+ * found and the real GLBs won. They sat unmounted for a week, costing visitors
+ * nothing (tree-shaken) but shipping 19 test names into the proof popup for
+ * code the site never runs — and standing as a trap for anyone reading them as
+ * current. Kept on disk because the wrong assumption is a good story, not
+ * because the code has a future here.
  */
 export const RENDERERS_3D: Record<Theme, ComponentType<Scene3DProps> | null> = {
   origin: Starfield,

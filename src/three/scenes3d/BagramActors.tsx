@@ -1,6 +1,6 @@
 /**
  * BAGRAM ACTORS (E4) — the chapter-03 hero beat the 3D layer OWNS: four real
- * baked GLB aircraft fly Martin's base-ops choreography over the panning 2D
+ * real GLB aircraft fly Martin's base-ops choreography over the panning 2D
  * desert (bagramMath.ts, screen-anchored + one flat ground model):
  *
  *  - C-17 lifts off near the tower small and distant, grows toward the

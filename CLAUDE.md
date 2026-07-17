@@ -6,10 +6,13 @@ projects = proof, contact = goal. **Read `local/bootstrap.md` first every sessio
 
 ## What it is / scope
 - **Shipped — and this IS the target state (Martin, 2026-07-15):** a production-grade **2D scrollytelling** world
-  (React+TS+Vite) with **original, far-richer-than-the-demo** environments + an **interactive globe**, PLUS an
-  **additive 3D layer** — real baked GLB aircraft heroes (climb · ballet · Bagram + airshow/landing patrols) and
+  (React+TS+Vite) with **original, far-richer-than-the-demo** environments, PLUS an
+  **additive 3D layer** — real GLB aircraft heroes (climb · ballet · Bagram + airshow/landing patrols) and
   depth starfields flying **over** the 2D scenes, gated so the 2D world is always the complete fallback
-  (ADR-006/007). Live on Vercel.
+  (ADR-007). Live on Vercel.
+- **No globe.** It was planned for L1 (ADR-006, `react-globe.gl`), **parked as "likely unneeded" (Martin, ADR-018)
+  and never built** — the dependency was never installed. The Bitcoin scene's flat dot-matrix **world map**
+  (`canvas/scenes/worldMap.ts`) is a different thing. Don't reintroduce it, and never claim it exists.
 - **The old "L2" (full R3F fly-through — the *whole* world in 3D, camera flown through 3D space) is formally
   RETIRED — never to be built (ADR-056).** It would be a rewrite of every environment for a marginal gain; the
   shipped hybrid already delivers the 3D wow. Treat the current state as the dream target, not a stepping stone.

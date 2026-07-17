@@ -1,16 +1,29 @@
 /**
- * The L-159 cockpit HUD — saturated green glyphs over the world, modelled on
- * the real photo (`local/ode mne/HUD display.jpg`): boxed FMS / MACH / ALT on
- * top, a mach tape, the two ROUND DIAL gauges (speed left, altitude right —
- * rings of ticks with a boxed digital readout), pitch-ladder bars around a
- * long horizon line, the flight-path marker, heading + nav readouts, and a
- * target designator that walks from A-A BVR to A-G as a strike beat arrives.
+ * The green cockpit HUD — saturated green glyphs over the world: boxed
+ * FMS / MACH / ALT on top, a mach tape, the two ROUND DIAL gauges (speed left,
+ * altitude right — rings of ticks with a boxed digital readout), pitch-ladder
+ * bars around a long horizon line, the flight-path marker, heading + nav
+ * readouts, and a target designator that walks from A-A BVR to A-G as a strike
+ * beat arrives.
+ *
+ * PROVENANCE — say this accurately (Martin, 2026-07-17). It is neither of the
+ * two things it has been called:
+ *   NOT "the L-159's HUD"    — it is not that aircraft's instrument, nor a copy.
+ *   NOT "drawn from scratch" — Martin supplied a reference.
+ * What it IS: Martin found `local/ode mne/HUD display.jpg` — the closest-looking
+ * HUD he could dig up, of UNKNOWN origin and NOT an L-159 — and this cluster was
+ * then drawn PROCEDURALLY IN CODE with its layout MODELLED ON that reference.
+ * Nothing is traced, no pixels are copied, and the runtime ships no image: it is
+ * all lines and text drawn per frame. The glyph vocabulary (boxed FMS/MACH/ALT,
+ * mach tape, dial gauges, pitch ladder, flight-path marker) is standard kit on
+ * any fighter HUD. What IS true of the L-159: its HUD was green (Martin flew it),
+ * which is why the green appears only in the L-159 moments.
  *
  * B2.2: the cluster sits DEAD CENTRE at full intensity — you are looking
  * through the combiner glass, so it owns the middle of the screen from the
  * moment the L-159 unlock powers it up (Martin: no fades, no dimming).
- * Amber stays the site's global HUD through-line; this green lived only in
- * the L-159 — it appears only in the L-159 moments, for authenticity.
+ * Amber stays the site's global HUD through-line; the real L-159's HUD was
+ * green, so this green appears only in the L-159 moments.
  */
 
 import { TAU, clamp01, lerp, rgba, smoothstep } from '../../toolkit'

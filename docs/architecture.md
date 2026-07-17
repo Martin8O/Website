@@ -7,7 +7,7 @@ Martin's life timeline. Everything on screen is derived from a single number, `s
 1. **Background art** — one fixed full-screen `<CanvasStage>` (2D `<canvas>`), a single `requestAnimationFrame`
    loop that reads `scrollProgress` and paints the current chapter's theme (with the next theme cross-fading in
    near a chapter's end). An **additive R3F `<Stage3D>` layer** rides *above* it, reading the same
-   `scrollProgress` — real baked GLB aircraft heroes (climb/ballet/Bagram + patrols) and depth starfields on the
+   `scrollProgress` — real GLB aircraft heroes (climb/ballet/Bagram + patrols) and depth starfields on the
    hero chapters — with this 2D layer as its always-complete no-WebGL / reduced-motion / weak-client fallback
    (mount deferred to after boot, ADR-055).
 2. **Story DOM** — chapter text cards, the amber HUD instrument (era + %), the tick scale, the scroll hint, the
@@ -29,7 +29,7 @@ else is data.
 
 ## The 2D → 3D seam (shipped — this is the target state)
 Because chapters are data and scroll is the single source of truth, the additive 3D layer changes only *how a
-scene is drawn*, not *how the story is read*: an R3F layer reads the same `scrollProgress` and flies real baked
+scene is drawn*, not *how the story is read*: an R3F layer reads the same `scrollProgress` and flies real
 GLB heroes over specific chapters, with the 2D canvas always the complete fallback. **The once-planned full "L2"
 fly-through — the *entire* world rebuilt in 3D with a camera flown through 3D space — is formally retired
 (ADR-056, Martin 2026-07-15); the shipped hybrid is the dream target, not a stepping stone.** See

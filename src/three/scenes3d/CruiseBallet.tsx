@@ -1,5 +1,5 @@
 /**
- * CRUISE BALLET — the chapter-02 one-circle fight flown by REAL baked GLBs:
+ * CRUISE BALLET — the chapter-02 one-circle fight flown by REAL GLBs:
  * the l159-ballet-3d showcase ported over the live 2D cruise scene. Two
  * stores-laden L-159s (500 l tanks on the inner pylons, AIM-9s on the outer
  * rails — the shared procedural stores) corkscrew a shared vertical axis,

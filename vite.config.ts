@@ -1,4 +1,5 @@
 import { defineConfig, type Plugin } from 'vite'
+import { configDefaults } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 /**
@@ -119,5 +120,13 @@ export default defineConfig({
         },
       },
     },
+  },
+  test: {
+    // `local/` is gitignored working material — notes, harnesses, archived
+    // experiments. Vitest's defaults would happily collect a *.test.ts from
+    // there and fail the suite on imports that only resolved in `src/`
+    // (exactly what happened when the parametric jets were archived,
+    // 2026-07-17). The suite covers shipped code; nothing else.
+    exclude: [...configDefaults.exclude, 'local/**'],
   },
 })
