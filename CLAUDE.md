@@ -42,8 +42,8 @@ projects = proof, contact = goal. **Read `local/bootstrap.md` first every sessio
   accents gold / cyan / magenta / bitcoin-orange `#F7931A`.
 
 ## Run commands
-- Dev: `npm run dev` · Quality gate (green before commit): `npm run check` = `tsc --noEmit` + `eslint` +
-  `vite build` (+ `vitest run` once tests exist) · Build: `npm run build` · Deploy: Vercel.
+- Dev: `npm run dev` · Quality gate (green before commit): `npm run check` = `tsc -b` + `eslint` +
+  `vite build` + `vitest run` · Build: `npm run build` · Deploy: Vercel.
   *(Authored at A1; update here only if a run-step changes.)*
 
 ## Workflow (the loop) — see `local/bootstrap.md`
