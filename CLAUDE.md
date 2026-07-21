@@ -1,6 +1,6 @@
 # CLAUDE.md — project constitution (lean; loads every session)
 
-Personal **scrollytelling website** for Martin: scroll = time, his life flies past (fighter pilot → airshow →
+Personal **scrollytelling website** for Martin: scroll = time, his life flies past (military jet pilot → airshow →
 self-healing → Bitcoin → the Claude Code build explosion), ending in a single email contact. Story = hook,
 projects = proof, contact = goal. **Read `local/bootstrap.md` first every session.**
 
