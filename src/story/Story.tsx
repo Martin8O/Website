@@ -7,6 +7,7 @@ import { CHAPTERS, CHAPTER_WEIGHTS, chaptersFor, EXTRA_ERAS } from '../data/chap
 import { useLang } from '../i18n/useLang'
 import { activeEra, chapterPosition } from '../timeline'
 import { buildRuns } from '../canvas/sceneTimeline'
+import { climbEngine } from '../vertie/flag'
 import { accentAt } from './accent'
 import { ChapterCards } from './ChapterCards'
 import { ChunkBoundary } from './ChunkBoundary'
@@ -38,6 +39,14 @@ const CanvasStage = lazy(() =>
 const Stage3D = lazy(() =>
   import('../three/Stage3D').then((m) => ({ default: m.Stage3D })),
 )
+
+// E1c: the climb heroes played by the published `vertie` player instead of by
+// the bespoke R3F scene — its own layer, its own WebGL context, its own chunk,
+// and only when `?climb=vertie` asks for it (default stays the bespoke scene).
+const VertieClimb = lazy(() =>
+  import('../vertie/VertieClimb').then((m) => ({ default: m.VertieClimb })),
+)
+const CLIMB_ENGINE = climbEngine()
 
 // Scene runs for the static EN chapters (theme/timing only — identical for
 // both languages), built once at module load for the accent blend.
@@ -97,6 +106,16 @@ export function Story() {
         <ChunkBoundary>
           <Suspense fallback={null}>
             <Stage3D chapters={CHAPTERS} />
+          </Suspense>
+        </ChunkBoundary>
+      )}
+      {/* The climb heroes on the published player (E1c) — the same gate as the
+          R3F stage, plus the explicit `?climb=vertie` opt-in. A player that
+          cannot run is simply absent and the 2D silhouette hero keeps flying. */}
+      {worldMode === '3d' && stage3dReady && CLIMB_ENGINE === 'vertie' && (
+        <ChunkBoundary>
+          <Suspense fallback={null}>
+            <VertieClimb chapters={CHAPTERS} />
           </Suspense>
         </ChunkBoundary>
       )}

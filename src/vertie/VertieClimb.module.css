@@ -1,0 +1,23 @@
+/* The Vertie climb layer (E1c). Same fixed footprint and stacking as the R3F
+   `Stage3D` layer it stands in for — one layer above the 2D world, under every
+   DOM story layer, never interactive. Its opacity IS the scene's presence: the
+   player has no cross-fade of its own, and one composited layer opacity is a
+   cheaper, cleaner equivalent of the bespoke scene's per-material alpha. */
+.stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* `<vertie-scene>` defaults to its own 300vh scroll region with a sticky
+   viewport — that is the drop-in scroll embed. Driven externally it owns no
+   scroll at all, so it collapses onto this layer instead. Both custom
+   properties are set: the host height and the sticky viewport inside it. */
+.scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+  --vertie-height: 100%;
+  --vertie-viewport-height: 100%;
+}

@@ -145,7 +145,7 @@ export const OFFER_QUALITY: OfferQuality = {
   heading: 'This website',
   selfItems: [
     {
-      testsLead: '<strong>364 automated tests</strong>',
+      testsLead: '<strong>382 automated tests</strong>',
       html: ' · WCAG accessibility',
       htmlMobile: ' · WCAG',
     },

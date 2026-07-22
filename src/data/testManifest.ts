@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 364
+export const TEST_COUNT = 382
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -482,6 +482,34 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "chapter data integrity > has chapters to tell the story",
       "chapter data integrity > gives every chapter a unique id",
       "chapter data integrity > sets a sky variant exactly on sky chapters",
+    ],
+  },
+  {
+    file: "src/vertie/climbScene.test.ts",
+    tests: [
+      "buildClimbScene — structure > declares the format version and one asset per aircraft plus the environment",
+      "buildClimbScene — structure > reproduces the lab display plane and the stage FOV",
+      "buildClimbScene — structure > gives every track its aircraft, its explicit scale and its own keys",
+      "buildClimbScene — structure > carries the full L-39 leg, not just its first snap",
+      "buildClimbScene — timing > turns each snap step into the duration of the leg after it, last key bare",
+      "buildClimbScene — timing > starts each track where the aircraft starts, so the relay hands over exactly",
+      "buildClimbScene — timing > ends the scene at the last key of the last track",
+      "buildClimbScene — timing > parks only the first aircraft before its span (holdBefore)",
+      "buildClimbScene — timing > converts the unlock effects out of window-t and back onto real tracks",
+      "climbSceneT — the external driver mapping > is the exact inverse of the snap timing the bespoke engine uses",
+      "climbSceneT — the external driver mapping > opens at 0 where the authored motion begins and reaches 1 at the last snap",
+      "climbSceneT — the external driver mapping > round-trips through climbWindowT, so a parity check can ask both engines about one instant",
+      "climbSceneT — the external driver mapping > runs negative before the sequence starts — the player clamps, we do not",
+      "the committed document > is byte-identical to what the generator writes today",
+      "the committed document > pins the frustum-clamp margin the site has always applied",
+    ],
+  },
+  {
+    file: "src/vertie/flag.test.ts",
+    tests: [
+      "parseClimbEngine > defaults to the bespoke R3F scene",
+      "parseClimbEngine > opts in to the published player",
+      "parseClimbEngine > accepts an explicit r3f and ignores anything else",
     ],
   },
 ]

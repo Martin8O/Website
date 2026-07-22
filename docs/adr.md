@@ -4,6 +4,46 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-072 — E1c: the chapter-01 climb heroes run on the published Vertie player, behind `?climb=vertie` (2026-07-23)
+The masterplan §5 decision — *"the site's hero 3D runs on Vertie"* — made literally true, at the cheapest honest
+scope: the graduation ladder (Ulla → Z-142 → L-39) is now rendered by the **published `vertie` npm package**
+(`<vertie-scene driver="external">`) instead of by the bespoke `ClimbHeroes` R3F scene. **This is the Website
+CONSUMING the player, not developing it** — the cross-repo fence holds (the player's E1a/E1b work shipped in the
+Vertie repo in earlier sessions; this commit touches only this repo). The package arrives as a committed
+`file:` tarball (`vendor/vertie-0.0.1.tgz`, unpublished) so Vercel installs it with no registry step.
+
+**What moved:** the choreography, wholesale. The same `CLIMB_SEQ` is re-expressed as an open-format document
+(`src/vertie/climbScene.ts` — a pure, tested transform → `public/climb/climb.json`) and the player's evaluator
+(centripetal Catmull-Rom · slerp · Fritsch–Carlson time-warp) replaces `climbMath`'s. **What the site kept**,
+because the format deliberately does not carry it: *when* the beat runs (`driver="external"` — the host owns `t`,
+ADR-039; the site still drives the climb run's own localT, the clock the 2D world breathes by, and the player
+renders synchronously in that push — no second loop), *how much* of the frame it owns (`skyPresence` × the
+white-out swallow, applied as one composited layer opacity instead of per-material alpha), and the golden unlock
+rings / type-name flashes / whole environment (still 2D, still projected by `climbMath`, still landing on the
+aircraft because `frustum-clamp="0.87"` reproduces `climbXScale` — ADR-038 — to 16 digits).
+
+**Why behind a flag, default OFF (`?climb=r3f`).** The Vertie format expresses lighting **only** as an
+environment map (spec §5): no light primitive, no shadow map, no per-node animation. So three things the bespoke
+scene does are lost in translation — the morning **key light's own real-time self-shadows** (canopy on spine,
+wing on root), and the **spinning propellers** (the site carries prop spin as glTF `extras`; the format animates
+whole assets). The morning **direction + colour** survive by being **baked into `public/climb/morning.hdr`** (a
+generated equirect — hemisphere wrap + two disc lights, `scripts/gen-vertie-climb.mjs`), so IBL reproduces as
+much of the rig as the format can. Flipping the default is therefore a **separate, deliberate** decision on an
+award-submitted page, not a side effect of landing the integration; `climbEngine()` mirrors `worldMode`'s
+`?world=` override in shape and spirit. Exactly one engine ever flies the aircraft (`SkyPatrols` renders
+`ClimbHeroes` only in `r3f` mode); a player that fails to load reports no readiness, so the 2D silhouette hero
+keeps flying — the same fallback contract as a failed GLB fetch.
+
+**Verified live, not just built** (the project's pixel-readback + `__`-probe method, hidden pane): the scene
+validates through the **published** validator (0 errors); full-document parity of the player's evaluator vs the
+bespoke `climbMath` is **≤ 2.16e-14** in-browser (and 1.5e-13 across 400 headless samples on the full 12-key
+L-39 leg the old Vertie fixture was missing); the whole relay renders (Ulla parked open → hand-off → L-39 into
+the white-out) with the live `frustumClamp.x = 0.845072254165…` matching the origin engine exactly; and the
+default path mounts no `vertie-scene` at all. Gate green (382 tests). The proof-panel test count moved 364 → 382
+(the number the site tells about itself, kept honest). Detail: `local/bootstrap.md` head.
+
+---
+
 ### ADR-071 — Pre-flight for the award submissions: three false claims retired at source, the share card re-cut, the GIF killed, the parametric jets archived (2026-07-17)
 Preparing the competition entries (`local/souteze/`, gitignored) meant writing down what the site *is* — and
 that exercise found **three claims the project had been repeating about itself that were not true**. All three

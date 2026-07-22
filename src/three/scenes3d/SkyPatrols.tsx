@@ -45,6 +45,7 @@ import { buildAIM9 } from './aim9'
 import { buildDropTank } from './droptank'
 import { BagramActors } from './BagramActors'
 import { ClimbHeroes } from './ClimbHeroes'
+import { climbEngine } from '../../vertie/flag'
 import { CruiseBallet } from './CruiseBallet'
 import { JET_SCALE, REST_Y, TIP_X, loadL159 } from './l159'
 import {
@@ -69,7 +70,10 @@ export function SkyScenes(props: Scene3DProps) {
     <>
       <SkyPatrols {...props} />
       <CruiseBallet {...props} />
-      <ClimbHeroes {...props} />
+      {/* E1c: `?climb=vertie` hands the graduation ladder to the published
+          `vertie` player (VertieClimb, its own layer and its own WebGL
+          context), so exactly one engine ever flies these three aircraft. */}
+      {climbEngine() === 'r3f' && <ClimbHeroes {...props} />}
       <BagramActors {...props} />
     </>
   )
