@@ -12,12 +12,18 @@
 
 /* `<vertie-scene>` defaults to its own 300vh scroll region with a sticky
    viewport — that is the drop-in scroll embed. Driven externally it owns no
-   scroll at all, so it collapses onto this layer instead. Both custom
-   properties are set: the host height and the sticky viewport inside it. */
+   scroll, so it must instead FILL this layer as a full-screen overlay.
+
+   Pin it with `position: absolute; inset: 0` rather than `width/height: 100%`:
+   a definite box that can never collapse to content height, and it neutralises
+   the element's internal `position: sticky` viewport (a sticky box inside a
+   fixed overlay has no scroll container, so with a definite host it just fills).
+   `--vertie-viewport-height: 100%` then resolves the inner canvas to the same
+   definite box. */
 .scene {
   display: block;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   --vertie-height: 100%;
   --vertie-viewport-height: 100%;
 }

@@ -121,10 +121,28 @@ export function VertieClimb({ chapters }: { chapters: readonly Chapter[] }) {
     // player belongs on the critical path.
     const loading = import('vertie')
 
+    // Force <vertie-scene> to re-measure its canvas. The external driver renders
+    // ON DEMAND (only when t changes), so if the renderer latched onto a stale
+    // pre-layout size, a static scene (viewer parked at the opening, not
+    // scrolling) would never repaint at the correct size — it would sit tiny in
+    // a corner. Perturbing the width by a hair for one frame trips the element's
+    // own ResizeObserver, which re-fits the drawing buffer and repaints.
+    let refitRaf = 0
+    const refit = () => {
+      if (!element) return
+      element.style.width = 'calc(100% - 1px)'
+      cancelAnimationFrame(refitRaf)
+      refitRaf = requestAnimationFrame(() => {
+        if (element) element.style.width = ''
+      })
+    }
+
     const onReady = () => {
       ready = true
       setHero3DReady('climb', true)
       finishHeroLoad('climb')
+      // Layout is settled by now; guarantee the renderer is at the true size.
+      refit()
     }
     const onProgress = (e: Event) => {
       const detail = (e as CustomEvent<ProgressDetail>).detail
@@ -270,6 +288,11 @@ export function VertieClimb({ chapters }: { chapters: readonly Chapter[] }) {
       tick()
     }
 
+    // A viewport resize changes the canvas box; re-fit so the on-demand renderer
+    // never keeps rendering into a stale size.
+    const onWindowResize = () => refit()
+    window.addEventListener('resize', onWindowResize, { passive: true })
+
     // DEV: force a scroll position and run one frame synchronously (no rAF),
     // so a harness can drive the flip in a background tab.
     if (probe) {
@@ -298,6 +321,8 @@ export function VertieClimb({ chapters }: { chapters: readonly Chapter[] }) {
     return () => {
       alive = false
       cancelAnimationFrame(raf)
+      cancelAnimationFrame(refitRaf)
+      window.removeEventListener('resize', onWindowResize)
       unmount()
     }
   }, [chapters])
