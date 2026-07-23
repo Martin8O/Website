@@ -42,6 +42,20 @@ the white-out) with the live `frustumClamp.x = 0.845072254165…` matching the o
 default path mounts no `vertie-scene` at all. Gate green (382 tests). The proof-panel test count moved 364 → 382
 (the number the site tells about itself, kept honest). Detail: `local/bootstrap.md` head.
 
+**Follow-up (same prompt) — the hardened CSP broke it live, twice-hidden:** on the real site the whole climb
+rendered **squashed into a corner at 300×150** while the 2D labels stayed correct. Two causes, both from the
+site's own hardened CSP, and both invisible to the headless verification pane (which has no CSP): (1) **`style-src
+'self'` blocked `<vertie-scene>`'s shadow `<style>` element** — inline CSS — so the canvas lost its
+`position/width/height` and collapsed to the intrinsic canvas size in the corner. Fixed **in the player**
+(Vertie repo, `adoptedStyleSheets`, which CSP exempts) and re-vendored; the site's CSP stays untouched. (2)
+`script-src 'self'` blocks the meshopt decoder's `WebAssembly.instantiate` — a **non-fatal** console error only
+on `?climb=vertie` (the quantize-only climb needs no decoder), parked for a lazy-decoder follow-up. ⚠ **Deploy
+trap:** the fix didn't reach production until the Vertie package was bumped **0.0.1 → 0.0.2** — npm caches a
+`file:` tarball by `name@version`, so Vercel's build silently reused the pre-fix 0.0.1 bundle (the live chunk
+stayed byte-identical). Verified after the bump: the deployed `vertie` chunk carries `adoptedStyleSheets` and the
+climb renders full-screen (Martin confirmed). Two earlier host-sizing attempts (1px-nudge, explicit px) chased
+the wrong layer and were reverted — the cause was always the CSP-blocked shadow stylesheet.
+
 ---
 
 ### ADR-071 — Pre-flight for the award submissions: three false claims retired at source, the share card re-cut, the GIF killed, the parametric jets archived (2026-07-17)
