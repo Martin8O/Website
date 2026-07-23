@@ -121,34 +121,10 @@ export function VertieClimb({ chapters }: { chapters: readonly Chapter[] }) {
     // player belongs on the critical path.
     const loading = import('vertie')
 
-    // Give <vertie-scene> an EXPLICIT pixel size instead of trusting its internal
-    // layout. The element is built for a drop-in scroll embed: its shadow root
-    // sizes the canvas through a chain of percentage heights and a
-    // `position: sticky` viewport. Driven externally as a full-screen overlay
-    // that chain can collapse (seen live: the whole scene squashed into the
-    // top-left corner at backing-store size while the 2D labels stayed correct),
-    // and my headless pane always resolved the percentages so it never showed.
-    // Sizing the host in real pixels from the always-full-screen `.stage` box
-    // sidesteps the chain entirely, and the size change trips the element's own
-    // ResizeObserver so the drawing buffer re-fits and repaints.
-    const sizeToHost = () => {
-      if (!element) return
-      const w = host.clientWidth
-      const h = host.clientHeight
-      if (w <= 0 || h <= 0) return
-      element.style.width = `${w}px`
-      element.style.height = `${h}px`
-    }
-    const hostResizeObserver =
-      typeof ResizeObserver === 'function' ? new ResizeObserver(sizeToHost) : null
-    hostResizeObserver?.observe(host)
-
     const onReady = () => {
       ready = true
       setHero3DReady('climb', true)
       finishHeroLoad('climb')
-      // Layout is settled by now; guarantee the element is at the true size.
-      sizeToHost()
     }
     const onProgress = (e: Event) => {
       const detail = (e as CustomEvent<ProgressDetail>).detail
@@ -181,8 +157,6 @@ export function VertieClimb({ chapters }: { chapters: readonly Chapter[] }) {
       beginHeroLoad('climb')
       host.appendChild(el)
       element = el
-      // Definite pixel size from the first frame, before anything renders.
-      sizeToHost()
     }
 
     const unmount = () => {
@@ -324,7 +298,6 @@ export function VertieClimb({ chapters }: { chapters: readonly Chapter[] }) {
     return () => {
       alive = false
       cancelAnimationFrame(raf)
-      hostResizeObserver?.disconnect()
       unmount()
     }
   }, [chapters])
