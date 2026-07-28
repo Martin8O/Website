@@ -6,6 +6,7 @@ import { setLang } from '../i18n/langStore'
 import { STRINGS } from '../i18n/strings'
 import { AboutPanel } from './AboutPanel'
 import { CreditsPopup } from './CreditsPopup'
+import { ChangelogPopup } from './ChangelogPopup'
 import { ChunkBoundary } from './ChunkBoundary'
 import styles from './SiteNav.module.css'
 
@@ -26,15 +27,17 @@ const WorkPanel = lazy(() => import('./WorkPanel').then((m) => ({ default: m.Wor
 export function SiteNav() {
   const lang = useLang()
   const t = STRINGS[lang]
-  // 'credits' is a mini window opened FROM about — it replaces the about panel
-  // (Martin: the licences must not show next to the about-me copy), so only one
-  // dialog stands at a time. Closing it returns to about.
-  const [open, setOpen] = useState<'work' | 'about' | 'credits' | null>(null)
-  // About↔Credits is a SWAP, not a fresh open: the returning About must skip
-  // its backdrop fade-in, or the story scene flashes at full strength for a
-  // frame between the two dark overlays (Martin's catch — same reason the
-  // Credits overlay never animates its backdrop at all).
-  const returning = useRef(false)
+  // 'credits' and 'changelog' are mini windows opened FROM about — each
+  // replaces the about panel (Martin: the licences must not show next to the
+  // about-me copy), so only one dialog stands at a time. Closing one returns
+  // to about.
+  const [open, setOpen] = useState<'work' | 'about' | 'credits' | 'changelog' | null>(null)
+  // About↔mini-window is a SWAP, not a fresh open: the returning About must
+  // skip its backdrop fade-in, or the story scene flashes at full strength for
+  // a frame between the two dark overlays (Martin's catch — same reason those
+  // overlays never animate their backdrop at all). The value also names which
+  // foot toggle to hand focus back to.
+  const returning = useRef<'credits' | 'changelog' | undefined>(undefined)
   const workRef = useRef<HTMLButtonElement>(null)
   const aboutRef = useRef<HTMLButtonElement>(null)
 
@@ -118,7 +121,7 @@ export function SiteNav() {
         className={styles.item}
         onClick={(e) => {
           tapFlash(e.currentTarget)
-          returning.current = false
+          returning.current = undefined
           setOpen('about')
         }}
         aria-haspopup="dialog"
@@ -140,15 +143,20 @@ export function SiteNav() {
       </button>
       {open === 'about' && (
         <AboutPanel
-          instant={returning.current}
+          returnTo={returning.current}
           onClose={closeAbout}
           onCredits={() => {
-            returning.current = true
+            returning.current = 'credits'
             setOpen('credits')
+          }}
+          onChangelog={() => {
+            returning.current = 'changelog'
+            setOpen('changelog')
           }}
         />
       )}
       {open === 'credits' && <CreditsPopup onClose={() => setOpen('about')} />}
+      {open === 'changelog' && <ChangelogPopup onClose={() => setOpen('about')} />}
       {open === 'work' && (
         // Deploy skew can 404 the lazy chunk hours after page load — tell the
         // visitor instead of blanking the whole site (ChunkBoundary).

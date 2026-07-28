@@ -38,6 +38,8 @@ export type UiStrings = {
   profiles: string
   credits: string
   creditsBody: string
+  changelog: string
+  changelogBody: string
   testsTitle: string
   testsBody: string
   copyEmail: string
@@ -96,6 +98,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     profiles: 'Profiles',
     credits: 'Credits',
     creditsBody: '3D aircraft — based on Sketchfab originals (modified), under CC BY 4.0:',
+    changelog: 'Changelog',
+    changelogBody: 'How this site was built, straight from its GitHub history:',
     testsTitle: 'Automated tests',
     testsBody:
       'Collected from the codebase at build time — every deploy must pass all of them first:',
@@ -137,6 +141,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     profiles: 'Profily',
     credits: 'Credits',
     creditsBody: '3D letadla — vychází ze Sketchfab originálů (upraveno), pod CC BY 4.0:',
+    changelog: 'Changelog',
+    changelogBody: 'Jak tenhle web vznikal – přímo podle jeho historie na GitHubu:',
     testsTitle: 'Automatické testy',
     testsBody:
       'Sesbírané z kódu při buildu – každé nasazení jimi musí nejdřív projít:',

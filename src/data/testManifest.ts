@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 382
+export const TEST_COUNT = 387
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -222,6 +222,16 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "landingPov > keeps the wheels descending to the threshold and down after it",
       "landingPov > bites the brakes at the wheels and eases to the stop at the runway half",
       "landingPov > projects depth monotonically with the threshold as the unit",
+    ],
+  },
+  {
+    file: "src/data/changelog.test.ts",
+    tests: [
+      "changelog data > is in chronological order",
+      "changelog data > has unique ids and ISO dates",
+      "changelog data > only ever links out over https",
+      "changelog data > translates every entry to Czech without losing one",
+      "formatChangelogDate > formats per language",
     ],
   },
   {

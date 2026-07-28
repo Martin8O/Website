@@ -4,6 +4,34 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-073 — About → Changelog: the site's own build history, read off the GitHub log (2026-07-28)
+A third quiet window under About: **Changelog** — three dated milestones of *this repo*, each linking to the real
+commit it happened in. Built as Credits' twin (same chrome, same manners, own dialog replacing About, focus
+returning to the toggle that opened it), so the visitor learns one interaction and it works everywhere.
+`src/data/changelog.ts` is the single source — EN canonical + a CS overlay merged by id (the chapters/projects
+pattern); adding a milestone is one object.
+
+**Scope decision (Martin):** *this website only.* The first cut also carried a **Vertie** entry ("an animation
+studio of its own", 19 Jul); it was pulled — Vertie is an unfinished sister project, and a milestone that reads
+as shipped when it isn't is the same class of false claim ADR-071 had to retract. It comes back when it stands on
+its own. That also settled the dating: **v2.0 = 2026-07-16**, when the 3D layer landed six days after v1.0 — not
+2026-07-23 (E1c, which is opt-in behind `?climb=vertie` and would have badged a flagged path as "the 3D version").
+
+**Two copy traps caught by Martin, both worth keeping written down:** (1) *"hand-drawn canvas chapters"* — the
+scenes are **computed by a render function every frame**, no illustrations and no scrubbed video, so the phrase
+reads as the opposite of the truth. Now **"procedurally drawn" / "kreslené kódem"**, the exact substitution
+`local/souteze/_materials/descriptions.md` already flags for award copy. (2) The 3D list was missing the **dusk
+landing break** (`patrolMath.BREAK`, chapter 05) — the 3D beats are climb · ballet · Bagram · airshow pass ·
+landing break, and a list that drops one is a quiet undercount of the work.
+
+Dates are formatted by a **pure string function**, never `Date` — a timezone must not be able to shift a
+milestone by a day, and it stays trivially testable (`changelog.test.ts`: chronological order, unique ids,
+https-only links, no untranslated entry, both date formats). The About foot became a **three-track grid**
+(Credits · Changelog centred in the gap · profile links) — measured dead-centre at 375 px and 1280 px.
+
+*Alternative rejected:* a section inside the About body — it would put a build log next to the positioning copy,
+the same reason the licences were moved out in the first place (ADR-043).
+
 ### ADR-072 — E1c: the chapter-01 climb heroes run on the published Vertie player, behind `?climb=vertie` (2026-07-23)
 The masterplan §5 decision — *"the site's hero 3D runs on Vertie"* — made literally true, at the cheapest honest
 scope: the graduation ladder (Ulla → Z-142 → L-39) is now rendered by the **published `vertie` npm package**

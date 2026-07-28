@@ -76,27 +76,32 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
 export function AboutPanel({
   onClose,
   onCredits,
-  instant = false,
+  onChangelog,
+  returnTo,
 }: {
   onClose: () => void
   onCredits: () => void
-  /** True when About REPLACES the Credits popup (the return leg of the
+  onChangelog: () => void
+  /** Set when About REPLACES one of its mini windows (the return leg of the
    *  swap): the dark backdrop must stand instantly — a fade-from-zero
    *  would flash the story scene at full strength between the dialogs.
-   *  The return leg also puts focus back on the Credits toggle (the
-   *  control that opened the popup), not the panel's close button. */
-  instant?: boolean
+   *  The value names WHICH foot toggle opened it, so focus goes back to the
+   *  control the visitor actually pressed, not the panel's close button. */
+  returnTo?: 'credits' | 'changelog'
 }) {
   const lang = useLang()
   const t = STRINGS[lang]
   const copy = COPY[lang]
   const closeRef = useRef<HTMLButtonElement>(null)
   const creditsRef = useRef<HTMLButtonElement>(null)
+  const changelogRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const instant = returnTo !== undefined
 
   useEffect(() => {
-    ;((instant ? creditsRef.current : closeRef.current) ?? closeRef.current)?.focus()
-    // Mount-only: `instant` is fixed for a given open (About remounts on
+    const back = returnTo === 'changelog' ? changelogRef.current : creditsRef.current
+    ;((instant ? back : closeRef.current) ?? closeRef.current)?.focus()
+    // Mount-only: `returnTo` is fixed for a given open (About remounts on
     // every open — SiteNav conditional-renders it).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -156,6 +161,9 @@ export function AboutPanel({
 
         <footer className={styles.foot}>
           <div className={styles.footRow}>
+            {/* Three tracks (Martin): Credits hard-left, the profile links
+                hard-right, and Changelog CENTERED in the gap between them —
+                hence a grid, not the old two-group space-between. */}
             <button
               ref={creditsRef}
               type="button"
@@ -164,6 +172,15 @@ export function AboutPanel({
               aria-haspopup="dialog"
             >
               {t.credits}
+            </button>
+            <button
+              ref={changelogRef}
+              type="button"
+              className={`${styles.creditsToggle} ${styles.changelogToggle}`}
+              onClick={onChangelog}
+              aria-haspopup="dialog"
+            >
+              {t.changelog}
             </button>
             <div className={styles.links} aria-label={t.profiles}>
               {[PROFILE.github, PROFILE.linkedin].map((p) => (

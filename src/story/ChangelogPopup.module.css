@@ -1,0 +1,186 @@
+/* The build-history mini window — Credits' twin, a touch wider (the entries
+   carry a sentence each). Same chrome, same manners, same amber. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 3vw, 2.5rem);
+  background: color-mix(in srgb, #04050a 80%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto;
+  /* NO backdrop fade — like Credits, this only ever opens as a REPLACEMENT of
+     the About panel, and fading in from zero flashes the story scene at full
+     strength for a frame between the two dialogs. */
+}
+
+.panel {
+  width: min(460px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1rem, 3vw, 1.4rem) clamp(1.1rem, 3vw, 1.6rem) clamp(1.1rem, 3vw, 1.4rem);
+  background: linear-gradient(180deg, #0b0d16 0%, #08090f 100%);
+  border: 1px solid color-mix(in srgb, var(--amber) 22%, transparent);
+  border-radius: 14px;
+  box-shadow: 0 40px 120px -30px #000, 0 0 60px -20px color-mix(in srgb, var(--amber) 26%, transparent);
+  animation: rise 200ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  scrollbar-width: thin;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.close {
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+/* Hover is POINTER-only (see SiteNav.module.css: on touch it latches). */
+.close:focus-visible,
+.close:active {
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+  border-color: color-mix(in srgb, var(--amber) 55%, transparent);
+  outline: none;
+}
+
+@media (hover: hover) {
+  .close:hover {
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+    border-color: color-mix(in srgb, var(--amber) 55%, transparent);
+    outline: none;
+  }
+}
+
+.intro {
+  margin: 0 0 1rem;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+}
+
+/* The dated rail: one hairline running down the left, a dot per milestone. */
+.list {
+  margin: 0;
+  padding: 0 0 0 1.05rem;
+  list-style: none;
+  border-left: 1px solid color-mix(in srgb, var(--amber) 20%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.entry {
+  position: relative;
+}
+
+.dot {
+  position: absolute;
+  left: calc(-1.05rem - 3.5px);
+  top: 0.34rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 10px -1px color-mix(in srgb, var(--amber) 70%, transparent);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.16rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fg) 52%, transparent);
+}
+
+.version {
+  padding: 0.08rem 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+  border-radius: 999px;
+  color: var(--amber);
+  letter-spacing: 0.08em;
+  /* The release badge keeps its own casing — "v1.0", not the row's "V1.0". */
+  text-transform: none;
+}
+
+.entryTitle {
+  margin: 0 0 0.28rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--fg) 92%, transparent);
+}
+
+.body {
+  margin: 0 0 0.34rem;
+  font-size: 0.79rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+}
+
+.link {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--fg) 54%, transparent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.link:focus-visible,
+.link:active {
+  color: var(--amber);
+  border-color: var(--amber);
+  outline: none;
+}
+
+@media (hover: hover) {
+  .link:hover {
+    color: var(--amber);
+    border-color: var(--amber);
+    outline: none;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .panel {
+    animation: none;
+  }
+}

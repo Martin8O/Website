@@ -169,12 +169,18 @@
   border-top: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
-/* Row: quiet Credits toggle hard-left, profile links hard-right. */
+/* Three tracks: the quiet Credits toggle hard-left, the profile links
+   hard-right, and Changelog floating in the middle track — `1fr` + a centred
+   item puts it dead centre of the gap, whatever the two ends measure. */
 .footRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: 0.8rem;
+}
+
+.changelogToggle {
+  justify-self: center;
 }
 
 .links {
