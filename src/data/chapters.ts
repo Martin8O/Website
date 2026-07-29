@@ -160,8 +160,14 @@ export const CHAPTERS: Chapter[] = [
     // Two doors on the first screen for the visitor who came for the work:
     // the projects panel (same dialog the nav opens) and the flight plan.
     actions: [
-      { id: 'work', label: 'Projects' },
-      { id: 'offer', label: 'Work with me' },
+      // "My work", not "Projects": the pair reads as one sentence — what you
+      // are looking at, and what you can do about it — and "Projects" next to
+      // "Start a project" echoed the same word twice.
+      { id: 'work', label: 'My work' },
+      // NOT "Work with me" (Martin): in English that reads as looking for a
+      // colleague or a job, not as an offer to a client. The Czech overlay
+      // keeps "Spolupráce" — "nabídka spolupráce" IS the client phrase there.
+      { id: 'offer', label: 'Start a project' },
     ],
   },
   {

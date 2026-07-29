@@ -9,8 +9,10 @@ Ninety percent of the story is a life; only chapters 09–10 speak to a client, 
 hero now says what the site IS before a single scroll: a mono eyebrow (**"Jet pilot turned builder · websites ·
 apps · automations"** / *"Proudový pilot, teď vývojář · weby · aplikace · automatizace"*), a lede that names the
 last chapter a **dev workshop** and this site a **work sample**, and a closing line that hands off to two quiet
-HUD pills — **Projects** (opens the nav's own Work dialog) and **Work with me** / *Spolupráce* (teleports to
-chapter 09). The old eyebrow (`↓ Scroll to travel through time with me`) was dropped: the bobbing `ScrollHint`
+HUD pills — **My work** (opens the nav's own Work dialog) and **Start a project** / *Projekty · Spolupráce*
+(teleports to chapter 09). The English labels went through two corrections by Martin: *"Work with me"* reads as
+looking for a colleague or a job rather than offering to a client, and *"Projects · Start a project"* echoed the
+same word twice. Czech needs neither fix — *nabídka spolupráce* is the client phrase there. The old eyebrow (`↓ Scroll to travel through time with me`) was dropped: the bobbing `ScrollHint`
 and the lede's own last sentence already carry the nudge twice.
 
 *Why buttons and not just the nav:* the nav is a small glass pill top-right and reads as chrome — a visitor who
