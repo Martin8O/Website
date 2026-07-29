@@ -19,7 +19,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
   intro: {
     num: 'Proudový pilot, teď vývojář · weby · aplikace · automatizace',
     title: 'Martin',
-    body: 'Jeden život, mnoho kapitol&nbsp;–&nbsp;ta poslední je vývojářská dílna a&nbsp;toto je ukázka mojí práce.<br>Skrolujte&nbsp;–&nbsp;slunce se rozběhne po obloze a&nbsp;s&nbsp;ním můj příběh. Nebo skočte rovnou na:',
+    body: 'Jeden život, mnoho kapitol&nbsp;–&nbsp;ta poslední je vývojářská dílna.<br>Tenhle web je ukázka mojí práce.<br><br class="gap">Skrolujte, rozběhněte slunce po obloze a&nbsp;s&nbsp;ním i&nbsp;můj příběh.<br>Nebo skočte rovnou na:',
     actions: [
       { id: 'work', label: 'Projekty' },
       { id: 'offer', label: 'Spolupráce' },

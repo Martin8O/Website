@@ -30,7 +30,16 @@ in days, not months"**. The three-noun stack (quality-build-pace) read as machin
 does the work, and "quality" is already carried by "built properly, end to end" two lines above. The Czech
 ("tempo měřené ve dnech") was already natural and stays.
 
-**Found on the way, deliberately NOT fixed here:** `.body { max-width: 34ch }` is **non-deterministic**. When the
+**Follow-up, same day (after Martin read it on the live site):** the lede's line breaks are now **authored**
+(`<br>`), two sentences per block with a blank line between them — sazba was breaking them into ragged,
+arbitrary lines. That only works if the measure is deterministic, so the intro column moved from `56ch` to
+**`34em` (≈533px)**; the longest authored line measures 485px, so it keeps real margin. On phones the blank
+line costs a whole row where the card is already the tallest thing on screen, so it carries **`<br class="gap">`**
+and is dropped below 600px. (The first attempt hid it with `br + br` — which silently killed *every* later break
+too, because the sibling combinator skips text nodes and every `<br>` is therefore adjacent to the previous one.)
+
+**Found on the way, deliberately NOT fixed for the rest of the site:** `.body { max-width: 34ch }` is
+**non-deterministic**. When the
 `0` glyph isn't available at computed-value time (webfont still loading), CSS falls back to `1ch = 0.5em` →
 **266.56px** instead of Inter's **336.33px** — a 27 % narrower measure, and justified text at that width opens
 visible rivers. Which one a visitor gets depends on whether Inter was in cache when the value computed; Martin

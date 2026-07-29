@@ -207,13 +207,29 @@
   text-align-last: center;
 }
 
-/* Intro lede: a short, centered tagline — not a justified paragraph. It also
-   runs on a WIDER measure than the story bodies (34ch would break its two
-   sentences into five ragged lines): three tight lines on desktop, and on a
-   phone the card width caps it anyway. */
+/* Intro lede: a short, centered tagline — not a justified paragraph. Its four
+   lines are authored with <br> (chapters.ts), so the measure only has to be
+   wide enough for the longest of them and is set in `em`, NOT `ch`: `ch`
+   resolves against the font, and when the `0` glyph isn't available yet the
+   spec falls back to 1ch = 0.5em — a 27 % narrower column and different line
+   breaks depending on whether Inter was in cache. 34em ≈ 533px at the capped
+   body size: the longest authored line measures 494px, so it keeps a real
+   margin, and it still sits inside the 592px the card leaves. */
 .centerBody .body {
   text-align: center;
-  max-width: 56ch;
+  max-width: 34em;
+}
+
+/* Phones: the blank line between the two blocks costs a whole line where the
+   card is already the tallest thing on screen (both long sentences wrap), so
+   the blank-line <br class="gap"> is dropped — the blocks still read apart
+   because each starts its own line. Desktop keeps the breather.
+   (It carries its own class on purpose: `br + br` would ALSO match every
+   later <br>, because the sibling combinator skips text nodes.) */
+@media (max-width: 600px) {
+  :global(#intro) .body :global(br.gap) {
+    display: none;
+  }
 }
 
 /* On phones the column is narrow enough that justify opens ugly word-gaps

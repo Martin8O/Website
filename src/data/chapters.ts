@@ -152,7 +152,11 @@ export const CHAPTERS: Chapter[] = [
     num: 'Jet pilot turned builder · websites · apps · automations',
     title: 'Martin',
     centerBody: true,
-    body: 'One life, many chapters&nbsp;—&nbsp;the last one is a dev workshop, and this is a work sample.<br>Scroll&nbsp;—&nbsp;the sun races across the sky and my story runs with it. Or jump straight to:',
+    // Authored line breaks (Martin): each sentence owns its line and the two
+    // blocks — "what this is" / "how to use it" — are split by a blank line.
+    // The measure below (`.centerBody .body`) is set in `em`, not `ch`, so
+    // these breaks land the same whether or not Inter is in cache yet.
+    body: 'One life, many chapters&nbsp;—&nbsp;the last one is a dev workshop.<br>This website is a work sample.<br><br class="gap">Scroll, sending the sun racing across the sky and my story with it.<br>Or jump straight to:',
     // Two doors on the first screen for the visitor who came for the work:
     // the projects panel (same dialog the nav opens) and the flight plan.
     actions: [
