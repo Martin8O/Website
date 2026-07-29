@@ -4,6 +4,40 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-074 — The intro frames the offer: positioning eyebrow + two quick paths (2026-07-29)
+Ninety percent of the story is a life; only chapters 09–10 speak to a client, and they sit at the very end. The
+hero now says what the site IS before a single scroll: a mono eyebrow (**"Jet pilot turned builder · websites ·
+apps · automations"** / *"Proudový pilot, teď vývojář · weby · aplikace · automatizace"*), a lede that names the
+last chapter a **dev workshop** and this site a **work sample**, and a closing line that hands off to two quiet
+HUD pills — **Projects** (opens the nav's own Work dialog) and **Work with me** / *Spolupráce* (teleports to
+chapter 09). The old eyebrow (`↓ Scroll to travel through time with me`) was dropped: the bobbing `ScrollHint`
+and the lede's own last sentence already carry the nudge twice.
+
+*Why buttons and not just the nav:* the nav is a small glass pill top-right and reads as chrome — a visitor who
+came for the work had no door on the first screen. *Why the offer target is `index + 0.03`, not the chapter
+start:* it lands where the "Your flight plan" card is up **and** panel 01 has just risen at its waypoint
+(`offerMath.wpOffset(0) ≈ −0.01`), never on the empty chart. *Why a window-event bus*
+(`src/story/workPanelBus.ts`, the `contactFlash` idiom): there is exactly **one** Work dialog on the site and
+`SiteNav` owns its state + lazy chunk — an event asks for it instead of lifting that state into the app. The
+labels ride the chapter data (`actions`), so behaviour is single-sourced on the id and copy stays bilingual.
+
+Two typographic knobs the intro needed: the lede runs on a **wider measure (56ch)** — 34ch broke its two
+sentences into five ragged lines — and the eyebrow is a touch smaller/tighter so the positioning line holds
+**one row** on desktop and wraps to two only on phones.
+
+Same pass, EN copy fix (chapter 10 + About): *"a quality build pace measured in days"* → **"a build pace measured
+in days, not months"**. The three-noun stack (quality-build-pace) read as machine-translated; the contrast now
+does the work, and "quality" is already carried by "built properly, end to end" two lines above. The Czech
+("tempo měřené ve dnech") was already natural and stays.
+
+**Found on the way, deliberately NOT fixed here:** `.body { max-width: 34ch }` is **non-deterministic**. When the
+`0` glyph isn't available at computed-value time (webfont still loading), CSS falls back to `1ch = 0.5em` →
+**266.56px** instead of Inter's **336.33px** — a 27 % narrower measure, and justified text at that width opens
+visible rivers. Which one a visitor gets depends on whether Inter was in cache when the value computed; Martin
+saw both states side by side on the *same* commit (live site warm, dev preview cold) and reasonably read it as a
+regression. Fix = swap the `ch` measure for its em equivalent (`21.4em`); it touches every chapter body, so it
+gets its own prompt.
+
 ### ADR-073 — About → Changelog: the site's own build history, read off the GitHub log (2026-07-28)
 A third quiet window under About: **Changelog** — three dated milestones of *this repo*, each linking to the real
 commit it happened in. Built as Credits' twin (same chrome, same manners, own dialog replacing About, focus

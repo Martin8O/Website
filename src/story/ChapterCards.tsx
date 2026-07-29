@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { onContactCtaFlash } from './contactFlash'
-import { THEME_ACCENT, type Chapter } from '../data/chapters'
-import { cardOpacity, cardOpacityWindowed } from '../timeline'
+import { openWorkPanel } from './workPanelBus'
+import { scrollToProgress } from '../scroll/scrollStore'
+import { CHAPTER_WEIGHTS, THEME_ACCENT, type Chapter, type ChapterAction } from '../data/chapters'
+import { cardOpacity, cardOpacityWindowed, progressFromPos } from '../timeline'
 import { heroLive } from '../three/owned3d'
 import type { WorldMode } from '../three/worldMode'
 import { useLang } from '../i18n/useLang'
@@ -85,6 +87,52 @@ function Cta({ cta }: { cta: NonNullable<Chapter['cta']> }) {
         </span>
       )}
     </span>
+  )
+}
+
+/**
+ * The intro card's quick paths — two quiet HUD pills for the visitor who came
+ * for the WORK, not the life story: `work` opens the projects dialog the nav
+ * owns, `offer` teleports to chapter 09 (the flight plan). Both are real
+ * buttons (they act on the page, they don't navigate), labelled from the
+ * chapter data so the copy stays bilingual.
+ */
+function CardActions({ actions, chapters }: { actions: readonly ChapterAction[]; chapters: Chapter[] }) {
+  // Land just INSIDE the mission chapter: the "Your flight plan" card is up
+  // and panel 01 has just risen at its waypoint (offerMath.wpOffset(0) ≈ -0.01)
+  // — not the empty chart that precedes them.
+  const offerIndex = chapters.findIndex((c) => c.id === 'offer-mission')
+  const offerProgress = progressFromPos(offerIndex + 0.03, CHAPTER_WEIGHTS)
+
+  // Deterministic tap feedback, exactly as the nav does it: a quick tap can
+  // end before `:active` ever paints, and the UA's blue flash is off
+  // (ADR-068), so a restartable animation guarantees one visible pulse.
+  const tapFlash = (el: HTMLElement) => {
+    el.classList.remove(styles.tapped)
+    void el.offsetWidth
+    el.classList.add(styles.tapped)
+  }
+
+  return (
+    <div className={styles.actionRow}>
+      {actions.map((a) => (
+        <button
+          key={a.id}
+          type="button"
+          className={styles.action}
+          {...(a.id === 'work' ? { 'aria-haspopup': 'dialog' as const } : {})}
+          onClick={(e) => {
+            tapFlash(e.currentTarget)
+            if (a.id === 'work') openWorkPanel()
+            else scrollToProgress(offerProgress, { immediate: true })
+            // A pointer tap must not leave a sticky focus highlight (SiteNav).
+            if (e.detail > 0) e.currentTarget.blur()
+          }}
+        >
+          {a.label}
+        </button>
+      ))}
+    </div>
   )
 }
 
@@ -179,6 +227,7 @@ export function ChapterCards({
                 dangerouslySetInnerHTML={{ __html: ch.body }}
               />
             )}
+            {ch.actions && <CardActions actions={ch.actions} chapters={chapters} />}
             {ch.ctaEyebrow && <p className={styles.ctaEyebrow}>{ch.ctaEyebrow}</p>}
             {ch.cta && <Cta cta={ch.cta} />}
             {ch.ctaHint && <p className={styles.ctaHint}>{ch.ctaHint}</p>}

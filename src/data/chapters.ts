@@ -99,7 +99,16 @@ export type Chapter = {
    *  in across this pos-offset window from the chapter's index — the word
    *  "Bitcoin" arrives at 88 %, after the genesis impulse. */
   lateWord?: readonly [number, number]
+  /** Quiet HUD buttons under the body (intro only): the door for a visitor
+   *  who came for the WORK, not the life story — 'work' opens the projects
+   *  panel (the nav's own dialog, via the `workPanel` bus), 'offer'
+   *  teleports to chapter 09, the flight plan. Copy-only field: the label is
+   *  overlaid per language, the behaviour stays single-sourced on the id. */
+  actions?: readonly ChapterAction[]
 }
+
+/** One intro quick-path button — `id` is the behaviour, `label` the copy. */
+export type ChapterAction = { id: 'work' | 'offer'; label: string }
 
 /** Signature accent colour per theme — drives the eyebrow + HUD tint so the
  *  palette is data-driven from day one (hex, matches the design tokens). */
@@ -135,10 +144,21 @@ export const CHAPTERS: Chapter[] = [
   {
     id: 'intro',
     theme: 'origin',
-    num: '↓ Scroll to travel through time with me',
+    // The eyebrow POSITIONS the site in one mono line (Martin): 90 % of the
+    // story is a life, but the visitor must know from the first screen that
+    // this is also a workshop and an offer. The "scroll" nudge it used to
+    // carry is already on screen twice over — the bobbing ScrollHint at the
+    // bottom and the lede's own last sentence.
+    num: 'Jet pilot turned builder · websites · apps · automations',
     title: 'Martin',
     centerBody: true,
-    body: 'One life, many chapters.<br>Scroll and send the sun racing across the sky.',
+    body: 'One life, many chapters&nbsp;—&nbsp;the last one is a dev workshop, and this is a work sample.<br>Scroll&nbsp;—&nbsp;the sun races across the sky and my story runs with it. Or jump straight to:',
+    // Two doors on the first screen for the visitor who came for the work:
+    // the projects panel (same dialog the nav opens) and the flight plan.
+    actions: [
+      { id: 'work', label: 'Projects' },
+      { id: 'offer', label: 'Work with me' },
+    ],
   },
   {
     id: 'origin-school',
@@ -429,7 +449,7 @@ export const CHAPTERS: Chapter[] = [
     // Arrive only after the dev finale has said its piece (no ghost text
     // over the 08 card): rise from ~98 %, full at the very end.
     cardFull: [-0.05, 0],
-    body: 'Your destination can take any form&nbsp;—&nbsp;a website, an app, a tool, an automation. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built.<br><br>What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of regular meditation, and a quality build pace measured in days.<br><br>If you have something worth building, I’d enjoy hearing about it.',
+    body: 'Your destination can take any form&nbsp;—&nbsp;a website, an app, a tool, an automation. I take on the small-to-medium ones and build them properly, end to end. If you can describe it, it can be built.<br><br>What I bring: a military jet pilot’s focus, a test pilot’s precision, an eye for detail and a sense of responsibility, the calm of regular meditation, and a build pace measured in days, not months.<br><br>If you have something worth building, I’d enjoy hearing about it.',
     ctaEyebrow: '+ Get in touch',
     // Plain address, no decorative brackets — they wrapped onto their own
     // lines on phones and guard nothing (the address is plaintext in the

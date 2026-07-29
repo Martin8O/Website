@@ -1,6 +1,7 @@
-import { Suspense, lazy, useCallback, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { getScrollProgress, scrollToProgress } from '../scroll/scrollStore'
 import { flashContactCta } from './contactFlash'
+import { onOpenWorkPanel } from './workPanelBus'
 import { useLang } from '../i18n/useLang'
 import { setLang } from '../i18n/langStore'
 import { STRINGS } from '../i18n/strings'
@@ -40,6 +41,11 @@ export function SiteNav() {
   const returning = useRef<'credits' | 'changelog' | undefined>(undefined)
   const workRef = useRef<HTMLButtonElement>(null)
   const aboutRef = useRef<HTMLButtonElement>(null)
+
+  // The intro card's "Projects" button opens THIS dialog (one Work panel on
+  // the site) — closing it hands focus to the nav button, the same place a
+  // nav-opened panel returns to.
+  useEffect(() => onOpenWorkPanel(() => setOpen('work')), [])
 
   const closeWork = useCallback(() => {
     setOpen(null)

@@ -207,9 +207,13 @@
   text-align-last: center;
 }
 
-/* Intro lede: a short, centered two-line tagline — not a justified paragraph. */
+/* Intro lede: a short, centered tagline — not a justified paragraph. It also
+   runs on a WIDER measure than the story bodies (34ch would break its two
+   sentences into five ragged lines): three tight lines on desktop, and on a
+   phone the card width caps it anyway. */
 .centerBody .body {
   text-align: center;
+  max-width: 56ch;
 }
 
 /* On phones the column is narrow enough that justify opens ugly word-gaps
@@ -219,6 +223,99 @@
 @media (max-width: 600px) {
   .body {
     text-align: left;
+  }
+}
+
+/* The intro eyebrow is a POSITIONING line, not a chapter number — it wraps to
+   two lines on phones, so it needs leading of its own (the numbered eyebrows
+   everywhere else are single-line and unaffected). */
+:global(#intro) .num {
+  /* A touch smaller + tighter than a chapter number, so the whole positioning
+     line holds ONE row on desktop; on phones it wraps to two and needs the
+     leading. */
+  font-size: clamp(0.68rem, 1.45vw, 0.86rem);
+  letter-spacing: 0.13em;
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+}
+
+/* Intro quick paths — two quiet HUD pills under the lede. Centred, wrapping
+   to their own lines only if a translation outgrows the card. */
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: 1.5rem 0 0;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 44 px floor — a comfortable touch target on phones. */
+  min-height: 2.75rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #eef3fa;
+  background: rgba(0, 0, 0, 0.34);
+  border: 1px solid color-mix(in srgb, var(--accent, #f7931a) 42%, transparent);
+  border-radius: 999px;
+  padding: 0.55rem 1.05rem;
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.action:focus-visible,
+.action:active {
+  color: #fff;
+  border-color: var(--accent, var(--amber));
+  background: color-mix(in srgb, var(--accent, #f7931a) 16%, rgba(0, 0, 0, 0.34));
+}
+
+/* Hover only where a pointer really hovers — on touch it latches (SiteNav). */
+@media (hover: hover) {
+  .action:hover {
+    color: #fff;
+    border-color: var(--accent, var(--amber));
+    background: color-mix(in srgb, var(--accent, #f7931a) 16%, rgba(0, 0, 0, 0.34));
+  }
+}
+
+/* One guaranteed amber pulse per tap (the nav's `navTap` idiom — a quick tap
+   can end before `:active` ever paints). */
+.tapped {
+  animation: cardTap 420ms ease-out;
+}
+
+@keyframes cardTap {
+  0% {
+    background: color-mix(in srgb, var(--accent, var(--amber)) 22%, rgba(0, 0, 0, 0.34));
+    box-shadow: 0 0 22px -6px color-mix(in srgb, var(--accent, var(--amber)) 70%, transparent);
+  }
+  100% {
+    background: rgba(0, 0, 0, 0.34);
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tapped {
+    animation: none;
+  }
+}
+
+/* Narrow phones: trim the pill padding so both labels stay on ONE row (CZ
+   "Projekty · Spolupráce" is the longest pair). */
+@media (max-width: 400px) {
+  .action {
+    padding: 0.55rem 0.8rem;
+    letter-spacing: 0.08em;
   }
 }
 

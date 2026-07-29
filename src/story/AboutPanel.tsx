@@ -41,7 +41,7 @@ const COPY: Record<Lang, { p1: ReactNode; p2: ReactNode }> = {
         <strong>I can build you almost anything, well and fast.</strong> A website, an app, a tool,
         an automation. I take on the small-to-medium ones and carry them start to finish.
         If you can describe it, it can be built. I bring a pilot&rsquo;s precision, a
-        meditator&rsquo;s calm, and a quality build pace measured in days.
+        meditator&rsquo;s calm, and a build pace measured in days, not months.
       </>
     ),
   },
