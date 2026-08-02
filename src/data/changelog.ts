@@ -63,6 +63,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     date: '2026-08-02',
     title: 'The work list outgrows the five apps',
     body: 'Unplottable joins the portfolio: a 124,642-word novel an AI wrote inside a system built for it, in English and Russian.',
+    link: { href: `${REPO}/commit/b28708dcb0592e7295a708557b0205e1cdb9f0ff`, display: 'b28708d' },
   },
 ]
 
