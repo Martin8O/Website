@@ -80,7 +80,7 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
               <img
                 key={s.url}
                 src={s.url}
-                alt={`${p.name} — ${t.screenshotAlt}${i > 0 ? ` ${i + 1}` : ''}`}
+                alt={`${p.name} — ${s.cover ? t.coverAlt : t.screenshotAlt}${i > 0 ? ` ${i + 1}` : ''}`}
                 loading="lazy"
                 decoding="async"
               />

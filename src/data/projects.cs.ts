@@ -63,6 +63,10 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
       'Mění znalostní trezor v Obsidianu v učební hru ve stylu Duolinga: rozložené opakování (FSRS), strom dovedností a AI tutor.',
     status: 'Portuji na Android',
   },
+  unplottable: {
+    tagline:
+      'Román o 124 642 slovech ze světa Harryho Pottera, který napsala AI. Nejdřív jsme postavili systém: příručku všeho, co v tom světě platí, tabulku párující každou zasetou stopu s kapitolou, kde se vysvětlí, a kontrolu, kterou musela projít každá kapitola. Anglicky na 54 promptů, rusky jedním během na pozadí s 83 agenty. Nekomerční fanouškovské dílo.',
+  },
   'this-site': {
     name: 'Tento web',
     tagline:

@@ -58,6 +58,12 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'Real GLB aircraft start flying over the 2D world — the climb, the one-circle ballet, the Bagram base ops, the airshow pass and the dusk landing break — with the 2D world still the complete fallback underneath. Six more days after v1.0.',
     link: { href: `${REPO}/commit/98b548dfc5dd39319c6c7d3108b3f18d205eb7cc`, display: '98b548d' },
   },
+  {
+    id: 'unplottable',
+    date: '2026-08-02',
+    title: 'The work list outgrows the five apps',
+    body: 'Unplottable joins the portfolio: a 124,642-word novel an AI wrote inside a system built for it, in English and Russian.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -73,6 +79,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   v2: {
     title: 'Upgrade na 3D verzi',
     body: 'Nad 2D světem začínají létat skutečné GLB stroje – stoupání, vzdušný souboj, letecký provoz na základně Bagram, airshow a přistání dvojice za soumraku – a 2D svět pod nimi zůstává kompletní záložní verzí. Šest dní po v1.0.',
+  },
+  unplottable: {
+    title: 'Seznam prací přerostl pět aplikací',
+    body: 'K portfoliu přibyla Unplottable: román o 124 642 slovech, který napsala AI uvnitř systému postaveného přesně pro to, anglicky i rusky.',
   },
 }
 

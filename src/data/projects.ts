@@ -193,7 +193,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 6,
+    workOrder: 7,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -270,6 +270,30 @@ export const PROJECTS: Project[] = [
     live: true,
     build: { days: 4, commits: 32 },
     workOrder: 4,
+  },
+  // The Claude month's outlier: not an app at all, but a novel — written by an
+  // AI inside a system built for it. No `window` block (the dev scene keeps its
+  // five app windows); the Work panel is where it belongs, sitting just ahead
+  // of ClearFeed. `build` covers BOTH editions as one body of work: 3½ days of
+  // elapsed build for the English novel (20–24 Jul 2026) plus ~1 day for the
+  // Russian edition — NOT the 7 distinct commit days the other cards count,
+  // which would read as seven days of work for what was one long weekend. It
+  // deliberately stops before the 31 Jul / 1 Aug repo housekeeping and the
+  // Russian ch04/ch05 style re-test — that is upkeep, not the build.
+  {
+    id: 'unplottable',
+    name: 'Unplottable',
+    tagline:
+      'A 124,642-word novel set in the Harry Potter universe, written by an AI. We built the machinery first — a reference book of that world, a table pairing every planted hint with the chapter that pays it off, and a check no chapter could skip. English in 54 prompts, Russian in one background run of 83 agents. Non-commercial fan work.',
+    stack: ['Claude Code', 'Markdown', 'Python', 'Pandoc', 'LaTeX'],
+    era: 'claude',
+    link: {
+      href: 'https://github.com/Martin8O/Unplottable',
+      display: 'github.com/Martin8O/Unplottable',
+    },
+    live: true,
+    build: { days: 4.5, commits: 70 },
+    workOrder: 6,
   },
 ]
 

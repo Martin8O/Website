@@ -407,6 +407,10 @@ export const CHAPTERS: Chapter[] = [
     cardEase: [0.035, 0.05],
     compact: true,
     body: 'It began carefully&nbsp;—&nbsp;small apps first. Then I found <span class="a-cyan">Claude Code</span>, and careful was over: <span class="a-mag">five real apps in about a month</span>&nbsp;—&nbsp;built properly, not just fast&nbsp;—&nbsp;floating all around you. During the builds they wrote the lessons they taught me into the <strong>dev-brain</strong> vault, which <strong>BrainQuest</strong> turns into Duolingo-style learning&nbsp;—&nbsp;so I’m still learning the craft, not just watching. The contribution graph below looks like a steep takeoff; maybe everything above was training for it. <em>(Turns out I love the screen after all.)</em>',
+    // One quiet door, not a paragraph: everything built AFTER the five windows
+    // (this site, the novel, whatever lands next) lives in the Work panel, and
+    // the count is the whole message. Bump the number when a card is added.
+    actions: [{ id: 'work', label: '+ 2 more projects since →' }],
     // The Work items (the five floating windows) are data-driven from
     // `src/data/projects.ts` → the dev scene + DevWindowLinks read them.
   },

@@ -8,7 +8,13 @@
  * plain id. Projects with no entry render as a clean text card.
  */
 
-export type ProjectShot = { url: string; aspect: number }
+export type ProjectShot = {
+  url: string
+  aspect: number
+  /** True when the image is a book cover, not a screenshot — the alt text
+   *  says so instead of calling it a screenshot. */
+  cover?: boolean
+}
 
 export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'moje-cesta': [
@@ -23,6 +29,13 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   ],
   'clearfeed': [
     { url: '/shots/clearfeed-0.jpg', aspect: 2.500 },
+  ],
+  // Not a screenshot — the book's own cover, taken from the repo README
+  // (`book/cover.png`, 2000×3200) and baked to the same 760px JPEG as the rest.
+  // Cropped to its lower band (the last anomaly marker, the rule, the title):
+  // the full portrait cover made a card twice as tall as every other one.
+  'unplottable': [
+    { url: '/shots/unplottable-0.jpg', aspect: 1.250, cover: true },
   ],
   'tenovice': [
     { url: '/shots/tenovice-0.jpg', aspect: 0.983 },

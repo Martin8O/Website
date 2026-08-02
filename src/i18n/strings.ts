@@ -30,6 +30,9 @@ export type UiStrings = {
   workStack: string
   workLoadError: string
   screenshotAlt: string
+  /** Alt wording for a Work shot that is NOT a screenshot — the Unplottable
+   *  book cover (`ProjectShot.cover`). */
+  coverAlt: string
   sourceOnGitHub: string
   close: string
   aboutEyebrow: string
@@ -90,6 +93,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     workStack: 'Stack',
     workLoadError: 'The Work panel failed to load — please reload the page.',
     screenshotAlt: 'screenshot',
+    coverAlt: 'book cover',
     sourceOnGitHub: 'source code on GitHub',
     close: 'Close',
     aboutEyebrow: 'About',
@@ -133,6 +137,7 @@ export const STRINGS: Record<Lang, UiStrings> = {
     workStack: 'Technologie',
     workLoadError: 'Panel s projekty se nepodařilo načíst – obnovte prosím stránku.',
     screenshotAlt: 'snímek obrazovky',
+    coverAlt: 'obálka knihy',
     sourceOnGitHub: 'zdrojový kód na GitHubu',
     close: 'Zavřít',
     aboutEyebrow: 'O mně',

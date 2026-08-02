@@ -4,6 +4,43 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-075 — The work list outgrows the five apps: Unplottable, a counter instead of prose, live GitHub numbers (2026-08-02)
+The Claude-month shelf was framed as **"five real apps"**, and everything built since had nowhere to land. Three
+moves, one shape: the Work panel gains **Unplottable** — a 124,642-word novel written by an AI inside a system
+built for it, in English and Russian — chapter 08 gains **one counter pill** where a paragraph would have gone,
+and the rooftop GitHub billboard is re-read off the live API.
+
+*Why a card and not a mention:* it is a shipped, public, linkable body of work with a real artefact behind it,
+exactly like the apps; it sits at `workOrder: 6`, just ahead of ClearFeed (Martin), and carries no `window`
+block — the dev scene keeps its five app windows. *Why the cover is cropped:* the full 2000×3200 portrait made
+a card twice as tall as every other one; the lower band (last anomaly marker · rule · title · byline) keeps the
+book's identity at the grid's own proportion. `ProjectShot.cover` + the new `coverAlt` string exist so the alt
+text does not call a book cover a screenshot.
+
+*Why `build: { days: 4.5 }` breaks the house rule:* every other card counts **distinct commit days**, which
+here is 7 (20–25, 28 Jul) and reads as a week of work for what was one long weekend. The honest figure is
+elapsed build — **3½ days for the English novel + ~1 day for the Russian edition** — and it deliberately stops
+before the 31 Jul / 1 Aug repository housekeeping and the Russian ch04/ch05 style re-test (upkeep, not build).
+Caught by Martin, not by me.
+
+*Why a counter, not a sentence (Martin):* "plus x nových projektů" scales — the pill (`actions: [{ id: 'work' }]`,
+the intro's own bus) stays one line as the list grows, where prose would need rewriting every time. Bump the
+number when a card is added.
+
+*Why the billboard now shows May–August:* it had stopped on 13 July and there is no room for a fifth month —
+dropping April (Martin) keeps four bars and shrinks the matrix to 14 week-columns, day 0 = 1 May. Numbers come
+straight from the GitHub API — every repo Martin authors in, the Lovable bot included, plus his own commits in
+the Těnovice collab repo (other people's there are not his): **15 projects · 108 days · 914 commits · 1–29 days
+each**. Method validated against the retired snapshot: replayed to 13 July it yields 597 commits / 88 days
+where the old board read 599 / 88. The chips cover the whole run (first commit 17 Apr); the matrix draws only
+the last four months of it. August is two days old, so its bar is a stub — kept, on Martin's call.
+
+*Copy, third pass (Martin):* the first tagline claimed **he** wrote the world bible — he did not, the AI did;
+and "a ledger tracking 18 planted clues to the page where each pays" is jargon translated word-for-word. It now
+reads "we built the machinery first" and describes the ledger as a table pairing each planted hint with the
+chapter that pays it off. The changelog row is two sentences down to one; earlier rows are untouched, as a
+changelog's rows always are.
+
 ### ADR-074 — The intro frames the offer: positioning eyebrow + two quick paths (2026-07-29)
 Ninety percent of the story is a life; only chapters 09–10 speak to a client, and they sit at the very end. The
 hero now says what the site IS before a single scroll: a mono eyebrow (**"Jet pilot turned builder · websites ·
