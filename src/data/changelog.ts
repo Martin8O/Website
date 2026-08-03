@@ -65,13 +65,12 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'Unplottable joins the portfolio: a 124,642-word novel an AI wrote inside a system built for it, in English and Russian.',
     link: { href: `${REPO}/commit/b28708dcb0592e7295a708557b0205e1cdb9f0ff`, display: 'b28708d' },
   },
-  // The `link` lands at the wrap-up, anchored to the commit that adds this row
-  // (the Unplottable entry got its own anchor the same way).
   {
     id: 'bourky',
     date: '2026-08-02',
     title: 'Storm warnings for a Czech town',
     body: 'Bouřkový hlídač — storm and flash-flood warnings from seven forecast models and the weather radar as two separate sources. Notifications on Telegram.',
+    link: { href: `${REPO}/commit/eb9cee3805e47e4ca48d5ba8ed9ffca7c04f19ac`, display: 'eb9cee3' },
   },
 ]
 
