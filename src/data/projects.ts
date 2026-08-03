@@ -193,7 +193,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 7,
+    workOrder: 8,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -293,6 +293,23 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4.5, commits: 70 },
+    workOrder: 7,
+  },
+  // The newest one, and the first that has to be right about the real world:
+  // it warns a town about weather that is either coming or isn't. No `window`
+  // block (the dev scene keeps its five app windows) — it sits in the Work
+  // panel between BrainQuest and the novel.
+  {
+    id: 'bourky',
+    name: 'Storm Watch Kolín',
+    tagline:
+      'Warnings about thunderstorms and flash floods over one Czech town, up to three hours ahead — a web page and notifications through a Telegram bot. Seven forecast models and the national weather radar as two separate sources.',
+    stack: ['Supabase', 'Deno', 'PostgreSQL', 'Telegram Bot API', 'Vanilla JS'],
+    era: 'claude',
+    link: { href: 'https://kolin-bourky.vercel.app', display: 'kolin-bourky.vercel.app' },
+    repo: 'https://github.com/Martin8O/Bourky',
+    live: true,
+    build: { days: 3, commits: 41 },
     workOrder: 6,
   },
 ]

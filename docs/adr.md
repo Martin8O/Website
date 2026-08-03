@@ -4,6 +4,41 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-076 — Bouřkový hlídač joins the work; its shot is a scenario, not a calm Saturday (2026-08-03)
+The eighth Claude-era card: a storm watch for one Czech town — a page plus Telegram notifications, computed
+from seven public forecast models and the ČHMÚ radar kept as **two separate sources**. It sits at
+`workOrder: 6` (BrainQuest → **Bouřky** → Unplottable → ClearFeed) with no `window` block, the counter pill in
+chapter 08 goes `+ 2` → **`+ 3`**, and the changelog gains a row. `build: { days: 3, commits: 41 }` follows the
+house rule (distinct commit days: 31 Jul, 1–2 Aug) — the Unplottable exception stays an exception.
+
+*Why the screenshot is a simulated situation:* a true capture of the day it was baked is an empty blue strip
+and two dials on zero — accurate, and it shows nothing the application is for. The bake
+(`local/tmp/bourky-bake.mjs`) therefore installs a `fetch` wrapper **before the page loads** and hands it
+different inputs: the Open-Meteo hourly, quarter-hour and ensemble numbers at +2…+5 h come from the project's
+**own named scenarios** (`tests/testdemo.js` → PREHANKA / BOURKA / DEST), and one storm cell is painted into
+the measured ČHMÚ radar PNG (inflate → unfilter → bands in the scale's own shades → re-deflate; CRCs left zero,
+the page's decoder never reads them), centred so the town sits on its leading edge. The page then computes
+everything itself — verdict, sky strip, chips, both dials: **radar 61 · forecasts 66**. Nothing is drawn into
+the image and nothing outside the cell is touched. *Alternative rejected:* re-shooting on the next real storm —
+unbounded wait for a portfolio card, and the app has a demo suite exactly so the situation need not be waited for.
+
+*Why one image, not two:* the first cut stacked the app's own share image (the real 31 Jul storm on the radar
+map) under the page. It doubled the card's height and out-shouted the product (Martin). The cell painted into
+the live shot carries the same meaning inside the product's own frame.
+
+*Two facts corrected against the source, both prompted by Martin's doubt:* the card first claimed warnings
+**"one to three hours ahead"** (taken from the project's README). The bot's own horizon is `HODIN = 4` — the
+running hour and three after it — so the floor is *now*, not one hour: everywhere now reads **"up to three
+hours ahead" / "až tři hodiny předem"**, matching what the bot already says to users, and the same line was
+fixed in the Bouřky README. Related numbers that must not be conflated: the **page** shows eight hours of
+forecast, the **bot** warns up to three hours out, the **radar** measures now plus ČHMÚ's own one-hour
+extrapolation in six ten-minute steps (which is how the 31 Jul storm was seen 30 minutes ahead while no model
+had it).
+
+*Found on the way, left for its own repo:* the app's `minutesWord()` rounds the leftover minutes to tens
+without carrying, so a wait of 1 h 57 min prints as "asi za 1 h 60 min" (first five minutes of any hour). The
+bake waits that state out rather than freezing it into the shot; the fix belongs to the Bouřky project.
+
 ### ADR-075 — The work list outgrows the five apps: Unplottable, a counter instead of prose, live GitHub numbers (2026-08-02)
 The Claude-month shelf was framed as **"five real apps"**, and everything built since had nowhere to land. Three
 moves, one shape: the Work panel gains **Unplottable** — a 124,642-word novel written by an AI inside a system

@@ -37,6 +37,15 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'unplottable': [
     { url: '/shots/unplottable-0.jpg', aspect: 1.250, cover: true },
   ],
+  // The page itself: the verdict, the eight-hour strip with the showers coming
+  // in, and both dials — the radar calm, the forecasts at 66. One image, not
+  // two: the radar map that used to sit under it doubled the card's height and
+  // out-shouted the product. Baked by `local/tmp/bourky-bake.mjs`, which feeds
+  // the page a scenario from the project's own test suite so the shot shows
+  // what the app is FOR (a real calm day is an empty blue strip).
+  'bourky': [
+    { url: '/shots/bourky-0.jpg', aspect: 1.143 },
+  ],
   'tenovice': [
     { url: '/shots/tenovice-0.jpg', aspect: 0.983 },
   ],

@@ -65,6 +65,14 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'Unplottable joins the portfolio: a 124,642-word novel an AI wrote inside a system built for it, in English and Russian.',
     link: { href: `${REPO}/commit/b28708dcb0592e7295a708557b0205e1cdb9f0ff`, display: 'b28708d' },
   },
+  // The `link` lands at the wrap-up, anchored to the commit that adds this row
+  // (the Unplottable entry got its own anchor the same way).
+  {
+    id: 'bourky',
+    date: '2026-08-02',
+    title: 'Storm warnings for a Czech town',
+    body: 'Bouřkový hlídač — storm and flash-flood warnings from seven forecast models and the weather radar as two separate sources. Notifications on Telegram.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -84,6 +92,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   unplottable: {
     title: 'Seznam prací přerostl pět aplikací',
     body: 'K portfoliu přibyla Unplottable: román o 124 642 slovech, který napsala AI uvnitř systému postaveného přesně pro to, anglicky i rusky.',
+  },
+  bourky: {
+    title: 'Hlídač bouřek',
+    body: 'Varování před bouřkami a přívalovými dešti nad jedním českým městem – sedm předpovědních modelů a radar ČHMÚ jako dva samostatné zdroje. Oznámení na Telegram.',
   },
 }
 
