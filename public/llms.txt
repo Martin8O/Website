@@ -1,12 +1,12 @@
 # Martin Svoboda
 
-> Portfolio and story of Martin Svoboda — twenty years an Air Force fighter and
-> acceptance test pilot, now building software the same way he flew jets: nothing
-> ships until it's verified. svobodamartin.dev is a scrollytelling site where you
-> scroll and a life flies past — school, military aviation (Z-142, L-39, L-159),
-> Afghanistan, airshow display flying, self-healing from ulcerative colitis,
-> Bitcoin, and an explosion of real apps built with AI. The single goal is one
-> email contact.
+> Portfolio and story of Martin Svoboda — twenty years in the Czech Air Force, a
+> military jet pilot and later an acceptance test pilot, now building software the
+> same way he flew jets: nothing ships until it's verified. svobodamartin.dev is a
+> scrollytelling site where you scroll and a life flies past — school, military
+> aviation (Z-142, L-39, L-159), Afghanistan, airshow display flying, self-healing
+> from ulcerative colitis, Bitcoin, and an explosion of real apps built with AI.
+> The single goal is one email contact.
 
 The site is a static single-page app (React + TypeScript + Vite) with no backend
 and no data collection. Contact is by email only. Content is bilingual English
