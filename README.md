@@ -20,7 +20,7 @@ Live: **https://svobodamartin.dev**
 > developer: I don't hand-write the code, I direct it with **Claude Code** and verify
 > everything. That's stated on the site itself, and it's the honest frame for this repo:
 > what I brought is the discipline the job beat into me. Nothing shipped until it was
-> verified. **71 ADRs** record *why* (including the ones where I record my own wrong
+> verified. **76 ADRs** record *why* (including the ones where I record my own wrong
 > diagnoses), every mobile bug was reproduced by a harness that provably failed on the
 > pre-fix code, and `npm run check` had to be green before every commit.
 
@@ -36,7 +36,7 @@ Live: **https://svobodamartin.dev**
 - **CSS + custom properties / CSS Modules** for styling — **no Tailwind**.
 - **Lenis** for the one smooth‑scroll rhythm, on a custom rAF loop — **no GSAP**, no
   animation library at all. All choreography is custom scroll math.
-- **Vitest 4** — 364 unit tests over the pure scroll/scene math (no DOM, by design: the
+- **Vitest 4** — 387 unit tests over the pure scroll/scene math (no DOM, by design: the
   maths is extracted so it tests without a canvas).
 - Deployed as a static SPA on **Vercel** (GitHub → Vercel auto‑deploy).
 
