@@ -81,6 +81,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // Bouřky uses.
     title: 'A second novel, written in Czech',
     body: 'A second AI-written novel joins the work list: 53,470 words of original Czech science fiction, written in two days on the machinery Unplottable proved.',
+    link: { href: `${REPO}/commit/7ff8f712887fc391179a052534bc2c6468a8c724`, display: '7ff8f71' },
   },
 ]
 
