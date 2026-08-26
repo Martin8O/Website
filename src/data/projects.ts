@@ -193,7 +193,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 8,
+    workOrder: 9,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -311,6 +311,29 @@ export const PROJECTS: Project[] = [
     live: true,
     build: { days: 3, commits: 41 },
     workOrder: 6,
+  },
+  // The Claude month's second novel — and the harder of the two, because
+  // nothing about its world was already known: Unplottable borrowed a canon,
+  // this one had to invent every rule it then had to obey. Written natively in
+  // Czech, never through an English draft. No `window` block (the dev scene
+  // keeps its five app windows); it sits beside its sibling in the Work panel.
+  // `build` = the two days the book was actually written on (3–4 Aug 2026) and
+  // the six commits that carry it, deliberately stopping before the later
+  // publication housekeeping — the same rule the Unplottable card follows.
+  {
+    id: 'den-ktery-se-nestal',
+    name: 'Den, který se nestal',
+    tagline:
+      'An original science-fiction novel of 53,470 words, written by an AI natively in Czech — two days, three prompts. Bureaucratic SF: a verifier at the Institute of Retrospection measures what the past can prove, until the only thing that disagrees with the record is a memory of her own. Unplottable borrowed a world; this one had to invent every rule it then had to obey, and the repository ships the whole machine that kept it honest.',
+    stack: ['Claude Code', 'Markdown', 'Python', 'Pandoc', 'LaTeX'],
+    era: 'claude',
+    link: {
+      href: 'https://github.com/Martin8O/Den-ktery-se-nestal',
+      display: 'github.com/Martin8O/Den-ktery-se-nestal',
+    },
+    live: true,
+    build: { days: 2, commits: 6 },
+    workOrder: 8,
   },
 ]
 

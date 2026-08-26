@@ -410,7 +410,7 @@ export const CHAPTERS: Chapter[] = [
     // One quiet door, not a paragraph: everything built AFTER the five windows
     // (this site, the novel, whatever lands next) lives in the Work panel, and
     // the count is the whole message. Bump the number when a card is added.
-    actions: [{ id: 'work', label: '+ 3 more projects since →' }],
+    actions: [{ id: 'work', label: '+ 4 more projects since →' }],
     // The Work items (the five floating windows) are data-driven from
     // `src/data/projects.ts` → the dev scene + DevWindowLinks read them.
   },

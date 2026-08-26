@@ -4,6 +4,37 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-077 — A second novel joins the work; the GitHub billboard shows the quiet weeks too (2026-08-26)
+The ninth Claude-era card: ***Den, který se nestal*** — an original 53,470-word Czech science-fiction novel
+written by an AI in two days on three prompts. It sits at `workOrder: 8`, directly after Unplottable
+(ClearFeed 8 → 9), with no `window` block; the counter pill in chapter 08 goes `+ 3` → **`+ 4`** and the
+changelog gains a row. `build: { days: 2, commits: 6 }` — two distinct commit days (3–4 Aug), the house rule,
+stopping before the publication housekeeping exactly as the Unplottable card does.
+
+**The shot is the book's own generated cover**, cropped to the title block and the red stitch seam
+(`local/tmp/den-cover-bake.mjs`, 1600×2560 → 760×608, `cover: true` so the alt text does not call it a
+screenshot). Same reason as Unplottable: the full portrait page makes a card twice as tall as its row-mates.
+With two book covers now side by side, the two taglines had to stop sharing sentences — the new one names what
+separates them: *Unplottable borrowed a world; this one had to invent every rule it then had to obey.*
+
+**The link was a 404 when the card was written, and that was found by checking rather than reading.** The
+book's own decision index recorded it as "published as a public GitHub repository"; the repository was
+private. Fixed at the source (`Martin8O/Den-ktery-se-nestal@409e663` + the visibility flip, Martin's own
+click) before this card was allowed to ship — verified anonymously, HTTP 200. Two absolute paths from
+Martin's disk and a set of statistics the book's last editing pass had silently invalidated went out in the
+same commit there.
+
+**The rooftop GitHub billboard is re-read off the live API** (it had stopped on 2 Aug): 15 → **18** projects,
+108 → **132** days, 914 → **984** commits, 1–29 → **1–27** days each, momentum Aug 34 → **106**. Population
+and method unchanged (every non-fork repo Martin authors in, the Lovable bot's commits included, plus his own
+commits in the Těnovice collab repo; author-local date) — replayed against the retired snapshot the method
+reproduces July exactly at 439, which is what makes the new numbers trustworthy; the old `1–29 days each`
+does not reproduce under any definition and is corrected. **The matrix window now ends on the snapshot week
+instead of on the last commit** (day 0 = Mon 25 May, 14 columns), so the fortnight of silence after 5 Aug is
+visible rather than cropped out. Only three month ticks fit that window — the single May column would collide
+with June's label — so the heat ticks are decoupled from the momentum labels beside them, which stay whole
+calendar months.
+
 ### ADR-076 — Bouřkový hlídač joins the work; its shot is a scenario, not a calm Saturday (2026-08-03)
 The eighth Claude-era card: a storm watch for one Czech town — a page plus Telegram notifications, computed
 from seven public forecast models and the ČHMÚ radar kept as **two separate sources**. It sits at

@@ -46,6 +46,14 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'bourky': [
     { url: '/shots/bourky-0.jpg', aspect: 1.143 },
   ],
+  // The book's own generated cover (`book/cover.png`, 1600×2560), cropped to
+  // the band that carries its identity — the title block and the red stitch
+  // seam — for the same reason Unplottable is cropped: the full portrait page
+  // makes a card twice as tall as every other one. Baked by
+  // `local/tmp/den-cover-bake.mjs`.
+  'den-ktery-se-nestal': [
+    { url: '/shots/den-ktery-se-nestal-0.jpg', aspect: 1.250, cover: true },
+  ],
   'tenovice': [
     { url: '/shots/tenovice-0.jpg', aspect: 0.983 },
   ],

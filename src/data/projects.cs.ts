@@ -67,6 +67,10 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
     tagline:
       'Román o 124 642 slovech ze světa Harryho Pottera, který napsala AI. Nejdřív jsme postavili systém: příručku všeho, co v tom světě platí, tabulku párující každou zasetou stopu s kapitolou, kde se vysvětlí, a kontrolu, kterou musela projít každá kapitola. Anglicky na 54 promptů, rusky jedním během na pozadí s 83 agenty. Nekomerční fanouškovské dílo.',
   },
+  'den-ktery-se-nestal': {
+    tagline:
+      'Původní sci-fi román o 53 470 slovech, který napsala AI rovnou česky – za dva dny a tři zadání. Úřednická sci-fi: verifikátorka Ústavu retrospekce měří, co z minulosti je doložitelné, dokud se se záznamem nerozejde jediná věc – její vlastní vzpomínka. Unplottable si svět vypůjčila; tenhle si musel každé pravidlo nejdřív vymyslet a pak ho dodržet – a v repozitáři leží celý stroj, který na to dohlížel.',
+  },
   bourky: {
     name: 'Bouřkový hlídač',
     tagline:

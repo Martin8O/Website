@@ -11,9 +11,9 @@
  * Electricity buzzes across the etched glass grid in flickering arcs.
  *
  * The rooftop billboards are REAL: the amber contribution heatmap and the
- * monthly-momentum bars are read straight off GitHub (914 commits — you + your
- * AI builder — across 15 projects in 108 days, snapshot 2026-08-02; the matrix
- * draws the last four of those months) — the city itself advertises the
+ * monthly-momentum bars are read straight off GitHub (984 commits — you + your
+ * AI builder — across 18 projects in 132 days, snapshot 2026-08-26; the matrix
+ * draws the last fourteen weeks) — the city itself advertises the
  * explosion, in the site's amber through-line.
  *
  * From the singularity the five project WINDOWS are born — bursting out in
@@ -132,38 +132,49 @@ function roundRect(
 // --- GitHub reality, baked into the city (billboards) -------------------------
 // Real daily commits — you + your AI builder (every repo you author in, the
 // Lovable bot's commits included, plus your own commits in the Těnovice collab
-// repo; other people's commits there are not yours and are excluded).
-// Snapshot 2026-08-02, read from the GitHub API. **Day 0 = 2026-05-01, a
-// Friday** — the billboard shows the LAST FOUR MONTHS (Martin: April can go),
-// so `+4` is the Monday-first weekday index of day 0 and sets the grid rows.
-// Regenerate by re-reading the API; the chips below cover the WHOLE run
-// (first commit 2026-04-17 → snapshot), the matrix only the window it draws.
+// repo; other people's commits there are not yours and are excluded), counted
+// by author-local date. Snapshot 2026-08-26, read from the GitHub API.
+// **Day 0 = 2026-05-25, a Monday** — the billboard shows the LAST FOURTEEN
+// WEEKS, ending with the snapshot's own week, so the weekday index of day 0 is
+// 0 and no offset is needed. Regenerate by re-reading the API; the chips below
+// cover the WHOLE run (first commit 2026-04-17 → snapshot), the matrix only the
+// window it draws — which is why the run's April and early-May weeks, and the
+// quiet fortnight after 5 Aug, sit inside the window honestly rather than being
+// cropped out of it.
 const COMMIT_DAYS: ReadonlyArray<readonly [number, number]> = [
-  [5, 22], [6, 37], [7, 12], [29, 31], [32, 4], [33, 2], [34, 1],
-  [35, 3], [38, 6], [39, 2], [40, 1], [41, 8], [42, 10], [43, 7],
-  [44, 3], [45, 12], [46, 10], [47, 12], [48, 12], [49, 6], [50, 2],
-  [51, 5], [52, 22], [53, 17], [54, 17], [55, 26], [56, 19], [57, 3],
-  [58, 2], [59, 12], [60, 11], [61, 11], [62, 5], [63, 16], [64, 9],
-  [65, 6], [66, 13], [67, 14], [68, 37], [69, 11], [70, 10], [71, 6],
-  [72, 5], [73, 13], [74, 12], [75, 18], [76, 36], [77, 2], [78, 1],
-  [79, 4], [80, 24], [81, 36], [82, 34], [83, 23], [84, 19], [85, 14],
-  [86, 4], [87, 4], [88, 9], [89, 18], [90, 3], [91, 22], [92, 30],
-  [93, 4],
+  [5, 31], [8, 4], [9, 2], [10, 1], [11, 3], [14, 6], [15, 2],
+  [16, 1], [17, 8], [18, 10], [19, 6], [20, 3], [21, 10], [22, 11],
+  [23, 11], [24, 9], [25, 11], [26, 3], [28, 27], [29, 14], [30, 17],
+  [31, 27], [32, 21], [33, 3], [34, 1], [35, 13], [36, 9], [37, 11],
+  [38, 7], [39, 14], [40, 11], [41, 4], [42, 13], [43, 11], [44, 40],
+  [45, 11], [46, 12], [47, 6], [48, 4], [49, 14], [50, 5], [51, 22],
+  [52, 39], [53, 2], [54, 1], [55, 1], [56, 20], [57, 41], [58, 31],
+  [59, 26], [60, 20], [61, 14], [62, 5], [63, 4], [64, 9], [65, 18],
+  [66, 3], [67, 20], [68, 47], [69, 24], [70, 16], [71, 14], [72, 5],
 ]
 const HEAT_COLS = 14
+const HEAT_PEAK = 47 // the window's busiest day (1 Aug) — the heat scale's top
 const HEAT: number[][] = []
 for (let c = 0; c < HEAT_COLS; c++) HEAT.push(new Array<number>(7).fill(0))
 for (const [d, n] of COMMIT_DAYS) {
-  const col = Math.floor((d + 4) / 7)
-  if (col < HEAT_COLS) HEAT[col][(d + 4) % 7] = Math.min(1, n / 37)
+  const col = Math.floor(d / 7)
+  if (col < HEAT_COLS) HEAT[col][d % 7] = Math.min(1, n / HEAT_PEAK)
 }
 /** Monthly momentum — REAL monthly commit counts (you + your AI builder):
- *  May 102 · Jun 235 · Jul 439 · Aug 34 (August is two days old). Bars
- *  normalized to the peak month. */
-const MOM_VALS = [102, 235, 439, 34] as const
+ *  May 102 · Jun 233 · Jul 439 · Aug 106. Bars normalized to the peak month.
+ *  These are whole calendar months and are independent of the matrix window
+ *  beside them, which starts inside May. */
+const MOM_VALS = [102, 233, 439, 106] as const
 const MOM_LABELS = ['MAY', 'JUN', 'JUL', 'AUG'] as const
-const MOM_TEXT = ['102', '235', '439', '34'] as const
+const MOM_TEXT = ['102', '233', '439', '106'] as const
 const MOM_MAX = Math.max(...MOM_VALS)
+/** Month ticks under the matrix. Only three fit: the window opens on 25 May,
+ *  so its single May column would collide with June's label one cell away. */
+const HEAT_MONTHS = ['JUN', 'JUL', 'AUG'] as const
+// Where each month's first day lands: Jun 1 = day 7 (col 1, nudged right so
+// the label does not hang off the panel), Jul 1 = day 37 (col 5), Aug 1 =
+// day 68 (col 9).
+const HEAT_MONTH_COLS = [1.2, 5, 9] as const
 
 // --- The Tron city: seven depth rows climbing away from the glass -------------
 type Tower = {
@@ -1920,10 +1931,10 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
     const chipY = py + ph * 0.12
     let cxp = x0b + 10 * S
     const CHIPS = [
-      ['15', 'projects'],
-      ['108', 'days'],
-      ['914', 'commits'],
-      ['1–29', 'days each'],
+      ['18', 'projects'],
+      ['132', 'days'],
+      ['984', 'commits'],
+      ['1–27', 'days each'],
     ] as const
     for (let ci = 0; ci < CHIPS.length; ci++) {
       ctx.font = `700 ${Math.round(10.5 * S)}px "Chakra Petch", ui-monospace, monospace`
@@ -1967,15 +1978,12 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
     ctx.font = `${Math.round(7.5 * S)}px "Chakra Petch", ui-monospace, monospace`
     ctx.fillStyle = rgba(PALE, 0.42 * aB)
     ctx.textAlign = 'center'
-    // Where each month's first day lands in the matrix (day 0 = 1 May): May
-    // col 0 — nudged right so the label doesn't hang off the panel — Jun 5,
-    // Jul 9, Aug 13.
-    const monthCols = [0.6, 5, 9, 13] as const
-    for (let mi = 0; mi < 4; mi++) {
-      ctx.fillText(MOM_LABELS[mi], hx0 + monthCols[mi] * cs, py + ph * 0.91)
+    for (let mi = 0; mi < HEAT_MONTHS.length; mi++) {
+      ctx.fillText(HEAT_MONTHS[mi], hx0 + HEAT_MONTH_COLS[mi] * cs, py + ph * 0.91)
     }
     // Monthly momentum (right): muted labels, amber bars, real values at the
-    // tips — 102 · 235 · 439 · 34 (August is two days old, hence the stub).
+    // tips — 102 · 233 · 439 · 106 (August stops at the 5th, where the work
+    // paused; the bar is short because the month is, not because it is cut).
     const mx0 = x0b + pw * 0.56
     const mw2 = pw * 0.44 - 12 * S
     const my0 = py + ph * 0.28

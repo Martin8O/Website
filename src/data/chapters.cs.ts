@@ -86,7 +86,7 @@ export const CHAPTER_COPY_CS: Record<string, ChapterCopy> = {
     num: '08 – Exploze',
     title: 'Sólo<br>vývojář',
     body: 'Začalo to opatrně&nbsp;–&nbsp;nejdřív malé aplikace. Pak jsem objevil <span class="a-cyan">Claude Code</span> a&nbsp;opatrnost skončila: <span class="a-mag">pět skutečných aplikací za zhruba měsíc</span>&nbsp;–&nbsp;postavených pořádně, ne jen rychle&nbsp;–&nbsp;vznášejí se tady okolo. Během vývoje zapisovaly do trezoru <strong>dev-brain</strong> tematické lekce, které <strong>BrainQuest</strong> mění ve výuku ve stylu Duolinga&nbsp;–&nbsp;takže se pořád učím, ne jen přihlížím. Graf příspěvků níže vypadá jako strmý vzlet; všechno předtím mohl být trénink na tohle. <em>(Nakonec mě ta obrazovka přece jen baví.)</em>',
-    actions: [{ id: 'work', label: '+ 3 další projekty →' }],
+    actions: [{ id: 'work', label: '+ 4 další projekty →' }],
   },
   'offer-mission': {
     num: '09 – Vaše mise',

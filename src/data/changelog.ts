@@ -72,6 +72,16 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'Bouřkový hlídač — storm and flash-flood warnings from seven forecast models and the weather radar as two separate sources. Notifications on Telegram.',
     link: { href: `${REPO}/commit/eb9cee3805e47e4ca48d5ba8ed9ffca7c04f19ac`, display: 'eb9cee3' },
   },
+  {
+    id: 'den-ktery-se-nestal',
+    date: '2026-08-26',
+    // Name or function, never "the list grew again" (Martin's rule, set with
+    // the Bouřky row). The Czech row carries the name — a book title does not
+    // translate — so the English one carries the function, the same split
+    // Bouřky uses.
+    title: 'A second novel, written in Czech',
+    body: 'A second AI-written novel joins the work list: 53,470 words of original Czech science fiction, written in two days on the machinery Unplottable proved.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -95,6 +105,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   bourky: {
     title: 'Hlídač bouřek',
     body: 'Varování před bouřkami a přívalovými dešti nad jedním českým městem – sedm předpovědních modelů a radar ČHMÚ jako dva samostatné zdroje. Oznámení na Telegram.',
+  },
+  'den-ktery-se-nestal': {
+    title: 'Den, který se nestal',
+    body: 'K seznamu prací přibyl druhý román od AI: 53 470 slov původní české sci-fi, napsaných za dva dny na stroji, který prověřila Unplottable.',
   },
 }
 
