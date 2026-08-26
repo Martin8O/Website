@@ -4,6 +4,40 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-078 — The 3D gate stops trusting core/memory counts on desktop (privacy browsers farble them) (2026-08-26)
+**The defect, reported by Martin and reproduced:** Brave on a capable desktop (Ryzen 5, 8 logical cores,
+15 GB) was served the **2D fallback** on `svobodamartin.dev` — in a normal window and a private one alike —
+while `localhost` served 3D on the same machine, in the same browser, in the same minute. Brave's
+fingerprint farbling reported `navigator.hardwareConcurrency: 3`; `isWeakClient` read ≤ 3 cores as a low-end
+phone and refused the layer. Brave does not farble local addresses, which is exactly why the preview looked
+fine and production did not — the discrepancy *was* the diagnosis. Confirmed by Martin: console read **3** on
+the live domain and **8** with the shield off, and `?world=3d` produced 3D throughout (so WebGL2 and the
+chunk were never in question — only the gate).
+
+**The fix.** `deviceMemory` and `hardwareConcurrency` are now consulted **only on a touch-first client**
+(`(pointer: coarse)` — the PRIMARY pointer, so a touchscreen laptop still reads as desktop). `saveData` and a
+≤ 3g `effectiveType` keep counting everywhere: those state intent and the real network, not a guessable
+hardware fact. A missing device class reads as desktop — the permissive direction on purpose.
+
+**Why not repair the numbers instead:** a farbled value is indistinguishable from a true one, so they are
+only consulted where they were meant to be and where nobody farbles. This is a class, not a Brave quirk —
+Firefox with `resistFingerprinting` reports 2 for the same reason, as does the Tor Browser; detecting Brave
+by name would have fixed one browser and left the others broken. **The protection that remains is the one
+that measures behaviour instead of claims:** the runtime FPS watchdog still drops a desktop that lies its way
+past the gate and then genuinely crawls, within ~3 s, remembered for 24 h.
+
+**Verified by reproducing the lie, not by trusting tests** (`local/tmp/brave-gate-verify.mjs`): the counter is
+redefined before any page script runs — the moment Brave does it — and the gate's real decision is read off
+the live DOM (only the R3F stage holds a WebGL2 context). Five cases; desktop·3-cores and desktop·2-cores+2 GB
+go **2D → 3D**, while phone·3-cores, desktop·data-saver and `?world=2d` stay 2D unchanged. The old module was
+checked back in and the same harness re-run to prove the two fixed cases really did fail before — a green
+matrix that was never red proves nothing. The data-saver case doubles as the canary that the harness can see
+2D at all.
+
+**Fallout:** the suite grew 387 → 391, which broke the generated manifest's invariant that the site's own
+proof-panel copy states the true count — the check working as designed. Copy synced in both languages and in
+the README.
+
 ### ADR-077 — A second novel joins the work; the GitHub billboard shows the quiet weeks too (2026-08-26)
 The ninth Claude-era card: ***Den, který se nestal*** — an original 53,470-word Czech science-fiction novel
 written by an AI in two days on three prompts. It sits at `workOrder: 8`, directly after Unplottable

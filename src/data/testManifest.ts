@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 387
+export const TEST_COUNT = 391
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -458,8 +458,12 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "autoDowngradeActive (the decaying FPS-watchdog memory) > a fresh trip is honoured for the TTL, then decays (never sticks forever)",
       "autoDowngradeActive (the decaying FPS-watchdog memory) > legacy/garbage values read as expired — one clean retry",
       "autoDowngradeActive (the decaying FPS-watchdog memory) > a clock that jumped backwards reads as stale, not a far-future ban",
-      "isWeakClient > reads little memory, few cores, data-saver or a slow link as weak",
-      "isWeakClient > reads absent signals as capable (Firefox/Safari expose none)",
+      "isWeakClient > on a touch-first device: little memory or few cores read as weak",
+      "isWeakClient > on a touch-first device: comfortable hardware still reads capable",
+      "isWeakClient > on a desktop: the farble-able core/memory counts are IGNORED",
+      "isWeakClient > data-saver and a slow link still count on EVERY device",
+      "isWeakClient > reads absent signals as capable (Safari exposes none of them)",
+      "isWeakClient > an unstated device class reads as desktop, not as a phone",
     ],
   },
   {

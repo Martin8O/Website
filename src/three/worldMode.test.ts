@@ -85,17 +85,55 @@ describe('autoDowngradeActive (the decaying FPS-watchdog memory)', () => {
 })
 
 describe('isWeakClient', () => {
-  it('reads little memory, few cores, data-saver or a slow link as weak', () => {
-    expect(isWeakClient({ deviceMemory: 2 })).toBe(true)
-    expect(isWeakClient({ hardwareConcurrency: 2 })).toBe(true)
-    expect(isWeakClient({ connection: { saveData: true } })).toBe(true)
-    expect(isWeakClient({ connection: { effectiveType: '3g' } })).toBe(true)
-    expect(isWeakClient({ connection: { effectiveType: '2g' } })).toBe(true)
+  const phone = { mobileClass: true } as const
+  const desktop = { mobileClass: false } as const
+
+  it('on a touch-first device: little memory or few cores read as weak', () => {
+    expect(isWeakClient({ ...phone, deviceMemory: 2 })).toBe(true)
+    expect(isWeakClient({ ...phone, deviceMemory: 3.9 })).toBe(true)
+    expect(isWeakClient({ ...phone, hardwareConcurrency: 2 })).toBe(true)
+    expect(isWeakClient({ ...phone, hardwareConcurrency: 3 })).toBe(true)
   })
 
-  it('reads absent signals as capable (Firefox/Safari expose none)', () => {
+  it('on a touch-first device: comfortable hardware still reads capable', () => {
+    expect(isWeakClient({ ...phone, deviceMemory: 4, hardwareConcurrency: 4 })).toBe(false)
+    expect(isWeakClient({ ...phone, deviceMemory: 8, hardwareConcurrency: 8 })).toBe(false)
+    expect(isWeakClient({ ...phone })).toBe(false)
+  })
+
+  // The 2026-08-26 defect: Brave's fingerprint farbling reported 3 cores on a
+  // Ryzen 5 (8 logical, 15 GB), so the live site served 2D to a capable
+  // desktop while `localhost` — which Brave does not farble — served 3D.
+  // Firefox with resistFingerprinting reports 2 for the same reason.
+  it('on a desktop: the farble-able core/memory counts are IGNORED', () => {
+    expect(isWeakClient({ ...desktop, hardwareConcurrency: 3 })).toBe(false)
+    expect(isWeakClient({ ...desktop, hardwareConcurrency: 2 })).toBe(false)
+    expect(isWeakClient({ ...desktop, deviceMemory: 0.5 })).toBe(false)
+    expect(isWeakClient({ ...desktop, deviceMemory: 2, hardwareConcurrency: 2 })).toBe(false)
+  })
+
+  it('data-saver and a slow link still count on EVERY device', () => {
+    for (const device of [phone, desktop]) {
+      expect(isWeakClient({ ...device, connection: { saveData: true } })).toBe(true)
+      expect(isWeakClient({ ...device, connection: { effectiveType: 'slow-2g' } })).toBe(true)
+      expect(isWeakClient({ ...device, connection: { effectiveType: '2g' } })).toBe(true)
+      expect(isWeakClient({ ...device, connection: { effectiveType: '3g' } })).toBe(true)
+      expect(isWeakClient({ ...device, connection: { effectiveType: '4g' } })).toBe(false)
+    }
+  })
+
+  it('reads absent signals as capable (Safari exposes none of them)', () => {
     expect(isWeakClient({})).toBe(false)
     expect(isWeakClient({ deviceMemory: 8, hardwareConcurrency: 10 })).toBe(false)
     expect(isWeakClient({ connection: { effectiveType: '4g', saveData: false } })).toBe(false)
+  })
+
+  // An unknown device shape must not cost a capable visitor the 3D layer:
+  // absent `mobileClass` reads as desktop, and the runtime FPS watchdog is
+  // what protects a device that lies its way past this gate.
+  it('an unstated device class reads as desktop, not as a phone', () => {
+    expect(isWeakClient({ hardwareConcurrency: 2 })).toBe(false)
+    expect(isWeakClient({ deviceMemory: 1 })).toBe(false)
+    expect(isWeakClient({ connection: { saveData: true } })).toBe(true)
   })
 })

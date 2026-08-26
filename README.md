@@ -36,7 +36,7 @@ Live: **https://svobodamartin.dev**
 - **CSS + custom properties / CSS Modules** for styling — **no Tailwind**.
 - **Lenis** for the one smooth‑scroll rhythm, on a custom rAF loop — **no GSAP**, no
   animation library at all. All choreography is custom scroll math.
-- **Vitest 4** — 387 unit tests over the pure scroll/scene math (no DOM, by design: the
+- **Vitest 4** — 391 unit tests over the pure scroll/scene math (no DOM, by design: the
   maths is extracted so it tests without a canvas).
 - Deployed as a static SPA on **Vercel** (GitHub → Vercel auto‑deploy).
 

@@ -13,10 +13,11 @@
  *  - no WebGL2 → 2D (one throwaway-context probe, cached per session).
  *  - `?world=2d|3d` — the URL kill-switch / debug override (support,
  *    verification harnesses). The only manual lever left.
- *  - a WEAK CLIENT auto-falls back to 2D: little device memory / few cores
- *    (the 3D chunk + the GLB heroes are real work), or a data-saver / slow
- *    connection (they are real megabytes). Re-probed every visit — never
- *    persisted, so it can never stick.
+ *  - a WEAK CLIENT auto-falls back to 2D: a data-saver / slow connection (the
+ *    GLB heroes are real megabytes) on any device, plus little device memory
+ *    / few cores ON A TOUCH-FIRST DEVICE ONLY (see `isWeakClient` — the core
+ *    and memory counts are privacy-farmed on desktop and cannot be trusted
+ *    there). Re-probed every visit — never persisted, so it can never stick.
  *  - the runtime FPS watchdog fired recently (persisted WITH AN EXPIRY —
  *    a downgrade decays after AUTO_TTL_MS, so one bad session, thermal
  *    throttle or a background-load moment can never brand a device 2D
@@ -46,23 +47,54 @@ type ClientHints = {
   deviceMemory?: number
   hardwareConcurrency?: number
   connection?: NetInfo
+  /** True when the PRIMARY pointer is coarse — a phone or tablet. A laptop
+   *  with a touchscreen still reads `fine` (its primary pointer is the
+   *  trackpad), which is exactly the line this heuristic needs: the core and
+   *  memory counts below were written against low-end PHONES. */
+  mobileClass?: boolean
 }
 
 /**
- * Conservative "this client would rather not pay for 3D" heuristic — any
- * signal alone flips it: < 4 GB device memory or ≤ 3 cores (low-end phones),
- * an explicit data-saver, or a ≤ 3g effective link (the hero GLBs are real
- * megabytes). Every signal is optional — browsers that expose none of them
- * (Firefox, Safari) simply read as capable, and the visitor toggle remains
- * the manual way down (or up: an explicit 3D choice beats this heuristic).
+ * Conservative "this client would rather not pay for 3D" heuristic.
+ *
+ * Two tiers, and the split is the whole point:
+ *
+ *  - **Always, on any device** — an explicit data-saver or a ≤ 3g effective
+ *    link. Those are statements about intent and about the network, and the
+ *    hero GLBs are real megabytes either way.
+ *  - **Only on a touch-first device** — < 4 GB device memory or ≤ 3 cores.
+ *
+ * The second tier used to apply everywhere, and that was a real defect
+ * (2026-08-26, Martin's report, reproduced): **privacy browsers lie about
+ * these two numbers on purpose.** Brave's fingerprint farbling reported
+ * `hardwareConcurrency: 3` on a Ryzen 5 with 8 logical cores and 15 GB of
+ * RAM — so a perfectly capable desktop read as a low-end phone and was served
+ * the 2D fallback, in a normal window and a private one alike. Firefox with
+ * `resistFingerprinting` reports 2 for the same reason, and the Tor Browser
+ * likewise. The tell was that `localhost` looked fine while the live domain
+ * did not: Brave does not farble local addresses, so the same laptop reported
+ * 8 cores in the preview and 3 in production.
+ *
+ * The counters cannot be repaired — a farbled value is indistinguishable from
+ * a true one — so they are only consulted where they were meant to be: on a
+ * phone or tablet, where nobody farbles and where the risk they guard against
+ * is real. A desktop that lies its way past this gate and then genuinely
+ * cannot render is still caught within ~3 s by the runtime FPS watchdog below,
+ * which measures what the device actually DOES rather than what it claims.
+ *
+ * Every signal is optional — browsers that expose none of them (Safari, and
+ * Firefox for `deviceMemory`) simply read as capable, and `?world=2d` remains
+ * the manual way down (or up: `?world=3d` beats this heuristic).
  */
 export function isWeakClient(hints: ClientHints): boolean {
-  if (hints.deviceMemory !== undefined && hints.deviceMemory < 4) return true
-  if (hints.hardwareConcurrency !== undefined && hints.hardwareConcurrency <= 3) return true
   const net = hints.connection
   if (net?.saveData) return true
   const type = net?.effectiveType
-  return type === 'slow-2g' || type === '2g' || type === '3g'
+  if (type === 'slow-2g' || type === '2g' || type === '3g') return true
+  // Farble-able counters: phones and tablets only.
+  if (!hints.mobileClass) return false
+  if (hints.deviceMemory !== undefined && hints.deviceMemory < 4) return true
+  return hints.hardwareConcurrency !== undefined && hints.hardwareConcurrency <= 3
 }
 
 /** The pure decision — every input explicit, so the matrix is unit-tested. */
@@ -103,9 +135,30 @@ function probeWebGL2(): boolean {
 
 let weakProbe: boolean | null = null
 
+/** Primary pointer coarse ⇒ a touch-first device (phone / tablet). A laptop
+ *  with a touchscreen reports `fine` here — `any-pointer` would not, which is
+ *  why this deliberately asks about the PRIMARY pointer. */
+const COARSE_POINTER = '(pointer: coarse)'
+
+function probeMobileClass(): boolean {
+  try {
+    return window.matchMedia(COARSE_POINTER).matches
+  } catch {
+    return false // no matchMedia ⇒ treat as desktop: the FPS watchdog backstops
+  }
+}
+
 function probeWeakClient(): boolean {
   if (weakProbe === null) {
-    weakProbe = isWeakClient(navigator as Navigator & ClientHints)
+    // Read the hints out explicitly rather than spreading `navigator`: they
+    // live on the prototype as getters, so a spread copies none of them.
+    const nav = navigator as Navigator & ClientHints
+    weakProbe = isWeakClient({
+      deviceMemory: nav.deviceMemory,
+      hardwareConcurrency: nav.hardwareConcurrency,
+      connection: nav.connection,
+      mobileClass: probeMobileClass(),
+    })
   }
   return weakProbe
 }
