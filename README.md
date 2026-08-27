@@ -20,9 +20,10 @@ Live: **https://svobodamartin.dev**
 > developer: I don't hand-write the code, I direct it with **Claude Code** and verify
 > everything. That's stated on the site itself, and it's the honest frame for this repo:
 > what I brought is the discipline the job beat into me. Nothing shipped until it was
-> verified. **76 ADRs** record *why* (including the ones where I record my own wrong
-> diagnoses), every mobile bug was reproduced by a harness that provably failed on the
-> pre-fix code, and `npm run check` had to be green before every commit.
+> verified. **Architecture decision records** capture *why* (including the ones where I
+> record my own wrong diagnoses), every mobile bug was reproduced by a harness that
+> provably failed on the pre-fix code, and `npm run check` had to be green before every
+> commit.
 
 ![Military jets chapter — L‑159 above the clouds, with the amber HUD through‑line](docs/assets/hero-fighters.png)
 
