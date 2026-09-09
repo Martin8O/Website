@@ -4,6 +4,41 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-081 — The whole-site audit's fixes: proof links that cannot expire, build lines re-read, a guarded Czech overlay (2026-09-09)
+The first independent audit of the *whole* site (2026-09-07/09: every factual claim vs. reality, the full
+`src/` read at once, a headless drive of production, Lighthouse ×3 desktop + ×3 mobile) found the site
+technically sound — 9 of 10 live checks clean, desktop 99·100·100·100 — and its defects almost entirely in
+**what the site claims**. This row records what was fixed and, just as deliberately, what was not.
+
+**Fixed.** (1) The Hardenize proof link pointed at one *run id*; Hardenize expires runs, so the "Don't trust
+— verify" link had been a 404 for weeks. It now carries the hostname only, which always resolves to the
+latest report. (2) The Work cards' build lines are re-read with the house rule (distinct author-local commit
+days · commits): RL Lab 23·112 → **27·122** (the project ended 16 Jul; the card had frozen at an 11 Jul
+reading), Registrace 17·63 → **27·109** (work resumed 27 Aug–5 Sep). (3) `public/llms.txt` was four releases
+behind the Work list — Unplottable, Storm Watch Kolín, *Den, který se nestal* and *Out of Their Minds* now
+have their section. (4) The Czech copy is an overlay merged by id with a silent spread, so renaming an id
+would hand Czech visitors English copy under a green gate; `copyOverlay.test.ts` makes the overlay
+load-bearing (every chapter/project covered, no orphan keys, no English body or tagline copied verbatim) —
+the same guard `changelog.test.ts` already gave the changelog. Its first run caught three legitimate
+cross-language identities ("2012–2022 · L-159", "Těnovice", "Display pilot"), so the verbatim check covers
+prose only. 391 → **397** tests, synced in the proof panel EN/CZ and the README. (5) The language toggle's
+accessible name now starts with its visible text ("CZ – Přepnout do češtiny") — Lighthouse's
+`label-content-name-mismatch`. (6) The skip link jumped but focus stayed at the top: the contact card is
+`visibility: hidden` until the *smoothed* progress catches up, and a hidden element refuses focus, so one
+frame was never enough; it now retries for up to 120 frames and stops the moment the CTA holds focus
+(verified: lands within 100 ms). (7) ADR-074's queued follow-up: `.body { max-width: 34ch }` → `21.4em`,
+because `ch` resolves against the fallback font until the webfont arrives and the measure depended on cache.
+
+**Deliberately not changed (Martin's calls).** The proof panel's Lighthouse 98·100·92·100 stays — re-measured
+three times each: desktop 99·100·100·100, mobile 82–83·100·100·100, so the panel is conservative and true.
+"3D in 6 more days" stays: six days of building, two of polish. The 14 MB hero-model warm-up on every 3D visit
+stays: smoothness on the Bagram beat is worth the bytes. The three `status` notes ("Runs locally", "Not yet
+in the store", "Porting to Android") stay hidden on purpose: a project is *live* when it is finished and
+open-source to run, store presence is not the bar.
+
+**Rule earned:** a proof link must point at something that does not expire — a hostname report, never a run.
+Full findings: `local/tmp/AUDIT_WEB_2026-09-07.md` (+ `audit-claims`, `audit-code`, `audit-live`).
+
 ### ADR-080 — A third novel joins the work; the GitHub billboard is re-read and rolls forward a month (2026-09-08)
 The eleventh Claude-era card: ***Out of Their Minds*** («Не в своём уме») — a 108,423-word Harry Potter
 romantic comedy written by an AI **natively in Russian**, never through an English draft, its terminology

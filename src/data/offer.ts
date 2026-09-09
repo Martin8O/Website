@@ -145,7 +145,7 @@ export const OFFER_QUALITY: OfferQuality = {
   heading: 'This website',
   selfItems: [
     {
-      testsLead: '<strong>391 automated tests</strong>',
+      testsLead: '<strong>397 automated tests</strong>',
       html: ' · WCAG accessibility',
       htmlMobile: ' · WCAG',
     },
@@ -177,7 +177,10 @@ export const OFFER_QUALITY: OfferQuality = {
     },
     {
       html: 'Hardenize <strong>green</strong>',
-      href: 'https://www.hardenize.com/report/svobodamartin.dev/1783538721',
+      // No run id on purpose: Hardenize expires individual runs after a while
+      // (the old id went 404 within weeks), the hostname URL always resolves
+      // to the latest report.
+      href: 'https://www.hardenize.com/report/svobodamartin.dev',
     },
   ],
 }

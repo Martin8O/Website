@@ -188,7 +188,11 @@
   font-size: clamp(0.86rem, 1.6vw, 0.98rem);
   line-height: 1.55;
   color: #eef3fa;
-  max-width: 34ch;
+  /* 21.4em = 34ch in Inter (1ch ≈ 0.629em). Set in em, not ch, because `ch`
+     resolves against the fallback font (0.5em) until the webfont arrives, so
+     the measure — and the justify rivers — used to depend on cache state
+     (ADR-074's queued follow-up). */
+  max-width: 21.4em;
   margin: 1.25rem auto 0;
   /* Bodies set as a justified block (Martin's call, rev15/16) — titles and
      eyebrows keep their card alignment. Line-end stretch is solved by wording
@@ -550,7 +554,7 @@
   font-style: italic;
   color: var(--muted);
   margin: 0.7rem auto 0;
-  max-width: 34ch;
+  max-width: 21.4em; /* same reasoning as .body above */
   text-align: center;
 }
 

@@ -20,10 +20,19 @@ export function SkipLinks() {
       onClick={(e) => {
         e.preventDefault()
         scrollToProgress(1, { immediate: true })
-        // Focus after the card has become visible (opacity follows progress).
-        requestAnimationFrame(() => {
-          document.getElementById('contact-now')?.querySelector('a')?.focus()
-        })
+        // Focus once the card has become visible. Its opacity follows the
+        // SMOOTHED progress and ChapterCards keeps it `visibility: hidden`
+        // until then, and a hidden element silently refuses focus — so a
+        // single frame was never enough (the audit of 2026-09-09 found the
+        // jump landed but focus stayed on the skip link). Retry for up to
+        // ~2 s; stop the moment the CTA actually holds focus.
+        let tries = 120
+        const tryFocus = () => {
+          const cta = document.getElementById('contact-now')?.querySelector('a')
+          cta?.focus()
+          if (document.activeElement !== cta && --tries > 0) requestAnimationFrame(tryFocus)
+        }
+        requestAnimationFrame(tryFocus)
       }}
     >
       {STRINGS[lang].skipToContact}

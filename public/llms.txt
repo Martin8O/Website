@@ -29,6 +29,13 @@ and no data collection. Contact is by email only. Content is bilingual English
 - [BrainQuest + dev-brain](https://github.com/Martin8O/BrainQuest): turns an Obsidian knowledge vault into a Duolingo-style learning game with spaced repetition (FSRS), a skill-tree and an AI tutor (Next.js, Capacitor).
 - [This site](https://github.com/Martin8O/Website): the scrollytelling site itself — an empty folder to a live production deploy in 4 days, then a 3D version in 6 more (React, TypeScript, Vite, Canvas 2D, Lenis).
 
+## Work — since that month (the build pace kept going)
+
+- [Unplottable](https://github.com/Martin8O/Unplottable): a 124,642-word novel set in the Harry Potter universe, written by an AI — the machinery came first (a reference book of that world, a ledger pairing every planted hint with the chapter that pays it off, and a check no chapter could skip). English in 54 prompts, Russian in one background run of 83 agents. Non-commercial fan work.
+- [Storm Watch Kolín](https://kolin-bourky.vercel.app): thunderstorm and flash-flood warnings for one Czech town, up to three hours ahead — a web page plus a Telegram bot, fed by seven forecast models and the national weather radar as two separate sources (Supabase, Deno, PostgreSQL). [Source](https://github.com/Martin8O/Bourky).
+- [Den, který se nestal](https://github.com/Martin8O/Den-ktery-se-nestal): an original 53,470-word science-fiction novel written by an AI natively in Czech — two days, three prompts. Bureaucratic SF: a verifier at the Institute of Retrospection measures what the past can prove, until the only thing that disagrees with the record is a memory of her own.
+- [Out of Their Minds](https://github.com/Martin8O/out-of-their-minds): «Не в своём уме» — a 108,423-word romantic comedy in the Harry Potter world, written by an AI natively in Russian, never translated; thirty-five chapters, each read end to end by an independent reviewer before it was allowed to stay. Non-commercial fan work.
+
 ## Work — before Claude
 
 - [My Healing Journey](https://mojecestakezdravi.cz/): the site documenting how Martin healed himself from ulcerative colitis — his first web build (2015).

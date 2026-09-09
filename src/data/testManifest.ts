@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 391
+export const TEST_COUNT = 397
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -232,6 +232,17 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "changelog data > only ever links out over https",
       "changelog data > translates every entry to Czech without losing one",
       "formatChangelogDate > formats per language",
+    ],
+  },
+  {
+    file: "src/data/copyOverlay.test.ts",
+    tests: [
+      "Czech chapter overlay > covers every chapter with a non-empty entry",
+      "Czech chapter overlay > has no orphan entry (an overlay for an id that no longer exists)",
+      "Czech chapter overlay > actually overlays the prose — no English body copied verbatim",
+      "Czech project overlay > covers every project with a Czech tagline",
+      "Czech project overlay > has no orphan entry (an overlay for an id that no longer exists)",
+      "Czech project overlay > actually overlays the tagline — no English tagline copied verbatim",
     ],
   },
   {

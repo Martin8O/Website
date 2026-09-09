@@ -142,7 +142,10 @@ export function SiteNav() {
           tapFlash(e.currentTarget)
           setLang(lang === 'en' ? 'cs' : 'en')
         }}
-        aria-label={t.langSwitchLabel}
+        // The accessible name starts with the visible text ("CZ" / "EN") so a
+        // screen reader announces what a sighted user sees, then the intent
+        // (Lighthouse: label-content-name-mismatch, audit 2026-09-09).
+        aria-label={`${t.langSwitch} – ${t.langSwitchLabel}`}
         title={t.langSwitchLabel}
       >
         {t.langSwitch}
