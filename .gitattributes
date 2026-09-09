@@ -1,0 +1,10 @@
+# Baked data files are compared byte-for-byte against a generator in the test
+# suite (`src/vertie/climbScene.test.ts`, `src/data/testManifest.test.ts`), so
+# their working-copy line endings must stay LF whatever `core.autocrlf` says.
+* text=auto eol=lf
+*.jpg binary
+*.png binary
+*.gif binary
+*.mp4 binary
+*.glb binary
+*.woff2 binary

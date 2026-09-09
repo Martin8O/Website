@@ -4,6 +4,22 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-079 — Line endings are pinned to LF, because two tests compare generated files byte-for-byte (2026-09-08)
+`npm run check` was **red on a clean checkout** before this prompt changed anything: `climbScene.test.ts`
+compares `public/climb/climb.json` on disk against what its generator produces, and the generator emits LF
+while `core.autocrlf=true` had rewritten the file to CRLF at checkout. The same mechanism had already left
+`src/data/testManifest.ts` showing as modified with an empty diff. Nothing was wrong with either file — the
+working copy simply did not match the bytes the test recomputes.
+
+A repository with no `.gitattributes` inherits whatever each machine's `core.autocrlf` happens to be, so a
+byte-for-byte test is only green by luck of local configuration. `.gitattributes` now sets `* text=auto
+eol=lf` with the binary asset types (jpg/png/gif/mp4/glb/woff2) marked binary, and the working copy was
+renormalized. *Why the repo and not the test:* loosening the test to ignore line endings would hide a real
+class of drift in generated files, which is the only thing that test exists to catch.
+
+Given its own commit and its own row on purpose: it was a leftover found in the tree, not part of the novel
+card's work, and a leftover never rides along on someone else's commit.
+
 ### ADR-078 — The 3D gate stops trusting core/memory counts on desktop (privacy browsers farble them) (2026-08-26)
 **The defect, reported by Martin and reproduced:** Brave on a capable desktop (Ryzen 5, 8 logical cores,
 15 GB) was served the **2D fallback** on `svobodamartin.dev` — in a normal window and a private one alike —
