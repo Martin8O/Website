@@ -91,6 +91,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // function, because `changelog.test.ts` asserts the CS overlay differs.
     title: 'A third novel, and the first written in Russian',
     body: 'A third AI-written novel joins the work list: 108,423 words of Harry Potter romantic comedy, written natively in Russian across thirty-five chapters, each one read end to end by a reviewer who did not write it.',
+    link: { href: `${REPO}/commit/1873fb821a007677ad3d5c5aa5928d2c0f2db848`, display: '1873fb8' },
   },
 ]
 
