@@ -193,7 +193,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 9,
+    workOrder: 10,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -334,6 +334,31 @@ export const PROJECTS: Project[] = [
     live: true,
     build: { days: 2, commits: 6 },
     workOrder: 8,
+  },
+  // The Claude month's third novel, and the one written in a language the
+  // repository never translates out of: Russian from the first sentence. Where
+  // Unplottable borrowed a world and Den had to invent one, this one had to be
+  // FUNNY on demand — the genre law is written into the style guide as a
+  // machine-checkable rule the gate refuses to pass without. No `window` block
+  // (the dev scene keeps its five app windows); it sits beside its two siblings
+  // in the Work panel. `build` = the four days the book was actually written on
+  // (4, 5, 7 and 8 Sep 2026) and the fourteen commits that carry it,
+  // deliberately stopping before the two publication-housekeeping commits — the
+  // same rule the Unplottable and Den cards follow.
+  {
+    id: 'out-of-their-minds',
+    name: 'Out of Their Minds',
+    tagline:
+      '«Не в своём уме» — a 108,423-word romantic comedy set in the Harry Potter world, written by an AI natively in Russian, never translated, using the terminology of the Russian editions. Two foster children mistranslate an old rite, and by that summer nobody in Britain is in their own body. Thirty-five chapters, each read end to end by an independent reviewer before it was allowed to stay. Non-commercial fan work.',
+    stack: ['Claude Code', 'Markdown', 'Python', 'Pandoc', 'LaTeX'],
+    era: 'claude',
+    link: {
+      href: 'https://github.com/Martin8O/out-of-their-minds',
+      display: 'github.com/Martin8O/out-of-their-minds',
+    },
+    live: true,
+    build: { days: 4, commits: 14 },
+    workOrder: 9,
   },
 ]
 

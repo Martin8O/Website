@@ -4,6 +4,61 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-080 — A third novel joins the work; the GitHub billboard is re-read and rolls forward a month (2026-09-08)
+The eleventh Claude-era card: ***Out of Their Minds*** («Не в своём уме») — a 108,423-word Harry Potter
+romantic comedy written by an AI **natively in Russian**, never through an English draft, its terminology
+following the Russian ROSMAN editions. It sits at `workOrder: 9`, directly after *Den, který se nestal*
+(ClearFeed 9 → 10), with no `window` block — the dev scene keeps its five app windows. The counter pill in
+chapter 08 goes `+ 4` → **`+ 5`** and the changelog gains a row.
+
+`build: { days: 4, commits: 14 }` — the four distinct author-local commit days the book was written on
+(4, 5, 7 and 8 Sep 2026) and the fourteen commits that carry it, **stopping before the two
+publication-housekeeping commits**, exactly as the Unplottable and Den cards do. Note the 6 Sep commit lands
+on 7 Sep in the author's own timezone; counted by UTC it would have read five days, and the house rule is
+author-local.
+
+**The shot is the book's own generated cover** (`book/cover.png`, 1600×2560), cropped to the band that
+carries its identity — the two interlocking rings with the gold point between them, the arcs falling away,
+the rule and the Russian title (`local/tmp/oot-cover-bake.mjs` → 760×608, `cover: true` so the alt text says
+"book cover" / "obálka knihy" instead of calling it a screenshot). Same reason as its two siblings: the full
+portrait page makes a card twice as tall as its row-mates. The first crop clipped the rings; the band was
+raised until the signature survives whole.
+
+**With three book covers now in one row the taglines had to stay distinct.** Unplottable borrowed a world;
+Den had to invent one; this one had to be *funny on demand* in a language it never translates out of — and
+every one of its thirty-five chapters was read end to end by an independent reviewer before it was kept.
+The card name is the repository's own English title, not the Russian one, because the link and the display
+string carry that name too; the Russian title opens the tagline instead. The changelog keeps the established
+split — the Czech row carries the name (*Nejsou při smyslech*, the repository's own Czech rendering), the
+English one the function — because `changelog.test.ts` asserts the CS overlay actually differs.
+
+**The card's link was a 404 when it was written**, the same trap ADR-077 hit: `Martin8O/out-of-their-minds`
+was private. Found by asking GitHub rather than by trusting the repo's own "for publication" README, raised
+to Martin before the card was allowed to ship, and re-verified anonymously after he flipped it: HTTP 200.
+
+**The rooftop GitHub billboard is re-read off the live API** (`local/tmp/gh-stats-2026-09-08.mjs`; it had
+stopped on 26 Aug): 18 → **20** projects, 132 → **145** days, 984 → **1089** commits, 1–27 days each
+unchanged. Population and method unchanged — every non-fork repo Martin authors in, private ones and the
+Lovable bot's commits included, plus his own commits in the Těnovice collab repo, counted by author-local
+date — and **proved before trusted**: replayed against the retired 26 Aug snapshot the method reproduces
+18 projects, 1–27 days each, and May 102 / Jun 233 / Jul 439 exactly. Four commits stamped 2025-01-01 (a
+placeholder date, not work) stay excluded, as they were then; the run still starts at the first real commit,
+2026-04-17.
+
+The momentum bars roll forward a month, May–Aug → **Jun 233 · Jul 439 · Aug 123 · Sep 88**, and the matrix
+window moves with them (day 0 = Mon 8 Jun, 14 columns, no weekday offset, peak 47 unchanged). August reads
+123 rather than the 106 banked on 26 Aug because the month had five days left to run when that snapshot was
+taken. **September's bar is a stub for the opposite reason to August's old one** — it is eight days into a
+month still being written, not a month that stopped — and the comment beside it now says which. Three month
+ticks fit the window again (JUL · AUG · SEP), and the three-week silence in mid-August sits inside the
+matrix as a visible gap rather than being cropped out of it.
+
+Gate green: `tsc -b`, eslint 0/0, build, **391/391**. Verified live in both languages by reading the real
+DOM, not the source (`local/tmp/oot-verify.mjs`): the card at slot 11 of 20 between *Den, který se nestal*
+and ClearFeed, its alt text not calling the cover a screenshot, the link, the build line ("4 days of
+building · 14 commits" / "4 dny vývoje · 14 commitů") and the changelog tail in both languages. The
+billboard was read back off the rendered canvas as pixels rather than trusted from its constants.
+
 ### ADR-079 — Line endings are pinned to LF, because two tests compare generated files byte-for-byte (2026-09-08)
 `npm run check` was **red on a clean checkout** before this prompt changed anything: `climbScene.test.ts`
 compares `public/climb/climb.json` on disk against what its generator produces, and the generator emits LF

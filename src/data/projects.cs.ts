@@ -71,6 +71,10 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
     tagline:
       'Původní sci-fi román o 53 470 slovech, který napsala AI rovnou česky – za dva dny a tři zadání. Úřednická sci-fi: verifikátorka Ústavu retrospekce měří, co z minulosti je doložitelné, dokud se se záznamem nerozejde jediná věc – její vlastní vzpomínka. Unplottable si svět vypůjčila; tenhle si musel každé pravidlo nejdřív vymyslet a pak ho dodržet – a v repozitáři leží celý stroj, který na to dohlížel.',
   },
+  'out-of-their-minds': {
+    tagline:
+      '«Не в своём уме» – romantická komedie o 108 423 slovech ze světa Harryho Pottera, kterou napsala AI rovnou rusky, bez překladu a s názvoslovím ruských vydání. Dvě děti v pěstounské péči špatně přeloží starý obřad a do léta není v Británii nikdo ve svém vlastním těle. Třicet pět kapitol a každou od začátku do konce přečetl nezávislý recenzent, než mohla zůstat. Nekomerční fanouškovské dílo.',
+  },
   bourky: {
     name: 'Bouřkový hlídač',
     tagline:

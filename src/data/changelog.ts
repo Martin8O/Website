@@ -83,6 +83,15 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'A second AI-written novel joins the work list: 53,470 words of original Czech science fiction, written in two days on the machinery Unplottable proved.',
     link: { href: `${REPO}/commit/7ff8f712887fc391179a052534bc2c6468a8c724`, display: '7ff8f71' },
   },
+  {
+    id: 'out-of-their-minds',
+    date: '2026-09-08',
+    // Same split as the two rows above: the Czech title carries the name — the
+    // repository's own Czech rendering of it — and the English one the
+    // function, because `changelog.test.ts` asserts the CS overlay differs.
+    title: 'A third novel, and the first written in Russian',
+    body: 'A third AI-written novel joins the work list: 108,423 words of Harry Potter romantic comedy, written natively in Russian across thirty-five chapters, each one read end to end by a reviewer who did not write it.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -110,6 +119,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   'den-ktery-se-nestal': {
     title: 'Den, který se nestal',
     body: 'K seznamu prací přibyl druhý román od AI: 53 470 slov původní české sci-fi, napsaných za dva dny na stroji, který prověřila Unplottable.',
+  },
+  'out-of-their-minds': {
+    title: 'Nejsou při smyslech',
+    body: 'K seznamu prací přibyl třetí román od AI: 108 423 slov romantické komedie ze světa Harryho Pottera, napsané rovnou rusky v pětatřiceti kapitolách, z nichž každou od začátku do konce přečetl recenzent, který ji nepsal.',
   },
 }
 

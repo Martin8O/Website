@@ -54,6 +54,15 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'den-ktery-se-nestal': [
     { url: '/shots/den-ktery-se-nestal-0.jpg', aspect: 1.250, cover: true },
   ],
+  // The book's own generated cover (`book/cover.png`, 1600×2560), cropped to
+  // the band that carries its identity — the two interlocking rings with the
+  // gold point between them (the swapped minds), the arcs falling away from
+  // them and the Russian title — for the same reason the other two book covers
+  // are cropped: the full portrait page makes a card twice as tall as every
+  // other one. Baked by `local/tmp/oot-cover-bake.mjs`.
+  'out-of-their-minds': [
+    { url: '/shots/out-of-their-minds-0.jpg', aspect: 1.250, cover: true },
+  ],
   'tenovice': [
     { url: '/shots/tenovice-0.jpg', aspect: 0.983 },
   ],
