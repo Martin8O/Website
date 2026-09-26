@@ -30,6 +30,7 @@ a project. Chapter 08's counter goes + 5 → **+ 6**; changelog row EN = functio
 card has ≥ 5 commits, so Kite Season read "4 commitů". Czech now plurals commits as it already plurals days
 (1 commit · 2–4 commity · 5+ commitů), English gets a singular "1 commit", and `strings.test.ts` guards both
 (397 → **399**, synced in the proof panel EN/CZ and the README).
+The changelog row is anchored to its own commit (`fcedcdb`) in a follow-up commit, as ADR-080 did.
 
 ### ADR-081 — The whole-site audit's fixes: proof links that cannot expire, build lines re-read, a guarded Czech overlay (2026-09-09)
 The first independent audit of the *whole* site (2026-09-07/09: every factual claim vs. reality, the full

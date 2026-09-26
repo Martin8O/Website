@@ -100,6 +100,8 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // one the function (`changelog.test.ts` asserts the CS overlay differs).
     title: 'A kite forecast that picks the kite',
     body: 'Kite Season joins the work list: six weather models averaged into one verdict for a Sicilian lagoon, with the kite chosen from your own bag. A single HTML file, no backend.',
+
+    link: { href: `${REPO}/commit/fcedcdb5c023458ec6e4bf451bfba1dd99aeb426`, display: 'fcedcdb' },
   },
 ]
 
