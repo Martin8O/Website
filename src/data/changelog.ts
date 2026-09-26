@@ -99,7 +99,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // The Bouřky split again: the Czech title carries the name, the English
     // one the function (`changelog.test.ts` asserts the CS overlay differs).
     title: 'A kite forecast that picks the kite',
-    body: 'Kite Season joins the work list: six weather models averaged into one verdict for a Sicilian lagoon, with the kite chosen from your own bag. A single HTML file, no backend.',
+    body: 'Kite Season joins the work list: six weather models averaged into one verdict for a Sicilian lagoon, with the kite chosen from your own bag, an hour-by-hour forecast up to three days ahead and the whole week at a glance. A single HTML file, no backend.',
 
     link: { href: `${REPO}/commit/fcedcdb5c023458ec6e4bf451bfba1dd99aeb426`, display: 'fcedcdb' },
   },
@@ -137,7 +137,7 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   },
   kiteseason: {
     title: 'Kite Season',
-    body: 'K seznamu prací přibyla předpověď pro kiting: šest meteorologických modelů zprůměrovaných do jednoho verdiktu pro lagunu na Sicílii, a k tomu kite vybraný z vlastní tašky. Jeden soubor HTML, žádný server.',
+    body: 'K seznamu prací přibyla předpověď pro kitesurfing. Ze šesti meteorologických modelů pro lagunu na Sicílii složí jednu jasnou odpověď: kdy vyrazit a s jakým kitem z vlastní výbavy. Nabídne i předpověď hodinu po hodině až na tři dny dopředu a přehled celého týdne. Vejde se do jediného souboru HTML a nepotřebuje server.',
   },
 }
 

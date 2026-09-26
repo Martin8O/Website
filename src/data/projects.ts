@@ -323,7 +323,7 @@ export const PROJECTS: Project[] = [
     id: 'kiteseason',
     name: 'Kite Season',
     tagline:
-      'Should I go kiting today, and on which kite? Six weather models averaged into one sentence for a lagoon in Sicily — the window, the wind and the kite from your own bag, sized to your weight, board and level. Offshore wind and gusty air mark an hour down; one tap puts the window in your calendar. One HTML file, no backend.',
+      'Should I go kiting today, and on which kite? Six weather models averaged into one sentence for a lagoon in Sicily — the window, the wind and the kite from your own bag, sized to your weight, board and level. Behind it, an hour-by-hour forecast from 24 hours to three days, the whole week at a glance, and a warning for offshore wind and gusts. One HTML file, no backend.',
     stack: ['HTML', 'Vanilla JS', 'SVG', 'Open-Meteo'],
     era: 'claude',
     link: { href: 'https://kiteseason.vercel.app', display: 'kiteseason.vercel.app' },

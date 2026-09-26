@@ -82,7 +82,7 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   },
   kiteseason: {
     tagline:
-      'Jet dnes na kite, a na jaký? Šest meteorologických modelů zprůměrovaných do jedné věty pro lagunu na Sicílii – okno, vítr a kite z vlastní tašky, spočítaný podle váhy, prkna a úrovně jezdce. Vítr od břehu a nárazový vítr hodinu srazí; jedním klepnutím je okno v kalendáři. Jeden soubor HTML, žádný server.',
+      'Vyplatí se dnes vyrazit na vodu, a s jakým kitem? Aplikace porovná šest meteorologických modelů pro lagunu Lo Stagnone na Sicílii a odpoví jednou větou: kdy to pojede, jak silně bude foukat a který kite z vaší výbavy si vzít podle váhy, prkna a zkušeností. K tomu podrobná předpověď hodinu po hodině na 24 hodin až tři dny, přehled celého týdne a upozornění na vítr od břehu či nárazy. Celá aplikace je jediný soubor HTML, bez serveru.',
   },
   'this-site': {
     name: 'Tento web',

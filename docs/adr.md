@@ -4,6 +4,18 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-083 — Kite Season's copy: natural Czech, and the forecast before the calendar (2026-09-26)
+Martin's review of ADR-082: the Czech tagline read as a word-for-word carry-over of the English one ("Jet dnes
+na kite, a na jaký? … hodinu srazí"). Both Czech texts (card, changelog) are rewritten as native Czech in the
+site's formal "vy" register, not translated. And the card led with the one-tap calendar export — a real
+feature, but a minor one — while leaving out what a rider actually opens the app for: the **hour-by-hour
+forecast (24 h / 48 h / 3 days)** and the **seven-day overview**. The card (EN + CZ), both changelog rows,
+`llms.txt` and the repo README (`8be6700`) now lead with those, and the calendar line is dropped. The week is
+described as an overview with each day's daylight hours as a strip, not as "hourly for a week": the hour list
+itself stops at three days, and the copy says only that.
+**Rule earned:** Czech site copy is written in Czech, never translated sentence by sentence from the English;
+and a card names what the user comes for, not the feature that was easiest to describe.
+
 ### ADR-082 — Kite Season joins the work after Storm Watch; the billboard is re-read; Czech commit counts learn their plural (2026-09-26)
 **Kite Season** (`Martin8O/kiteseason`, live at kiteseason.vercel.app) is a one-file kite forecast for Lo
 Stagnone: six Open-Meteo models averaged into one sentence ("today you ride 12 m between 15:00 and 20:00"),
