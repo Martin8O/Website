@@ -4,6 +4,33 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-082 — Kite Season joins the work after Storm Watch; the billboard is re-read; Czech commit counts learn their plural (2026-09-26)
+**Kite Season** (`Martin8O/kiteseason`, live at kiteseason.vercel.app) is a one-file kite forecast for Lo
+Stagnone: six Open-Meteo models averaged into one sentence ("today you ride 12 m between 15:00 and 20:00"),
+the kite picked from the rider's own bag by weight, board and level, hours marked down for offshore wind,
+gusts, rain and darkness. It is Storm Watch's small sibling — the same many-models-one-honest-number idea —
+so its card sits **directly after Storm Watch** at `workOrder: 7` (Unplottable 8, Den 9, Out of Their Minds
+10, ClearFeed 11). No `window` block. `build: {days: 1, commits: 4}` — the one author-local day it was built
+(14 Sep) and the four commits that carry it, stopping before the README, the same rule the book cards follow.
+
+**The shot is the live app, not a mock-up:** three phone screens (Now · Hours · Week) captured off the
+production site by headless Chrome and composed side by side, one image per language because the app is
+bilingual (`kiteseason` / `kiteseason.cs`, aspect 1.429). The week was near-calm, and the default rider's
+verdict read only "light wind all week"; the capture sets a real rider profile (foil, 4.5 m/s floor) so the
+verdict, the windows and the kite pick are visible — the repo's README says so under its screenshots.
+The repo itself gained a README with those screenshots, a description and topics.
+
+**Billboard re-read** off the live API with the unchanged method, replayed first against 2026-09-08 (it
+reproduces 20 projects / 1089 commits exactly): **23 projects · 163 days · 1169 commits · 1–28 days each**,
+Sep 88 → 168, matrix day 0 = Mon 22 Jun (ticks at cols 1.29 / 5.71 / 10.14), peak 47 unchanged. One repo is
+excluded by name: `kite-season`, an empty duplicate holding only GitHub's own "Initial commit" — a stray, not
+a project. Chapter 08's counter goes + 5 → **+ 6**; changelog row EN = function, CS = name; `llms.txt` line.
+
+**Bug caught by driving the page, not by the gate:** `buildLine` hard-coded "commitů" on the assumption every
+card has ≥ 5 commits, so Kite Season read "4 commitů". Czech now plurals commits as it already plurals days
+(1 commit · 2–4 commity · 5+ commitů), English gets a singular "1 commit", and `strings.test.ts` guards both
+(397 → **399**, synced in the proof panel EN/CZ and the README).
+
 ### ADR-081 — The whole-site audit's fixes: proof links that cannot expire, build lines re-read, a guarded Czech overlay (2026-09-09)
 The first independent audit of the *whole* site (2026-09-07/09: every factual claim vs. reality, the full
 `src/` read at once, a headless drive of production, Lighthouse ×3 desktop + ×3 mobile) found the site

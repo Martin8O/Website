@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 397
+export const TEST_COUNT = 399
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -251,6 +251,13 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "testManifest (generated — npm run gen:tests) > TEST_COUNT equals the baked list",
       "testManifest (generated — npm run gen:tests) > files are unique, repo-relative test modules with non-empty case names",
       "testManifest (generated — npm run gen:tests) > the proof-panel copy tells the same number (EN + CZ)",
+    ],
+  },
+  {
+    file: "src/i18n/strings.test.ts",
+    tests: [
+      "buildLine > Czech plurals both the days and the commits (1 · 2–4 · 5+)",
+      "buildLine > English says \"1 day\" and \"1 commit\" in the singular",
     ],
   },
   {

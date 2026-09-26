@@ -93,6 +93,14 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'A third AI-written novel joins the work list: 108,423 words of Harry Potter romantic comedy, written natively in Russian across thirty-five chapters, each one read end to end by a reviewer who did not write it.',
     link: { href: `${REPO}/commit/1873fb821a007677ad3d5c5aa5928d2c0f2db848`, display: '1873fb8' },
   },
+  {
+    id: 'kiteseason',
+    date: '2026-09-26',
+    // The Bouřky split again: the Czech title carries the name, the English
+    // one the function (`changelog.test.ts` asserts the CS overlay differs).
+    title: 'A kite forecast that picks the kite',
+    body: 'Kite Season joins the work list: six weather models averaged into one verdict for a Sicilian lagoon, with the kite chosen from your own bag. A single HTML file, no backend.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -124,6 +132,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   'out-of-their-minds': {
     title: 'Nejsou při smyslech',
     body: 'K seznamu prací přibyl třetí román od AI: 108 423 slov romantické komedie ze světa Harryho Pottera, napsané rovnou rusky v pětatřiceti kapitolách, z nichž každou od začátku do konce přečetl recenzent, který ji nepsal.',
+  },
+  kiteseason: {
+    title: 'Kite Season',
+    body: 'K seznamu prací přibyla předpověď pro kiting: šest meteorologických modelů zprůměrovaných do jednoho verdiktu pro lagunu na Sicílii, a k tomu kite vybraný z vlastní tašky. Jeden soubor HTML, žádný server.',
   },
 }
 

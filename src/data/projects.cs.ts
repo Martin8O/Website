@@ -80,6 +80,10 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
     tagline:
       'Varování před bouřkami a přívalovými dešti nad Kolínem až tři hodiny předem – webová stránka a oznámení skrze Telegram bota. Sedm předpovědních modelů a radar ČHMÚ jako dva samostatné zdroje.',
   },
+  kiteseason: {
+    tagline:
+      'Jet dnes na kite, a na jaký? Šest meteorologických modelů zprůměrovaných do jedné věty pro lagunu na Sicílii – okno, vítr a kite z vlastní tašky, spočítaný podle váhy, prkna a úrovně jezdce. Vítr od břehu a nárazový vítr hodinu srazí; jedním klepnutím je okno v kalendáři. Jeden soubor HTML, žádný server.',
+  },
   'this-site': {
     name: 'Tento web',
     tagline:

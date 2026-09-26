@@ -193,7 +193,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 10,
+    workOrder: 11,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -293,12 +293,12 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4.5, commits: 70 },
-    workOrder: 7,
+    workOrder: 8,
   },
-  // The newest one, and the first that has to be right about the real world:
-  // it warns a town about weather that is either coming or isn't. No `window`
-  // block (the dev scene keeps its five app windows) — it sits in the Work
-  // panel between BrainQuest and the novel.
+  // The first one that has to be right about the real world: it warns a town
+  // about weather that is either coming or isn't. No `window` block (the dev
+  // scene keeps its five app windows) — it sits in the Work panel between
+  // BrainQuest and Kite Season.
   {
     id: 'bourky',
     name: 'Storm Watch Kolín',
@@ -311,6 +311,26 @@ export const PROJECTS: Project[] = [
     live: true,
     build: { days: 3, commits: 41 },
     workOrder: 6,
+  },
+  // Storm Watch's small sibling: the same many-models-one-honest-number idea,
+  // turned from warning a town to telling one rider whether to go out, and on
+  // which kite. A single HTML file, no backend. No `window` block (the dev
+  // scene keeps its five app windows); it sits right after Storm Watch in the
+  // Work panel. `build` = the one day it was built on (14 Sep 2026) and the
+  // four commits that carry it, stopping before the README — the same rule
+  // the book cards follow.
+  {
+    id: 'kiteseason',
+    name: 'Kite Season',
+    tagline:
+      'Should I go kiting today, and on which kite? Six weather models averaged into one sentence for a lagoon in Sicily — the window, the wind and the kite from your own bag, sized to your weight, board and level. Offshore wind and gusty air mark an hour down; one tap puts the window in your calendar. One HTML file, no backend.',
+    stack: ['HTML', 'Vanilla JS', 'SVG', 'Open-Meteo'],
+    era: 'claude',
+    link: { href: 'https://kiteseason.vercel.app', display: 'kiteseason.vercel.app' },
+    repo: 'https://github.com/Martin8O/kiteseason',
+    live: true,
+    build: { days: 1, commits: 4 },
+    workOrder: 7,
   },
   // The Claude month's second novel — and the harder of the two, because
   // nothing about its world was already known: Unplottable borrowed a canon,
@@ -333,7 +353,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 2, commits: 6 },
-    workOrder: 8,
+    workOrder: 9,
   },
   // The Claude month's third novel, and the one written in a language the
   // repository never translates out of: Russian from the first sentence. Where
@@ -358,7 +378,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4, commits: 14 },
-    workOrder: 9,
+    workOrder: 10,
   },
 ]
 

@@ -53,18 +53,19 @@ export type UiStrings = {
 
 /**
  * The Work card's build-stats line — "22 days of building · 111 commits".
- * Czech needs real pluralization (1 den · 2–4 dny · 5+ dní · zlomky "dne");
- * every commit count on file is ≥ 5, so "commitů" is safe. Half days render
- * as "3½".
+ * Czech needs real pluralization (1 den · 2–4 dny · 5+ dní · zlomky "dne";
+ * 1 commit · 2–4 commity · 5+ commitů — Kite Season's 4 commits broke the old
+ * "every count is ≥ 5" shortcut). Half days render as "3½".
  */
 export function buildLine(lang: Lang, days: number, commits: number): string {
   const d = Number.isInteger(days) ? String(days) : `${Math.floor(days)}½`
   if (lang === 'cs') {
     const unit =
       days === 1 ? 'den' : !Number.isInteger(days) ? 'dne' : days <= 4 ? 'dny' : 'dní'
-    return `${d} ${unit} vývoje · ${commits} commitů`
+    const cUnit = commits === 1 ? 'commit' : commits <= 4 ? 'commity' : 'commitů'
+    return `${d} ${unit} vývoje · ${commits} ${cUnit}`
   }
-  return `${d} ${days === 1 ? 'day' : 'days'} of building · ${commits} commits`
+  return `${d} ${days === 1 ? 'day' : 'days'} of building · ${commits} ${commits === 1 ? 'commit' : 'commits'}`
 }
 
 export const STRINGS: Record<Lang, UiStrings> = {

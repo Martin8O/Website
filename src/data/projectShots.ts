@@ -46,6 +46,19 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'bourky': [
     { url: '/shots/bourky-0.jpg', aspect: 1.143 },
   ],
+  // Three phone screens of the live app side by side — Now (the verdict over
+  // the satellite map), Hours (the model-range chart and the hour list with
+  // the kite for each hour) and Week (the rideable windows). Captured off the
+  // live site with a foil rider and a 4.5 m/s floor, so a light-wind week
+  // still shows what the verdict looks like; one per language, because the
+  // app itself is bilingual. Baked by `local/tmp/kite-shots.mjs` +
+  // `local/tmp/kite-compose.mjs`.
+  'kiteseason': [
+    { url: '/shots/kiteseason-0.jpg', aspect: 1.429 },
+  ],
+  'kiteseason.cs': [
+    { url: '/shots/kiteseason_cs-0.jpg', aspect: 1.429 },
+  ],
   // The book's own generated cover (`book/cover.png`, 1600×2560), cropped to
   // the band that carries its identity — the title block and the red stitch
   // seam — for the same reason Unplottable is cropped: the full portrait page
