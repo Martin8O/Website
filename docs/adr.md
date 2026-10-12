@@ -22,7 +22,7 @@ sentence saying it was replaced; `llms.txt` follows.
 
 **Deliberately not changed (Martin):** chapter 08's "+ 6 more projects since" counter and the rooftop billboard
 stay as they are — they are re-read in one pass once more projects have landed. The changelog row is anchored to
-its own commit in a follow-up commit, as ADR-080/082 did.
+its own commit (`9abdb14`) in a follow-up commit, as ADR-080/082 did.
 
 ### ADR-083 — Kite Season's copy: natural Czech, and the forecast before the calendar (2026-09-26)
 Martin's review of ADR-082: the Czech tagline read as a word-for-word carry-over of the English one ("Jet dnes

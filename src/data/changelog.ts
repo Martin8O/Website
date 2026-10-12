@@ -110,6 +110,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // the function (`changelog.test.ts` asserts the CS overlay differs).
     title: 'A clinic’s website, rebuilt from scratch',
     body: 'RR Fyzio centrum joins the work list: a physiotherapy clinic in Kolín under a new name, on a new site that replaces the one I built for it in 2022 — a drawing of the body that answers “where does it hurt?”, every therapy on its own page, and not one old address lost.',
+    link: { href: `${REPO}/commit/9abdb14a22ca8cb94d490956b923bfce45473b99`, display: '9abdb14' },
   },
 ]
 
