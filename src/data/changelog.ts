@@ -103,6 +103,14 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
 
     link: { href: `${REPO}/commit/fcedcdb5c023458ec6e4bf451bfba1dd99aeb426`, display: 'fcedcdb' },
   },
+  {
+    id: 'rrfyzio',
+    date: '2026-10-12',
+    // The Bouřky split: the Czech title carries the name, the English one
+    // the function (`changelog.test.ts` asserts the CS overlay differs).
+    title: 'A clinic’s website, rebuilt from scratch',
+    body: 'RR Fyzio centrum joins the work list: a physiotherapy clinic in Kolín under a new name, on a new site that replaces the one I built for it in 2022 — a drawing of the body that answers “where does it hurt?”, every therapy on its own page, and not one old address lost.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -138,6 +146,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   kiteseason: {
     title: 'Kite Season',
     body: 'K seznamu prací přibyla předpověď pro kitesurfing. Ze šesti meteorologických modelů pro lagunu na Sicílii složí jednu jasnou odpověď: kdy vyrazit a s jakým kitem z vlastní výbavy. Nabídne i předpověď hodinu po hodině až na tři dny dopředu a přehled celého týdne. Vejde se do jediného souboru HTML a nepotřebuje server.',
+  },
+  rrfyzio: {
+    title: 'RR Fyzio centrum',
+    body: 'K seznamu prací přibyl web fyzioterapeutického centra v Kolíně, které dostalo nový název. Nahradil web, který jsem mu postavil v roce 2022: kresba těla odpoví na otázku „Kde vás to bolí?“, každá terapie má vlastní stránku a žádná stará adresa se neztratila.',
   },
 }
 

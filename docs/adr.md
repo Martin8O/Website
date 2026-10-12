@@ -4,6 +4,26 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-084 — RR Fyzio centrum joins the work after Kite Season; the 2022 card points at the archive (2026-10-12)
+**RR Fyzio centrum** (live at rrfyzio.cz; repo `Martin8O/FyzioCentrum`, private — the content belongs to the
+clinic, so no `repo` link) is the new site of a physiotherapy and massage clinic in Kolín after a rebrand: Astro
+static output on Cloudflare Workers, rebuilt from scratch to replace the 2022 WordPress site, every old address
+kept or redirected, a body map answering "where does it hurt?", a gift-voucher form, no cookies, no tracking. The
+card sits **right after Kite Season** at `workOrder: 8` (Unplottable 9, Den 10, Out of Their Minds 11, ClearFeed
+12). No `window` block. `build: {days: 15, commits: 69}` — the distinct author-local days 3 Sep – 8 Oct 2026 and
+the commits they carry (merge included), stopping before the README, the Kite Season rule. The shot is the
+repo's own README hero (live site on a desktop and a phone, 1760×970) scaled to 760 px; the site is Czech-only,
+so one image serves both languages. Changelog row (EN function, CS name) and an `llms.txt` line.
+
+**The 2022 card stays, its link does not.** `rrcentrumpolabi.cz` now 301s to `rrfyzio.cz`, so the old card
+(pre-Claude, "Created in 2022") would have opened the new site. Martin's call: keep the card as history and point
+it at the Wayback Machine's last capture of the original (11 Apr 2026, verified 200, title intact), with one
+sentence saying it was replaced; `llms.txt` follows.
+
+**Deliberately not changed (Martin):** chapter 08's "+ 6 more projects since" counter and the rooftop billboard
+stay as they are — they are re-read in one pass once more projects have landed. The changelog row is anchored to
+its own commit in a follow-up commit, as ADR-080/082 did.
+
 ### ADR-083 — Kite Season's copy: natural Czech, and the forecast before the calendar (2026-09-26)
 Martin's review of ADR-082: the Czech tagline read as a word-for-word carry-over of the English one ("Jet dnes
 na kite, a na jaký? … hodinu srazí"). Both Czech texts (card, changelog) are rewritten as native Czech in the

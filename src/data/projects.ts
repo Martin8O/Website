@@ -103,14 +103,21 @@ export const PROJECTS: Project[] = [
     live: true,
     workOrder: 1,
   },
+  // Its successor, RR Fyzio centrum, took over the domain in Oct 2026 and
+  // rrcentrumpolabi.cz now 301s to rrfyzio.cz — so the live link would show
+  // the new site under the 2022 card. It points at the Wayback Machine's last
+  // capture of the original instead (11 Apr 2026, verified 200).
   {
     id: 'rrcentrum',
     name: 'RR Centrum Polabí',
     tagline:
-      'A website for a regeneration & rehabilitation centre run by two physiotherapists. Created in 2022.',
+      'A website for a regeneration & rehabilitation centre run by two physiotherapists. Created in 2022, replaced in 2026 by RR Fyzio centrum — the link opens the archived original.',
     stack: ['Web'],
     era: 'pre-claude',
-    link: { href: 'https://rrcentrumpolabi.cz', display: 'rrcentrumpolabi.cz' },
+    link: {
+      href: 'https://web.archive.org/web/20260411212207/https://rrcentrumpolabi.cz/',
+      display: 'web.archive.org',
+    },
     live: true,
     workOrder: 2,
   },
@@ -193,7 +200,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 11,
+    workOrder: 12,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -293,7 +300,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4.5, commits: 70 },
-    workOrder: 8,
+    workOrder: 9,
   },
   // The first one that has to be right about the real world: it warns a town
   // about weather that is either coming or isn't. No `window` block (the dev
@@ -332,6 +339,26 @@ export const PROJECTS: Project[] = [
     build: { days: 1, commits: 4 },
     workOrder: 7,
   },
+  // A clinic's own site, rebuilt from scratch after a rebrand, replacing the
+  // 2022 site that sits in the pre-Claude list (`rrcentrum`). Czech-only, so
+  // one shot. The repo is private (the content belongs to the clinic) → no
+  // `repo`. No `window` block; it sits right after Kite Season in the Work
+  // panel.
+  // `build` = the 15 author-local days it was built on (3 Sep – 8 Oct 2026)
+  // and the 69 commits that carry it, stopping before the README — the same
+  // rule the Kite Season and book cards follow.
+  {
+    id: 'rrfyzio',
+    name: 'RR Fyzio centrum',
+    tagline:
+      'The new website of a physiotherapy and massage clinic in Kolín, after a new name, logo and domain — rebuilt from scratch to replace the site I made for it in 2022, without losing a single address search engines already knew. A drawing of the body answers “where does it hurt?” with the therapies and the people for it; every therapy has its own page, and gift vouchers are ordered by form. Static and fast, with no cookies and no tracking.',
+    stack: ['Astro', 'TypeScript', 'Cloudflare Workers', 'CSS'],
+    era: 'claude',
+    link: { href: 'https://rrfyzio.cz', display: 'rrfyzio.cz' },
+    live: true,
+    build: { days: 15, commits: 69 },
+    workOrder: 8,
+  },
   // The Claude month's second novel — and the harder of the two, because
   // nothing about its world was already known: Unplottable borrowed a canon,
   // this one had to invent every rule it then had to obey. Written natively in
@@ -353,7 +380,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 2, commits: 6 },
-    workOrder: 9,
+    workOrder: 10,
   },
   // The Claude month's third novel, and the one written in a language the
   // repository never translates out of: Russian from the first sentence. Where
@@ -378,7 +405,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4, commits: 14 },
-    workOrder: 10,
+    workOrder: 11,
   },
 ]
 

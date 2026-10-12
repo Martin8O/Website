@@ -59,6 +59,12 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'kiteseason.cs': [
     { url: '/shots/kiteseason_cs-0.jpg', aspect: 1.429 },
   ],
+  // The live site on a desktop and a phone, side by side — the picture the
+  // project's own README carries (`RRFyzio/docs/images/readme-hero.png`,
+  // 1760×970), scaled to 760 px. Czech-only site → one shot for both languages.
+  'rrfyzio': [
+    { url: '/shots/rrfyzio-0.jpg', aspect: 1.818 },
+  ],
   // The book's own generated cover (`book/cover.png`, 1600×2560), cropped to
   // the band that carries its identity — the title block and the red stitch
   // seam — for the same reason Unplottable is cropped: the full portrait page

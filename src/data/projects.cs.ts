@@ -15,7 +15,8 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
       'Web dokumentující, jak jsem se sám uzdravil z ulcerózní kolitidy – můj první skutečný web. Vytvořeno v roce 2015.',
   },
   rrcentrum: {
-    tagline: 'Web pro regenerační a rehabilitační centrum dvou fyzioterapeutek. Vytvořeno v roce 2022.',
+    tagline:
+      'Web pro regenerační a rehabilitační centrum dvou fyzioterapeutek. Vytvořeno v roce 2022, v roce 2026 ho nahradil web RR Fyzio centrum – odkaz otevře archivovaný původní web.',
   },
   'bitcoin-article': {
     name: 'Poznejte Bitcoin',
@@ -83,6 +84,10 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   kiteseason: {
     tagline:
       'Vyplatí se dnes vyrazit na vodu, a s jakým kitem? Aplikace porovná šest meteorologických modelů pro lagunu Lo Stagnone na Sicílii a odpoví jednou větou: kdy to pojede, jak silně bude foukat a který kite z vaší výbavy si vzít podle váhy, prkna a zkušeností. K tomu podrobná předpověď hodinu po hodině na 24 hodin až tři dny, přehled celého týdne a upozornění na vítr od břehu či nárazy. Celá aplikace je jediný soubor HTML, bez serveru.',
+  },
+  rrfyzio: {
+    tagline:
+      'Nový web fyzioterapeutického a masážního centra v Kolíně po změně názvu, loga i domény – postavený znovu od základu místo webu, který jsem mu udělal v roce 2022, a bez ztráty jediné adresy, kterou už znaly vyhledávače. Kresba těla odpoví na otázku „Kde vás to bolí?“ terapiemi i lidmi, kteří s tím pomohou; každá terapie má vlastní stránku a dárkový poukaz se objedná formulářem. Statický a rychlý, bez cookies a bez sledování.',
   },
   'this-site': {
     name: 'Tento web',
