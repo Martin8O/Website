@@ -119,6 +119,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // the function (`changelog.test.ts` asserts the CS overlay differs).
     title: 'A Swiss Army knife for a space game',
     body: 'ED Multitool joins the work list: routes, trade, services, gear, politics, stats, earnings and missions for Elite Dangerous, across a faithful copy of the Milky Way. Five days from the first commit to a public release.',
+    link: { href: `${REPO}/commit/243c9a6a8f248762b752ded395fcaa3ef7db3e8f`, display: '243c9a6' },
   },
 ]
 

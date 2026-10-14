@@ -24,7 +24,7 @@ changelog row (EN function, CS name) and the `llms.txt` line all carry it.
 moves; the array order stays the dev-scene window contract.
 
 **Deliberately not changed:** chapter 08's counter and the rooftop billboard still wait for their one
-re-read pass. The changelog row is anchored to its own commit in a follow-up commit, as ADR-084 did.
+re-read pass. The changelog row is anchored to its own commit (`243c9a6`) in a follow-up commit, as ADR-084 did.
 
 ### ADR-084 — RR Fyzio centrum joins the work after Kite Season; the 2022 card points at the archive (2026-10-12)
 **RR Fyzio centrum** (live at rrfyzio.cz; repo `Martin8O/FyzioCentrum`, private — the content belongs to the
