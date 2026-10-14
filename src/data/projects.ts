@@ -200,7 +200,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 12,
+    workOrder: 13,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -231,7 +231,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/Registrace',
     live: true,
     build: { days: 27, commits: 109 },
-    workOrder: 2,
+    workOrder: 6,
     window: { tint: MAGENTA, kind: 'form', shot: 'registrace' },
   },
   {
@@ -260,7 +260,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Porting to Android',
     build: { days: 10, commits: 42 },
-    workOrder: 5,
+    workOrder: 9,
     window: { tint: MINT, kind: 'graph' },
   },
   // No `window` block — the dev scene keeps its five windows; this one IS the
@@ -300,7 +300,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4.5, commits: 70 },
-    workOrder: 9,
+    workOrder: 10,
   },
   // The first one that has to be right about the real world: it warns a town
   // about weather that is either coming or isn't. No `window` block (the dev
@@ -317,7 +317,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/Bourky',
     live: true,
     build: { days: 3, commits: 41 },
-    workOrder: 6,
+    workOrder: 7,
   },
   // Storm Watch's small sibling: the same many-models-one-honest-number idea,
   // turned from warning a town to telling one rider whether to go out, and on
@@ -337,13 +337,13 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/kiteseason',
     live: true,
     build: { days: 1, commits: 4 },
-    workOrder: 7,
+    workOrder: 8,
   },
   // A clinic's own site, rebuilt from scratch after a rebrand, replacing the
   // 2022 site that sits in the pre-Claude list (`rrcentrum`). Czech-only, so
   // one shot. The repo is private (the content belongs to the clinic) → no
-  // `repo`. No `window` block; it sits right after Kite Season in the Work
-  // panel.
+  // `repo`. No `window` block; it sits second in the Work panel, right after
+  // RL Lab.
   // `build` = the 15 author-local days it was built on (3 Sep – 8 Oct 2026)
   // and the 69 commits that carry it, stopping before the README — the same
   // rule the Kite Season and book cards follow.
@@ -357,7 +357,28 @@ export const PROJECTS: Project[] = [
     link: { href: 'https://rrfyzio.cz', display: 'rrfyzio.cz' },
     live: true,
     build: { days: 15, commits: 69 },
-    workOrder: 8,
+    workOrder: 2,
+  },
+  // A plugin for a game, not a web app: it runs inside EDMarketConnector next
+  // to Elite Dangerous and opens its big window as a local browser page. The
+  // repo link IS the home (releases live there) → no separate `repo`. Two
+  // shots, both from the project's own README: the banner, then four of its
+  // nine tabs. The app is English-only → one set for both languages.
+  // `build` = all 5 author-local days (11 – 15 Oct 2026) and 59 commits up to
+  // and including the first public release — here the README landed mid-build
+  // and features kept coming after it, so the rule "stop before the README"
+  // would have cut off a third of the work.
+  {
+    id: 'edmultitool',
+    name: 'ED Multitool',
+    tagline:
+      'A Swiss Army knife for the space game Elite Dangerous: routes, trade, services, gear, politics, stats, earnings and missions — across a faithful, full-scale copy of a simulated Milky Way.',
+    stack: ['Python', 'EDMC plugin', 'JavaScript', 'Spansh API'],
+    era: 'claude',
+    link: { href: 'https://github.com/Martin8O/ED-Multitool', display: 'github.com/Martin8O/ED-Multitool' },
+    live: true,
+    build: { days: 5, commits: 59 },
+    workOrder: 5,
   },
   // The Claude month's second novel — and the harder of the two, because
   // nothing about its world was already known: Unplottable borrowed a canon,
@@ -380,7 +401,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 2, commits: 6 },
-    workOrder: 10,
+    workOrder: 11,
   },
   // The Claude month's third novel, and the one written in a language the
   // repository never translates out of: Russian from the first sentence. Where
@@ -405,7 +426,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4, commits: 14 },
-    workOrder: 11,
+    workOrder: 12,
   },
 ]
 

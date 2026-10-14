@@ -65,6 +65,13 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'rrfyzio': [
     { url: '/shots/rrfyzio-0.jpg', aspect: 1.818 },
   ],
+  // Both from the project's own README (`ED/docs/images/`): the banner
+  // (1600×533), then four of the nine tabs side by side (1936×834), each scaled
+  // to 760 px by `local/tmp/ed-shots.mjs`. English-only app → one set.
+  'edmultitool': [
+    { url: '/shots/edmultitool-0.jpg', aspect: 3.004 },
+    { url: '/shots/edmultitool-1.jpg', aspect: 2.324 },
+  ],
   // The book's own generated cover (`book/cover.png`, 1600×2560), cropped to
   // the band that carries its identity — the title block and the red stitch
   // seam — for the same reason Unplottable is cropped: the full portrait page

@@ -4,6 +4,28 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-085 — ED Multitool joins the work; the Claude-era order is reshuffled (2026-10-15)
+**ED Multitool** (public repo `Martin8O/ED-Multitool`, MIT, first public release 0.37.0) is an Elite Dangerous
+plugin for the EDMarketConnector companion app — routes, trade, services, gear, Powerplay, stats, earnings and
+missions in one local browser window. The repo link is the home (releases live there), so no separate `repo`.
+No `window` block. `build: {days: 5, commits: 59}` — all author-local days 11 – 15 Oct 2026 up to and including
+the first public release. Here the README landed mid-build and features kept coming after it, so "stop before the
+README" would have cut off a third of the work. Shots: the project's own README banner (1600×533) and its
+four-tab overview (1936×834), each scaled to 760 px; the app is English-only, so one set serves both languages.
+
+**The copy is for people who do not play.** A first, feature-by-feature tagline was too long and
+too technical for that reader; the line now is a Swiss Army knife for the space game — routes, trade,
+services, gear, politics, stats, earnings and missions — across a faithful copy of a simulated Milky Way. Card,
+changelog row (EN function, CS name) and the `llms.txt` line all carry it.
+
+**New Claude-era order:** RL Lab 1 · RR Fyzio centrum 2 · Těnovice 3 · This Site 4 · **ED Multitool 5**
+(BrainQuest's old place) · Registrace 6 (just before Storm Watch) · Storm Watch 7 · Kite Season 8 · BrainQuest 9
+(RR Fyzio's old place) · Unplottable 10 · Den 11 · Out of Their Minds 12 · ClearFeed 13. Only `workOrder`
+moves; the array order stays the dev-scene window contract.
+
+**Deliberately not changed:** chapter 08's counter and the rooftop billboard still wait for their one
+re-read pass. The changelog row is anchored to its own commit in a follow-up commit, as ADR-084 did.
+
 ### ADR-084 — RR Fyzio centrum joins the work after Kite Season; the 2022 card points at the archive (2026-10-12)
 **RR Fyzio centrum** (live at rrfyzio.cz; repo `Martin8O/FyzioCentrum`, private — the content belongs to the
 clinic, so no `repo` link) is the new site of a physiotherapy and massage clinic in Kolín after a rebrand: Astro

@@ -89,6 +89,10 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
     tagline:
       'Nový web fyzioterapeutického a masážního centra v Kolíně po změně názvu, loga i domény – postavený znovu od základu místo webu, který jsem mu udělal v roce 2022, a bez ztráty jediné adresy, kterou už znaly vyhledávače. Kresba těla odpoví na otázku „Kde vás to bolí?“ terapiemi i lidmi, kteří s tím pomohou; každá terapie má vlastní stránku a dárkový poukaz se objedná formulářem. Statický a rychlý, bez cookies a bez sledování.',
   },
+  edmultitool: {
+    tagline:
+      'Švýcarský nůž pro vesmírnou hru Elite Dangerous: trasy, obchod, služby, vybavení, politika, statistiky, výnosy i mise – napříč celou věrnou kopií simulované Mléčné dráhy.',
+  },
   'this-site': {
     name: 'Tento web',
     tagline:

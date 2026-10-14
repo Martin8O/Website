@@ -112,6 +112,14 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'RR Fyzio centrum joins the work list: a physiotherapy clinic in Kolín under a new name, on a new site that replaces the one I built for it in 2022 — a drawing of the body that answers “where does it hurt?”, every therapy on its own page, and not one old address lost.',
     link: { href: `${REPO}/commit/9abdb14a22ca8cb94d490956b923bfce45473b99`, display: '9abdb14' },
   },
+  {
+    id: 'edmultitool',
+    date: '2026-10-15',
+    // The Bouřky split: the Czech title carries the name, the English one
+    // the function (`changelog.test.ts` asserts the CS overlay differs).
+    title: 'A Swiss Army knife for a space game',
+    body: 'ED Multitool joins the work list: routes, trade, services, gear, politics, stats, earnings and missions for Elite Dangerous, across a faithful copy of the Milky Way. Five days from the first commit to a public release.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -151,6 +159,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   rrfyzio: {
     title: 'RR Fyzio centrum',
     body: 'K seznamu prací přibyl web fyzioterapeutického centra v Kolíně, které dostalo nový název. Nahradil web, který jsem mu postavil v roce 2022: kresba těla odpoví na otázku „Kde vás to bolí?“, každá terapie má vlastní stránku a žádná stará adresa se neztratila.',
+  },
+  edmultitool: {
+    title: 'ED Multitool',
+    body: 'K seznamu prací přibyl švýcarský nůž pro vesmírnou hru Elite Dangerous: trasy, obchod, služby, vybavení, politika, statistiky, výnosy i mise napříč věrnou kopií Mléčné dráhy. Od prvního commitu k veřejnému vydání za pět dní.',
   },
 }
 
