@@ -179,7 +179,7 @@ export function WorkPanel({ onClose }: { onClose: () => void }) {
         <div className={styles.scroll}>
           <section className={styles.group}>
             <h3 className={styles.groupHead}>
-              {/* "~month" (it was really ~5 weeks) highlighted light-orange —
+              {/* The era word ("era" / "Éra") highlighted light-orange —
                   the `{m}` token places it correctly in either language. */}
               {(() => {
                 const [pre, post] = t.workClaudeHead.split('{m}')
@@ -193,7 +193,7 @@ export function WorkPanel({ onClose }: { onClose: () => void }) {
               })()}{' '}
               <span className={styles.claudeSub}>
                 {/* [[…]] marks the build-fact to lift out of the sub line —
-                    "this site in 4 days" (Martin). */}
+                    the project count. */}
                 {t.workClaudeSub.split(/\[\[|\]\]/).map((seg, i) =>
                   i % 2 === 1 ? (
                     <span key={i} className={styles.subHi}>

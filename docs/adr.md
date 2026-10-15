@@ -4,6 +4,28 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-086 — The solo-dev numbers re-read: billboard since June, counter + 8, a new era heading (2026-10-15)
+The one re-read pass that ADR-084 and ADR-085 deferred. **Billboard** re-read off the GitHub API at snapshot
+2026-10-15 (`gh-stats-2026-10-15.mjs`): **27 projects · 182 days · 1,485 commits · 1–31 days each**. Same
+population as before (every non-fork repo authored, the collaboration repo's own commits only), with two repos
+excluded by name: the single-commit public copies of ED Multitool and of the RR Fyzio site, exported from projects
+already counted. The 2025-01-01 placeholder commits are dropped in the script now, not by hand. The method was
+replayed against the 26 Sep snapshot first: it reproduces 23 · 163 · 1–28 exactly, and the 19 extra commits and
+one extra repo are all work done later on 26 Sep, after that snapshot was read.
+
+**The matrix now spans every week since 1 June** (20 columns, day 0 = Mon 1 Jun), not the last fourteen weeks:
+June is when the Claude-era work begins, and a rolling window kept cropping the start of the story. The panel
+widens sideways by the extra columns (`PANEL_WIDE`) so cells, type and the momentum column keep their size.
+Momentum shows the same five months: Jun 233 · Jul 439 · Aug 123 · Sep 237 · Oct 247. Peak day 75 (12 Oct).
+
+**Chapter 08's counter** reads **+ 8** (This Site, Unplottable, Storm Watch, Kite Season, Den, Out of Their Minds,
+RR Fyzio centrum, ED Multitool — everything after the five windows).
+
+**The Work panel's era heading** no longer says "five real apps in ~a month — then this site in 4 days, its 3D
+version in 6 more": true at launch, stale now. It reads "The Claude-Code era · 13 projects since June — apps,
+websites, a game add-on and three novels" (CS "Éra s Claude Code · 13 projektů od června – …"); the count moves
+with each new card, "since June" stays true. The site's own build times stay on the This Site card.
+
 ### ADR-085 — ED Multitool joins the work; the Claude-era order is reshuffled (2026-10-15)
 **ED Multitool** (public repo `Martin8O/ED-Multitool`, MIT, first public release 0.37.0) is an Elite Dangerous
 plugin for the EDMarketConnector companion app — routes, trade, services, gear, Powerplay, stats, earnings and
