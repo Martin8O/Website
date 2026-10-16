@@ -8,7 +8,7 @@ import { paints2D, paintsHero2D } from '../three/owned3d'
 import type { WorldMode } from '../three/worldMode'
 import { setCamRigOffset } from './camRig'
 import { getGlassCanvas } from './glass'
-import { canStepDown, canvasDpr, createPace, tickPace } from './resolution'
+import { canStepDown, canvasDpr, createPace, getResStep, setResStep, tickPace } from './resolution'
 import { getRenderer, prefetchLazyScenes, rendererEpoch } from './registry'
 import { landingShake } from './scenes/sky/skyMath'
 import { buildRuns, resolveSceneFrame, type SceneSlot } from './sceneTimeline'
@@ -65,8 +65,8 @@ export function CanvasStage({
     let lastJitter = -1
 
     // Adaptive resolution (resolution.ts): starts at the full capped ratio,
-    // steps down only on a sustained slow frame pace.
-    let resStep = 0
+    // steps down only on a sustained slow frame pace. The step is shared:
+    // the 3D layer follows it (resolution.ts).
     let dpr = 1
     const pace = createPace()
     let lastNow = -1
@@ -188,7 +188,7 @@ export function CanvasStage({
     }
 
     const resize = () => {
-      dpr = canvasDpr(window.devicePixelRatio, resStep)
+      dpr = canvasDpr(window.devicePixelRatio, getResStep())
       // Readable resolution step — lets a live check on a real device (and
       // the tooling) confirm what the adaptive resolution decided.
       canvas.dataset.res = String(dpr)
@@ -348,8 +348,8 @@ export function CanvasStage({
       // Frame pace → adaptive resolution. Judged on the real rAF interval;
       // a reduced-motion stage paints on demand, so its pace means nothing.
       if (lastNow >= 0 && !reducedMotion && tickPace(pace, now - lastNow, !buildCalm())) {
-        if (canStepDown(window.devicePixelRatio, resStep)) {
-          resStep++
+        if (canStepDown(window.devicePixelRatio, getResStep())) {
+          setResStep(getResStep() + 1)
           resize()
         }
       }

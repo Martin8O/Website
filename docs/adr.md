@@ -4,6 +4,36 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-088 — Safari, round two: the 3D layer follows the resolution step; lighter dev and contact frames (2026-10-16)
+After ADR-087 the site read better on a fast Mac in Safari but still stuttered from the second or third section —
+the flying chapters, where the 3D heroes join the 2D world.
+
+- **The resolution step is shared** (`canvas/resolution.ts`: a tiny step store). The 3D stage follows it: its
+  canvas ratio drops with the 2D world (2 → 1.5 → 1.25), and from the first step every shadow map is halved
+  (`fitShadowMaps` in `Stage3D.tsx`, re-checked every ~2 s so a hero built later is brought in line). The cockpit
+  glass still keeps full resolution.
+- **The pace guard's two blind spots are closed.** Hero-build frames are excused only up to 15 s per visit (a build
+  pipeline that never settles could otherwise postpone the judgement for good — the FPS watchdog's budget idiom).
+  The cadence rule is now explicit: a device whose best window runs ≥ 30 ms is treated as frame-rate capped
+  (Low Power Mode) and judged against 1.25 × that; anything faster is judged against a flat 22 ms, so a Mac that
+  opens smoothly and sinks in the heavier chapters always qualifies, and a 48 Hz panel (20.8 ms) never does.
+- **Contact: soft passes in one reduced-resolution layer** (`toolkit.beginSoftLayer`). The sky gradient, the
+  Milky Way bands and the nine nebula glows — all detail-free — paint at half CSS resolution and land in one
+  upscaled blit; source-over is associative, so the composite matches. Speckle, stars and the bloom stay full
+  resolution. −73 % of the contact frame (CPU raster, 16" Retina size); max pixel difference 10/255 in the
+  nebula wash, mean 1.4.
+- **Dev: blit only what is there** (`toolkit.opaqueBounds`). The seven city rows are 87–95 % transparent and the
+  core bloom sprite has an empty margin; each is now drawn from the box holding its pixels (read once per bake,
+  2 px margin so edge filtering is unchanged). −16 to −31 % of the dev frames; pixel difference ≤ 4/255.
+- **Flying chapters measured, left as they are.** Their 2D frames now cost about what the opening costs; the
+  largest item is the full-screen sky gradient, which no blit can undercut. The remaining suspect there is the 3D
+  layer, which the shared step now covers.
+
+Verified: a forced-slow run with the 3D world steps the WebGL canvas 2560 → 1920 → 1600 px (1280 CSS @ DPR 2)
+and the shadow maps 2048/1024/2048 → 1024/512/1024 with no errors; healthy and 30 fps-capped runs stay at full
+resolution (dev and production builds); composite pixel diffs over 23 story positions; the 3D sleep, text-plane
+rig and all four hero harnesses pass. Not yet verified on real Safari hardware. Tests 407 → 411.
+
 ### ADR-087 — Lighter frames for Safari: GPU grain, adaptive canvas resolution, a sleeping 3D layer (2026-10-16)
 A report of stutter in Safari on a fast Mac. Safari rasters the 2D canvas largely on the CPU, so the cost of a frame
 follows the device pixel count — at a 16" Retina viewport (1728 × 1117 CSS px, DPR 2) that is 7.7 million pixels per

@@ -24,6 +24,7 @@ import { RENDERERS_3D, type FlightRig } from './registry3d'
 import { buildFlightPath, flightPoseAt, createPose } from './flightMath'
 import { createFrame3D, writeSlot3D, type Frame3D } from './frame3d'
 import { STAGE_FOV } from './scenes3d/Starfield'
+import { canvasDpr, getResStep, shadowScale, subscribeResStep } from '../canvas/resolution'
 import styles from './Stage3D.module.css'
 
 /** Camera micro-parallax, world units at full pointer presence. A pure
@@ -71,7 +72,9 @@ export function Stage3D({ chapters }: { chapters: readonly Chapter[] }) {
         // Costs nothing outside the beats — only their keys cast, and they
         // are culled/off with the scenes.
         shadows
-        dpr={[1, 2]}
+        // Follows the 2D engine's adaptive-resolution step (resolution.ts);
+        // FrameController applies later steps.
+        dpr={canvasDpr(window.devicePixelRatio, getResStep())}
         gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
         // far 480 (was 130): the Bagram C-17 takes off from the FAR runway
         // strip (z ≈ −450) and would be frustum-clipped nearer. Every other
@@ -240,10 +243,32 @@ function FrameController({ flight, frame }: { flight: FlightRig; frame: Frame3D 
     )
   }, -1)
 
+  // Adaptive resolution (canvas/resolution.ts): a step decided by the 2D
+  // engine's pace guard lowers this canvas's ratio too, and from the first
+  // step halves every shadow map. Lights are re-checked on each step and
+  // every ~2 s while stepped, so a hero built later (its own mapSize.set at
+  // build time) is brought in line as well.
+  const setDpr = useThree((s) => s.setDpr)
+  const shadowCheck = useRef({ dirty: false, frames: 0 }).current
+  useEffect(
+    () =>
+      subscribeResStep(() => {
+        setDpr(canvasDpr(window.devicePixelRatio, getResStep()))
+        shadowCheck.dirty = true
+      }),
+    [setDpr, shadowCheck],
+  )
+
   // Render takeover (a positive priority replaces R3F's own draw): draw only
   // while a 3D theme owns part of the frame. The canvas is re-shown in the
   // same tick as its first fresh draw, so a stale frame never flashes.
   useFrame(({ gl: renderer, scene: root, camera }) => {
+    if (getResStep() > 0 && ++shadowCheck.frames >= 120) shadowCheck.dirty = true
+    if (shadowCheck.dirty) {
+      shadowCheck.dirty = false
+      shadowCheck.frames = 0
+      fitShadowMaps(root, shadowScale(getResStep()))
+    }
     if (live.now) renderer.render(root, camera)
     if (live.now !== live.shown) {
       live.shown = live.now
@@ -252,4 +277,23 @@ function FrameController({ flight, frame }: { flight: FlightRig; frame: Frame3D 
   }, 1)
 
   return null
+}
+
+/** Sizes every shadow-casting light's map to its built size × `scale`. The
+ *  built size is remembered on first sight; a changed size drops the current
+ *  map so three.js re-allocates it at the new size on the next draw. */
+function fitShadowMaps(root: THREE.Object3D, scale: number) {
+  root.traverse((o) => {
+    const light = o as THREE.Light
+    if (!light.isLight || !light.castShadow || !light.shadow) return
+    const base = (light.userData.baseShadowSize as number | undefined) ?? light.shadow.mapSize.x
+    light.userData.baseShadowSize = base
+    const size = Math.max(256, Math.round(base * scale))
+    if (light.shadow.mapSize.x === size) return
+    light.shadow.mapSize.set(size, size)
+    if (light.shadow.map) {
+      light.shadow.map.dispose()
+      light.shadow.map = null
+    }
+  })
 }

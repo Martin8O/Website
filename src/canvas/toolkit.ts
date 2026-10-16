@@ -161,6 +161,92 @@ export function drawGlow(
   ctx.restore()
 }
 
+/**
+ * A reduced-resolution offscreen for SOFT full-frame passes — sky gradients,
+ * vast glows, nebula washes: content with no detail finer than tens of px.
+ * Where the 2D canvas rasters on the CPU, each such pass costs every device
+ * pixel of the frame; painting them here at `scale` of CSS px and laying the
+ * result down in one upscaled blit costs a fraction, and source-over is
+ * associative, so the composite matches painting them one by one (up to
+ * the smoothing of an already smooth field). Sharp details (stars, specks,
+ * lines) stay on the full-resolution canvas. Usage per frame:
+ * `const soft = beginSoftLayer('id', w, h)`, paint into `soft ?? ctx`, then
+ * `commitSoftLayer('id', ctx)`.
+ */
+const softLayers = new Map<string, { c: HTMLCanvasElement; g: CanvasRenderingContext2D; scale: number }>()
+
+export function beginSoftLayer(
+  id: string,
+  w: number,
+  h: number,
+  scale = 0.5,
+): CanvasRenderingContext2D | null {
+  if (typeof document === 'undefined') return null
+  let s = softLayers.get(id)
+  const cw = Math.max(1, Math.ceil(w * scale))
+  const ch = Math.max(1, Math.ceil(h * scale))
+  if (!s || s.scale !== scale) {
+    const c = document.createElement('canvas')
+    const g = c.getContext('2d')
+    if (!g) return null
+    s = { c, g, scale }
+    softLayers.set(id, s)
+  }
+  if (s.c.width !== cw || s.c.height !== ch) {
+    s.c.width = cw
+    s.c.height = ch
+  }
+  s.g.setTransform(scale, 0, 0, scale, 0, 0)
+  s.g.clearRect(0, 0, w, h)
+  return s.g
+}
+
+export function commitSoftLayer(id: string, ctx: CanvasRenderingContext2D): void {
+  const s = softLayers.get(id)
+  if (!s) return
+  ctx.save()
+  ctx.globalAlpha = 1
+  ctx.globalCompositeOperation = 'source-over'
+  ctx.drawImage(s.c, 0, 0, s.c.width / s.scale, s.c.height / s.scale)
+  ctx.restore()
+}
+
+export type PixelRect = { x: number; y: number; w: number; h: number }
+
+/**
+ * The bounding box of a baked sprite's non-transparent pixels, grown by
+ * `margin` px (kept inside the canvas). Read ONCE per bake: blitting only this
+ * box skips the fully transparent rest, which a CPU rasterizer would
+ * otherwise blend pixel by pixel — the result is identical (the margin keeps
+ * edge filtering sampling the same transparent neighbours).
+ */
+export function opaqueBounds(c: HTMLCanvasElement, margin = 2): PixelRect {
+  const full = { x: 0, y: 0, w: c.width, h: c.height }
+  const g = c.getContext('2d')
+  if (!g || c.width === 0 || c.height === 0) return full
+  const d = g.getImageData(0, 0, c.width, c.height).data
+  let top = -1
+  let bottom = -1
+  let left = c.width
+  let right = -1
+  for (let y = 0; y < c.height; y++) {
+    const row = y * c.width * 4
+    for (let x = 0; x < c.width; x++) {
+      if (d[row + x * 4 + 3] === 0) continue
+      if (top < 0) top = y
+      bottom = y
+      if (x < left) left = x
+      if (x > right) right = x
+    }
+  }
+  if (top < 0) return { x: 0, y: 0, w: 0, h: 0 }
+  const x0 = Math.max(0, left - margin)
+  const y0 = Math.max(0, top - margin)
+  const x1 = Math.min(c.width, right + 1 + margin)
+  const y1 = Math.min(c.height, bottom + 1 + margin)
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }
+}
+
 // ---------------------------------------------------------------------------
 // Particles / silhouettes
 // ---------------------------------------------------------------------------

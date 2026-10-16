@@ -12,7 +12,7 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 407
+export const TEST_COUNT = 411
 
 export const TEST_MANIFEST: TestFileEntry[] = [
   {
@@ -26,6 +26,10 @@ export const TEST_MANIFEST: TestFileEntry[] = [
       "tickPace > stays quiet at a healthy frame rate",
       "tickPace > ignores pauses and excused build frames",
       "tickPace > does not fire on a few isolated hitches",
+      "tickPace > stops excusing build frames once the excuse budget is spent",
+      "tickPace > treats a 48 Hz panel as healthy and a 30 fps cap as a cap",
+      "tickPace > still fires for a device that opens smoothly and then sinks",
+      "shared resolution step > notifies followers once per real change",
     ],
   },
   {

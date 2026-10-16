@@ -46,8 +46,10 @@ import {
   hash1,
   lerp,
   mixHex,
+  opaqueBounds,
   rgba,
   smoothstep,
+  type PixelRect,
 } from '../toolkit'
 import {
   DEV,
@@ -422,7 +424,7 @@ function getNebulaLayers(w: number, h: number, horizonY: number, unit: number) {
 
 /** The singularity's bloom (nested glows + the horizontal flare), baked
  *  once — blitted per frame scaled by `coreGlow`. */
-let coreCache: { key: string; c: HTMLCanvasElement; half: number } | null = null
+let coreCache: { key: string; c: HTMLCanvasElement; half: number; box: PixelRect } | null = null
 function getCoreSprite(unit: number) {
   if (typeof document === 'undefined') return null
   const key = unit.toFixed(0)
@@ -440,14 +442,21 @@ function getCoreSprite(unit: number) {
   g.scale(3.4, 1)
   drawGlow(g, 0, 0, unit * 0.13, ICE, 0.16)
   g.restore()
-  coreCache = { key, c, half }
+  coreCache = { key, c, half, box: opaqueBounds(c) }
   return coreCache
 }
 
 // One baked layer per depth row: extruded bodies, floor bands, lit strips,
 // window dots, corner seams, crowns, sky-bridges, billboards. The dynamic
 // light (beacons, scans, beams, arcs, ships) rides on top per frame.
-let cityCache: { key: string; layers: HTMLCanvasElement[]; pad: number; ch: number } | null = null
+let cityCache: {
+  key: string
+  layers: HTMLCanvasElement[]
+  /** Per layer: the box holding its non-transparent pixels (opaqueBounds). */
+  boxes: PixelRect[]
+  pad: number
+  ch: number
+} | null = null
 function getCityLayers(w: number, unit: number) {
   if (typeof document === 'undefined') return null
   const key = `${w.toFixed(0)}:${unit.toFixed(0)}`
@@ -686,7 +695,7 @@ function getCityLayers(w: number, unit: number) {
     }
     layers.push(c)
   }
-  cityCache = { key, layers, pad, ch }
+  cityCache = { key, layers, boxes: layers.map((l) => opaqueBounds(l)), pad, ch }
   return cityCache
 }
 
@@ -1329,7 +1338,15 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
         const sh = par(rowPar[row])
         ctx.save()
         ctx.globalAlpha = alpha * aMul * rowA[row]
-        ctx.drawImage(city.layers[row], -city.pad + sh.x, horizonY + 1 - city.ch + sh.y * 0.35)
+        // Only the box that holds the row's towers (most of a row's canvas is
+        // empty sky) — same pixels, far fewer blended.
+        const b = city.boxes[row]
+        if (b.w > 0)
+          ctx.drawImage(
+            city.layers[row],
+            b.x, b.y, b.w, b.h,
+            -city.pad + sh.x + b.x, horizonY + 1 - city.ch + sh.y * 0.35 + b.y, b.w, b.h,
+          )
         ctx.restore()
         if (row < N_ROWS - 1) {
           fillVerticalGradient(
@@ -1457,7 +1474,8 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
     if (spr) {
       ctx.save()
       ctx.globalAlpha = clamp01(alpha * aMul * coreGlow)
-      ctx.drawImage(spr.c, coreX - spr.half, coreY - spr.half)
+      const b = spr.box
+      ctx.drawImage(spr.c, b.x, b.y, b.w, b.h, coreX - spr.half + b.x, coreY - spr.half + b.y, b.w, b.h)
       ctx.restore()
     }
     ctx.save()

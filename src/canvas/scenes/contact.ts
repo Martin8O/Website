@@ -40,7 +40,9 @@
 
 import type { Renderer } from '../types'
 import {
+  beginSoftLayer,
   clamp01,
+  commitSoftLayer,
   drawGlow,
   drawStars,
   fillVerticalGradient,
@@ -219,8 +221,12 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   const { w, h } = cfg
 
   // --- Space: indigo-violet depth + the galactic plane + nebula clouds ----
+  // All soft (no detail finer than tens of px) → painted into the reduced-
+  // resolution soft layer and laid down in one blit (toolkit.beginSoftLayer);
+  // the speckle and stars below stay full resolution.
+  const bg = beginSoftLayer('contact-space', w, h) ?? ctx
   fillVerticalGradient(
-    ctx,
+    bg,
     0,
     0,
     w,
@@ -235,23 +241,23 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
   const maxDim = Math.max(w, h)
   // The Milky Way: a soft diagonal band of light across the whole frame —
   // one wide violet wash with a narrower warm core inside it.
-  ctx.save()
-  ctx.translate(w * 0.5, h * 0.42)
-  ctx.rotate(-0.32)
+  bg.save()
+  bg.translate(w * 0.5, h * 0.42)
+  bg.rotate(-0.32)
   const bandH = h * 0.3
-  const band = ctx.createLinearGradient(0, -bandH, 0, bandH)
+  const band = bg.createLinearGradient(0, -bandH, 0, bandH)
   band.addColorStop(0, 'rgba(143,159,216,0)')
   band.addColorStop(0.5, rgba('#8f9fd8', 0.085 * alpha))
   band.addColorStop(1, 'rgba(143,159,216,0)')
-  ctx.fillStyle = band
-  ctx.fillRect(-w * 1.2, -bandH, w * 2.4, bandH * 2)
-  const core = ctx.createLinearGradient(0, -bandH * 0.35, 0, bandH * 0.35)
+  bg.fillStyle = band
+  bg.fillRect(-w * 1.2, -bandH, w * 2.4, bandH * 2)
+  const core = bg.createLinearGradient(0, -bandH * 0.35, 0, bandH * 0.35)
   core.addColorStop(0, 'rgba(232,226,255,0)')
   core.addColorStop(0.5, rgba('#e8e2ff', 0.06 * alpha))
   core.addColorStop(1, 'rgba(232,226,255,0)')
-  ctx.fillStyle = core
-  ctx.fillRect(-w * 1.2, -bandH * 0.35, w * 2.4, bandH * 0.7)
-  ctx.restore()
+  bg.fillStyle = core
+  bg.fillRect(-w * 1.2, -bandH * 0.35, w * 2.4, bandH * 0.7)
+  bg.restore()
   // Nebula clouds — breathing, adrift barely faster than the eye notices.
   for (let i = 0; i < NEBULA_COLORS.length; i++) {
     const bx =
@@ -260,8 +266,9 @@ export const renderContact: Renderer = (ctx, alpha, t, time, cfg) => {
       (0.08 + hash1(i * 11.7 + 5.9) * 0.84) * h + Math.cos(time * 0.006 + i * 1.3) * h * 0.012
     const brad = (0.28 + hash1(i * 5.3 + 8.1) * 0.32) * maxDim
     const bb = 0.75 + 0.25 * breath(time, hash1(i * 3.9))
-    drawGlow(ctx, bx, by, brad, NEBULA_COLORS[i], alpha * 0.085 * bb)
+    drawGlow(bg, bx, by, brad, NEBULA_COLORS[i], alpha * 0.085 * bb)
   }
+  if (bg !== ctx) commitSoftLayer('contact-space', ctx)
   // Film-static speckle, drifting slowly — the farthest parallax layer.
   const speckle = ensureSpeckle(ctx)
   if (speckle) {
