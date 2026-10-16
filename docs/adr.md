@@ -4,6 +4,35 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-087 — Lighter frames for Safari: GPU grain, adaptive canvas resolution, a sleeping 3D layer (2026-10-16)
+A report of stutter in Safari on a fast Mac. Safari rasters the 2D canvas largely on the CPU, so the cost of a frame
+follows the device pixel count — at a 16" Retina viewport (1728 × 1117 CSS px, DPR 2) that is 7.7 million pixels per
+canvas. Measured with CPU raster at that size, four costs stood out:
+
+- **The film grain** was a full-frame `overlay` pattern fill on the canvas every frame — 35–50 % of the whole frame
+  in most chapters. It is now a DOM layer (the same noise tile, `mix-blend-mode: overlay`, 5 % opacity) between the
+  2D canvas and the 3D stage, blended by the compositor; the loop only steps its offset every 120 ms as a
+  transform. Composite captures before/after differ by at most 1/255 at DPR 2 (removing the grain entirely
+  differs 30× more on average), so the look is unchanged.
+- **Adaptive resolution** (`canvas/resolution.ts`): the 2D world canvas starts at the capped device ratio and,
+  only when ≥ 60 % of a 90-frame window run clearly slower than the device's own best cadence seen so far (and
+  over 20 ms), steps its backing store to 75 %, then 62.5 % — never below 1×, never back up within a visit. Hero
+  build frames, pauses and reduced motion are ignored. A steadily capped frame rate (Low Power Mode at 30 fps, a
+  48 Hz panel) is a cadence, not a struggling canvas, and never triggers it. The HUD glass and the 3D layer keep
+  full resolution. Measures behaviour, not browser names (the FPS-watchdog idiom).
+- **The 3D layer sleeps** in chapters with no 3D theme (calm, bitcoin, dev, offer): a render takeover skips the
+  WebGL draw and hides its canvas, so the compositor stops blending an empty full-screen layer — in exactly the
+  chapters whose 2D scenes are heaviest. Scene frame callbacks keep running (parking and fades need them).
+- **Pointer parallax, landing shake and the ballet depth mask** were custom properties on the document root,
+  rewritten every frame — a whole-page style invalidation. They now go onto the text planes only
+  (`canvas/camRig.ts`: one inline transform; the mask on the cards).
+
+Result in the same measurement: **−38 % 2D frame cost at full resolution, −57 % once a resolution step applies.**
+Verified: composite pixel diffs, a forced-slow run stepping 2 → 1.5 → 1.25 and a 30 fps-capped run staying at 2
+(dev and production builds), the 3D layer drawing in origin/sky/contact and sleeping elsewhere, all four 3D hero
+harnesses, parallax/shake/mask readback. Not verified on real Safari hardware from here. The bitcoin and dev
+scenes remain the heaviest frames (2–4× the rest) — their internal cost is a separate pass. Tests 399 → 407.
+
 ### ADR-086 — The solo-dev numbers re-read: billboard since June, counter + 8, a new era heading (2026-10-15)
 The one re-read pass that ADR-084 and ADR-085 deferred. **Billboard** re-read off the GitHub API at snapshot
 2026-10-15 (`gh-stats-2026-10-15.mjs`): **27 projects · 182 days · 1,485 commits · 1–31 days each**. Same

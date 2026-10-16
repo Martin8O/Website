@@ -5,12 +5,9 @@
   /* Two engine-driven signals ride this one transform: the B2.3d landing
      shake, and the C4 micro-parallax (a few px against the pointer, so the
      text floats a plane above the painted world). Both are zero at rest,
-     under reduced motion and on touch. */
-  transform: translate3d(
-    calc(var(--cam-shake-x, 0px) + var(--par-x, 0px)),
-    calc(var(--cam-shake-y, 0px) + var(--par-y, 0px)),
-    0
-  );
+     under reduced motion and on touch. The engine writes the moving value
+     inline (canvas/camRig.ts); this is the rest pose. */
+  transform: translate3d(0, 0, 0);
   /* Ballet depth (chapter 02): the text visually sits mid-depth of the 3D
      one-circle fight — while the NEAR jet crosses the card, CruiseBallet
      publishes a soft viewport-space hole (--ballet-mask, the whole

@@ -7,3 +7,28 @@
   height: 100%;
   display: block;
 }
+
+/* Filmic grain over the 2D world (under the 3D stage and every DOM layer —
+   pure DOM order). The noise tile is set from CanvasStage; the loop steps
+   the plane's offset as a transform. Overlay-blended at 5 % by the
+   compositor, so it costs no canvas raster per frame. The plane is one tile
+   larger than the viewport so any offset still covers it. */
+.grainClip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.grain {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(100% + 160px);
+  height: calc(100% + 160px);
+  background-repeat: repeat;
+  background-size: 160px 160px;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  will-change: transform;
+}

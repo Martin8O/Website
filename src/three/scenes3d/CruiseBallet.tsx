@@ -51,6 +51,7 @@ import {
 import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
 import { buildAIM9 } from './aim9'
 import { buildDropTank } from './droptank'
+import { setCamRigMask } from '../../canvas/camRig'
 
 /** Kick the shared model fetch early in the climb — the ballet fades in at
  *  21 % (pos ≈ 2.58), a whole chapter of scroll after this trips. */
@@ -630,7 +631,7 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
       res.hudMesh.geometry.dispose()
       res.hudMat.dispose()
       res.hudTex.dispose()
-      document.documentElement.style.removeProperty('--ballet-mask')
+      setCamRigMask('')
       holeStr.current = ''
       loadKicked.current = false
     }
@@ -669,7 +670,7 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
       res.hudMesh.visible = false
       if (holeStr.current !== '') {
         holeStr.current = ''
-        document.documentElement.style.removeProperty('--ballet-mask')
+        setCamRigMask('')
       }
       return
     }
@@ -808,14 +809,11 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
       const hs = holeR >= 1 ? `${holeR.toFixed(0)}|${holeX.toFixed(0)}|${holeY.toFixed(0)}` : ''
       if (hs !== holeStr.current) {
         holeStr.current = hs
-        const rs = document.documentElement.style
-        if (hs === '')
-          rs.removeProperty('--ballet-mask')
-        else
-          rs.setProperty(
-            '--ballet-mask',
-            `radial-gradient(circle ${holeR.toFixed(0)}px at ${holeX.toFixed(0)}px ${holeY.toFixed(0)}px, transparent 52%, #000 100%)`,
-          )
+        setCamRigMask(
+          hs === ''
+            ? ''
+            : `radial-gradient(circle ${holeR.toFixed(0)}px at ${holeX.toFixed(0)}px ${holeY.toFixed(0)}px, transparent 52%, #000 100%)`,
+        )
       }
 
       // Wingtip vapour: puffs at FIXED flow-intervals along the true path

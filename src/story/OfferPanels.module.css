@@ -3,12 +3,9 @@
   inset: 0;
   pointer-events: none;
   /* Ride the same engine-driven shake + micro-parallax as the chapter cards
-     so the blocks float on the text plane, one level above the painted map. */
-  transform: translate3d(
-    calc(var(--cam-shake-x, 0px) + var(--par-x, 0px)),
-    calc(var(--cam-shake-y, 0px) + var(--par-y, 0px)),
-    0
-  );
+     so the blocks float on the text plane, one level above the painted map.
+     The engine writes the moving value inline (canvas/camRig.ts). */
+  transform: translate3d(0, 0, 0);
 }
 
 /* A chart information box: dark glass plate, hairline amber frame, two

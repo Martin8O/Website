@@ -5,6 +5,7 @@ import { scrollToProgress } from '../scroll/scrollStore'
 import { CHAPTER_WEIGHTS, THEME_ACCENT, type Chapter, type ChapterAction } from '../data/chapters'
 import { cardOpacity, cardOpacityWindowed, progressFromPos } from '../timeline'
 import { heroLive } from '../three/owned3d'
+import { registerCamRig } from '../canvas/camRig'
 import type { WorldMode } from '../three/worldMode'
 import { useLang } from '../i18n/useLang'
 import { STRINGS } from '../i18n/strings'
@@ -167,8 +168,15 @@ export function ChapterCards({
     mq.addEventListener('change', update)
     return () => mq.removeEventListener('change', update)
   }, [])
+  // The engine's shake + micro-parallax and the ballet depth mask ride this
+  // plane (canvas/camRig.ts) — written per element, never on the root.
+  const planeRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = planeRef.current
+    return el ? registerCamRig(el, true) : undefined
+  }, [])
   return (
-    <main className={styles.cards}>
+    <main ref={planeRef} className={styles.cards}>
       {chapters.map((ch, i) => {
         const full3d = worldMode === '3d' && ch.cardFull3d && heroLive(ch.sky)
         const o = full3d

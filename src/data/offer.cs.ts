@@ -70,7 +70,7 @@ export const OFFER_QUALITY_CS: Partial<OfferQuality> = {
   heading: 'Tento web',
   selfItems: [
     {
-      testsLead: '<strong>399 automatických testů</strong>',
+      testsLead: '<strong>407 automatických testů</strong>',
       html: ' · přístupnost WCAG',
       htmlMobile: ' · WCAG',
     },

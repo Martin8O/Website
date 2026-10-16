@@ -112,6 +112,12 @@ function FrameController({ flight, frame }: { flight: FlightRig; frame: Frame3D 
   // fades in on arrival / out on leave, blur and touch lift; positions are
   // viewport-normalized so no resize handling is needed.
   const ptr = useRef({ tx: 0.5, ty: 0.5, ta: 0, x: 0.5, y: 0.5, a: 0 }).current
+  // Whether any theme in this frame has a 3D scene. Chapters carried by the
+  // 2D world alone (calm, bitcoin, dev, offer) skip the GPU draw entirely and
+  // hide the canvas, so the compositor stops blending an empty full-screen
+  // layer over the 2D world. Scene useFrames keep running (their parking and
+  // fade logic needs every frame); only the draw is skipped.
+  const live = useRef({ now: true, shown: true }).current
 
   // Dev-only verification hook (the __paintFrame idiom): tooling reads the
   // live frame snapshot to assert the 3D layer tracks the 2D timeline.
@@ -189,6 +195,10 @@ function FrameController({ flight, frame }: { flight: FlightRig; frame: Frame3D 
       }
     }
     frame.count = n
+    live.now =
+      !!resolved &&
+      (RENDERERS_3D[resolved.base.run.theme] != null ||
+        (resolved.incoming != null && RENDERERS_3D[resolved.incoming.run.theme] != null))
 
     // Ease the pointer with the 2D engine's constants.
     ptr.x += (ptr.tx - ptr.x) * 0.1
@@ -229,6 +239,17 @@ function FrameController({ flight, frame }: { flight: FlightRig; frame: Frame3D 
       _pose.z + _right.z * ox + _up.z * oy,
     )
   }, -1)
+
+  // Render takeover (a positive priority replaces R3F's own draw): draw only
+  // while a 3D theme owns part of the frame. The canvas is re-shown in the
+  // same tick as its first fresh draw, so a stale frame never flashes.
+  useFrame(({ gl: renderer, scene: root, camera }) => {
+    if (live.now) renderer.render(root, camera)
+    if (live.now !== live.shown) {
+      live.shown = live.now
+      renderer.domElement.style.visibility = live.now ? '' : 'hidden'
+    }
+  }, 1)
 
   return null
 }

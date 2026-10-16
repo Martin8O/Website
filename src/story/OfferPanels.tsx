@@ -6,6 +6,7 @@ import { STRINGS } from '../i18n/strings'
 import { cardOpacityWindowed } from '../timeline'
 import { panelWindows } from '../canvas/scenes/offerMath'
 import { ChunkBoundary } from './ChunkBoundary'
+import { registerCamRig } from '../canvas/camRig'
 import styles from './OfferPanels.module.css'
 
 // The test-suite popup carries the whole baked manifest (354+ case names) —
@@ -51,6 +52,12 @@ export function OfferPanels({ pos }: { pos: number }) {
     return () => mq.removeEventListener('change', update)
   }, [])
   const { full, ease } = panelWindows(mobile)
+  // Rides the engine's shake + micro-parallax with the cards (canvas/camRig.ts).
+  const planeRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = planeRef.current
+    return el ? registerCamRig(el) : undefined
+  }, [])
 
   const renderPanel = (i: number) => {
     const p = panels[i]
@@ -203,7 +210,7 @@ export function OfferPanels({ pos }: { pos: number }) {
   }
 
   return (
-    <section className={styles.panels} aria-label={STRINGS[lang].offerLandmark}>
+    <section ref={planeRef} className={styles.panels} aria-label={STRINGS[lang].offerLandmark}>
       {/* Desktop: two flex columns flanking the chart — blocks stack and can
           never overlap, whatever their heights. Mobile: the wrappers become
           display:contents and each panel takes its central-slot turn. */}

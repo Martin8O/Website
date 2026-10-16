@@ -12,9 +12,22 @@ export type TestFileEntry = {
   tests: string[]
 }
 
-export const TEST_COUNT = 399
+export const TEST_COUNT = 407
 
 export const TEST_MANIFEST: TestFileEntry[] = [
+  {
+    file: "src/canvas/resolution.test.ts",
+    tests: [
+      "canvasDpr > caps the device ratio at 2 and scales it per step",
+      "canvasDpr > never drops below 1 and tolerates a missing ratio",
+      "canvasDpr > only allows a step that actually lowers the resolution",
+      "tickPace > fires when a window runs clearly slower than the device has shown it can",
+      "tickPace > never fires on a steadily capped frame rate (30 fps power saving)",
+      "tickPace > stays quiet at a healthy frame rate",
+      "tickPace > ignores pauses and excused build frames",
+      "tickPace > does not fire on a few isolated hitches",
+    ],
+  },
   {
     file: "src/canvas/sceneTimeline.test.ts",
     tests: [
