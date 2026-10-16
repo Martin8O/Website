@@ -16,7 +16,9 @@
 
 import type { Renderer } from '../../types'
 import {
+  beginSoftLayer,
   clamp01,
+  commitSoftLayer,
   drawGlow,
   drawRidge,
   fillVerticalGradient,
@@ -91,8 +93,11 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
     const a = alpha * below
     const dim = approach * 0.65 // the ceiling steals the light as it closes in
 
+    // Sky + sun glows are detail-free: one reduced-resolution soft layer,
+    // laid down in a single blit (toolkit.beginSoftLayer).
+    const bg = beginSoftLayer('climb-below', w, h) ?? ctx
     fillVerticalGradient(
-      ctx,
+      bg,
       0,
       0,
       w,
@@ -108,8 +113,9 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
     // Morning sun, upper LEFT (northern hemisphere — it will cross the whole
     // Air-Force section left→right). Weak down here: we fly under a ceiling.
     const sunA = a * 0.18 * (1 - dim)
-    drawGlow(ctx, w * 0.18, h * 0.2, unit * 0.24, '#ffd98a', sunA)
-    drawGlow(ctx, w * 0.18, h * 0.2, unit * 0.07, '#fff3d2', sunA * 1.4)
+    drawGlow(bg, w * 0.18, h * 0.2, unit * 0.24, '#ffd98a', sunA)
+    drawGlow(bg, w * 0.18, h * 0.2, unit * 0.07, '#fff3d2', sunA * 1.4)
+    if (bg !== ctx) commitSoftLayer('climb-below', ctx)
 
     // The countryside FLYING PAST backwards and sinking away — the same
     // landscape translating (scrollX), never remodelling.
@@ -272,8 +278,9 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
   if (above > 0.004) {
     const a = alpha * above
 
+    const bg = beginSoftLayer('climb-above', w, h) ?? ctx
     fillVerticalGradient(
-      ctx,
+      bg,
       0,
       0,
       w,
@@ -294,9 +301,10 @@ export const renderClimb: Renderer = (ctx, alpha, t, time, cfg) => {
     const sun = sunArc(1.5 + (cfg.tRaw ?? t))
     const sunX = w * sun.x
     const sunY = h * sun.y
-    drawGlow(ctx, sunX, sunY, unit * 0.5, '#cfe6ff', a * 0.34)
-    drawGlow(ctx, sunX, sunY, unit * 0.2, '#ffe9ad', a * 0.65)
-    drawGlow(ctx, sunX, sunY, unit * 0.08, '#fffbe8', a)
+    drawGlow(bg, sunX, sunY, unit * 0.5, '#cfe6ff', a * 0.34)
+    drawGlow(bg, sunX, sunY, unit * 0.2, '#ffe9ad', a * 0.65)
+    drawGlow(bg, sunX, sunY, unit * 0.08, '#fffbe8', a)
+    if (bg !== ctx) commitSoftLayer('climb-above', ctx)
     ctx.save()
     ctx.fillStyle = rgba('#fffdf2', a)
     ctx.beginPath()

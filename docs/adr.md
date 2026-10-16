@@ -4,6 +4,19 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-089 — Flying chapters: the opening sky and sun glows go through the soft layer (2026-10-16)
+ADR-088 left the flying chapters' 2D frames alone because their largest single cost, the full-screen sky
+gradient, cannot be undercut by a blit. A draw-order census showed every flying sub-mood opens the same way:
+the sky gradient, then two to four sun glows, all detail-free, before the first sharp element (the sun disc, the
+desert's corona ring, the ridges). Those leading passes now paint into the reduced-resolution soft layer
+(`toolkit.beginSoftLayer`, ADR-088) and land in one blit — climb (below and above the deck), cruise, desert and
+airshow. The sun disc, clouds, terrain, aircraft and HUD stay full resolution. Sunset is left as it is: its
+stars are drawn between the sky and the glows, so merging would mean reordering, which changes the look.
+
+Result (CPU raster, 16" Retina size): climb, cruise and desert frames −13 to −36 %, airshow −7 to −11 %, sunset
+unchanged. Composite captures over 23 story positions: max 8/255 in the flying chapters (max 5 at DPR 2),
+everything else unchanged within capture noise. All four hero harnesses and the 3D-sleep check pass.
+
 ### ADR-088 — Safari, round two: the 3D layer follows the resolution step; lighter dev and contact frames (2026-10-16)
 After ADR-087 the site read better on a fast Mac in Safari but still stuttered from the second or third section —
 the flying chapters, where the 3D heroes join the 2D world.

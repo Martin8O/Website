@@ -29,8 +29,10 @@
 
 import type { Renderer } from '../../types'
 import {
+  beginSoftLayer,
   TAU,
   clamp01,
+  commitSoftLayer,
   drawGlow,
   drawRidge,
   fillVerticalGradient,
@@ -196,8 +198,11 @@ export const renderAirshow: Renderer = (ctx, alpha, t, time, cfg) => {
   const condense = alpha * alpha * alpha
 
   // --- A vivid summer day ----------------------------------------------------
+  // Sky + sun glows are detail-free: one reduced-resolution soft layer,
+  // laid down in a single blit (toolkit.beginSoftLayer).
+  const bg = beginSoftLayer('airshow-sky', w, h) ?? ctx
   fillVerticalGradient(
-    ctx,
+    bg,
     0,
     0,
     w,
@@ -216,8 +221,9 @@ export const renderAirshow: Renderer = (ctx, alpha, t, time, cfg) => {
   const sun = sunArc(4.5 + (cfg.tRaw ?? t))
   const sunX = w * sun.x
   const sunY = h * sun.y
-  drawGlow(ctx, sunX, sunY, unit * 0.32, '#fff3c4', alpha * 0.5)
-  drawGlow(ctx, sunX, sunY, unit * 0.1, '#fffdf0', alpha * 0.8)
+  drawGlow(bg, sunX, sunY, unit * 0.32, '#fff3c4', alpha * 0.5)
+  drawGlow(bg, sunX, sunY, unit * 0.1, '#fffdf0', alpha * 0.8)
+  if (bg !== ctx) commitSoftLayer('airshow-sky', ctx)
   ctx.save()
   ctx.fillStyle = rgba('#fffdf2', alpha * 0.95)
   ctx.beginPath()

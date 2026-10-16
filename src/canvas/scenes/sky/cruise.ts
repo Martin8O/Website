@@ -18,7 +18,9 @@
 
 import type { Renderer } from '../../types'
 import {
+  beginSoftLayer,
   clamp01,
+  commitSoftLayer,
   drawGlow,
   fillVerticalGradient,
   hash1,
@@ -67,8 +69,11 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   // the climb's exact above-deck sky and eases into the cruise's own across
   // the solo run, far too slowly for the eye to catch.
   const fromClimb = 1 - smoothstep(0, 0.3, t)
+  // Sky + sun glows are detail-free: one reduced-resolution soft layer,
+  // laid down in a single blit (toolkit.beginSoftLayer).
+  const bg = beginSoftLayer('cruise-sky', w, h) ?? ctx
   fillVerticalGradient(
-    ctx,
+    bg,
     0,
     0,
     w,
@@ -88,9 +93,10 @@ export const renderCruise: Renderer = (ctx, alpha, t, time, cfg) => {
   const sun = sunArc(2.5 + (cfg.tRaw ?? t))
   const sunX = w * sun.x
   const sunY = h * sun.y
-  drawGlow(ctx, sunX, sunY, unit * 0.5, mixHex('#cfe6ff', '#ffe2b0', gold), alpha * 0.32)
-  drawGlow(ctx, sunX, sunY, unit * 0.2, mixHex('#ffe9ad', '#ffd898', gold), alpha * 0.62)
-  drawGlow(ctx, sunX, sunY, unit * 0.08, '#fffbe8', alpha)
+  drawGlow(bg, sunX, sunY, unit * 0.5, mixHex('#cfe6ff', '#ffe2b0', gold), alpha * 0.32)
+  drawGlow(bg, sunX, sunY, unit * 0.2, mixHex('#ffe9ad', '#ffd898', gold), alpha * 0.62)
+  drawGlow(bg, sunX, sunY, unit * 0.08, '#fffbe8', alpha)
+  if (bg !== ctx) commitSoftLayer('cruise-sky', ctx)
   ctx.save()
   ctx.fillStyle = rgba('#fffdf2', alpha)
   ctx.beginPath()

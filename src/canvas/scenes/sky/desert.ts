@@ -26,7 +26,9 @@
 import type { Renderer } from '../../types'
 import {
   TAU,
+  beginSoftLayer,
   clamp01,
+  commitSoftLayer,
   drawGlow,
   drawRidge,
   fillVerticalGradient,
@@ -218,8 +220,11 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   const structA = condense * 0.92
 
   // --- Scorched sky, white-hot sun ------------------------------------------
+  // Sky + sun glows are detail-free: one reduced-resolution soft layer,
+  // laid down in a single blit (toolkit.beginSoftLayer).
+  const bg = beginSoftLayer('desert-sky', w, h) ?? ctx
   fillVerticalGradient(
-    ctx,
+    bg,
     0,
     0,
     w,
@@ -240,10 +245,11 @@ export const renderDesert: Renderer = (ctx, alpha, t, time, cfg) => {
   const sun = sunArc(3.5 + tr)
   const sunX = w * sun.x
   const sunY = h * sun.y
-  drawGlow(ctx, sunX, sunY, unit * 0.55, '#f9e9b8', alpha * 0.55)
-  drawGlow(ctx, sunX, sunY, unit * 0.2, '#ffdf8a', alpha * 0.6)
-  drawGlow(ctx, sunX, sunY, unit * 0.085, '#ffe9a8', alpha * 0.95)
-  drawGlow(ctx, sunX, sunY, unit * 0.05, '#fffbe9', alpha * 0.95)
+  drawGlow(bg, sunX, sunY, unit * 0.55, '#f9e9b8', alpha * 0.55)
+  drawGlow(bg, sunX, sunY, unit * 0.2, '#ffdf8a', alpha * 0.6)
+  drawGlow(bg, sunX, sunY, unit * 0.085, '#ffe9a8', alpha * 0.95)
+  drawGlow(bg, sunX, sunY, unit * 0.05, '#fffbe9', alpha * 0.95)
+  if (bg !== ctx) commitSoftLayer('desert-sky', ctx)
   ctx.save()
   ctx.strokeStyle = rgba('#ffe9a8', alpha * 0.16)
   ctx.lineWidth = 2
