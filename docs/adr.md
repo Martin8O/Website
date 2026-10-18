@@ -4,6 +4,14 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-090 — Chapter 01 names the ultralight first; "over a hundred hours" (2026-10-18)
+Chapter 01's copy said "First the Z‑142, then the L‑39C" while its own climb sequence opens on the ultralight
+(Ulla → Z‑142 → L‑39) — and the ultralight licence and first solo (2003) did come first. Both the EN body and the
+CZ overlay now read "First an ultralight, then the Z‑142 and the L‑39C" / "Napřed ultralight, pak Z‑142 a L‑39C".
+The hours line moves from "a hundred" to "over a hundred" (≈ 50 h Z‑142 + ≈ 70 h L‑39C in training). Copy only:
+no layout or code change; the card gains at most one line (checked EN/CZ at 375×812, 1024×768, 1366×768 — clear
+of the era badge). Deliberately not added to the public changelog — a factual correction, not a feature.
+
 ### ADR-089 — Flying chapters: the opening sky and sun glows go through the soft layer (2026-10-16)
 ADR-088 left the flying chapters' 2D frames alone because their largest single cost, the full-screen sky
 gradient, cannot be undercut by a blit. A draw-order census showed every flying sub-mood opens the same way:
