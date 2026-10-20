@@ -48,7 +48,16 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
+import {
+  PARK_OUT,
+  createGpuParker,
+  getRoomEnv,
+  idleSlice,
+  markSharedTextures,
+  tagRig,
+  warmPrograms,
+  warmTextures,
+} from './surface'
 import { buildAIM9 } from './aim9'
 import { buildDropTank } from './droptank'
 import { setCamRigMask } from '../../canvas/camRig'
@@ -439,6 +448,7 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
     group.add(fill)
     const hemi = new THREE.HemisphereLight(0xdcecf8, 0x7a8a72, 0)
     group.add(hemi)
+    tagRig('cruise', key, fill, hemi)
 
     // Four faint tip streams: [jet0-L, jet0-R, jet1-L, jet1-R].
     const trails = [makeTrail(), makeTrail(), makeTrail(), makeTrail()]
@@ -500,6 +510,9 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
   }, [])
 
   const jetsRef = useRef<JetInstance[] | null>(null)
+  /** The built jets are fully warmed (textures + programs) — only then do
+   *  they fly; until this flips the frame loop treats them as not built. */
+  const liveRef = useRef(false)
   const loadKicked = useRef(false)
   const lastEmit = useRef(-1e9)
   /** Last story position the HUD billboard texture was rendered for —
@@ -531,6 +544,8 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
   }, [probe])
 
   const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
 
   // Shadow maps for the noon rig — enabled once for the whole stage (only
   // the ballet key casts, and it is culled with the group outside the
@@ -587,9 +602,14 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
         // parked from under the other scene (surface.ts GPU parking).
         markSharedTextures(res.group)
         await warmTextures(gl, res.group, (d, n) =>
-          reportHeroProgress('cruise', 0.8 + (d / n) * 0.19),
+          reportHeroProgress('cruise', 0.8 + (d / n) * 0.15),
         )
         if (!alive) return
+        // …and every shader program the pair (dissolving and solid), the
+        // vapour, wisps and HUD glass will draw.
+        await warmPrograms(gl, scene, camera, res.root, 'cruise', 'hash')
+        if (!alive) return
+        liveRef.current = true
         // The 2D cruise scene may now hand its corkscrew over (it keeps
         // painting until this flips — the story never shows a hole).
         setHero3DReady('cruise', true)
@@ -614,6 +634,7 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
       parker.dispose()
       setHero3DReady('cruise', false)
       resetHeroLoad('cruise')
+      liveRef.current = false
       const jets = jetsRef.current
       if (jets) {
         for (const j of jets) {
@@ -651,8 +672,8 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
     if (!loadKicked.current && kickable) kickLoad()
     // Approaching this hero's beat with the build unfinished — let idleSlice
     // run on the short timeout (finish over smoothness).
-    if (!jetsRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
-    if (cruiseRun) parker.tick(frame.pos, cruiseRun.start, cruiseRun.end + 1, !!jetsRef.current)
+    if (!liveRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
+    if (cruiseRun) parker.tick(frame.pos, cruiseRun.start, cruiseRun.end + 1, liveRef.current)
 
     const slot = slotOfCruise(frame.slots, frame.count)
     const t = slot ? slot.tRaw : 0
@@ -763,7 +784,7 @@ export function CruiseBallet({ frame, flight }: Scene3DProps) {
       }
     }
 
-    const jets = jetsRef.current
+    const jets = liveRef.current ? jetsRef.current : null
     let holeX = -1000
     let holeY = -1000
     let holeR = 0

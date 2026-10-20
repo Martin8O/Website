@@ -15,6 +15,7 @@
 
 import * as THREE from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import { whenStill } from '../../scroll/scrollStore'
 import { buildUrgent } from '../heroLoad'
 
 /** One cooperative yield: idle callback when the browser offers one (so the
@@ -57,7 +58,12 @@ export function getRoomEnv(gl: THREE.WebGLRenderer, sigma: number): Promise<THRE
   }
   let tex = bySigma.get(sigma)
   if (!tex) {
-    tex = idleSlice().then(() => {
+    // The bake links its own programs synchronously (~0.4 s cold on ANGLE)
+    // — let it land while the visitor is reading, not mid-scroll. Every
+    // hero waits on it (each keeps its 2D stand-in meanwhile); a visitor who
+    // never pauses for 6 s pays the freeze on whatever frame that is, as
+    // before — but it is no longer brought forward into the first scroll.
+    tex = whenStill(400, 6000).then(idleSlice).then(() => {
       const pmrem = new THREE.PMREMGenerator(gl)
       const t = pmrem.fromScene(new RoomEnvironment(), sigma).texture
       // The generator's internals are free to go — the baked target survives.
@@ -196,6 +202,192 @@ export function createGpuParker(gl: THREE.WebGLRenderer, root: THREE.Object3D): 
     dispose() {
       dead = true
     },
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shader-program warm-up — three links a material's program the first time it
+// is DRAWN, synchronously inside that frame (≈70–100 ms per program on ANGLE /
+// D3D11). A beat's entry needs 4–16 new programs at once, so a cold first
+// visit froze 0.4–1.7 s at every 3D scene change (the browser's own shader
+// disk cache is why a reload looked smooth). The hero scenes now hand their
+// built stage to `warmPrograms` before reporting ready: every program the beat
+// will ever draw is compiled ahead under KHR_parallel_shader_compile (off the
+// main thread) and awaited without blocking — the 2D hero keeps flying until
+// it resolves, exactly like an unfinished build.
+// ---------------------------------------------------------------------------
+
+/** userData key that marks a beat's own light rig (its key/fill/hemisphere,
+ *  switched on only while the beat is live). Lights WITHOUT it are always in
+ *  the scene's light set (the patrol rigs fade by intensity, never by
+ *  visibility). The program key depends on the light COUNTS, so the warm-up
+ *  rebuilds the exact sets the live frames will have. */
+export const HERO_RIG = 'heroRig'
+
+/** Tag a beat's rig lights (see HERO_RIG). */
+export function tagRig(name: string, ...lights: THREE.Light[]): void {
+  for (const l of lights) l.userData[HERO_RIG] = name
+}
+
+/** How a beat fades its materials in and out — each fade state is its own
+ *  program set: 'blend' = classic opacity (a transparent DOUBLE-sided
+ *  material draws in two passes, back then front, two programs, plus the
+ *  opaque one at full presence); 'hash' = three's alphaHash dissolve. */
+export type FadeMode = 'blend' | 'hash'
+
+type ProgramLike = { isReady(): boolean }
+type RendererProps = { get(o: object): { programs?: Map<string, ProgramLike> } }
+
+function lightSignature(lights: readonly THREE.Light[]): string {
+  let dir = 0
+  let dirS = 0
+  let hemi = 0
+  let point = 0
+  let pointS = 0
+  let spot = 0
+  let spotS = 0
+  let other = 0
+  for (const l of lights) {
+    if ((l as THREE.DirectionalLight).isDirectionalLight) {
+      dir++
+      if (l.castShadow) dirS++
+    } else if ((l as THREE.HemisphereLight).isHemisphereLight) hemi++
+    else if ((l as THREE.PointLight).isPointLight) {
+      point++
+      if (l.castShadow) pointS++
+    } else if ((l as THREE.SpotLight).isSpotLight) {
+      spot++
+      if (l.castShadow) spotS++
+    } else other++
+  }
+  return `${dir}.${dirS}.${hemi}.${point}.${pointS}.${spot}.${spotS}.${other}`
+}
+
+/** The light sets a beat's materials can be drawn under: the always-on
+ *  lights plus its own rig, plus — for a cross-fade — one neighbour rig on
+ *  top (`own === null`: a beat without a rig of its own, drawn under the
+ *  always-on set or with one rig present). Deduped by light counts, which is
+ *  all the program key sees. */
+function lightSets(scene: THREE.Scene, own: string | null): THREE.Light[][] {
+  const always: THREE.Light[] = []
+  const rigs = new Map<string, THREE.Light[]>()
+  scene.traverse((o) => {
+    const l = o as THREE.Light
+    if (!l.isLight) return
+    const tag = l.userData[HERO_RIG] as string | undefined
+    if (tag === undefined) always.push(l)
+    else rigs.set(tag, [...(rigs.get(tag) ?? []), l])
+  })
+  const base = own === null ? always : [...always, ...(rigs.get(own) ?? [])]
+  const sets = [base]
+  for (const [tag, lights] of rigs) if (tag !== own) sets.push([...base, ...lights])
+  const seen = new Set<string>()
+  return sets.filter((s) => {
+    const sig = lightSignature(s)
+    if (seen.has(sig)) return false
+    seen.add(sig)
+    return true
+  })
+}
+
+/** The readiness poll's yield (a plain timer is fine here: the wait is
+ *  GPU-bound, and a hidden tab draws nothing anyway). */
+const pause = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+
+/**
+ * Compile — ahead of its first draw — every program `root` will need, under
+ * every light set and fade state it can be drawn in, and resolve once the
+ * GPU reports them all linked. Never rejects: a failure or a lost context
+ * just resolves (the first draw then compiles as before). Materials are left
+ * exactly as found.
+ */
+export async function warmPrograms(
+  gl: THREE.WebGLRenderer,
+  scene: THREE.Scene,
+  camera: THREE.Camera,
+  root: THREE.Object3D,
+  own: string | null,
+  fade: FadeMode,
+): Promise<void> {
+  try {
+    const mats = new Set<THREE.Material>()
+    root.traverse((o) => {
+      const m = (o as THREE.Mesh).material
+      if (!m) return
+      for (const x of Array.isArray(m) ? m : [m]) mats.add(x)
+    })
+    const saved = [...mats].map((m) => ({ m, transparent: m.transparent, alphaHash: m.alphaHash }))
+    const setFaded = (on: boolean) => {
+      for (const s of saved) {
+        if (fade === 'blend') s.m.transparent = on ? true : s.transparent
+        else if ((s.m as THREE.MeshStandardMaterial).isMeshStandardMaterial) {
+          // Only the airframes dissolve — the beat's sprites, trails and
+          // HUD glass keep their one look.
+          s.m.alphaHash = on ? true : s.alphaHash
+          s.m.transparent = on ? false : s.transparent
+        }
+        s.m.needsUpdate = true
+      }
+    }
+    // `compile` gathers lights from the TARGET's visible tree and from the
+    // compiled root's. The root's own lights are shut out (its holder lists
+    // none) and the target is the live scene with its light list replaced —
+    // it keeps the scene's fog/environment, which also enter the key.
+    // Compiled one drawable at a time against a small time budget per idle
+    // slice: building a new program's shader text is itself main-thread
+    // work (a whole beat in one call was a 100–160 ms task on a slow CPU).
+    const drawables: THREE.Object3D[] = []
+    root.traverse((o) => {
+      if ((o as THREE.Mesh).material) drawables.push(o)
+    })
+    let one: THREE.Object3D | null = null
+    const holder = {
+      traverse: (cb: (o: THREE.Object3D) => void) => {
+        if (one) cb(one)
+      },
+      traverseVisible: () => undefined,
+    } as unknown as THREE.Object3D
+    for (const lights of lightSets(scene, own)) {
+      const target = Object.create(scene) as THREE.Scene
+      target.traverseVisible = (cb) => {
+        for (const l of lights) cb(l)
+      }
+      for (const faded of [true, false]) {
+        await idleSlice()
+        // Re-applied after every yield: the frames drawn in between leave a
+        // beat that is not live yet alone, but nothing here relies on that.
+        setFaded(faded)
+        let sliceStart = performance.now()
+        for (const d of drawables) {
+          if (performance.now() - sliceStart > 6) {
+            await idleSlice()
+            setFaded(faded)
+            sliceStart = performance.now()
+          }
+          if (gl.getContext().isContextLost()) return
+          one = d
+          gl.compile(holder, camera, target)
+        }
+      }
+    }
+    one = null
+    // Hand every material back in its base state; the flagged update makes
+    // its first real draw re-pick the (now warm) program for the live lights.
+    setFaded(false)
+    // Wait for the links without blocking (KHR_parallel_shader_compile;
+    // without it every program reports ready at once and the first draw
+    // waits as before). Patience: a stuck driver must not hold the beat.
+    const props = gl.properties as unknown as RendererProps
+    const pending: ProgramLike[] = []
+    for (const m of mats) for (const p of props.get(m).programs?.values() ?? []) pending.push(p)
+    const deadline = performance.now() + 15000
+    while (pending.length > 0 && performance.now() < deadline) {
+      if (gl.getContext().isContextLost()) return
+      for (let i = pending.length - 1; i >= 0; i--) if (pending[i].isReady()) pending.splice(i, 1)
+      if (pending.length > 0) await pause(32)
+    }
+  } catch {
+    // A warm-up is never load-bearing — the first draw compiles as before.
   }
 }
 

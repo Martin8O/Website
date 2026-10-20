@@ -43,12 +43,26 @@ export function warmFirstHero(): void {
   if (warmed || typeof fetch !== 'function') return
   warmed = true
   afterLoad(() => {
-    for (const url of CLIMB_HERO_URLS) {
-      // Low priority + a real cache read: populate the browser cache so the
-      // GLTFLoader fetch that follows is a hit. Failures are ignored — the
-      // loader will fetch normally, and a warm is never load-bearing.
-      fetch(url, { priority: 'low', cache: 'force-cache' } as RequestInit).catch(() => {})
-    }
+    // ONE AT A TIME, in story order. Fired all at once, the eight downloads
+    // split the bandwidth evenly, so the first chapter's biggest models
+    // (ulla 3 MB, l39 4.9 MB) arrived LAST — on a 20 Mbit line ~6 s in,
+    // after the visitor had already flown the climb in 2D. In sequence the
+    // first hero is complete as early as the line allows.
+    void (async () => {
+      for (const url of CLIMB_HERO_URLS) {
+        try {
+          // Low priority + a real cache read: populate the browser cache so
+          // the GLTFLoader fetch that follows is a hit. The body is read to
+          // the end (that is what completes the cache entry) and dropped.
+          // Failures are ignored — the loader fetches normally, and a warm
+          // is never load-bearing.
+          const res = await fetch(url, { priority: 'low', cache: 'force-cache' } as RequestInit)
+          await res.arrayBuffer()
+        } catch {
+          // next model
+        }
+      }
+    })()
   })
 }
 

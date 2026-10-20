@@ -4,6 +4,25 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-091 — First-visit scene changes: 3D shader programs warmed ahead; GLBs fetched in story order (2026-10-20)
+Testers saw scene changes stutter on a FIRST visit only (a reload was smooth). A cold-profile scroll with a
+WebGL link probe found the cause: three.js links each material's program synchronously the first time it is
+drawn (≈ 70–100 ms each on ANGLE/D3D11), and a beat's entry needed 4–16 at once — 0.4–1.7 s frames at the climb,
+Bagram (worst), Apache, airshow and sunset beats. The browser's shader disk cache is why reloads looked fine.
+Fixes: (1) `surface.warmPrograms` — after the texture warm-up, every hero scene compiles all its programs ahead
+under KHR_parallel_shader_compile, for each light set it can be drawn under (beat rigs tagged `heroRig`;
+the program key only sees light counts) and each fade state (blend: transparent double-sided materials draw in
+two passes; hash: alphaHash), sliced at 6 ms per idle callback, and reports ready only once the GPU says the
+programs are linked; the 2D hero flies meanwhile. Ballet and patrol jets now fly only after that (`liveRef`).
+(2) The RoomEnvironment PMREM bake (~0.4 s of synchronous links) and the dev scene's static bake wait for the
+story to stand still (`scrollStore.whenStill`, sub-pixel tolerance for the smooth-scroll tail; 6 s / 15 s
+patience). (3) `warmFirstHero` fetches the eight GLBs one at a time in story order — in parallel, the first
+chapter's biggest models arrived last. Measured, cold profile, normal CPU: worst 3D boundary 1,672 → 41 ms; reload
+max 34 ms; at 4× CPU the heroes now go 3D on the first pass. Tried and dropped: rehearsing every 2D world
+off-screen (no gain at 2D boundaries, its own 50–380 ms cost). Not done: canvas `font` sets that force a style
+update (measured ≈ 0.3 ms/frame in the offer scene — not a stutter source). Left: the climb's first shadow pass
+links one depth program (≈ 40 ms) and slow-CPU 2D cross-fades (bitcoin/dev/contact) stay a steady cost.
+
 ### ADR-090 — Chapter 01 names the ultralight first; "over a hundred hours" (2026-10-18)
 Chapter 01's copy said "First the Z‑142, then the L‑39C" while its own climb sequence opens on the ultralight
 (Ulla → Z‑142 → L‑39) — and the ultralight licence and first solo (2003) did come first. Both the EN body and the

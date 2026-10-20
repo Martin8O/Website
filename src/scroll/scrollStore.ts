@@ -104,3 +104,31 @@ export function subscribeStoryCover(listener: CoverListener): () => void {
   coverListeners.add(listener)
   return () => coverListeners.delete(listener)
 }
+
+/** Movement per 50 ms poll below which the story counts as standing still:
+ *  well under a pixel on any page length — the smooth-scroll's long ease-out
+ *  tail is invisible, so it must not keep a reader "moving". */
+const STILL_EPS = 2e-5
+
+/**
+ * Resolves once the story has stood still for `quietMs` — so a one-off
+ * blocking job (a GPU program link, a big cache bake) lands while the visitor
+ * reads, not inside a scroll — or after `maxMs` regardless, so a visitor who
+ * never pauses still gets it (`Infinity`: an optional job that may simply
+ * never run).
+ */
+export function whenStill(quietMs = 250, maxMs = 4000): Promise<void> {
+  return new Promise((resolve) => {
+    const start = performance.now()
+    let last = progress
+    let since = start
+    const check = () => {
+      const now = performance.now()
+      if (Math.abs(progress - last) > STILL_EPS) since = now
+      last = progress
+      if (now - since >= quietMs || now - start >= maxMs) resolve()
+      else setTimeout(check, 50)
+    }
+    setTimeout(check, 50)
+  })
+}

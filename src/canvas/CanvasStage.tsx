@@ -2,7 +2,13 @@ import { useEffect, useRef } from 'react'
 import { THEME_ACCENT, type Chapter } from '../data/chapters'
 import { chapterPosition } from '../timeline'
 import { CHAPTER_WEIGHTS } from '../data/chapters'
-import { getScrollProgress, setScrollProgress, subscribeStoryCover, isStoryCovered } from '../scroll/scrollStore'
+import {
+  getScrollProgress,
+  setScrollProgress,
+  subscribeStoryCover,
+  isStoryCovered,
+  whenStill,
+} from '../scroll/scrollStore'
 import { buildCalm } from '../three/heroLoad'
 import { paints2D, paintsHero2D } from '../three/owned3d'
 import type { WorldMode } from '../three/worldMode'
@@ -163,14 +169,20 @@ export function CanvasStage({
     // Dperf-4) so a normal scroll never waits on a round-trip when it reaches
     // the deep worlds, and (2) warm the dev chapter's static bakes (the
     // heaviest 2D cache build) for the current size, so entering the chapter
-    // never pays the bake in a scroll frame. The dev import here shares the
-    // dev chunk the prefetch loads. Pure prefetch + cache fill; the render
-    // path is unchanged.
+    // never pays the bake in a scroll frame. (2) waits for the visitor to
+    // stand still: the bake is a 0.1–0.4 s block on a slow CPU, and the idle
+    // callback's timeout used to drop it into the first scroll. The dev
+    // import here shares the dev chunk the prefetch loads. Pure prefetch +
+    // cache fill; the render path is unchanged.
     let warmTimer = 0
+    let dead = false
     const warmIdle = () => {
       prefetchLazyScenes()
-      import('./scenes/dev')
-        .then((m) => m.warmDevScene(w, h))
+      whenStill(400, 15000)
+        .then(() => import('./scenes/dev'))
+        .then((m) => {
+          if (!dead) m.warmDevScene(w, h)
+        })
         .catch(() => undefined)
     }
     const scheduleWarm = () => {
@@ -413,6 +425,7 @@ export function CanvasStage({
     }
 
     return () => {
+      dead = true
       stop()
       window.clearTimeout(warmTimer)
       if (import.meta.env.DEV) delete hookHost.__paintFrame

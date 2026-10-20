@@ -56,7 +56,15 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, markSharedTextures, warmTextures } from './surface'
+import {
+  PARK_OUT,
+  createGpuParker,
+  getRoomEnv,
+  idleSlice,
+  markSharedTextures,
+  warmPrograms,
+  warmTextures,
+} from './surface'
 
 /** The registry's 'sky' entry: the two flypast beats, the chapter-02
  *  one-circle fight (CruiseBallet — the ballet showcase, ported), the
@@ -606,6 +614,9 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
   // Jet instances arrive with the model: [0..1] clean pass pair,
   // [2..3] armed break pair.
   const jetsRef = useRef<JetInstance[] | null>(null)
+  /** The built jets are fully warmed (textures + programs) — only then do
+   *  they fly; until this flips the frame loop treats them as not built. */
+  const liveRef = useRef(false)
   const loadKicked = useRef(false)
   const aspectRef = useRef(0)
 
@@ -627,6 +638,8 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
   }, [probe])
 
   const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
 
   // GPU parking (surface.ts): both flypast pairs live inside the sunset
   // chapter — far from it their GPU copies are released and re-warmed on
@@ -684,9 +697,16 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
         // GPU warm-up while the jets are still invisible — a beat's first
         // frame must never pay the texture upload mid-scroll.
         await warmTextures(gl, res.stage, (d, n) =>
-          reportHeroProgress('patrol', 0.82 + (d / n) * 0.17),
+          reportHeroProgress('patrol', 0.82 + (d / n) * 0.12),
         )
         if (!alive) return
+        // …and every shader program both flypasts will draw. This beat has
+        // no rig of its own (its lights fade by intensity and are always in
+        // the scene), so `null`: drawn under the always-on set, or with the
+        // desert rig still up through the cross-fade.
+        await warmPrograms(gl, scene, camera, res.stage, null, 'blend')
+        if (!alive) return
+        liveRef.current = true
         finishHeroLoad('patrol')
         if (import.meta.env.DEV) probe.ready = true
       })
@@ -707,6 +727,7 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
       cleanupRef.current?.()
       parker.dispose()
       resetHeroLoad('patrol')
+      liveRef.current = false
       const jets = jetsRef.current
       if (jets) {
         for (const j of jets) {
@@ -742,8 +763,8 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
     if (!loadKicked.current && kickable) kickLoad()
     // Approaching the flypasts with the build unfinished — let idleSlice run
     // on the short timeout (finish over smoothness).
-    if (!jetsRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
-    if (sunsetRun) parker.tick(frame.pos, sunsetRun.start, sunsetRun.end + 1, !!jetsRef.current)
+    if (!liveRef.current && loadKicked.current && frame.pos > LOAD_AT_POS) bumpBuildUrgency()
+    if (sunsetRun) parker.tick(frame.pos, sunsetRun.start, sunsetRun.end + 1, liveRef.current)
 
     // Glue the stage to the flight pose (position + forward + bank, no
     // pointer parallax) — the camera-glued convention.
@@ -774,7 +795,7 @@ export function SkyPatrols({ frame, flight }: Scene3DProps) {
 
     const airshow = slotOf(frame.slots, frame.count, 'airshow')
     const sunset = slotOf(frame.slots, frame.count, 'sunset')
-    const jets = jetsRef.current
+    const jets = liveRef.current ? jetsRef.current : null
 
     // --- The head-on pass --------------------------------------------------
     const passT = airshow ? airshow.tRaw : 0

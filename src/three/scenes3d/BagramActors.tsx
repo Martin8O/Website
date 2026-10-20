@@ -59,7 +59,15 @@ import {
   type BagramPose,
 } from '../bagramMath'
 import type { Scene3DProps } from '../registry3d'
-import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, warmTextures } from './surface'
+import {
+  PARK_OUT,
+  createGpuParker,
+  getRoomEnv,
+  idleSlice,
+  tagRig,
+  warmPrograms,
+  warmTextures,
+} from './surface'
 
 type ActorId = 'c17' | 'apache' | 'f16' | 'mi17'
 
@@ -396,6 +404,7 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
     fill.position.set(-8, 3, 6)
     stage.add(fill)
     stage.add(fill.target)
+    tagRig('desert', key, hemi, fill)
 
     return {
       stage,
@@ -444,6 +453,8 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
   const aliveRef = useRef(true)
 
   const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
 
   // Shadow maps (idempotent with the climb/ballet rigs — one stage flag).
   useEffect(() => {
@@ -505,8 +516,12 @@ export function BagramActors({ frame, flight }: Scene3DProps) {
         // Push the textures to the GPU while the actors are still invisible
         // — entering the desert must never pay the upload mid-scroll.
         await warmTextures(gl, res.stage, (d, n) =>
-          reportHeroProgress('desert', 0.85 + (d / n) * 0.14),
+          reportHeroProgress('desert', 0.85 + (d / n) * 0.1),
         )
+        if (!aliveRef.current) return
+        // …and every shader program the beat will draw (the cold-visit
+        // freeze at the desert entry was 14–16 links in one frame).
+        await warmPrograms(gl, scene, camera, res.stage, 'desert', 'blend')
         if (!aliveRef.current) return
         readyRef.current = true
         // The actual 2D→3D flip fires from the frame loop (in place, with the

@@ -60,7 +60,15 @@ import {
   reportHeroProgress,
   resetHeroLoad,
 } from '../heroLoad'
-import { PARK_OUT, createGpuParker, getRoomEnv, idleSlice, warmTextures } from './surface'
+import {
+  PARK_OUT,
+  createGpuParker,
+  getRoomEnv,
+  idleSlice,
+  tagRig,
+  warmPrograms,
+  warmTextures,
+} from './surface'
 
 const MODEL_URLS: Record<ClimbAircraft['id'], string> = {
   ulla: '/models/ulla.glb',
@@ -264,6 +272,7 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
     fill.position.set(4, -6, 2)
     room.add(fill)
     room.add(fill.target)
+    tagRig('climb', key, hemi, fill)
 
     const aircraft: AircraftRes[] = CLIMB_SEQ.aircraft.map((a) => {
       const pivot = new THREE.Group()
@@ -311,6 +320,8 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
   const aliveRef = useRef(true)
 
   const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
 
   // Shadow maps for the morning key — enabled once for the whole stage (the
   // rig is culled with the scene's presence, so the shadow pass costs
@@ -371,8 +382,12 @@ export function ClimbHeroes({ frame, flight }: Scene3DProps) {
         let warmed = 0
         for (const r of res.aircraft) {
           if (r.model) await warmTextures(gl, r.model.root)
-          reportHeroProgress('climb', 0.68 + (++warmed / res.aircraft.length) * 0.31)
+          reportHeroProgress('climb', 0.68 + (++warmed / res.aircraft.length) * 0.27)
         }
+        if (!aliveRef.current) return
+        // …and every shader program the ladder will draw, so no aircraft's
+        // first appearance links its programs mid-scroll.
+        await warmPrograms(gl, scene, camera, res.stage, 'climb', 'blend')
         if (!aliveRef.current) return
         readyRef.current = true
         setHero3DReady('climb', true)
