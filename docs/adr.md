@@ -25,7 +25,7 @@ as ADR-086 (`PANEL_WIDE`), so cells and type keep their size.
 
 **The board's first chip says "repos", not "projects".** The board has always counted every repo with commits in
 the run (unlisted and in-progress work included), while the Work panel counts finished cards; with both saying
-"projects", 28 beside 14 read as a contradiction. Only the word changes; the count and its rule stay.
+"projects", 28 beside 14 read as a contradiction. Only the word changes; the count and its rule stay. The changelog row is anchored to its own commit (`597edd2`) in a follow-up commit, as ADR-085 did.
 
 ### ADR-091 — First-visit scene changes: 3D shader programs warmed ahead; GLBs fetched in story order (2026-10-20)
 Testers saw scene changes stutter on a FIRST visit only (a reload was smooth). A cold-profile scroll with a
