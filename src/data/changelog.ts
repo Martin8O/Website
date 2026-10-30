@@ -121,6 +121,14 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'ED Multitool joins the work list: routes, trade, services, gear, politics, stats, earnings and missions for Elite Dangerous, across a faithful copy of the Milky Way. Five days from the first commit to a public release.',
     link: { href: `${REPO}/commit/243c9a6a8f248762b752ded395fcaa3ef7db3e8f`, display: '243c9a6' },
   },
+  {
+    id: 'rodokmen',
+    date: '2026-10-30',
+    // The Bouřky split: the Czech title carries the name, the English one
+    // the function (`changelog.test.ts` asserts the CS overlay differs).
+    title: 'A family tree that cites its sources',
+    body: 'Rodokmen joins the work list: a family history built from Czech and Moravian parish registers, every fact with its level of evidence and a citation to the page of the register, drawn as a family chart, a fan of ancestors, a map and a timeline. The real family stays private; the public demo shows an invented one. Four days from the first commit.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -160,6 +168,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   rrfyzio: {
     title: 'RR Fyzio centrum',
     body: 'K seznamu prací přibyl web fyzioterapeutického centra v Kolíně, které dostalo nový název. Nahradil web, který jsem mu postavil v roce 2022: kresba těla odpoví na otázku „Kde vás to bolí?“, každá terapie má vlastní stránku a žádná stará adresa se neztratila.',
+  },
+  rodokmen: {
+    title: 'Rodokmen',
+    body: 'K seznamu prací přibyl rodokmen postavený z českých a moravských matrik: každý údaj s mírou doložení a odkazem na stránku matriky, a k tomu schéma rodiny, vějíř předků, mapa i časová osa. Skutečná rodina zůstává soukromá; veřejná ukázka předvádí vymyšlenou. Od prvního commitu za čtyři dny.',
   },
   edmultitool: {
     title: 'ED Multitool',

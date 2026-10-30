@@ -93,6 +93,10 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
     tagline:
       'Švýcarský nůž pro vesmírnou hru Elite Dangerous: trasy, obchod, služby, vybavení, politika, statistiky, výnosy i mise – napříč celou věrnou kopií simulované Mléčné dráhy.',
   },
+  rodokmen: {
+    tagline:
+      'Rodinná historie postavená z českých a moravských matrik: každý údaj nese míru doložení a odkaz na pramen, který vede až na stránku matriky. Zápisy přepsané z latiny, němčiny i češtiny s překladem vedle; interaktivní schéma rodiny, vějíř předků, mapa míst, kde rodina žila, a životy na pozadí dějin. Údaje žijících lidí chrání kontrola, bez které se web vůbec nesestaví. Ukázka předvádí vymyšlenou rodinu o 379 lidech – skutečné jsou jen obce.',
+  },
   'this-site': {
     name: 'Tento web',
     tagline:

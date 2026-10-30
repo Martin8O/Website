@@ -89,6 +89,13 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'out-of-their-minds': [
     { url: '/shots/out-of-their-minds-0.jpg', aspect: 1.250, cover: true },
   ],
+  // The public demo's home page — the picture the project's own README
+  // carries (`rodokmen-genealogy/docs/images/home.png`, 1200×913), scaled to
+  // 760 px by `local/tmp/rodokmen-shots.mjs`. The family on it is invented;
+  // the site is Czech-only → one shot for both languages.
+  'rodokmen': [
+    { url: '/shots/rodokmen-0.jpg', aspect: 1.315 },
+  ],
   'tenovice': [
     { url: '/shots/tenovice-0.jpg', aspect: 0.983 },
   ],

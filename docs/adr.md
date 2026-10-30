@@ -4,6 +4,29 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-092 — Rodokmen joins the work third; the GitHub board re-read and counted as repos (2026-10-30)
+**Rodokmen** (private repo `Martin8O/rodokmen`; public copy `Martin8O/rodokmen-genealogy` with a demo at
+rodokmen-demo.pages.dev) is a family history built from Czech and Moravian parish registers: every fact with its
+evidence level and a citation to the register page, a family chart, a fan of ancestors, a map and a timeline,
+and a privacy check the site build cannot pass without. The real family stays private; the demo shows an invented
+family of 379 people (only the villages are real), so the card links the demo and the public copy. It joins the
+Work panel at **workOrder 3**, before Těnovice; every later Claude-era card moves down one (array order, the
+dev-scene window contract, is untouched). build = 4 days / 125 commits (27 – 30 Oct), the demo included. One shot,
+the public README's home picture (Czech-only site). Changelog row (EN function, CS name); llms.txt line.
+
+**Counter and heading:** chapter 08 reads **+ 9**, the Work panel's era heading **14 projects since June**.
+
+**Board re-read** at 2026-10-30 (`gh-stats-2026-10-30.mjs`): **28 repos · 197 days · 1,746 commits · 1–32 days
+each**; Jun 233 · Jul 439 · Aug 123 · Sep 237 · Oct 508; peak day 80 (30 Oct). Excluded by name: the public copies
+of ED Multitool, RR Fyzio and Rodokmen (exports of projects already counted) and `eu`, a private side repo that is
+not one of the projects. Summer time ended on 25 Oct, so commits from then on are dated at UTC+1 instead of the
+fixed +2 (earlier days are unchanged). The matrix gains its 21st and 22nd week; the panel widens by the same rule
+as ADR-086 (`PANEL_WIDE`), so cells and type keep their size.
+
+**The board's first chip says "repos", not "projects".** The board has always counted every repo with commits in
+the run (unlisted and in-progress work included), while the Work panel counts finished cards; with both saying
+"projects", 28 beside 14 read as a contradiction. Only the word changes; the count and its rule stay.
+
 ### ADR-091 — First-visit scene changes: 3D shader programs warmed ahead; GLBs fetched in story order (2026-10-20)
 Testers saw scene changes stutter on a FIRST visit only (a reload was smooth). A cold-profile scroll with a
 WebGL link probe found the cause: three.js links each material's program synchronously the first time it is

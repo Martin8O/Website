@@ -200,7 +200,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 13,
+    workOrder: 14,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -217,7 +217,7 @@ export const PROJECTS: Project[] = [
     live: true,
     badge: 'COLLAB',
     build: { days: 11, commits: 53 },
-    workOrder: 3,
+    workOrder: 4,
     window: { tint: VIOLET, kind: 'fund', shot: 'tenovice', cropY: 0.13 },
   },
   {
@@ -231,7 +231,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/Registrace',
     live: true,
     build: { days: 27, commits: 109 },
-    workOrder: 6,
+    workOrder: 7,
     window: { tint: MAGENTA, kind: 'form', shot: 'registrace' },
   },
   {
@@ -260,7 +260,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Porting to Android',
     build: { days: 10, commits: 42 },
-    workOrder: 9,
+    workOrder: 10,
     window: { tint: MINT, kind: 'graph' },
   },
   // No `window` block — the dev scene keeps its five windows; this one IS the
@@ -276,7 +276,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/Website',
     live: true,
     build: { days: 4, commits: 32 },
-    workOrder: 4,
+    workOrder: 5,
   },
   // The Claude month's outlier: not an app at all, but a novel — written by an
   // AI inside a system built for it. No `window` block (the dev scene keeps its
@@ -300,7 +300,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4.5, commits: 70 },
-    workOrder: 10,
+    workOrder: 11,
   },
   // The first one that has to be right about the real world: it warns a town
   // about weather that is either coming or isn't. No `window` block (the dev
@@ -317,7 +317,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/Bourky',
     live: true,
     build: { days: 3, commits: 41 },
-    workOrder: 7,
+    workOrder: 8,
   },
   // Storm Watch's small sibling: the same many-models-one-honest-number idea,
   // turned from warning a town to telling one rider whether to go out, and on
@@ -337,7 +337,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/kiteseason',
     live: true,
     build: { days: 1, commits: 4 },
-    workOrder: 8,
+    workOrder: 9,
   },
   // A clinic's own site, rebuilt from scratch after a rebrand, replacing the
   // 2022 site that sits in the pre-Claude list (`rrcentrum`). Czech-only, so
@@ -378,7 +378,7 @@ export const PROJECTS: Project[] = [
     link: { href: 'https://github.com/Martin8O/ED-Multitool', display: 'github.com/Martin8O/ED-Multitool' },
     live: true,
     build: { days: 5, commits: 59 },
-    workOrder: 5,
+    workOrder: 6,
   },
   // The Claude month's second novel — and the harder of the two, because
   // nothing about its world was already known: Unplottable borrowed a canon,
@@ -401,7 +401,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 2, commits: 6 },
-    workOrder: 11,
+    workOrder: 12,
   },
   // The Claude month's third novel, and the one written in a language the
   // repository never translates out of: Russian from the first sentence. Where
@@ -426,7 +426,28 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4, commits: 14 },
-    workOrder: 12,
+    workOrder: 13,
+  },
+  // A family history built from parish registers. The real family stays in a
+  // private repo; what the public sees is a separate copy of the engine with
+  // an invented family generated from a seed (only the villages are real) —
+  // so the link is that demo and the repo link is the public copy. Czech-only
+  // site → one shot, the README's own home picture. No `window` block; it
+  // sits third in the Work panel, before Těnovice.
+  // `build` = all 4 author-local days (27 – 30 Oct 2026) and 125 commits of
+  // the private repo, the demo included — the public copy is an export of it.
+  {
+    id: 'rodokmen',
+    name: 'Rodokmen',
+    tagline:
+      'A family history built from Czech and Moravian parish registers, where every fact carries its level of evidence and a citation that leads to the page of the register. Entries transcribed from Latin, German and Czech with a translation beside them; an interactive family chart, a fan of ancestors, a map of where the family lived and their lives set against history. Living people are protected by a check the site cannot be built without. The demo shows an invented family of 379 people — only the villages are real.',
+    stack: ['Python', 'Pydantic', 'Astro', 'd3', 'Leaflet', 'Pagefind'],
+    era: 'claude',
+    link: { href: 'https://rodokmen-demo.pages.dev', display: 'rodokmen-demo.pages.dev' },
+    repo: 'https://github.com/Martin8O/rodokmen-genealogy',
+    live: true,
+    build: { days: 4, commits: 125 },
+    workOrder: 3,
   },
 ]
 

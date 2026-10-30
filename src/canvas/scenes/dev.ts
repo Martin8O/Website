@@ -11,8 +11,8 @@
  * Electricity buzzes across the etched glass grid in flickering arcs.
  *
  * The rooftop billboards are REAL: the amber contribution heatmap and the
- * monthly-momentum bars are read straight off GitHub (1,485 commits — you + your
- * AI builder — across 27 projects in 182 days, snapshot 2026-10-15; the matrix
+ * monthly-momentum bars are read straight off GitHub (1,746 commits — you + your
+ * AI builder — across 28 repos in 197 days, snapshot 2026-10-30; the matrix
  * draws every week since June) — the city itself advertises the
  * explosion, in the site's amber through-line.
  *
@@ -135,11 +135,14 @@ function roundRect(
 // Real daily commits — you + your AI builder (every repo you author in, the
 // Lovable bot's commits included, plus your own commits in the Těnovice collab
 // repo; other people's commits there are not yours and are excluded), counted
-// by author-local date. Snapshot 2026-10-15, read from the GitHub API
-// (`local/tmp/gh-stats-2026-10-15.mjs --until 2026-10-15 --exclude
-// ED-Multitool,rrfyzio-public`). Two repos are left out on purpose: the public
-// copies of ED Multitool and of the RR Fyzio site, each a single commit
-// exported from a project already counted — copies, not projects. The four
+// by author-local date (UTC+2 through summer time, UTC+1 from 25 Oct).
+// Snapshot 2026-10-30, read from the GitHub API
+// (`local/tmp/gh-stats-2026-10-30.mjs --until 2026-10-30 --exclude
+// ED-Multitool,rrfyzio-public,rodokmen-genealogy,eu`). Four repos are left out
+// on purpose: the public copies of ED Multitool, of the RR Fyzio site and of
+// Rodokmen (its demo with an invented family), each exported from a project
+// already counted — copies, not projects — and `eu`, a private side repo
+// that is not one of the projects. The four
 // commits stamped 2025-01-01 carry a placeholder date and are dropped too.
 // **Day 0 = 2026-06-01, a Monday** — the billboard shows EVERY WEEK SINCE
 // JUNE (the month the Claude-era work begins), ending with the snapshot's own
@@ -163,10 +166,12 @@ const COMMIT_DAYS: ReadonlyArray<readonly [number, number]> = [
   [112, 21], [113, 9], [114, 14], [115, 6], [116, 6], [117, 27], [118, 7],
   [119, 4], [120, 24], [121, 15], [122, 11], [123, 17], [124, 5], [125, 5],
   [126, 24], [127, 6], [128, 16], [129, 8], [130, 3], [132, 15], [133, 75],
-  [134, 15], [135, 37], [136, 10],
+  [134, 15], [135, 37], [136, 20], [137, 9], [138, 6], [139, 4], [140, 3],
+  [141, 13], [142, 12], [143, 14], [144, 17], [145, 4], [146, 8], [147, 1],
+  [148, 10], [149, 51], [150, 19], [151, 80],
 ]
-const HEAT_COLS = 20
-const HEAT_PEAK = 75 // the window's busiest day (12 Oct) — the heat scale's top
+const HEAT_COLS = 22
+const HEAT_PEAK = 80 // the window's busiest day (30 Oct) — the heat scale's top
 const HEAT: number[][] = []
 for (let c = 0; c < HEAT_COLS; c++) HEAT.push(new Array<number>(7).fill(0))
 for (const [d, n] of COMMIT_DAYS) {
@@ -174,13 +179,13 @@ for (const [d, n] of COMMIT_DAYS) {
   if (col < HEAT_COLS) HEAT[col][d % 7] = Math.min(1, n / HEAT_PEAK)
 }
 /** Monthly momentum — REAL monthly commit counts (you + your AI builder):
- *  Jun 233 · Jul 439 · Aug 123 · Sep 237 · Oct 247 — the same months the
- *  matrix beside them spans. Bars normalized to the peak month. October is 15 days old at the
- *  snapshot and already past September — August's bar is short because the
- *  month itself was. */
-const MOM_VALS = [233, 439, 123, 237, 247] as const
+ *  Jun 233 · Jul 439 · Aug 123 · Sep 237 · Oct 508 — the same months the
+ *  matrix beside them spans. Bars normalized to the peak month. October is 30 days old at the
+ *  snapshot and already the busiest month of the run — August's bar is short
+ *  because the month itself was. */
+const MOM_VALS = [233, 439, 123, 237, 508] as const
 const MOM_LABELS = ['JUN', 'JUL', 'AUG', 'SEP', 'OCT'] as const
-const MOM_TEXT = ['233', '439', '123', '237', '247'] as const
+const MOM_TEXT = ['233', '439', '123', '237', '508'] as const
 const MOM_MAX = Math.max(...MOM_VALS)
 /** Month ticks under the matrix, one per month it spans. */
 const HEAT_MONTHS = ['JUN', 'JUL', 'AUG', 'SEP', 'OCT'] as const
@@ -1966,10 +1971,12 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
     const chipY = py + ph * 0.12
     let cxp = x0b + 10 * S
     const CHIPS = [
-      ['27', 'projects'],
-      ['182', 'days'],
-      ['1485', 'commits'],
-      ['1–31', 'days each'],
+      // "repos", not "projects": the Work panel counts finished projects
+      // (cards); this counts every repo with commits in the run.
+      ['28', 'repos'],
+      ['197', 'days'],
+      ['1746', 'commits'],
+      ['1–32', 'days each'],
     ] as const
     for (let ci = 0; ci < CHIPS.length; ci++) {
       ctx.font = `700 ${Math.round(10.5 * S)}px "Chakra Petch", ui-monospace, monospace`
@@ -2017,7 +2024,7 @@ export const renderDev: Renderer = (ctx, alpha, t, time, cfg) => {
       ctx.fillText(HEAT_MONTHS[mi], hx0 + HEAT_MONTH_COLS[mi] * cs, py + ph * 0.91)
     }
     // Monthly momentum (right): muted labels, amber bars, real values at the
-    // tips — 233 · 439 · 123 · 237 · 247 (October is 15 days old at the snapshot,
+    // tips — 233 · 439 · 123 · 237 · 508 (October is 30 days old at the snapshot,
     // so its bar is a month still being written, not a month that stopped).
     const mx0 = x0b + pw - pb * 0.44
     const mw2 = pb * 0.44 - 12 * S
