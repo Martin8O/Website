@@ -11,7 +11,7 @@ evidence level and a citation to the register page, a family chart, a fan of anc
 and a privacy check the site build cannot pass without. The real family stays private; the demo shows an invented
 family of 379 people (only the villages are real), so the card links the demo and the public copy. It joins the
 Work panel at **workOrder 3**, before Těnovice; every later Claude-era card moves down one (array order, the
-dev-scene window contract, is untouched). build = 4 days / 125 commits (27 – 30 Oct), the demo included. One shot,
+dev-scene window contract, is untouched). build = 3 days / 125 commits (27 Oct 22:33 – 30 Oct, elapsed, not the 4 calendar days: day one was a 40-minute evening), the demo included. One shot,
 the public README's home picture (Czech-only site). Changelog row (EN function, CS name); llms.txt line.
 
 **Counter and heading:** chapter 08 reads **+ 9**, the Work panel's era heading **14 projects since June**.

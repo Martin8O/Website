@@ -127,7 +127,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // The Bouřky split: the Czech title carries the name, the English one
     // the function (`changelog.test.ts` asserts the CS overlay differs).
     title: 'A family tree that cites its sources',
-    body: 'Rodokmen joins the work list: a family history built from Czech and Moravian parish registers, every fact with its level of evidence and a citation to the page of the register, drawn as a family chart, a fan of ancestors, a map and a timeline. The real family stays private; the public demo shows an invented one. Four days from the first commit.',
+    body: 'Rodokmen joins the work list: a family history built from Czech and Moravian parish registers, every fact with its level of evidence and a citation to the page of the register, drawn as a family chart, a fan of ancestors, a map and a timeline. The real family stays private; the public demo shows an invented one. Three days from the first commit.',
     link: { href: `${REPO}/commit/597edd296ecc305d4946af7f3efdd6dfa30ee09b`, display: '597edd2' },
   },
 ]
@@ -172,7 +172,7 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   },
   rodokmen: {
     title: 'Rodokmen',
-    body: 'K seznamu prací přibyl rodokmen postavený z českých a moravských matrik: každý údaj s mírou doložení a odkazem na stránku matriky, a k tomu schéma rodiny, vějíř předků, mapa i časová osa. Skutečná rodina zůstává soukromá; veřejná ukázka předvádí vymyšlenou. Od prvního commitu za čtyři dny.',
+    body: 'K seznamu prací přibyl rodokmen postavený z českých a moravských matrik: každý údaj s mírou doložení a odkazem na stránku matriky, a k tomu schéma rodiny, vějíř předků, mapa i časová osa. Skutečná rodina zůstává soukromá; veřejná ukázka předvádí vymyšlenou. Od prvního commitu za tři dny.',
   },
   edmultitool: {
     title: 'ED Multitool',

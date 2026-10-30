@@ -434,8 +434,11 @@ export const PROJECTS: Project[] = [
   // so the link is that demo and the repo link is the public copy. Czech-only
   // site → one shot, the README's own home picture. No `window` block; it
   // sits third in the Work panel, before Těnovice.
-  // `build` = all 4 author-local days (27 – 30 Oct 2026) and 125 commits of
-  // the private repo, the demo included — the public copy is an export of it.
+  // `build` = 3 days, the ELAPSED time from the first commit (27 Oct, 22:33)
+  // to the finished demo (30 Oct, ~21:00), not the 4 calendar days the other
+  // cards count: day one was a 40-minute evening, so four would overstate it
+  // (the Unplottable rule). 125 commits of the private repo, the demo
+  // included — the public copy is an export of it.
   {
     id: 'rodokmen',
     name: 'Rodokmen',
@@ -446,7 +449,7 @@ export const PROJECTS: Project[] = [
     link: { href: 'https://rodokmen-demo.pages.dev', display: 'rodokmen-demo.pages.dev' },
     repo: 'https://github.com/Martin8O/rodokmen-genealogy',
     live: true,
-    build: { days: 4, commits: 125 },
+    build: { days: 3, commits: 125 },
     workOrder: 3,
   },
 ]
