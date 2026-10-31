@@ -443,7 +443,7 @@ export const PROJECTS: Project[] = [
     id: 'rodokmen',
     name: 'Rodokmen',
     tagline:
-      'A family history built from Czech and Moravian parish registers, where every fact carries its level of evidence and a citation that leads to the page of the register. Entries transcribed from Latin, German and Czech with a translation beside them; an interactive family chart, a fan of ancestors, a map of where the family lived and their lives set against history. Living people are protected by a check the site cannot be built without. The demo shows an invented family of 379 people — only the villages are real.',
+      "A family history pieced together from Czech and Moravian parish registers, gravestones and the family's own memories. Every fact carries its source — for a register, down to the exact page. The family comes alive in a family tree with every ancestor and descendant, a fan of ancestors, a map and a timeline. The real family has its own site, open only to relatives behind a sign-in; the public demo shows an invented one.",
     stack: ['Python', 'Pydantic', 'Astro', 'd3', 'Leaflet', 'Pagefind'],
     era: 'claude',
     link: { href: 'https://rodokmen-demo.pages.dev', display: 'rodokmen-demo.pages.dev' },

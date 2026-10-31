@@ -95,7 +95,7 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   },
   rodokmen: {
     tagline:
-      'Rodinná historie postavená z českých a moravských matrik: každý údaj nese míru doložení a odkaz na pramen, který vede až na stránku matriky. Zápisy přepsané z latiny, němčiny i češtiny s překladem vedle; interaktivní schéma rodiny, vějíř předků, mapa míst, kde rodina žila, a životy na pozadí dějin. Údaje žijících lidí chrání kontrola, bez které se web vůbec nesestaví. Ukázka předvádí vymyšlenou rodinu o 379 lidech – skutečné jsou jen obce.',
+      'Rodinná historie poskládaná z českých a moravských matrik, z náhrobků i ze vzpomínek rodiny. Každý údaj má poznamenaný svůj zdroj – u matriky až po konkrétní stránku. Rodina ožívá v rodinném stromu se všemi předky i potomky, ve vějíři předků, na mapě i na časové ose. Skutečná rodina má vlastní web jen pro příbuzné, za přihlášením; veřejná ukázka předvádí vymyšlenou.',
   },
   'this-site': {
     name: 'Tento web',

@@ -4,6 +4,17 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-093 — Rodokmen card copy follows the changelog; sources and the private family site named (2026-10-31)
+The Rodokmen tagline (EN + CZ) and its llms.txt line claimed more than the changelog row does (translations
+beside every entry, the build-time privacy check, the 379-person count, "lives set against history"). They now
+say only what the changelog says, plus two facts checked against the project's own docs: the sources include
+gravestones and the family's own memories (evidence levels `documented` from a gravestone and `family`), and the
+real family has its own site open only to relatives behind a sign-in (Cloudflare Access, e-mail code). The family
+chart is described as a family tree with every ancestor and descendant (it shows ancestors above, descendants
+below any person). Copy only: no layout or code change; the tagline is shorter than before and fits in both
+languages. The changelog row is left as it is. Note: the project texts mount only when the Work panel opens, so
+search engines most likely never see them; llms.txt is the one per-project summary for machines.
+
 ### ADR-092 — Rodokmen joins the work third; the GitHub board re-read and counted as repos (2026-10-30)
 **Rodokmen** (private repo `Martin8O/rodokmen`; public copy `Martin8O/rodokmen-genealogy` with a demo at
 rodokmen-demo.pages.dev) is a family history built from Czech and Moravian parish registers: every fact with its
