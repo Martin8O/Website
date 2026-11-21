@@ -139,12 +139,14 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // the function (`changelog.test.ts` asserts the CS overlay differs).
     title: 'A kitchen that builds itself',
     body: 'Kuchyně joins the work list: a demo website for a joinery workshop that opens on the kitchen assembling itself in an empty room, rendered in Blender, with every part checked to land exactly. Two days from the first commit.',
+    link: { href: `${REPO}/commit/15304e6ee8a698ee68c758e99c855ee9ded74f3d`, display: '15304e6' },
   },
   {
     id: 'talksubs',
     date: '2026-11-21',
     title: 'Lecture subtitles, made on your own PC',
     body: 'TalkSubs joins the work list: a Windows app that turns English lecture recordings into timed subtitles for a translator or finished English ones, with an editor to check and translate them while you listen. Nothing leaves the computer. Four days from the first commit to a public release.',
+    link: { href: `${REPO}/commit/15304e6ee8a698ee68c758e99c855ee9ded74f3d`, display: '15304e6' },
   },
 ]
 
