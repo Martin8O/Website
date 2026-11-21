@@ -130,6 +130,22 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'Rodokmen joins the work list: a family history built from Czech and Moravian parish registers, every fact with its level of evidence and a citation to the page of the register, drawn as a family chart, a fan of ancestors, a map and a timeline. The real family stays private; the public demo shows an invented one. Three days from the first commit.',
     link: { href: `${REPO}/commit/597edd296ecc305d4946af7f3efdd6dfa30ee09b`, display: '597edd2' },
   },
+  // Both added the same day; Kuchyně first — it was built first (10 – 11 Nov,
+  // TalkSubs 17 – 20 Nov) and it sits ahead of TalkSubs in the Work panel.
+  {
+    id: 'kuchyne',
+    date: '2026-11-21',
+    // The Bouřky split: the Czech title carries the name, the English one
+    // the function (`changelog.test.ts` asserts the CS overlay differs).
+    title: 'A kitchen that builds itself',
+    body: 'Kuchyně joins the work list: a demo website for a joinery workshop that opens on the kitchen assembling itself in an empty room, rendered in Blender, with every part checked to land exactly. Two days from the first commit.',
+  },
+  {
+    id: 'talksubs',
+    date: '2026-11-21',
+    title: 'Lecture subtitles, made on your own PC',
+    body: 'TalkSubs joins the work list: a Windows app that turns English lecture recordings into timed subtitles for a translator or finished English ones, with an editor to check and translate them while you listen. Nothing leaves the computer. Four days from the first commit to a public release.',
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -173,6 +189,14 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   rodokmen: {
     title: 'Rodokmen',
     body: 'K seznamu prací přibyl rodokmen postavený z českých a moravských matrik: každý údaj s mírou doložení a odkazem na stránku matriky, a k tomu schéma rodiny, vějíř předků, mapa i časová osa. Skutečná rodina zůstává soukromá; veřejná ukázka předvádí vymyšlenou. Od prvního commitu za tři dny.',
+  },
+  talksubs: {
+    title: 'TalkSubs',
+    body: 'K seznamu prací přibyla aplikace pro Windows, která z nahrávek anglických přednášek udělá časované titulky pro překladatele i hotové anglické, s editorem, ve kterém je při poslechu zkontrolujete a přeložíte. Nic neopustí počítač. Od prvního commitu k veřejnému vydání za čtyři dny.',
+  },
+  kuchyne: {
+    title: 'Kuchyně',
+    body: 'K seznamu prací přibyl ukázkový web pro truhlářství, který začíná animací: v prázdné místnosti se sama složí kuchyň, vyrenderovaná v Blenderu, a každý díl dosedne přesně na své místo. Od prvního commitu za dva dny.',
   },
   edmultitool: {
     title: 'ED Multitool',

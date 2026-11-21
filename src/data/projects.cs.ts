@@ -97,6 +97,14 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
     tagline:
       'Rodinná historie poskládaná z českých a moravských matrik, z náhrobků i ze vzpomínek rodiny. Každý údaj má poznamenaný svůj zdroj – u matriky až po konkrétní stránku. Rodina ožívá v rodinném stromu se všemi předky i potomky, ve vějíři předků, na mapě i na časové ose. Skutečná rodina má vlastní web jen pro příbuzné, za přihlášením; veřejná ukázka předvádí vymyšlenou.',
   },
+  talksubs: {
+    tagline:
+      'Aplikace pro Windows, která z nahrávek anglických přednášek udělá časované titulky – šablonu pro překladatele nebo hotové anglické titulky – celé na vašem vlastním počítači. Moderní model řeči načasuje každé slovo, titulky dodrží profesionální pravidla pro délku a rychlost čtení a vestavěný editor se zvukovou křivkou je umožní zkontrolovat, opravit i přeložit přímo při poslechu. Nic se nikam neodesílá a vše, co si aplikace uchovává, je zamčené k vašemu účtu ve Windows.',
+  },
+  kuchyne: {
+    tagline:
+      'Ukázkový web pro truhlářství, které dělá kuchyně na míru; firma na něm, její jméno i kontakty jsou smyšlené. Otevírá ho animace vyrenderovaná v Blenderu: prázdná místnost, pak ze stran přilétají desky ve čtyřech vrstvách a samy se složí v hotovou kuchyň – u každého dílu je ověřené, že dosedne přesně a nikdy neprojde zdí. Telefony mají vlastní verzi na výšku.',
+  },
   'this-site': {
     name: 'Tento web',
     tagline:

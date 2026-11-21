@@ -200,7 +200,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Not yet in the store',
     build: { days: 3, commits: 19 },
-    workOrder: 14,
+    workOrder: 16,
     window: { tint: CYAN, kind: 'blocklist', shot: 'clearfeed', cropX: 0.08 },
   },
   {
@@ -217,7 +217,7 @@ export const PROJECTS: Project[] = [
     live: true,
     badge: 'COLLAB',
     build: { days: 11, commits: 53 },
-    workOrder: 4,
+    workOrder: 6,
     window: { tint: VIOLET, kind: 'fund', shot: 'tenovice', cropY: 0.13 },
   },
   {
@@ -231,7 +231,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/Registrace',
     live: true,
     build: { days: 27, commits: 109 },
-    workOrder: 7,
+    workOrder: 9,
     window: { tint: MAGENTA, kind: 'form', shot: 'registrace' },
   },
   {
@@ -260,7 +260,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Porting to Android',
     build: { days: 10, commits: 42 },
-    workOrder: 10,
+    workOrder: 12,
     window: { tint: MINT, kind: 'graph' },
   },
   // No `window` block — the dev scene keeps its five windows; this one IS the
@@ -276,7 +276,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/Website',
     live: true,
     build: { days: 4, commits: 32 },
-    workOrder: 5,
+    workOrder: 7,
   },
   // The Claude month's outlier: not an app at all, but a novel — written by an
   // AI inside a system built for it. No `window` block (the dev scene keeps its
@@ -300,7 +300,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4.5, commits: 70 },
-    workOrder: 11,
+    workOrder: 13,
   },
   // The first one that has to be right about the real world: it warns a town
   // about weather that is either coming or isn't. No `window` block (the dev
@@ -317,7 +317,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/Bourky',
     live: true,
     build: { days: 3, commits: 41 },
-    workOrder: 8,
+    workOrder: 10,
   },
   // Storm Watch's small sibling: the same many-models-one-honest-number idea,
   // turned from warning a town to telling one rider whether to go out, and on
@@ -337,7 +337,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/kiteseason',
     live: true,
     build: { days: 1, commits: 4 },
-    workOrder: 9,
+    workOrder: 11,
   },
   // A clinic's own site, rebuilt from scratch after a rebrand, replacing the
   // 2022 site that sits in the pre-Claude list (`rrcentrum`). Czech-only, so
@@ -378,7 +378,7 @@ export const PROJECTS: Project[] = [
     link: { href: 'https://github.com/Martin8O/ED-Multitool', display: 'github.com/Martin8O/ED-Multitool' },
     live: true,
     build: { days: 5, commits: 59 },
-    workOrder: 6,
+    workOrder: 8,
   },
   // The Claude month's second novel — and the harder of the two, because
   // nothing about its world was already known: Unplottable borrowed a canon,
@@ -401,7 +401,7 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 2, commits: 6 },
-    workOrder: 12,
+    workOrder: 14,
   },
   // The Claude month's third novel, and the one written in a language the
   // repository never translates out of: Russian from the first sentence. Where
@@ -426,14 +426,14 @@ export const PROJECTS: Project[] = [
     },
     live: true,
     build: { days: 4, commits: 14 },
-    workOrder: 13,
+    workOrder: 15,
   },
   // A family history built from parish registers. The real family stays in a
   // private repo; what the public sees is a separate copy of the engine with
   // an invented family generated from a seed (only the villages are real) —
   // so the link is that demo and the repo link is the public copy. Czech-only
   // site → one shot, the README's own home picture. No `window` block; it
-  // sits third in the Work panel, before Těnovice.
+  // sits fourth in the Work panel, after Kuchyně.
   // `build` = 3 days, the ELAPSED time from the first commit (27 Oct, 22:33)
   // to the finished demo (30 Oct, ~21:00), not the 4 calendar days the other
   // cards count: day one was a 40-minute evening, so four would overstate it
@@ -450,6 +450,49 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/rodokmen-genealogy',
     live: true,
     build: { days: 3, commits: 125 },
+    workOrder: 4,
+  },
+  // A desktop app, not a web page: it runs on the user's own Windows PC and
+  // opens its window in the browser. The repo IS the home (the download lives
+  // in its releases) → no separate `repo`. One shot, the README's dark editor
+  // picture (its amber sits on the site's through-line). It sits fifth in the
+  // Work panel, after Rodokmen.
+  // `build` = the 4 author-local days (17 – 20 Nov 2026) and 32 commits of the
+  // private working repo up to and including the public 1.1.0 release — the
+  // public repo is a single-commit export of it (the ED Multitool rule).
+  {
+    id: 'talksubs',
+    name: 'TalkSubs',
+    tagline:
+      'A Windows app that turns English lecture recordings into timed subtitles — a template for a translator or finished English subtitles — entirely on your own PC. A modern speech model times every word, the subtitles keep professional rules for length and reading speed, and a built-in editor with a waveform lets you check, fix and translate them while you listen. Nothing is uploaded, and what the app keeps is encrypted to your Windows account.',
+    stack: ['Python', 'ONNX Runtime', 'Parakeet TDT', 'React', 'TypeScript', 'wavesurfer.js'],
+    era: 'claude',
+    link: { href: 'https://github.com/Martin8O/talksubs', display: 'github.com/Martin8O/talksubs' },
+    live: true,
+    build: { days: 4, commits: 32 },
+    workOrder: 5,
+  },
+  // A demo website for a small joinery workshop. The business on the public
+  // preview is made up (name, phone, e-mail, ID, town) and the site says so;
+  // the repo stays private, no `repo`; the preview is not indexed. The DEMO
+  // badge says it on the card too. Its card shows the homepage intro
+  // itself — the rendered kitchen assembling — as a looping clip, with the
+  // finished kitchen as the still (reduced motion, before the clip decodes).
+  // Czech-only site → one set for both languages. It sits third, after RR Fyzio
+  // centrum — in the first row of the panel, so the clip is playing the moment
+  // the panel opens.
+  // `build` = the 2 author-local days (10 – 11 Nov 2026) and all 16 commits.
+  {
+    id: 'kuchyne',
+    name: 'Kuchyně',
+    tagline:
+      'A demo website for a joinery workshop that makes kitchens to measure; the business on it, its name and contacts are made up. It opens on an animation rendered in Blender: an empty room, then the boards fly in from the edges in four layers and put themselves together into the finished kitchen — every part checked to land exactly and never pass through a wall. Phones get their own upright cut.',
+    stack: ['Blender', 'Python', 'Vanilla JS', 'CSS', 'Cloudflare Pages'],
+    era: 'claude',
+    link: { href: 'https://kuchyne-ukazka.pages.dev', display: 'kuchyne-ukazka.pages.dev' },
+    live: true,
+    badge: 'DEMO',
+    build: { days: 2, commits: 16 },
     workOrder: 3,
   },
 ]

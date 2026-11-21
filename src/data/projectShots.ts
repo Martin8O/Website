@@ -14,6 +14,9 @@ export type ProjectShot = {
   /** True when the image is a book cover, not a screenshot — the alt text
    *  says so instead of calling it a screenshot. */
   cover?: boolean
+  /** Still frame for a clip — shown before it decodes and, under reduced
+   *  motion, instead of playing it. */
+  poster?: string
 }
 
 export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
@@ -95,6 +98,20 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   // the site is Czech-only → one shot for both languages.
   'rodokmen': [
     { url: '/shots/rodokmen-0.jpg', aspect: 1.315 },
+  ],
+  // The editor in its dark look — the project's own README picture
+  // (`talksubs/docs/images/editor-dark.png`, 1280×820), scaled to 760 px.
+  // The app is bilingual but its README shows the English window → one shot.
+  'talksubs': [
+    { url: '/shots/talksubs-0.jpg', aspect: 1.564 },
+  ],
+  // The demo's homepage intro itself: the room fills with the kitchen, held a
+  // moment on the finished room before it loops. Cut from the site's own
+  // `media/intro-1080.mp4` (7.3 s) to 760 px, no sound, + a 1.5 s hold on the
+  // last frame (668 KB). The poster is that last frame, so reduced motion and
+  // a slow decode both show the finished kitchen, not the empty room.
+  'kuchyne': [
+    { url: '/kuchyne-intro.mp4', aspect: 1.776, poster: '/shots/kuchyne-0.jpg' },
   ],
   'tenovice': [
     { url: '/shots/tenovice-0.jpg', aspect: 0.983 },

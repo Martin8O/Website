@@ -36,7 +36,17 @@ function shotsFor(id: string, lang: Lang) {
  *  gesture-less autoplay (some mobile / embedded webviews). Under
  *  `prefers-reduced-motion` it stays a still first frame — no autoplay, no
  *  play() call (motion is a Done-criterion here). */
-function LoopingClip({ src, label, className }: { src: string; label?: string; className?: string }) {
+function LoopingClip({
+  src,
+  label,
+  className,
+  poster,
+}: {
+  src: string
+  label?: string
+  className?: string
+  poster?: string
+}) {
   const ref = useRef<HTMLVideoElement>(null)
   const reduced =
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -47,12 +57,15 @@ function LoopingClip({ src, label, className }: { src: string; label?: string; c
     <video
       ref={ref}
       src={src}
+      poster={poster}
       className={className}
       autoPlay={!reduced}
       loop
       muted
       playsInline
-      preload="metadata"
+      // `auto`: the clips mount only when the panel opens and are meant to be
+      // moving the moment it does — no wait for a hover or a scroll.
+      preload={reduced ? 'metadata' : 'auto'}
       aria-label={label}
       aria-hidden={label ? undefined : true}
     />
@@ -74,6 +87,7 @@ function Card({ p, lang, t }: { p: Project; lang: Lang; t: UiStrings }) {
               <LoopingClip
                 key={s.url}
                 src={s.url}
+                poster={s.poster}
                 label={`${p.name} — ${t.screenshotAlt}${i > 0 ? ` ${i + 1}` : ''}`}
               />
             ) : (

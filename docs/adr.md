@@ -4,6 +4,25 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-094 — Work list gains Kuchyně third and TalkSubs fifth; a card can show a playing clip (2026-11-21)
+Two Claude-era cards. **Kuchyně** (workOrder 3): a demo website for a small joinery workshop, opening on a
+kitchen that assembles itself in an empty room, rendered in Blender. The repo stays private; the card links
+only the public preview (`kuchyne-ukazka.pages.dev`, not indexed), whose business is made up (name, phone,
+e-mail, ID and town, said so on the site), and carries a DEMO badge. Its card shows that intro as a
+looping clip instead of a still: cut from the site's own 1080p intro to 760 px, no sound, with a 1.5 s hold on the
+finished kitchen before it loops (668 KB, `public/kuchyne-intro.mp4`). Shots gained an optional `poster` (the last
+frame), shown before the clip decodes and, under reduced motion, instead of playing it. Project clips now preload
+in full (`preload="auto"`, `metadata` under reduced motion): they mount only when the panel opens and should be
+moving the moment it does, without a hover or a scroll; third place keeps the card in the panel's first row on
+desktop. build = 2 days / 16 commits. **TalkSubs** (workOrder 5): a Windows app that turns English lecture
+recordings into timed subtitles offline, with an editor to check and translate them. The link is its public repo
+(the download lives in its releases); one shot, the README's dark editor picture (its amber matches the site).
+build = 4 days / 32 commits of the private working repo up to the public 1.1.0 release — the public repo is a
+single-commit export. Rodokmen moves to 4th; every later Claude-era card moves down two (the array, the dev-scene
+window contract, is untouched). Changelog rows (Kuchyně first: built first, and first in the panel), llms.txt
+lines, chapter 08 counter + 11, era heading 16 projects. The GitHub board in chapter 08 is not re-read (still the
+2026-10-30 snapshot).
+
 ### ADR-093 — Rodokmen card copy follows the changelog; sources and the private family site named (2026-10-31)
 The Rodokmen tagline (EN + CZ) and its llms.txt line claimed more than the changelog row does (translations
 beside every entry, the build-time privacy check, the 379-person count, "lives set against history"). They now
