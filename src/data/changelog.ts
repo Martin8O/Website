@@ -155,6 +155,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // the function (`changelog.test.ts` asserts the CS overlay differs).
     title: 'One photo in, a 3D model out',
     body: "Trellis 2 joins the work list: Microsoft's TRELLIS.2 with my own GUI on top — three tries side by side, re-making one part of a model without touching the rest, a print-ready file for every model and overnight batches. Six days from the first commit.",
+    link: { href: `${REPO}/commit/db345e3a8bdbda03c45adf2ba3d04aaef152fe66`, display: 'db345e3' },
   },
 ]
 
