@@ -113,6 +113,18 @@ export const PROJECT_SHOTS: Record<string, ProjectShot[]> = {
   'kuchyne': [
     { url: '/kuchyne-intro.mp4', aspect: 1.776, poster: '/shots/kuchyne-0.jpg' },
   ],
+  // One real result beside the photo it came from: a baroque St Joseph with
+  // the young Jesus from a town column, Max quality. Rendered from the run's
+  // own GLB (three.js, studio light), the model swinging 50° either side of the
+  // photo's own angle and back in 6 s (loops seamlessly) — not a full turn: the
+  // statue's back faced the column, so the photo never saw it. 760 px, no
+  // sound. Only the main piece is shown (a few stray specks left out) and the
+  // ornate base is cut away just below the figures' feet, leaving the thin slab
+  // they stand on; the figures themselves are untouched. The poster is the first frame — the model seen
+  // from the photo's own angle.
+  'trellis': [
+    { url: '/trellis-joseph.mp4', aspect: 1.667, poster: '/shots/trellis-0.jpg' },
+  ],
   'tenovice': [
     { url: '/shots/tenovice-0.jpg', aspect: 0.983 },
   ],

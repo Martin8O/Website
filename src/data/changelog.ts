@@ -148,6 +148,14 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     body: 'TalkSubs joins the work list: a Windows app that turns English lecture recordings into timed subtitles for a translator or finished English ones, with an editor to check and translate them while you listen. Nothing leaves the computer. Four days from the first commit to a public release.',
     link: { href: `${REPO}/commit/15304e6ee8a698ee68c758e99c855ee9ded74f3d`, display: '15304e6' },
   },
+  {
+    id: 'trellis',
+    date: '2026-11-22',
+    // The Bouřky split: the Czech title carries the name, the English one
+    // the function (`changelog.test.ts` asserts the CS overlay differs).
+    title: 'One photo in, a 3D model out',
+    body: "Trellis 2 joins the work list: Microsoft's TRELLIS.2 with my own GUI on top — three tries side by side, re-making one part of a model without touching the rest, a print-ready file for every model and overnight batches. Six days from the first commit.",
+  },
 ]
 
 /** Czech copy overlay, merged by id (the chapters/projects pattern). */
@@ -199,6 +207,10 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
   kuchyne: {
     title: 'Kuchyně',
     body: 'K seznamu prací přibyl ukázkový web pro truhlářství, který začíná animací: v prázdné místnosti se sama složí kuchyň, vyrenderovaná v Blenderu, a každý díl dosedne přesně na své místo. Od prvního commitu za dva dny.',
+  },
+  trellis: {
+    title: 'Trellis 2',
+    body: 'K seznamu prací přibyl TRELLIS.2 od Microsoftu s vlastním GUI navrch – tři pokusy vedle sebe, předělání jedné části modelu beze změny zbytku, soubor pro 3D tisk ke každému modelu a dávky přes noc. Od prvního commitu za šest dní.',
   },
   edmultitool: {
     title: 'ED Multitool',

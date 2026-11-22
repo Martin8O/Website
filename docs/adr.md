@@ -4,6 +4,22 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-095 — Trellis 2 joins the work list fourth; its card plays a real result beside its photo (2026-11-22)
+**Trellis 2** (workOrder 4): Microsoft's TRELLIS.2 (one photo → a textured 3D model) running locally on one
+12 GB graphics card, with an own GUI on top: five quality levels from a one-minute preview to Max, live progress,
+three tries side by side, re-making one marked part of a model while the rest stays untouched, a print-ready file
+at a chosen size, a light copy for the web, and batches of several models in a row. The working repo is private,
+so the card links the upstream model it is built on (`github.com/microsoft/TRELLIS.2`) and says so. The card plays
+a clip of one real result next to the photo it came from: a baroque St Joseph with the young Jesus from a town
+column, Max quality (4 min 17 s, peak 11.7 GB). Rendered from the run's own model with three.js (studio light),
+the model swings 50° either side of the photo's own angle in 6 s and loops — not a full turn, because the statue's
+back faced the column and was never in the photo. Only the main piece is shown (a few stray specks left out) and
+the ornate base is cut away just below the figures' feet; the figures are untouched. 760 px, no sound, 381 KB
+(`public/trellis-joseph.mp4`), first frame as the poster. Chosen over a first angel clip whose model had a
+truncated heart. build = 6 days / 18 commits (7 – 12 Nov 2026). Rodokmen moves to 5th and every later Claude-era
+card down one (the array, the dev-scene window contract, is untouched). Changelog row, llms.txt line, chapter 08
+counter + 12, era heading 17 projects.
+
 ### ADR-094 — Work list gains Kuchyně third and TalkSubs fifth; a card can show a playing clip (2026-11-21)
 Two Claude-era cards. **Kuchyně** (workOrder 3): a demo website for a small joinery workshop, opening on a
 kitchen that assembles itself in an empty room, rendered in Blender. The repo stays private; the card links

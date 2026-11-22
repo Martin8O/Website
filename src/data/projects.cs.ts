@@ -105,6 +105,10 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
     tagline:
       'Ukázkový web pro truhlářství, které dělá kuchyně na míru; firma na něm, její jméno i kontakty jsou smyšlené. Otevírá ho animace vyrenderovaná v Blenderu: prázdná místnost, pak ze stran přilétají desky ve čtyřech vrstvách a samy se složí v hotovou kuchyň – u každého dílu je ověřené, že dosedne přesně a nikdy neprojde zdí. Telefony mají vlastní verzi na výšku.',
   },
+  trellis: {
+    tagline:
+      'TRELLIS.2 od Microsoftu udělá z jediné fotky otexturovaný 3D model. Navrch vlastní GUI: pět úrovní kvality od minutového náhledu po Max (až 10 minut), živý průběh, tři pokusy vedle sebe, předělání jedné vyznačené části beze změny zbytku, soubor pro 3D tisk v zadané velikosti, odlehčená kopie pro web a dávky více modelů za sebou, třeba přes noc. Běží lokálně na jedné GPU, zcela offline.',
+  },
   'this-site': {
     name: 'Tento web',
     tagline:
