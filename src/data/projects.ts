@@ -246,7 +246,7 @@ export const PROJECTS: Project[] = [
     live: true,
     status: 'Runs locally — no hosted demo',
     build: { days: 27, commits: 122 },
-    workOrder: 1,
+    workOrder: 4,
     window: { tint: CORAL, kind: 'anim', shot: 'rllab', aspect: 0.58 },
   },
   {
@@ -343,7 +343,7 @@ export const PROJECTS: Project[] = [
   // 2022 site that sits in the pre-Claude list (`rrcentrum`). Czech-only, so
   // one shot. The repo is private (the content belongs to the clinic) → no
   // `repo`. No `window` block; it sits second in the Work panel, right after
-  // RL Lab.
+  // Trellis-2-local.
   // `build` = the 15 author-local days it was built on (3 Sep – 8 Oct 2026)
   // and the 69 commits that carry it, stopping before the README — the same
   // rule the Kite Season and book cards follow.
@@ -433,7 +433,7 @@ export const PROJECTS: Project[] = [
   // an invented family generated from a seed (only the villages are real) —
   // so the link is that demo and the repo link is the public copy. Czech-only
   // site → one shot, the README's own home picture. No `window` block; it
-  // sits fifth in the Work panel, after Trellis 2.
+  // sits third in the Work panel, after RR Fyzio centrum.
   // `build` = 3 days, the ELAPSED time from the first commit (27 Oct, 22:33)
   // to the finished demo (30 Oct, ~21:00), not the 4 calendar days the other
   // cards count: day one was a 40-minute evening, so four would overstate it
@@ -450,13 +450,13 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/rodokmen-genealogy',
     live: true,
     build: { days: 3, commits: 125 },
-    workOrder: 5,
+    workOrder: 3,
   },
   // A desktop app, not a web page: it runs on the user's own Windows PC and
   // opens its window in the browser. The repo IS the home (the download lives
   // in its releases) → no separate `repo`. One shot, the README's dark editor
   // picture (its amber sits on the site's through-line). It sits sixth in the
-  // Work panel, after Rodokmen.
+  // Work panel, after Kuchyně.
   // `build` = the 4 author-local days (17 – 20 Nov 2026) and 32 commits of the
   // private working repo up to and including the public 1.1.0 release — the
   // public repo is a single-commit export of it (the ED Multitool rule).
@@ -478,9 +478,8 @@ export const PROJECTS: Project[] = [
   // badge says it on the card too. Its card shows the homepage intro
   // itself — the rendered kitchen assembling — as a looping clip, with the
   // finished kitchen as the still (reduced motion, before the clip decodes).
-  // Czech-only site → one set for both languages. It sits third, after RR Fyzio
-  // centrum — in the first row of the panel, so the clip is playing the moment
-  // the panel opens.
+  // Czech-only site → one set for both languages. It sits fifth, after RL Lab —
+  // in the panel's second row on desktop.
   // `build` = the 2 author-local days (10 – 11 Nov 2026) and all 16 commits.
   {
     id: 'kuchyne',
@@ -493,27 +492,29 @@ export const PROJECTS: Project[] = [
     live: true,
     badge: 'DEMO',
     build: { days: 2, commits: 16 },
-    workOrder: 3,
+    workOrder: 5,
   },
   // Microsoft's TRELLIS.2 (photo → textured 3D model) made to run on one
   // 12 GB home graphics card, with its own engine and GUI on top.
-  // The working repo stays private, so the link is the upstream model it is
-  // built on (the card says so). Its card plays one real result next to the
+  // The repo IS the home (it runs locally — no hosted demo) → no separate
+  // `repo`; the tagline names the upstream model it is built on. Its card plays one real result next to the
   // photo it came from: a baroque St Joseph with the young Jesus from a town
-  // column, Max quality, 4 min 17 s on the card (peak 11.7 GB). It sits fourth, right after
-  // Kuchyně, opening the panel's second row with a second moving card.
-  // `build` = the 6 author-local days (7 – 12 Nov 2026) and all 18 commits.
+  // column, Max quality, 4 min 17 s on the card (peak 11.7 GB). It sits first in the Work
+  // panel, so its clip is playing the moment the panel opens.
+  // `build` = the 8 author-local days (7 – 12, 23, 24 Nov 2026) and 23 commits
+  // of the private working repo up to and including the public release — the
+  // public repo is a single-commit export of it (the TalkSubs rule).
   {
     id: 'trellis',
-    name: 'Trellis 2',
+    name: 'Trellis-2-local',
     tagline:
-      "Microsoft's TRELLIS.2 turns one photo into a textured 3D model. On top of it, my own GUI: five quality levels from a one-minute preview to Max (up to 10 minutes), live progress, three tries side by side, re-making one marked part while the rest stays untouched, a print-ready file at a chosen size, a light copy for the web, and batches of several models in a row, overnight if need be. Runs locally on one GPU, fully offline.",
+      "A textured 3D model and a print-ready file from one photo, locally on one GPU, fully offline. Its own GUI: five quality levels from a one-minute preview to Max (up to 10 minutes), live progress, three tries side by side, re-making one marked part while the rest stays untouched, a light copy for the web, and batches of several models in a row, overnight if need be. Built on the open-source foundations of Microsoft's TRELLIS.2.",
     stack: ['Python', 'PyTorch', 'CUDA', 'Gradio', 'WSL2', 'TRELLIS.2'],
     era: 'claude',
-    link: { href: 'https://github.com/microsoft/TRELLIS.2', display: 'github.com/microsoft/TRELLIS.2' },
+    link: { href: 'https://github.com/Martin8O/Trellis-2-local', display: 'github.com/Martin8O/Trellis-2-local' },
     live: true,
-    build: { days: 6, commits: 18 },
-    workOrder: 4,
+    build: { days: 8, commits: 23 },
+    workOrder: 1,
   },
 ]
 

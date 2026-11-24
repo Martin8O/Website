@@ -4,6 +4,18 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-096 — Trellis-2-local goes first and links its public repo; the copy leads with what it adds (2026-11-24)
+The project's public export is `github.com/Martin8O/Trellis-2-local` (one commit, MIT licence, third-party and
+non-commercial notices, no working notes; the working repo stays private). The card now links it and carries
+its name, **Trellis-2-local**, in both languages and on the changelog row. The copy no longer opens with
+Microsoft's TRELLIS.2 (it read as if the work were borrowed): it opens with what the tool does — a textured 3D
+model and a print-ready file from one photo, locally on one GPU, fully offline — lists what its own GUI adds,
+and names TRELLIS.2 last as the open-source foundation it builds on. Same length as before: card heights
+measured unchanged in both languages at three and two columns. build = 8 days / 23 commits of the private
+working repo up to and including the public release (the TalkSubs rule; was 6 / 18 up to 12 Nov), so the
+changelog row now says eight days to a public release. Work order: Trellis-2-local 1, RR Fyzio centrum 2,
+Rodokmen 3, RL Lab 4, Kuchyně 5, TalkSubs 6, the rest unchanged.
+
 ### ADR-095 — Trellis 2 joins the work list fourth; its card plays a real result beside its photo (2026-11-22)
 **Trellis 2** (workOrder 4): Microsoft's TRELLIS.2 (one photo → a textured 3D model) running locally on one
 12 GB graphics card, with an own GUI on top: five quality levels from a one-minute preview to Max, live progress,

@@ -107,7 +107,7 @@ export const PROJECT_COPY_CS: Record<string, ProjectCopy> = {
   },
   trellis: {
     tagline:
-      'TRELLIS.2 od Microsoftu udělá z jediné fotky otexturovaný 3D model. Navrch vlastní GUI: pět úrovní kvality od minutového náhledu po Max (až 10 minut), živý průběh, tři pokusy vedle sebe, předělání jedné vyznačené části beze změny zbytku, soubor pro 3D tisk v zadané velikosti, odlehčená kopie pro web a dávky více modelů za sebou, třeba přes noc. Běží lokálně na jedné GPU, zcela offline.',
+      'Z jediné fotky otexturovaný 3D model a soubor pro 3D tisk, lokálně na jedné GPU a zcela offline. Vlastní GUI: pět úrovní kvality od minutového náhledu po Max (až 10 minut), živý průběh, tři pokusy vedle sebe, předělání jedné vyznačené části beze změny zbytku, odlehčená kopie pro web a dávky více modelů za sebou, třeba přes noc. Staví na open-source základech TRELLIS.2 od Microsoftu.',
   },
   'this-site': {
     name: 'Tento web',

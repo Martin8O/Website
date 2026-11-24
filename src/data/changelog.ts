@@ -154,7 +154,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     // The Bouřky split: the Czech title carries the name, the English one
     // the function (`changelog.test.ts` asserts the CS overlay differs).
     title: 'One photo in, a 3D model out',
-    body: "Trellis 2 joins the work list: Microsoft's TRELLIS.2 with my own GUI on top — three tries side by side, re-making one part of a model without touching the rest, a print-ready file for every model and overnight batches. Six days from the first commit.",
+    body: "Trellis-2-local joins the work list: a textured 3D model and a print-ready file from a single photo, locally on one GPU and fully offline. Its own GUI adds five quality levels, three tries side by side, re-making one part of a model without touching the rest, and batches of several models in a row, overnight if need be. Built on the open-source foundations of Microsoft's TRELLIS.2. Eight days from the first commit to a public release.",
     link: { href: `${REPO}/commit/db345e3a8bdbda03c45adf2ba3d04aaef152fe66`, display: 'db345e3' },
   },
 ]
@@ -210,8 +210,8 @@ const CHANGELOG_COPY_CS: Record<string, Pick<ChangelogEntry, 'title' | 'body'>> 
     body: 'K seznamu prací přibyl ukázkový web pro truhlářství, který začíná animací: v prázdné místnosti se sama složí kuchyň, vyrenderovaná v Blenderu, a každý díl dosedne přesně na své místo. Od prvního commitu za dva dny.',
   },
   trellis: {
-    title: 'Trellis 2',
-    body: 'K seznamu prací přibyl TRELLIS.2 od Microsoftu s vlastním GUI navrch – tři pokusy vedle sebe, předělání jedné části modelu beze změny zbytku, soubor pro 3D tisk ke každému modelu a dávky přes noc. Od prvního commitu za šest dní.',
+    title: 'Trellis-2-local',
+    body: 'K seznamu prací přibyl Trellis-2-local: z jediné fotky otexturovaný 3D model a soubor pro 3D tisk, lokálně na jedné GPU a zcela offline. Vlastní GUI přidává pět úrovní kvality, tři pokusy vedle sebe, předělání jedné části modelu beze změny zbytku a dávky více modelů za sebou, třeba přes noc. Staví na open-source základech TRELLIS.2 od Microsoftu. Od prvního commitu k veřejnému vydání za osm dní.',
   },
   edmultitool: {
     title: 'ED Multitool',
