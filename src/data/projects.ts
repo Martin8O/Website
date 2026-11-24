@@ -433,7 +433,7 @@ export const PROJECTS: Project[] = [
   // an invented family generated from a seed (only the villages are real) —
   // so the link is that demo and the repo link is the public copy. Czech-only
   // site → one shot, the README's own home picture. No `window` block; it
-  // sits third in the Work panel, after RR Fyzio centrum.
+  // sits fifth in the Work panel, after RL Lab.
   // `build` = 3 days, the ELAPSED time from the first commit (27 Oct, 22:33)
   // to the finished demo (30 Oct, ~21:00), not the 4 calendar days the other
   // cards count: day one was a 40-minute evening, so four would overstate it
@@ -450,13 +450,13 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Martin8O/rodokmen-genealogy',
     live: true,
     build: { days: 3, commits: 125 },
-    workOrder: 3,
+    workOrder: 5,
   },
   // A desktop app, not a web page: it runs on the user's own Windows PC and
   // opens its window in the browser. The repo IS the home (the download lives
   // in its releases) → no separate `repo`. One shot, the README's dark editor
   // picture (its amber sits on the site's through-line). It sits sixth in the
-  // Work panel, after Kuchyně.
+  // Work panel, after Rodokmen.
   // `build` = the 4 author-local days (17 – 20 Nov 2026) and 32 commits of the
   // private working repo up to and including the public 1.1.0 release — the
   // public repo is a single-commit export of it (the ED Multitool rule).
@@ -478,8 +478,8 @@ export const PROJECTS: Project[] = [
   // badge says it on the card too. Its card shows the homepage intro
   // itself — the rendered kitchen assembling — as a looping clip, with the
   // finished kitchen as the still (reduced motion, before the clip decodes).
-  // Czech-only site → one set for both languages. It sits fifth, after RL Lab —
-  // in the panel's second row on desktop.
+  // Czech-only site → one set for both languages. It sits third, after RR Fyzio
+  // centrum — in the panel's first row on desktop.
   // `build` = the 2 author-local days (10 – 11 Nov 2026) and all 16 commits.
   {
     id: 'kuchyne',
@@ -492,7 +492,7 @@ export const PROJECTS: Project[] = [
     live: true,
     badge: 'DEMO',
     build: { days: 2, commits: 16 },
-    workOrder: 5,
+    workOrder: 3,
   },
   // Microsoft's TRELLIS.2 (photo → textured 3D model) made to run on one
   // 12 GB home graphics card, with its own engine and GUI on top.

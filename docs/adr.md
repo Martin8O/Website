@@ -4,6 +4,11 @@ Short, dated records of *why*. Newest on top. Detail in the linked history/notes
 
 ---
 
+### ADR-097 — Kuchyně and Rodokmen swap places in the Work list (2026-11-24)
+Kuchyně moves to 3rd and Rodokmen to 5th, so the panel's first row on desktop holds Trellis-2-local, RR Fyzio
+centrum and Kuchyně (two playing clips). Order: Trellis-2-local 1, RR Fyzio centrum 2, Kuchyně 3, RL Lab 4,
+Rodokmen 5, TalkSubs 6, the rest unchanged. Order only; no copy or layout change.
+
 ### ADR-096 — Trellis-2-local goes first and links its public repo; the copy leads with what it adds (2026-11-24)
 The project's public export is `github.com/Martin8O/Trellis-2-local` (one commit, MIT licence, third-party and
 non-commercial notices, no working notes; the working repo stays private). The card now links it and carries
